@@ -557,25 +557,31 @@ td:last-child {
     border-right: none;
 }
 
-/* Table column widths */
-table.compact th:nth-child(1),
-table.compact td:nth-child(1) { width: 70px; max-width: 70px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-table.compact th:nth-child(2),
-table.compact td:nth-child(2) { width: 120px; max-width: 120px; white-space: normal; word-wrap: break-word; }
-table.compact th:nth-child(3),
-table.compact td:nth-child(3) { width: 80px; max-width: 80px; white-space: nowrap; }
-table.compact th:nth-child(4),
-table.compact td:nth-child(4) { width: 70px; max-width: 70px; white-space: nowrap; }
-table.compact th:nth-child(5),
-table.compact td:nth-child(5) { width: 90px; max-width: 90px; white-space: nowrap; }
-table.compact th:nth-child(6),
-table.compact td:nth-child(6) { width: 40px; max-width: 40px; text-align: center; white-space: nowrap; }
-table.compact th:nth-child(7),
-table.compact td:nth-child(7) { width: 60px; max-width: 60px; text-align: right; white-space: nowrap; }
-table.compact th:nth-child(8),
-table.compact td:nth-child(8) { width: 120px; min-width: 100px; white-space: normal; word-wrap: break-word; }
-table.compact th:nth-child(9),
-table.compact td:nth-child(9) { width: auto; min-width: 100px; white-space: normal; word-wrap: break-word; }
+/* Table column widths - auto fit content */
+table.compact,
+#priceTable,
+#sizeTable { table-layout: auto; width: 100%; }
+
+table.compact td, table.compact th,
+#priceTable td, #priceTable th,
+#sizeTable td, #sizeTable th { white-space: nowrap; }
+
+/* Bieznik column - allow wrapping for long tread names */
+.col-bieznik,
+#priceTable td:nth-child(3),
+#priceTable th:nth-child(3),
+#sizeTable td:nth-child(3),
+#sizeTable th:nth-child(3) {
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    min-width: 120px;
+}
+
+/* Price table action column - shrink to buttons */
+#priceTable td:nth-child(5),
+#priceTable th:nth-child(5) { width: 1px; padding-left: 3px; padding-right: 3px; }
+
+#priceTable .action-btns { display: flex; gap: 2px; }
 
 tbody tr:hover { background: var(--shadow-inset-light); }
 [data-theme="light"] tbody tr:nth-child(even) { background: rgba(255,255,255,0.3); }
@@ -1300,6 +1306,50 @@ tbody tr:hover { background: var(--shadow-inset-light); }
                 -2px -2px 4px var(--shadow-light);
 }
 
+/* Season switcher */
+.season-switcher {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.season-btn {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-inset);
+    box-shadow: inset 1px 1px 2px var(--shadow-inset-dark),
+                inset -1px -1px 2px var(--shadow-inset-light);
+    color: var(--text-secondary);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 9px;
+    font-family: 'Chakra Petch', sans-serif;
+    font-weight: 700;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all .2s ease;
+}
+
+.season-btn:hover {
+    color: var(--active-color);
+    border-color: rgba(163,177,198,0.25);
+}
+
+[data-theme="dark"] .season-btn:hover {
+    border-color: rgba(60,60,65,0.5);
+}
+
+.season-btn.cennik-active {
+    color: var(--active-color) !important;
+    box-shadow: inset 3px 3px 6px var(--shadow-inset-dark),
+                inset -3px -3px 6px var(--shadow-inset-light) !important;
+    border-color: rgba(59,130,246,0.3) !important;
+}
+
+[data-theme="dark"] .season-btn.cennik-active {
+    border-color: rgba(59,130,246,0.4) !important;
+}
+
 /* Cennik season buttons */
 .cennik-active {
     color: var(--active-color) !important;
@@ -1309,6 +1359,46 @@ tbody tr:hover { background: var(--shadow-inset-light); }
 }
 .cennik-inactive {
     color: var(--text-secondary);
+}
+
+/* Missing price rows in cennik */
+.missing-badge {
+    display: inline-block;
+    background: var(--alert-warning-border);
+    color: #fff;
+    font-size: 7px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 8px;
+    margin-left: 6px;
+    vertical-align: middle;
+    letter-spacing: .3px;
+}
+.missing-price-row {
+    background: var(--alert-warning-bg) !important;
+}
+.missing-price-row td {
+    border-bottom: 1px solid rgba(245,158,11,0.15);
+}
+.missing-add-btn {
+    padding: 3px 8px;
+    font-size: 10px;
+    border: 1px solid var(--border-inset);
+    border-radius: 6px;
+    cursor: pointer;
+    background: var(--bg-primary);
+    color: #059669;
+    box-shadow: inset 1px 1px 2px var(--shadow-inset-dark),
+                inset -1px -1px 2px var(--shadow-inset-light);
+    transition: all .2s;
+}
+.missing-add-btn:hover {
+    color: #10b981;
+    border-color: rgba(5,150,105,0.3);
+}
+.missing-add-btn:active {
+    box-shadow: inset 3px 3px 6px var(--shadow-inset-dark),
+                inset -3px -3px 6px var(--shadow-inset-light);
 }
 
 /* Utility classes */
@@ -1322,9 +1412,6 @@ tbody tr:hover { background: var(--shadow-inset-light); }
     .stat { padding: 10px 8px; }
     th { padding: 4px 3px; font-size: 6px; }
     td { padding: 4px 3px; font-size: 8px; }
-    table.compact th:nth-child(1), table.compact td:nth-child(1) { width: 60px; max-width: 60px; }
-    table.compact th:nth-child(2), table.compact td:nth-child(2) { width: 100px; max-width: 100px; }
-    table.compact th:nth-child(3), table.compact td:nth-child(3) { width: 70px; max-width: 70px; }
     .header h1 { font-size: 14px; padding: 10px 14px; }
     .header { padding: 10px 12px 8px; }
 }
@@ -1336,6 +1423,8 @@ tbody tr:hover { background: var(--shadow-inset-light); }
     .header { flex-direction: column; align-items: stretch; }
     .header-right { justify-content: flex-end; }
     .header h1 { font-size: 13px; padding: 10px 14px; }
+    .season-switcher { justify-content: center; }
+    .season-btn { font-size: 10px; padding: 7px 14px; }
 }
     </style>
 </head>
@@ -1345,6 +1434,10 @@ tbody tr:hover { background: var(--shadow-inset-light); }
             <div class="header-content">
                 <h1>Przegląd opon</h1>
                 <p>Importuj i analizuj pliki Excel/CSV z rozszerzonymi funkcjami</p>
+            </div>
+            <div class="season-switcher">
+                <button class="season-btn" id="btnZima" onclick="switchCennik('zima')">❄ ZIMA</button>
+                <button class="season-btn" id="btnLato" onclick="switchCennik('lato')">☀ LATO</button>
             </div>
             <div class="header-right">
                 <button id="showHistory" class="btn neu-raised" title="Historia importów">📜</button>
@@ -1372,14 +1465,10 @@ tbody tr:hover { background: var(--shadow-inset-light); }
 
             <div class="section">
                 <div class="panel-head" id="priceToggle">
-                    <h3 class="title" style="margin: 0;">Cennik opon</h3>
+                    <h3 class="title" style="margin: 0;">Cennik opon <span id="missingBadge" class="missing-badge hide"></span></h3>
                     <span class="chevron">▼</span>
                 </div>
                 <div class="panel-content hide">
-                    <div class="radio" style="margin-bottom: 10px;">
-                        <label class="btn neu-raised cennik-active" id="btnZima" onclick="switchCennik('zima')">❄️ Opony Zimowe</label>
-                        <label class="btn neu-raised cennik-inactive" id="btnLato" onclick="switchCennik('lato')">☀️ Opony Letnie</label>
-                    </div>
                     <div class="export" style="margin-bottom: 10px;">
                         <button id="addPrice" class="btn success neu-raised">➕ Dodaj</button>
                         <button id="exportPrices" class="btn neu-raised">📊 Eksport Excel</button>
@@ -1389,14 +1478,14 @@ tbody tr:hover { background: var(--shadow-inset-light); }
                         <button id="showMissing" class="btn warning neu-raised">⚠️ Brakujące</button>
                     </div>
                     <div class="table-wrap neu-inset">
-                        <table class="compact">
+                        <table id="priceTable" class="compact">
                             <thead>
                                 <tr>
                                     <th>Rozmiar</th>
                                     <th>Producent</th>
                                     <th>Bieżnik</th>
                                     <th>Cena netto</th>
-                                    <th style="width: 80px;">Akcje</th>
+                                    <th>Akcje</th>
                                 </tr>
                             </thead>
                             <tbody id="priceBody"></tbody>
@@ -1486,7 +1575,7 @@ tbody tr:hover { background: var(--shadow-inset-light); }
                     </div>
                     <div class="panel-content">
                         <div class="table-wrap neu-inset">
-                            <table class="compact"><tbody id="sizeBody"></tbody></table>
+                            <table id="sizeTable" class="compact"><tbody id="sizeBody"></tbody></table>
                         </div>
                     </div>
                 </div>
@@ -1625,6 +1714,7 @@ tbody tr:hover { background: var(--shadow-inset-light); }
     </div>
 
 <script>
+let _dtFilter = null;
 let S = {
     data: [], cols: [], heads: [], spec: {},
     group: 'oddzial', table: null, odd: [], typ: [],
@@ -1646,34 +1736,45 @@ const DEFAULT_CAT_ZIMA = {
     '225 45 R18':    { p: 'Bridgestone', b: 'BLIZZAK 6',     n: 499.40 },
     '225 55 R16':    { p: 'Dębica',      b: 'Frigo2 HP2',    n: 292.40 },
     '225 55 R18':    { p: 'Bridgestone', b: 'BLIZZAK 6',     n: 543.40 },
-    '235 55 R18 SUV':{ p: 'Bridgestone', b: 'BLIZZAK LM001', n: 577.40 },
-    '235 55 R20 SUV':{ p: 'Bridgestone', b: 'BLIZZAK 6',     n: 908.40 }
+    '235 55 R18':    { p: 'Bridgestone', b: 'BLIZZAK LM001', n: 577.40 },
+    '235 55 R20':    { p: 'Bridgestone', b: 'BLIZZAK 6',     n: 908.40 }
 };
 
 const DEFAULT_CAT_LATO = {
-    '175 70 R14':    { p: 'Nexen',       b: "N'BLUE HD PLUS [88] T XL",               n: 142.40 },
-    '185 65 R15':    { p: 'Nexen',       b: "N'BLUE HD PLUS [88] T",                  n: 148.40 },
-    '205 55 R16':    { p: 'Dębica',      b: 'PRESTO HP 2 [91] V',                     n: 168.40 },
-    '205 55 R17':    { p: 'Vredestein',  b: 'ULTRAC + [95] V XL ZR',                  n: 268.40 },
-    '205 60 R16':    { p: 'Dębica',      b: 'PRESTO HP 2 [92] H',                     n: 205.40 },
-    '215 55 R17':    { p: 'Dębica',      b: 'PRESTO UHP 2 [98] W XL FP',             n: 298.40 },
-    '215 60 R16':    { p: 'Vredestein',  b: 'ULTRAC + [95] V',                        n: 238.40 },
-    '215 65 R16':    { p: 'Firestone',   b: 'ROADHAWK 2 [102] V XL',                 n: 228.40 },
-    '215 75 R16C':   { p: 'Hankook',     b: 'HECTORRA VAN [116/114] R',              n: 365.40 },
-    '225 45 R18':    { p: 'Continental', b: 'PREMIUMCONTACT 7 [91] W FR',             n: 455.40 },
-    '225 55 R18':    { p: 'Pirelli',     b: 'CINTURATO P7 (P7C1) [102] Y XL FR AO', n: 498.40 },
-    '235 55 R18':    { p: 'Goodyear',   b: 'EFFICIENTGRIP 2 SUV [98] V',             n: 528.40 },
-    '235 55 R20':    { p: 'Bridgestone',b: 'POTENZA SPORT [105] Y XL EV NE0',        n: 855.40 }
+    '175 70 R14':    { p: 'Nexen',       b: "N'BLUE HD PLUS [88] T",                  n: 178.16 },
+    '185 65 R15':    { p: 'Nexen',       b: "N'BLUE HD PLUS [88] T",                  n: 162.15 },
+    '205 55 R16':    { p: 'Vredestein',  b: 'PRESTO HP 2 [91] V',                     n: 185.02 },
+    '205 55 R17':    { p: 'Vredestein',  b: 'ULTRAC + [95] V XL ZR',                  n: 330.28 },
+    '205 60 R16':    { p: 'Vredestein',  b: 'PRESTO HP 2 [92] H',                     n: 250.92 },
+    '215 55 R17':    { p: 'Vredestein',  b: 'PRESTO UHP 2 [98] W XL FP',             n: 286.80 },
+    '215 60 R16':    { p: 'Vredestein',  b: 'ULTRAC + [95] V',                        n: 353.89 },
+    '215 65 R16':    { p: 'Firestone',   b: 'ROADHAWK 2 [102] V XL',                 n: 276.20 },
+    '215 75 R16C':   { p: 'Matador',     b: 'HECTORRA VAN [116/114] R',              n: 329.96 },
+    '225 45 R18':    { p: 'Continental', b: 'PREMIUMCONTACT 7 [91] W FR',             n: 468.20 },
+    '225 55 R18':    { p: 'Pirelli',     b: 'CINTURATO P7 (P7C1) [102] Y XL FR AO', n: 459.01 },
+    '235 55 R18':    { p: 'Goodyear',   b: 'EFFICIENTGRIP 2 SUV [98] V',             n: 427.50 },
+    '235 55 R20':    { p: 'Bridgestone',b: 'POTENZA SPORT [105] Y XL EV NE0',        n: 751.51 }
 };
 
 // Backward compat: stary klucz 'tirePrices' trafia do cennika zimowego
 let CAT_ZIMA = JSON.parse(localStorage.getItem('tirePrices_zima'))
             || JSON.parse(localStorage.getItem('tirePrices'))
             || { ...DEFAULT_CAT_ZIMA };
-let CAT_LATO = JSON.parse(localStorage.getItem('tirePrices_lato')) || { ...DEFAULT_CAT_LATO };
 
-let activeCennik = 'zima';
-let CAT = CAT_ZIMA;
+// Wersja cennika letniego — zmień przy każdej aktualizacji domyślnych cen
+const CAT_LATO_VER = '2025-03';
+const _savedLatoVer = localStorage.getItem('tirePrices_lato_ver');
+let CAT_LATO = (_savedLatoVer === CAT_LATO_VER)
+    ? (JSON.parse(localStorage.getItem('tirePrices_lato')) || { ...DEFAULT_CAT_LATO })
+    : { ...DEFAULT_CAT_LATO };
+if (_savedLatoVer !== CAT_LATO_VER) {
+    localStorage.setItem('tirePrices_lato', JSON.stringify(CAT_LATO));
+    localStorage.setItem('tirePrices_lato_ver', CAT_LATO_VER);
+}
+
+const _m = new Date().getMonth() + 1; // 1=sty … 12=gru; lato: mar–paź
+let activeCennik = (_m >= 3 && _m <= 10) ? 'lato' : 'zima';
+let CAT = activeCennik === 'lato' ? CAT_LATO : CAT_ZIMA;
 let HISTORY = JSON.parse(localStorage.getItem('importHistory')) || [];
 
 const norm = s => {
@@ -1861,7 +1962,12 @@ const loadFromHistory = (id) => {
     initTable();
     showAll(S.data);
     updateStats();
+    findMissingTires();
+    renderPriceTable();
     $('#clear').prop('disabled', false);
+    $('#zakup').val('TAK');
+    S.table?.draw();
+    updateCount();
     
     $('#fileName').text(entry.filename + ' (z historii)');
     $('#historyModal').removeClass('on');
@@ -1912,7 +2018,7 @@ const showAlert = (message, type = 'warning') => {
 
 // Brakujące opony
 const findMissingTires = () => {
-    if (!S.data.length || !S.spec.rozm) return;
+    if (!S.data.length || S.spec.rozm === undefined) return;
     
     S.missingTires.clear();
     const rc = S.cols[S.spec.rozm];
@@ -2093,12 +2199,29 @@ const savePrices = () => {
 
 const renderPriceTable = () => {
     const sorted = Object.keys(CAT).sort();
-    $('#priceBody').html(sorted.map(key => {
+
+    // Brakujące — rozmiary z danych które nie mają ceny w aktywnym cenniku
+    const missing = [];
+    if (S.data.length && S.spec.rozm !== undefined) {
+        const rc = S.cols[S.spec.rozm];
+        const seen = new Set();
+        S.data.forEach(row => {
+            const orig = row[rc];
+            const size = norm(orig);
+            if (size && !CAT[size] && !seen.has(orig)) {
+                seen.add(orig);
+                missing.push(orig);
+            }
+        });
+        missing.sort();
+    }
+
+    const catRows = sorted.map(key => {
         const item = CAT[key];
         return `<tr>
             <td><strong class="tire-size">${key}</strong></td>
             <td>${item.p}</td>
-            <td>${item.b}</td>
+            <td class="col-bieznik">${item.b}</td>
             <td><span class="money">${item.n.toFixed(2)}</span></td>
             <td>
                 <div class="action-btns">
@@ -2107,7 +2230,37 @@ const renderPriceTable = () => {
                 </div>
             </td>
         </tr>`;
-    }).join(''));
+    });
+
+    const missingRows = missing.map(size => {
+        const safe = size.replace(/'/g, "\\'");
+        return `<tr class="missing-price-row">
+            <td><strong class="tire-size" style="color:var(--alert-warning-border)">${size}</strong></td>
+            <td colspan="3" style="color:var(--text-muted);font-style:italic;font-size:8px;">brak w cenniku</td>
+            <td>
+                <div class="action-btns">
+                    <button class="missing-add-btn" onclick="addMissingToPrice('${safe}')" title="Dodaj do cennika">➕</button>
+                </div>
+            </td>
+        </tr>`;
+    });
+
+    $('#priceBody').html([...catRows, ...missingRows].join(''));
+
+    // Badge z liczbą brakujących
+    if (missing.length > 0) {
+        $('#missingBadge').text(`⚠ ${missing.length} brak`).removeClass('hide');
+        // Auto-otwórz panel jeśli był zamknięty
+        const content = $('#priceToggle').next('.panel-content');
+        const chevron = $('#priceToggle').find('.chevron');
+        if (content.hasClass('hide')) {
+            content.removeClass('hide');
+            chevron.addClass('on');
+        }
+    } else {
+        $('#missingBadge').addClass('hide');
+    }
+
     // Odśwież wygląd przycisków sezonów
     const isZima = activeCennik === 'zima';
     $('#btnZima').toggleClass('cennik-active', isZima).toggleClass('cennik-inactive', !isZima);
@@ -2115,15 +2268,16 @@ const renderPriceTable = () => {
 };
 
 const openPriceModal = (key = null) => {
+    const seasonLabel = activeCennik === 'zima' ? '❄ Zimowy' : '☀ Letni';
     S.editingKey = key;
     if (key) {
-        $('#modalTitle').text('Edytuj cenę opony');
+        $('#modalTitle').text(`Edytuj cenę — cennik ${seasonLabel}`);
         $('#editSize').val(key).prop('disabled', true);
         $('#editProducer').val(CAT[key].p);
         $('#editTread').val(CAT[key].b);
         $('#editPrice').val(CAT[key].n);
     } else {
-        $('#modalTitle').text('Dodaj cenę opony');
+        $('#modalTitle').text(`Dodaj cenę — cennik ${seasonLabel}`);
         $('#editSize').val('').prop('disabled', false);
         $('#editProducer').val('');
         $('#editTread').val('');
@@ -2149,10 +2303,11 @@ const savePriceFromModal = () => {
     }
 
     const normalized = norm(size);
+    const seasonLabel = activeCennik === 'zima' ? '❄ zimowy' : '☀ letni';
     CAT[normalized] = { p: producer, b: tread, n: price };
     savePrices();
     closePriceModal();
-    showAlert('Cena zapisana pomyślnie', 'success');
+    showAlert(`Cena zapisana do cennika ${seasonLabel}`, 'success');
 };
 
 window.editPrice = (key) => {
@@ -2420,8 +2575,6 @@ const process = (d, reprocess = false, filename = '') => {
             if (filename) {
                 saveToHistory(filename, S.data.length);
             }
-            
-            findMissingTires();
         } else {
             S.data.forEach(o => {
                 if (S.spec.rozm !== undefined) {
@@ -2450,13 +2603,15 @@ const process = (d, reprocess = false, filename = '') => {
         
         if (!reprocess) {
             updateFilters();
+            $('#zakup').val('TAK');
         }
         initTable();
+        findMissingTires();
+        renderPriceTable();
         showAll(S.data);
         updateStats();
         $('#clear').prop('disabled', false);
         
-        $('#zakup').val('TAK');
         S.table?.draw();
         updateCount();
         
@@ -2533,6 +2688,9 @@ const initTable = () => {
             { extend: 'csv', text: '📄 CSV', title: null, className: 'neu-raised' },
             { extend: 'pdf', text: '📑 PDF', title: 'Dane opon', orientation: 'landscape', className: 'neu-raised' }
         ],
+        columnDefs: [
+            { targets: bieznikIdx, className: 'col-bieznik' }
+        ],
         language: {
             "processing": "Przetwarzanie...",
             "search": "Szukaj:",
@@ -2554,16 +2712,26 @@ const initTable = () => {
         drawCallback: updateCount
     });
 
-    $.fn.dataTable.ext.search.push((s, d, i) => {
+    // Usuń stary filtr jeśli istnieje, żeby nie kumulować
+    if (_dtFilter) {
+        const idx = $.fn.dataTable.ext.search.indexOf(_dtFilter);
+        if (idx !== -1) $.fn.dataTable.ext.search.splice(idx, 1);
+        _dtFilter = null;
+    }
+    _dtFilter = (settings, d, i) => {
+        // Filtr działa tylko dla tabeli #data
+        if (settings.nTable.id !== 'data') return true;
+
         const r = S.data[i];
-        
+        if (!r) return true;
+
         const search = $('#quickSearch').val().toLowerCase();
         if (search) {
             const nr = getNr(r).toLowerCase();
             const nazwa = getNazwa(r).toLowerCase();
             if (!nr.includes(search) && !nazwa.includes(search)) return false;
         }
-        
+
         if (S.odd.length && S.spec.odd !== undefined) {
             if (!S.odd.includes(r[S.cols[S.spec.odd]])) return false;
         }
@@ -2575,7 +2743,8 @@ const initTable = () => {
             if (String(r[S.cols[S.spec.zakup]]).toUpperCase() !== z) return false;
         }
         return true;
-    });
+    };
+    $.fn.dataTable.ext.search.push(_dtFilter);
 
     S.table.on('search.dt', () => showAll(getFiltered()));
 };
@@ -2623,11 +2792,11 @@ const updateFilters = () => {
 const showAll = d => {
     showSize(d);
     showDetail(d);
-    $('#summary').toggleClass('hide', !(d.length && (S.spec.rozm || S.spec.odd || S.spec.adr)));
+    $('#summary').toggleClass('hide', !(d.length && (S.spec.rozm !== undefined || S.spec.odd !== undefined || S.spec.adr !== undefined)));
 };
 
 const showSize = d => {
-    if (!d.length || !S.spec.rozm) {
+    if (!d.length || S.spec.rozm === undefined) {
         $('#sizeBox').addClass('hide');
         return;
     }
@@ -2687,7 +2856,7 @@ const showDetail = d => {
     
     // Tryb grupowania według ROZMIARU - Z DEDUPLIKACJĄ
     if (mode === 'rozmiar') {
-        if (!S.spec.rozm) {
+        if (S.spec.rozm === undefined) {
             $('#detailBox').addClass('hide');
             return;
         }
@@ -2801,7 +2970,7 @@ const showDetail = d => {
     
     const c = {
         g: S.cols[gi],
-        r: S.spec.rozm ? S.cols[S.spec.rozm] : null,
+        r: (S.spec.rozm !== undefined) ? S.cols[S.spec.rozm] : null,
         i: S.spec.ilosc ? S.cols[S.spec.ilosc] : null,
         s: isOdd ? (S.spec.adr ? S.cols[S.spec.adr] : null) : (S.spec.odd ? S.cols[S.spec.odd] : null),
         u: S.spec.uwagi ? S.cols[S.spec.uwagi] : null
@@ -2876,7 +3045,7 @@ const exportXlsx = () => {
     
     if (mode === 'rozmiar') {
         const d = getFiltered();
-        if (!d.length || !S.spec.rozm) {
+        if (!d.length || S.spec.rozm === undefined) {
             showAlert('Brak danych do eksportu', 'warning');
             return;
         }
@@ -2977,7 +3146,7 @@ const exportPdf = () => {
     
     if (mode === 'rozmiar') {
         const d = getFiltered();
-        if (!d.length || !S.spec.rozm) {
+        if (!d.length || S.spec.rozm === undefined) {
             showAlert('Brak danych do eksportu', 'warning');
             return;
         }
@@ -3195,7 +3364,7 @@ const getGrouped = () => {
     const gc = S.cols[gi];
     
     const c = {
-        r: S.spec.rozm ? S.cols[S.spec.rozm] : null,
+        r: (S.spec.rozm !== undefined) ? S.cols[S.spec.rozm] : null,
         i: S.spec.ilosc ? S.cols[S.spec.ilosc] : null,
         s: isOdd ? (S.spec.adr ? S.cols[S.spec.adr] : null) : (S.spec.odd ? S.cols[S.spec.odd] : null),
         u: S.spec.uwagi ? S.cols[S.spec.uwagi] : null
@@ -3248,7 +3417,11 @@ const updateStats = () => {
 const clear = () => {
     if (!confirm('Wyczyścić?')) return;
     if (S.table) {
-        $.fn.dataTable.ext.search.pop();
+        if (_dtFilter) {
+            const idx = $.fn.dataTable.ext.search.indexOf(_dtFilter);
+            if (idx !== -1) $.fn.dataTable.ext.search.splice(idx, 1);
+            _dtFilter = null;
+        }
         S.table.destroy();
     }
     S = { data: [], cols: [], heads: [], spec: {}, group: 'oddzial', table: null, odd: [], typ: [], editingKey: null, missingTires: new Set() };
@@ -3264,6 +3437,7 @@ const clear = () => {
     $('#total, #tak, #suma, #visible').text('0');
     $('#wartosc').text('0.00');
     $('#clear').prop('disabled', true);
+    renderPriceTable();
 };
 
 const loading = on => {
