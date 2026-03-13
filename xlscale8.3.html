@@ -1,0 +1,3486 @@
+<!DOCTYPE html>
+<html lang="pl" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>XLScale Pro</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.7.1/css/buttons.dataTables.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary-color: #4F46E5;
+      --primary-light: #818CF8; 
+      --primary-dark: #3730A3;
+      --secondary-color: #10B981;
+      --secondary-light: #34D399;
+      --secondary-dark: #059669;
+      --accent-color: #8B5CF6;
+      --danger-color: #EF4444;
+      --warning-color: #F59E0B;
+      --info-color: #3B82F6;
+      --text-color: #1F2937;
+      --text-light: #6B7280;
+      --background-light: #F9FAFB;
+      --background-white: #FFFFFF;
+      --background-dark: #111827;
+      --border-color: #E5E7EB;
+      --border-dark: #D1D5DB;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text-color);
+    }
+    
+    .container {
+      background: var(--background-white);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+      border-radius: 1rem;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    header {
+      background: linear-gradient(to right, var(--primary-color), var(--primary-dark));
+      color: white;
+      padding: 1.25rem 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm32-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+      opacity: 0.3;
+    }
+    
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .tab {
+      transition: all 0.2s ease;
+      position: relative;
+      border-bottom: 2px solid transparent;
+    }
+    
+    .tab.active {
+      border-bottom: 2px solid var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .tab:hover {
+      color: var(--primary-color);
+    }
+    
+    .tab::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background-color: var(--primary-light);
+      transition: width 0.3s ease;
+    }
+    
+    .tab:hover::after {
+      width: 100%;
+    }
+    
+    /* Kolory dla wierszy tabeli - ULEPSZONE */
+    tbody tr.matched-row {
+      background-color: rgba(16, 185, 129, 0.08) !important;
+      border-left: 3px solid #10B981;
+    }
+    
+    tbody tr.matched-row:hover {
+      background-color: rgba(16, 185, 129, 0.15) !important;
+    }
+    
+    tbody tr.fuzzy-matched-row {
+      background-color: rgba(251, 191, 36, 0.08) !important;
+      border-left: 3px solid #F59E0B;
+    }
+    
+    tbody tr.fuzzy-matched-row:hover {
+      background-color: rgba(251, 191, 36, 0.15) !important;
+    }
+    
+    tbody tr.unmatched-row {
+      background-color: rgba(239, 68, 68, 0.05) !important;
+      border-left: 3px solid #EF4444;
+    }
+    
+    tbody tr.unmatched-row:hover {
+      background-color: rgba(239, 68, 68, 0.1) !important;
+    }
+    
+    /* Oznaczenie nowych kolumn */
+    td.new-column-cell {
+      background-color: rgba(139, 92, 246, 0.05) !important;
+      border-left: 1px dashed #8B5CF6;
+    }
+    
+    td.overwritten-column-cell {
+      background-color: rgba(251, 146, 60, 0.05) !important;
+      position: relative;
+    }
+    
+    td.overwritten-column-cell::after {
+      content: '✏️';
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      font-size: 0.6rem;
+      opacity: 0.6;
+    }
+    
+    .match-status-positive {
+      color: var(--secondary-color);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    
+    .match-status-fuzzy {
+      color: var(--warning-color);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    
+    .match-status-negative {
+      color: var(--danger-color);
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    
+    .dataTables_wrapper {
+      width: 100%;
+      overflow-x: auto;
+      padding: 0.75rem 0;
+      border-radius: 0.5rem;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    
+    table.dataTable {
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+    
+    thead {
+      background-color: #F3F4F6;
+    }
+    
+    th, td {
+      padding: 0.65rem 0.75rem;
+      text-align: left;
+      font-size: 0.75rem;
+    }
+    
+    th {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      background-color: #F3F4F6;
+      z-index: 10;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    }
+    
+    /* Oznaczenie nagłówków nowych kolumn */
+    th.new-column-header {
+      background: linear-gradient(to bottom, #F3F4F6, #EDE9FE);
+      color: #7C3AED;
+      position: relative;
+    }
+    
+    th.new-column-header::after {
+      content: '✨';
+      margin-left: 0.25rem;
+      font-size: 0.7rem;
+    }
+    
+    tbody tr {
+      transition: background-color 0.15s ease;
+    }
+    
+    tbody tr:hover {
+      background-color: rgba(243, 244, 246, 0.5);
+    }
+    
+    tbody tr:nth-child(even) {
+      background-color: var(--background-light);
+    }
+    
+    .dt-buttons {
+      display: flex !important;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem !important;
+    }
+    
+    .dt-button {
+      background: linear-gradient(to bottom, var(--primary-color), var(--primary-dark)) !important;
+      color: white !important;
+      border: none !important;
+      padding: 0.4rem 0.75rem !important;
+      border-radius: 0.25rem !important;
+      font-size: 0.7rem !important;
+      font-weight: 500 !important;
+      text-transform: uppercase !important;
+      cursor: pointer !important;
+      transition: all 0.2s ease !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 0.25rem !important;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+    }
+    
+    .dt-button:hover {
+      background: linear-gradient(to bottom, var(--primary-light), var(--primary-color)) !important;
+      transform: translateY(-1px) !important;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+    }
+    
+    .dt-button:active {
+      transform: translateY(0) !important;
+    }
+    
+    .import-container {
+      border-radius: 0.5rem;
+      border: 2px dashed #E5E7EB;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .import-container:hover {
+      border-color: var(--primary-light);
+    }
+    
+    .file-input-wrapper {
+      position: relative;
+    }
+    
+    .file-input-label {
+      cursor: pointer;
+      display: inline-block;
+      font-weight: 500;
+    }
+    
+    .select-container {
+      background-color: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      border: 1px solid var(--border-color);
+      transition: all 0.2s ease;
+    }
+    
+    .select-container:hover {
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      border-color: var(--primary-light);
+    }
+    
+    .column-toggle {
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+      display: inline-flex;
+      align-items: center;
+      background-color: white;
+      padding: 0.4rem 0.6rem;
+      border-radius: 0.25rem;
+      border: 1px solid var(--border-color);
+      transition: all 0.2s ease;
+    }
+    
+    .column-toggle:hover {
+      border-color: var(--primary-light);
+      background-color: #F9FAFB;
+    }
+    
+    .column-toggle input[type="checkbox"] {
+      margin-right: 0.4rem;
+      cursor: pointer;
+    }
+    
+    .column-toggle label {
+      cursor: pointer;
+      user-select: none;
+    }
+    
+    /* Fancy checkbox styles */
+    .column-toggle input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      height: 1rem;
+      width: 1rem;
+      background-color: #fff;
+      border: 1px solid #D1D5DB;
+      border-radius: 0.25rem;
+      display: inline-block;
+      position: relative;
+      cursor: pointer;
+      outline: none;
+    }
+    
+    .column-toggle input[type="checkbox"]:checked {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .column-toggle input[type="checkbox"]:checked::after {
+      content: '';
+      position: absolute;
+      left: 5px;
+      top: 2px;
+      width: 4px;
+      height: 8px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+    
+    button {
+      transition: all 0.2s ease;
+    }
+    
+    button:active {
+      transform: scale(0.98);
+    }
+    
+    .custom-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: linear-gradient(to bottom, var(--primary-color), var(--primary-dark));
+      color: white;
+      border: none;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    
+    .custom-button:hover {
+      background: linear-gradient(to bottom, var(--primary-light), var(--primary-color));
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    
+    .custom-button:active {
+      transform: translateY(0);
+    }
+    
+    .stats-card {
+      transition: all 0.2s ease;
+    }
+    
+    .stats-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    
+    .dataTables_filter input {
+      border: 1px solid var(--border-color);
+      border-radius: 0.375rem;
+      padding: 0.3rem 0.5rem;
+      font-size: 0.875rem;
+    }
+    
+    .dataTables_filter input:focus {
+      outline: none;
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+    }
+    
+    @media (max-width: 640px) {
+      th, td {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.7rem;
+      }
+      
+      .dt-buttons {
+        justify-content: center;
+      }
+      
+      .dt-button {
+        padding: 0.3rem 0.5rem !important;
+        font-size: 0.65rem !important;
+      }
+    }
+    
+    /* Tooltip styles */
+    .tooltip {
+      position: relative;
+      display: inline-block;
+      cursor: help;
+    }
+    
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 240px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 8px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -120px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 0.75rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .tooltip .tooltiptext::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: #333 transparent transparent transparent;
+    }
+    
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+    
+    /* Loading animation */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease;
+    }
+    
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(79, 70, 229, 0.2);
+      border-radius: 50%;
+      border-top-color: var(--primary-color);
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .show-loading {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    /* Progress bar */
+    .progress-bar-container {
+      width: 100%;
+      height: 6px;
+      background-color: #E5E7EB;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(to right, var(--secondary-color), var(--secondary-light));
+      width: 0;
+      transition: width 0.3s ease;
+    }
+    
+    /* POPRAWIONE Advanced options styles - WĘŻSZE PRZEŁĄCZNIKI */
+    .advanced-option {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      align-items: start;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      background-color: #F9FAFB;
+      border-radius: 0.375rem;
+      margin-bottom: 0.5rem;
+      transition: background-color 0.2s ease;
+    }
+    
+    .advanced-option:hover {
+      background-color: #F3F4F6;
+    }
+    
+    .advanced-option label {
+      font-size: 0.875rem;
+      color: var(--text-color);
+      cursor: pointer;
+      user-select: none;
+    }
+    
+    .advanced-option label span {
+      display: block;
+      margin-top: 0.125rem;
+    }
+    
+    .advanced-option label strong {
+      color: var(--primary-dark);
+    }
+    
+    /* Kompaktowy switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+    
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #CBD5E1;
+      transition: .3s;
+      border-radius: 22px;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    
+    input:checked + .slider {
+      background-color: var(--primary-color);
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(18px);
+    }
+    
+    /* Specjalny styl dla threshold container */
+    #fuzzy-threshold-container {
+      grid-template-columns: 1fr;
+      padding-left: 3.5rem;
+    }
+    
+    #fuzzy-threshold-container label {
+      width: 100%;
+    }
+    
+    /* Preview modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.5);
+    }
+    
+    .modal-content {
+      background-color: #fefefe;
+      margin: 5% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 90%;
+      max-width: 1200px;
+      border-radius: 0.5rem;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    .close:hover,
+    .close:focus {
+      color: black;
+    }
+    
+    /* Data quality indicators */
+    .quality-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    
+    .quality-good {
+      background-color: #D1FAE5;
+      color: #065F46;
+    }
+    
+    .quality-warning {
+      background-color: #FEF3C7;
+      color: #92400E;
+    }
+    
+    .quality-poor {
+      background-color: #FEE2E2;
+      color: #991B1B;
+    }
+    
+    /* Chart container */
+    .chart-container {
+      position: relative;
+      height: 300px;
+      margin-top: 1rem;
+    }
+    
+    /* Multiple column selection */
+    .multi-select-container {
+      position: relative;
+    }
+    
+    .multi-select-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 0.375rem;
+      margin-top: 0.25rem;
+      max-height: 200px;
+      overflow-y: auto;
+      display: none;
+      z-index: 100;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .multi-select-dropdown.show {
+      display: block;
+    }
+    
+    .multi-select-option {
+      padding: 0.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .multi-select-option:hover {
+      background-color: #F3F4F6;
+    }
+    
+    .multi-select-option input[type="checkbox"] {
+      margin: 0;
+    }
+    
+    .selected-columns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+      margin-top: 0.5rem;
+    }
+    
+    .selected-column-tag {
+      background-color: var(--primary-light);
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    
+    .selected-column-tag .remove {
+      cursor: pointer;
+      font-weight: bold;
+    }
+    
+    /* History timeline */
+    .timeline {
+      position: relative;
+      padding-left: 2rem;
+    }
+    
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0.5rem;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background-color: var(--border-color);
+    }
+    
+    .timeline-item {
+      position: relative;
+      padding-bottom: 1rem;
+    }
+    
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -1.5rem;
+      top: 0.25rem;
+      width: 0.75rem;
+      height: 0.75rem;
+      background-color: var(--primary-color);
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 0 0 2px var(--border-color);
+    }
+    
+    .timeline-content {
+      background-color: #F9FAFB;
+      padding: 0.75rem;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    .timeline-time {
+      font-size: 0.75rem;
+      color: var(--text-light);
+      margin-bottom: 0.25rem;
+    }
+    
+    /* Legenda kolorów w tabeli */
+    .table-legend {
+      display: flex;
+      gap: 1rem;
+      padding: 0.5rem 1rem;
+      background-color: #F9FAFB;
+      border-radius: 0.375rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.75rem;
+      flex-wrap: wrap;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+    }
+    
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 0.25rem;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+    
+    .new-column-suffix {
+      color: var(--accent-color);
+      font-size: 0.65rem;
+      font-weight: normal;
+      margin-left: 0.25rem;
+    }
+  </style>
+</head>
+<body class="h-full p-4 md:p-6">
+  <!-- Loading overlay -->
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="loading-spinner"></div>
+  </div>
+
+  <!-- Preview Modal -->
+  <div id="previewModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2 class="text-xl font-bold mb-4 flex items-center">
+        <i class="fas fa-eye text-indigo-600 mr-2"></i>
+        Podgląd zmian przed scaleniem
+      </h2>
+      <div id="previewContent"></div>
+    </div>
+  </div>
+
+  <div class="container mx-auto max-w-7xl">
+    <header class="text-white p-4 sm:p-6">
+      <h1 class="text-2xl font-bold"><i class="fas fa-table-cells mr-2"></i> XLScale Pro <span class="text-xs font-normal bg-white bg-opacity-20 rounded px-2 py-0.5 ml-2">v7.2.1</span></h1>
+      <p class="text-sm mt-1 opacity-80">Zaawansowane narzędzie do inteligentnego dopasowywania i scalania plików Excel</p>
+    </header>
+
+    <main class="p-4 sm:p-6 flex-grow flex flex-col">
+      <div class="mb-6 grid grid-cols-2 md:grid-cols-2 gap-4">
+        <div class="bg-white p-4 rounded-lg shadow-sm import-container">
+          <div class="flex items-center mb-2">
+            <i class="fas fa-file-excel text-green-600 mr-2"></i>
+            <label for="file-input" class="block text-sm font-medium text-gray-700">Importuj pierwszy plik:</label>
+            <div class="tooltip ml-1">
+              <i class="fas fa-circle-info text-blue-500 text-xs"></i>
+              <span class="tooltiptext">Wybierz główny plik Excel, do którego chcesz dodać dane z drugiego pliku. Zostanie on użyty jako baza do scalania.</span>
+            </div>
+          </div>
+          <div class="file-input-wrapper">
+            <input type="file" id="file-input" accept=".xlsx,.xls,.csv" class="block w-full text-sm text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+            <div class="progress-bar-container" id="progress-bar1-container" style="display: none;">
+              <div class="progress-bar" id="progress-bar1"></div>
+            </div>
+          </div>
+          <button id="import-files" class="mt-3 custom-button">
+            <i class="fas fa-file-import"></i>
+            <span>Importuj 1 plik</span>
+          </button>
+          <p id="file-info" class="mt-2 text-sm text-gray-500 flex items-center"><i class="fas fa-circle-info mr-1"></i> Wybierz plik Excel (.xlsx, .xls) lub CSV</p>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow-sm import-container">
+          <div class="flex items-center mb-2">
+            <i class="fas fa-file-excel text-green-600 mr-2"></i>
+            <label for="file-input-2" class="block text-sm font-medium text-gray-700">Importuj drugi plik:</label>
+            <div class="tooltip ml-1">
+              <i class="fas fa-circle-info text-blue-500 text-xs"></i>
+              <span class="tooltiptext">Wybierz plik Excel z danymi, które chcesz dodać do pierwszego pliku. Dane zostaną dopasowane według wybranej kolumny.</span>
+            </div>
+          </div>
+          <div class="file-input-wrapper">
+            <input type="file" id="file-input-2" accept=".xlsx,.xls,.csv" class="block w-full text-sm text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+            <div class="progress-bar-container" id="progress-bar2-container" style="display: none;">
+              <div class="progress-bar" id="progress-bar2"></div>
+            </div>
+          </div>
+          <button id="import-file-2" class="mt-3 custom-button">
+            <i class="fas fa-file-import"></i>
+            <span>Importuj 2 plik</span>
+          </button>
+          <p id="file-info-2" class="mt-2 text-sm text-gray-500 flex items-center"><i class="fas fa-circle-info mr-1"></i> Wybierz plik Excel (.xlsx, .xls) lub CSV</p>
+        </div>
+      </div>
+
+      <!-- Sekcja wyboru kolumn do dopasowania z zaawansowanymi opcjami -->
+      <div id="matching-options" class="mb-6 p-4 bg-white rounded-lg shadow-sm select-container" style="display: none;">
+        <div class="flex items-center mb-3">
+          <i class="fas fa-link text-indigo-600 mr-2"></i>
+          <h3 class="text-sm font-medium text-gray-700">Opcje dopasowania:</h3>
+          <div class="tooltip ml-1">
+            <i class="fas fa-circle-info text-blue-500 text-xs"></i>
+            <span class="tooltiptext">Wybierz kolumny, które mają być używane do dopasowania rekordów między plikami. Możesz używać wielu kolumn i dopasowania przybliżonego.</span>
+          </div>
+        </div>
+        
+        <!-- POPRAWIONE Zaawansowane opcje -->
+        <div class="mb-4 p-3 bg-gray-50 rounded-md">
+          <h4 class="text-xs font-medium text-gray-700 mb-2 flex items-center">
+            <i class="fas fa-sliders text-indigo-500 mr-1"></i>
+            Zaawansowane opcje dopasowania:
+          </h4>
+          
+          <div class="advanced-option">
+            <label class="switch">
+              <input type="checkbox" id="overwrite-columns">
+              <span class="slider"></span>
+            </label>
+            <label for="overwrite-columns">
+              <strong>Nadpisuj dane w istniejących kolumnach</strong>
+              <span class="text-xs text-gray-500">Gdy włączone: dane z pliku 2 nadpiszą istniejące wartości. Gdy wyłączone: utworzone zostaną nowe kolumny z suffiksem "_2"</span>
+            </label>
+          </div>
+          
+          <div class="advanced-option">
+            <label class="switch">
+              <input type="checkbox" id="fuzzy-matching">
+              <span class="slider"></span>
+            </label>
+            <label for="fuzzy-matching">
+              <strong>Dopasowanie przybliżone (Fuzzy Matching)</strong>
+              <span class="text-xs text-gray-500">Pozwala na dopasowanie podobnych wartości z drobnymi różnicami</span>
+            </label>
+          </div>
+          
+          <div class="advanced-option">
+            <label class="switch">
+              <input type="checkbox" id="case-sensitive">
+              <span class="slider"></span>
+            </label>
+            <label for="case-sensitive">
+              <strong>Rozróżniaj wielkość liter</strong>
+              <span class="text-xs text-gray-500">Wielkość liter będzie brana pod uwagę przy dopasowaniu</span>
+            </label>
+          </div>
+          
+          <div class="advanced-option">
+            <label class="switch">
+              <input type="checkbox" id="trim-whitespace" checked>
+              <span class="slider"></span>
+            </label>
+            <label for="trim-whitespace">
+              <strong>Usuń białe znaki</strong>
+              <span class="text-xs text-gray-500">Usuwa spacje na początku i końcu wartości</span>
+            </label>
+          </div>
+          
+          <div class="advanced-option" id="fuzzy-threshold-container" style="display: none;">
+            <label for="fuzzy-threshold" style="width: 100%;">
+              <strong>Próg podobieństwa: <span id="threshold-value">80</span>%</strong>
+              <input type="range" id="fuzzy-threshold" min="50" max="100" value="80" class="w-full mt-1">
+              <span class="text-xs text-gray-500">Minimalne podobieństwo wymagane do dopasowania</span>
+            </label>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="p-3 bg-gray-50 rounded-md">
+            <label for="file1-column-select" class="block text-xs font-medium text-gray-700 mb-1 flex items-center">
+              <i class="fas fa-table-columns text-indigo-500 mr-1"></i>
+              Kolumny z pliku 1:
+            </label>
+            <div class="multi-select-container">
+              <button id="file1-column-select" class="block w-full border border-gray-300 rounded-md shadow-sm text-sm p-2 text-left bg-white">
+                Wybierz kolumny...
+              </button>
+              <div id="file1-dropdown" class="multi-select-dropdown"></div>
+              <div id="file1-selected" class="selected-columns"></div>
+            </div>
+          </div>
+          <div class="p-3 bg-gray-50 rounded-md">
+            <label for="file2-column-select" class="block text-xs font-medium text-gray-700 mb-1 flex items-center">
+              <i class="fas fa-table-columns text-indigo-500 mr-1"></i>
+              Kolumny z pliku 2:
+            </label>
+            <div class="multi-select-container">
+              <button id="file2-column-select" class="block w-full border border-gray-300 rounded-md shadow-sm text-sm p-2 text-left bg-white">
+                Wybierz kolumny...
+              </button>
+              <div id="file2-dropdown" class="multi-select-dropdown"></div>
+              <div id="file2-selected" class="selected-columns"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Przyciski akcji -->
+        <div class="mt-4 flex gap-2">
+          <button id="preview-matching" class="custom-button bg-gray-600 hover:bg-gray-700" style="background: linear-gradient(to bottom, #4B5563, #374151);">
+            <i class="fas fa-eye"></i>
+            <span>Podgląd zmian</span>
+          </button>
+          <button id="apply-matching" class="custom-button opacity-50 cursor-not-allowed" disabled>
+            <i class="fas fa-code-merge"></i>
+            <span>Dopasuj i scal dane</span>
+          </button>
+          <button id="auto-detect" class="custom-button bg-purple-600 hover:bg-purple-700" style="background: linear-gradient(to bottom, #9333EA, #7C3AED);">
+            <i class="fas fa-wand-magic-sparkles"></i>
+            <span>Wykryj automatycznie</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="mb-2 border-b border-gray-200">
+        <nav class="-mb-px flex space-x-4" aria-label="Tabs">
+          <button class="tab active whitespace-nowrap py-3 px-3 border-b-2 font-medium text-sm flex items-center" onclick="openTab('Instrukcja')">
+            <i class="fas fa-book-open mr-1.5"></i> Instrukcja
+          </button>
+          <button class="tab whitespace-nowrap py-3 px-3 border-b-2 font-medium text-sm flex items-center" onclick="openTab('Zaimportowane')">
+            <i class="fas fa-table-list mr-1.5"></i> Zaimportowane
+          </button>
+          <button class="tab whitespace-nowrap py-3 px-3 border-b-2 font-medium text-sm flex items-center" onclick="openTab('Statystyki')">
+            <i class="fas fa-chart-simple mr-1.5"></i> Statystyki
+          </button>
+          <button class="tab whitespace-nowrap py-3 px-3 border-b-2 font-medium text-sm flex items-center" onclick="openTab('Analiza')">
+            <i class="fas fa-microscope mr-1.5"></i> Analiza jakości
+          </button>
+          <button class="tab whitespace-nowrap py-3 px-3 border-b-2 font-medium text-sm flex items-center" onclick="openTab('Historia')">
+            <i class="fas fa-clock-rotate-left mr-1.5"></i> Historia
+          </button>
+        </nav>
+      </div>
+
+      <div id="Instrukcja" class="content-tab">
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+          <div class="px-4 py-4 sm:px-6 bg-gradient-to-r from-indigo-50 to-purple-50">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 flex items-center">
+              <i class="fas fa-circle-info text-indigo-600 mr-2"></i>
+              Instrukcja zaawansowanego narzędzia scalania plików
+            </h3>
+          </div>
+          <div class="border-t border-gray-200 px-4 py-5 sm:p-0">
+            <dl class="sm:divide-y sm:divide-gray-200">
+              <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt class="text-sm font-medium text-gray-500 flex items-center">
+                  <i class="fas fa-file-import text-indigo-500 mr-2"></i>
+                  Import danych
+                </dt>
+                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                  <ol class="list-decimal list-inside space-y-2">
+                    <li>Kliknij przycisk "Importuj pierwszy plik" - Wybierz twój główny plik, do którego chcesz dodać dane.</li>
+                    <li>Kliknij "Importuj drugi plik" - Wybierz plik z danymi, które dodajesz.</li>
+                    <li>Wybierz kolumny do dopasowania z obu plików (możesz wybrać wiele kolumn).</li>
+                    <li>Ustaw zaawansowane opcje dopasowania według potrzeb.</li>
+                    <li>Użyj "Podgląd zmian" aby zobaczyć efekt przed scaleniem.</li>
+                    <li>Kliknij "Dopasuj i scal dane" aby przeprowadzić scalenie.</li>
+                  </ol>
+                </dd>
+              </div>
+              <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt class="text-sm font-medium text-gray-500 flex items-center">
+                  <i class="fas fa-star text-yellow-500 mr-2"></i>
+                  Nowe funkcje
+                </dt>
+                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                  <ul class="list-disc list-inside space-y-2">
+                    <li><strong>Kontrola nadpisywania kolumn</strong> - Wybierz czy dane mają nadpisać istniejące wartości czy utworzyć nowe kolumny</li>
+                    <li><strong>Inteligentne wykrywanie dat</strong> - Automatycznie rozpoznaje daty w różnych formatach</li>
+                    <li><strong>Dopasowanie przybliżone (Fuzzy Matching)</strong> - Znajduje podobne wartości mimo drobnych różnic</li>
+                    <li><strong>Dopasowanie wielokolumnowe</strong> - Używa wielu kolumn jednocześnie dla precyzyjnego dopasowania</li>
+                    <li><strong>Automatyczne wykrywanie kolumn</strong> - Inteligentnie sugeruje najlepsze kolumny do dopasowania</li>
+                    <li><strong>Podgląd zmian</strong> - Pokazuje dokładnie co zostanie zmienione przed scaleniem</li>
+                    <li><strong>Historia operacji</strong> - Śledzi wszystkie wykonane scalenia z możliwością cofnięcia</li>
+                    <li><strong>Analiza jakości danych</strong> - Wykrywa duplikaty, puste wartości i problemy z danymi</li>
+                    <li><strong>Zaawansowane statystyki</strong> - Wizualizacje i szczegółowe raporty</li>
+                    <li><strong>Eksport selektywny</strong> - Eksportuj tylko dopasowane lub niedopasowane rekordy</li>
+                  </ul>
+                </dd>
+              </div>
+              <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt class="text-sm font-medium text-gray-500 flex items-center">
+                  <i class="fas fa-palette text-purple-500 mr-2"></i>
+                  Oznaczenia kolorystyczne
+                </dt>
+                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                  <ul class="list-disc list-inside space-y-2">
+                    <li><span class="inline-block w-3 h-3 bg-green-500 rounded mr-1"></span> <strong>Zielony</strong> - Dokładnie dopasowane rekordy</li>
+                    <li><span class="inline-block w-3 h-3 bg-yellow-500 rounded mr-1"></span> <strong>Żółty</strong> - Przybliżone dopasowania (fuzzy matching)</li>
+                    <li><span class="inline-block w-3 h-3 bg-red-500 rounded mr-1"></span> <strong>Czerwony</strong> - Brak dopasowania</li>
+                    <li><span class="inline-block w-3 h-3 bg-purple-500 rounded mr-1"></span> <strong>Fioletowy</strong> - Nowe kolumny z pliku 2</li>
+                    <li><span class="inline-block w-3 h-3 bg-orange-500 rounded mr-1"></span> <strong>Pomarańczowy</strong> - Nadpisane kolumny</li>
+                  </ul>
+                </dd>
+              </div>
+              <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt class="text-sm font-medium text-gray-500 flex items-center">
+                  <i class="fas fa-cogs text-indigo-500 mr-2"></i>
+                  Opcje dopasowania
+                </dt>
+                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                  <ul class="list-disc list-inside space-y-2">
+                    <li><strong>Nadpisywanie kolumn</strong> - Włącz aby zastąpić dane w istniejących kolumnach, wyłącz aby utworzyć nowe kolumny z suffiksem "_2"</li>
+                    <li><strong>Fuzzy Matching</strong> - Włącz aby dopasować podobne wartości (np. "Jan Kowalski" i "J. Kowalski")</li>
+                    <li><strong>Próg podobieństwa</strong> - Ustaw jak podobne muszą być wartości (50-100%)</li>
+                    <li><strong>Rozróżnianie wielkości liter</strong> - Czy "ABC" i "abc" to różne wartości</li>
+                    <li><strong>Usuwanie białych znaków</strong> - Automatycznie usuwa niepotrzebne spacje</li>
+                    <li><strong>Wiele kolumn</strong> - Dopasuj po kombinacji kolumn dla większej precyzji</li>
+                  </ul>
+                </dd>
+              </div>
+              <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt class="text-sm font-medium text-gray-500 flex items-center">
+                  <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                  Porady Pro
+                </dt>
+                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                  <ul class="list-disc list-inside space-y-2">
+                    <li>Użyj <strong>automatycznego wykrywania</strong> aby szybko znaleźć najlepsze kolumny do dopasowania</li>
+                    <li>Wyłącz <strong>nadpisywanie kolumn</strong> jeśli chcesz zachować oryginalne dane i porównać je z nowymi</li>
+                    <li>Włącz <strong>fuzzy matching</strong> gdy dane mogą zawierać literówki lub różnice w formatowaniu</li>
+                    <li>Zawsze używaj <strong>podglądu</strong> przed finalnym scaleniem aby uniknąć błędów</li>
+                    <li>Sprawdź zakładkę <strong>Analiza jakości</strong> aby zidentyfikować problemy z danymi</li>
+                    <li>Używaj <strong>wielu kolumn</strong> gdy pojedyncza kolumna nie jest unikalna</li>
+                    <li>Eksportuj <strong>historię operacji</strong> dla celów audytu</li>
+                    <li>Kolumny z suffiksem "_2" oznaczają dane z drugiego pliku gdy nadpisywanie jest wyłączone</li>
+                  </ul>
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </div>
+
+      <div id="Zaimportowane" class="content-tab w-full" style="display:none">
+        <div class="mb-4 flex flex-wrap items-center p-4 bg-white rounded-lg shadow-sm">
+          <!-- Page length selector -->
+          <div class="mr-4 mb-2">
+            <label for="page-length" class="mr-2 text-sm font-medium text-gray-700 flex items-center">
+              <i class="fas fa-list-ol text-indigo-500 mr-1"></i>
+              Pokaż wierszy:
+            </label>
+            <select id="page-length" class="border border-gray-300 p-1.5 rounded-md text-sm">
+              <option value="10">10</option>
+              <option value="25" selected>25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+              <option value="-1">Wszystkie</option>
+            </select>
+          </div>
+          
+          <!-- Column visibility toggle button -->
+          <div class="mb-2 ml-2">
+            <button id="toggle-column-visibility" class="flex items-center bg-gray-700 hover:bg-gray-800 text-white font-medium py-1.5 px-3 rounded-md transition-colors">
+              <i class="fas fa-eye mr-1.5"></i>
+              Widoczność kolumn
+            </button>
+          </div>
+          
+          <!-- Export options -->
+          <div class="mb-2 ml-2">
+            <select id="export-filter" class="border border-gray-300 p-1.5 rounded-md text-sm">
+              <option value="all">Eksportuj wszystkie</option>
+              <option value="matched">Tylko dopasowane</option>
+              <option value="unmatched">Tylko niedopasowane</option>
+              <option value="fuzzy">Tylko przybliżone</option>
+            </select>
+          </div>
+
+          <!-- Search box placeholder -->
+          <div class="mb-2 ml-auto flex items-center">
+            <i class="fas fa-filter text-indigo-500 mr-1"></i>
+            <span class="text-sm text-gray-500">Użyj pola "Szukaj" do filtrowania danych</span>
+          </div>
+        </div>
+        
+        <!-- Legenda kolorów -->
+        <div class="table-legend" id="table-legend" style="display:none;">
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: rgba(16, 185, 129, 0.2); border-left: 3px solid #10B981;"></div>
+            <span>Dokładne dopasowanie</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: rgba(251, 191, 36, 0.2); border-left: 3px solid #F59E0B;"></div>
+            <span>Przybliżone dopasowanie</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: rgba(239, 68, 68, 0.1); border-left: 3px solid #EF4444;"></div>
+            <span>Brak dopasowania</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: rgba(139, 92, 246, 0.1); border: 1px dashed #8B5CF6;"></div>
+            <span>Nowa kolumna</span>
+          </div>
+        </div>
+        
+        <!-- Column toggles container - Hidden by default -->
+        <div id="column-toggles" class="mb-4 p-4 bg-white rounded-lg shadow-sm flex flex-wrap" style="display:none">
+          <div class="w-full mb-2 flex justify-between items-center">
+            <span class="text-sm font-medium text-gray-700 flex items-center">
+              <i class="fas fa-table-columns text-indigo-500 mr-1"></i>
+              Zarządzaj widocznością kolumn:
+            </span>
+            <div class="flex space-x-2">
+              <button id="select-all-columns" class="text-xs py-1 px-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded transition-colors">
+                Zaznacz wszystkie
+              </button>
+              <button id="deselect-all-columns" class="text-xs py-1 px-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition-colors">
+                Odznacz wszystkie
+              </button>
+            </div>
+          </div>
+          <div id="column-toggles-list" class="w-full flex flex-wrap mt-2"></div>
+        </div>
+        
+        <!-- Table container -->
+        <div class="table-container bg-white rounded-lg shadow-sm p-2 sm:p-4 overflow-hidden">
+          <table id="merged-table" class="display stripe w-full hover"></table>
+        </div>
+      </div>
+
+      <div id="Statystyki" class="content-tab" style="display:none">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div id="stats-container" class="bg-gradient-to-br from-blue-50 to-indigo-50 border-l-4 border-blue-400 p-4 rounded-r-lg stats-card"></div>
+          <div id="new-columns-container" class="bg-gradient-to-br from-purple-50 to-pink-50 border-l-4 border-purple-400 p-4 rounded-r-lg stats-card"></div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div id="changed-container" class="bg-gradient-to-br from-green-50 to-emerald-50 border-l-4 border-green-400 p-4 rounded-r-lg stats-card"></div>
+          <div id="not-found-container" class="bg-gradient-to-br from-yellow-50 to-amber-50 border-l-4 border-yellow-400 p-4 rounded-r-lg stats-card"></div>
+        </div>
+        
+        <div class="mt-4">
+          <div id="not-added-container" class="bg-gradient-to-br from-red-50 to-orange-50 border-l-4 border-red-400 p-4 rounded-r-lg stats-card"></div>
+        </div>
+        
+        <!-- Wykresy -->
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-white p-4 rounded-lg shadow-sm">
+            <h3 class="text-lg font-medium text-gray-900 mb-2 flex items-center">
+              <i class="fas fa-chart-pie text-indigo-600 mr-2"></i>
+              Rozkład dopasowań
+            </h3>
+            <div class="chart-container">
+              <canvas id="matchChart"></canvas>
+            </div>
+          </div>
+          <div class="bg-white p-4 rounded-lg shadow-sm">
+            <h3 class="text-lg font-medium text-gray-900 mb-2 flex items-center">
+              <i class="fas fa-chart-bar text-purple-600 mr-2"></i>
+              Statystyki kolumn
+            </h3>
+            <div class="chart-container">
+              <canvas id="columnChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="Analiza" class="content-tab" style="display:none">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Analiza jakości danych -->
+          <div class="bg-white p-4 rounded-lg shadow-sm">
+            <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+              <i class="fas fa-shield-check text-green-600 mr-2"></i>
+              Jakość danych - Plik 1
+            </h3>
+            <div id="quality-file1"></div>
+          </div>
+          
+          <div class="bg-white p-4 rounded-lg shadow-sm">
+            <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+              <i class="fas fa-shield-check text-blue-600 mr-2"></i>
+              Jakość danych - Plik 2
+            </h3>
+            <div id="quality-file2"></div>
+          </div>
+        </div>
+        
+        <!-- Wykryte problemy -->
+        <div class="mt-4 bg-white p-4 rounded-lg shadow-sm">
+          <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+            <i class="fas fa-triangle-exclamation text-yellow-600 mr-2"></i>
+            Wykryte problemy i sugestie
+          </h3>
+          <div id="data-issues"></div>
+        </div>
+        
+        <!-- Statystyki wypełnienia -->
+        <div class="mt-4 bg-white p-4 rounded-lg shadow-sm">
+          <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+            <i class="fas fa-chart-column text-indigo-600 mr-2"></i>
+            Wypełnienie kolumn
+          </h3>
+          <div class="chart-container">
+            <canvas id="fillChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div id="Historia" class="content-tab" style="display:none">
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-medium text-gray-900 flex items-center">
+              <i class="fas fa-clock-rotate-left text-indigo-600 mr-2"></i>
+              Historia operacji
+            </h3>
+            <button id="clear-history" class="text-sm text-red-600 hover:text-red-800">
+              <i class="fas fa-trash mr-1"></i>
+              Wyczyść historię
+            </button>
+          </div>
+          <div id="history-timeline" class="timeline"></div>
+        </div>
+      </div>
+    </main>
+    
+    <footer class="bg-gray-100 rounded-b-lg p-3 text-center text-gray-600 text-xs">
+      <p>XLScale Pro 2025 | W3bm@rk Zaawansowane narzędzie do inteligentnego dopasowywania i scalania plików Excel</p>
+    </footer>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+  <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.html5.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.print.min.js"></script>
+  
+<script>
+    let file1Data, file2Data, mergedTable, mergedData;
+    let allColumns = [];
+    let columnDataTypes = {}; // Przechowuje informacje o typach danych w kolumnach
+    // Kolumny dopasowania - teraz jako tablice dla wielu kolumn
+    let matchingColumns1 = [];
+    let matchingColumns2 = [];
+    let operationHistory = [];
+    let operationStartTime;
+    let overwrittenColumns = []; // Lista kolumn, które zostały nadpisane
+    let duplicatedColumns = {}; // Mapa kolumn z dodanym suffiksem
+    let newColumnsFromFile2 = []; // Lista nowych kolumn z pliku 2
+
+    // Opcje zaawansowane
+    let overwriteColumns = false; // NOWA OPCJA
+    let fuzzyMatching = false;
+    let caseSensitive = false;
+    let trimWhitespace = true;
+    let fuzzyThreshold = 80;
+
+    // Funkcje pomocnicze do pokazywania/ukrywania loadera
+    function showLoading() {
+      document.getElementById('loading-overlay').classList.add('show-loading');
+    }
+
+    function hideLoading() {
+      document.getElementById('loading-overlay').classList.remove('show-loading');
+    }
+
+    // Funkcja do symulacji postępu paska
+    function simulateProgress(progressBarId) {
+      const progressBar = document.getElementById(progressBarId);
+      const progressContainer = document.getElementById(progressBarId + '-container');
+      
+      progressContainer.style.display = 'block';
+      let width = 0;
+      const interval = setInterval(() => {
+        if (width >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            progressContainer.style.display = 'none';
+            progressBar.style.width = '0%';
+          }, 500);
+        } else {
+          width += Math.random() * 10;
+          if (width > 100) width = 100;
+          progressBar.style.width = width + '%';
+        }
+      }, 100);
+    }
+
+    // Funkcja do otwierania zakładek
+    function openTab(tabName) {
+      document.querySelectorAll('.content-tab').forEach(tab => tab.style.display = 'none');
+      document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(tabName).style.display = 'block';
+      const tabIndex = ['Instrukcja', 'Zaimportowane', 'Statystyki', 'Analiza', 'Historia'].indexOf(tabName) + 1;
+      document.querySelector(`.tab:nth-child(${tabIndex})`).classList.add('active');
+    }
+
+    // POPRAWIONE FUNKCJE WYKRYWANIA I FORMATOWANIA DAT
+
+    // Funkcja sprawdzająca czy wartość to data
+    function isDateValue(value) {
+      if (value === null || value === undefined || value === '') return false;
+      
+      // Sprawdź czy to liczba seryjna Excela (liczby między 1 a 60000 mogą być datami)
+      if (typeof value === 'number') {
+        // Daty Excela to liczby dni od 1900-01-01
+        // Zakres od 1 (1900-01-01) do ~60000 (2064)
+        return value >= 1 && value <= 60000;
+      }
+      
+      // Konwertuj na string i sprawdź różne formaty dat
+      const str = String(value).trim();
+      
+      // Wzorce dat
+      const datePatterns = [
+        /^\d{4}-\d{1,2}-\d{1,2}$/,           // YYYY-MM-DD
+        /^\d{1,2}\/\d{1,2}\/\d{4}$/,         // MM/DD/YYYY lub DD/MM/YYYY
+        /^\d{1,2}\.\d{1,2}\.\d{4}$/,         // DD.MM.YYYY
+        /^\d{1,2}-\d{1,2}-\d{4}$/,           // DD-MM-YYYY
+        /^\d{4}\/\d{1,2}\/\d{1,2}$/,         // YYYY/MM/DD
+        /^\d{1,2}\s+(sty|lut|mar|kwi|maj|cze|lip|sie|wrz|paź|lis|gru)\s+\d{4}$/i, // DD mies YYYY
+        /^\d{1,2}\s+(stycznia|lutego|marca|kwietnia|maja|czerwca|lipca|sierpnia|września|października|listopada|grudnia)\s+\d{4}$/i, // DD miesiąc YYYY
+        /^(0?[1-9]|[12][0-9]|3[01])[\.\/\-](0?[1-9]|1[012])[\.\/\-]\d{4}$/, // elastyczne DD.MM.YYYY
+        /^\d{4}-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$/ // ISO date
+      ];
+      
+      // Sprawdź czy pasuje do któregoś wzorca
+      for (const pattern of datePatterns) {
+        if (pattern.test(str)) {
+          // Dodatkowa walidacja - sprawdź czy to rzeczywiście prawidłowa data
+          const parsedDate = parseDate(str);
+          if (parsedDate && !isNaN(parsedDate.getTime())) {
+            const year = parsedDate.getFullYear();
+            // Akceptuj daty między 1900 a 2100
+            return year >= 1900 && year <= 2100;
+          }
+        }
+      }
+      
+      return false;
+    }
+
+    // Funkcja parsująca różne formaty dat
+    function parseDate(value) {
+      if (value === null || value === undefined || value === '') return null;
+      
+      // Jeśli to liczba seryjna Excela
+      if (typeof value === 'number' && value >= 1 && value <= 60000) {
+        return excelDateToJSDate(value);
+      }
+      
+      const str = String(value).trim();
+      
+      // Próbuj różne formaty
+      let date = null;
+      
+      // ISO format: YYYY-MM-DD
+      if (/^\d{4}-\d{1,2}-\d{1,2}/.test(str)) {
+        date = new Date(str);
+        if (!isNaN(date.getTime())) return date;
+      }
+      
+      // Format DD.MM.YYYY lub DD/MM/YYYY lub DD-MM-YYYY
+      const dmyMatch = str.match(/^(\d{1,2})[\.\/\-](\d{1,2})[\.\/\-](\d{4})/);
+      if (dmyMatch) {
+        const [_, day, month, year] = dmyMatch;
+        date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        if (!isNaN(date.getTime())) return date;
+      }
+      
+      // Format MM/DD/YYYY (amerykański)
+      const mdyMatch = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if (mdyMatch) {
+        const [_, month, day, year] = mdyMatch;
+        // Sprawdź czy to może być format MM/DD/YYYY (miesiąc > 12 oznacza DD/MM/YYYY)
+        if (parseInt(month) <= 12 && parseInt(day) > 12) {
+          date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+          if (!isNaN(date.getTime())) return date;
+        }
+      }
+      
+      // Format YYYY/MM/DD
+      const ymdMatch = str.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})/);
+      if (ymdMatch) {
+        const [_, year, month, day] = ymdMatch;
+        date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        if (!isNaN(date.getTime())) return date;
+      }
+      
+      // Polskie nazwy miesięcy
+      const polishMonths = {
+        'stycznia': 0, 'lutego': 1, 'marca': 2, 'kwietnia': 3,
+        'maja': 4, 'czerwca': 5, 'lipca': 6, 'sierpnia': 7,
+        'września': 8, 'października': 9, 'listopada': 10, 'grudnia': 11,
+        'sty': 0, 'lut': 1, 'mar': 2, 'kwi': 3,
+        'maj': 4, 'cze': 5, 'lip': 6, 'sie': 7,
+        'wrz': 8, 'paź': 9, 'lis': 10, 'gru': 11
+      };
+      
+      for (const [monthName, monthIndex] of Object.entries(polishMonths)) {
+        const regex = new RegExp(`(\\d{1,2})\\s+${monthName}\\s+(\\d{4})`, 'i');
+        const match = str.match(regex);
+        if (match) {
+          const [_, day, year] = match;
+          date = new Date(parseInt(year), monthIndex, parseInt(day));
+          if (!isNaN(date.getTime())) return date;
+        }
+      }
+      
+      // Ostatnia próba - natywny parser
+      date = new Date(str);
+      if (!isNaN(date.getTime())) {
+        const year = date.getFullYear();
+        if (year >= 1900 && year <= 2100) {
+          return date;
+        }
+      }
+      
+      return null;
+    }
+
+    // Funkcja analizująca typ danych w kolumnie
+    function analyzeColumnDataType(data, columnName) {
+      if (!data || data.length === 0) return 'text';
+      
+      const samples = data.slice(0, Math.min(100, data.length)); // Analizuj pierwsze 100 wierszy
+      let dateCount = 0;
+      let numberCount = 0;
+      let textCount = 0;
+      let emptyCount = 0;
+      
+      samples.forEach(row => {
+        const value = row[columnName];
+        
+        if (value === null || value === undefined || value === '') {
+          emptyCount++;
+        } else if (isDateValue(value)) {
+          dateCount++;
+        } else if (typeof value === 'number' || (!isNaN(parseFloat(value)) && isFinite(value))) {
+          numberCount++;
+        } else {
+          textCount++;
+        }
+      });
+      
+      const nonEmptyCount = samples.length - emptyCount;
+      if (nonEmptyCount === 0) return 'text';
+      
+      // Jeśli ponad 70% niepustych wartości to daty, uznaj kolumnę za datową
+      if (dateCount / nonEmptyCount > 0.7) return 'date';
+      // Jeśli ponad 70% to liczby, uznaj za liczbową
+      if (numberCount / nonEmptyCount > 0.7) return 'number';
+      // W przeciwnym razie to tekst
+      return 'text';
+    }
+
+    // Konwersja daty z formatu Excel do obiektu Date
+    function excelDateToJSDate(excelDate) {
+      if (typeof excelDate !== 'number') return null;
+      
+      // Excel przechowuje daty jako liczby dni od 1 stycznia 1900
+      // ale ma błąd - 1900 uznaje za rok przestępny
+      const adjustedExcelDate = excelDate > 59 ? excelDate - 1 : excelDate;
+      
+      // Data bazowa w Excelu to 1 stycznia 1900
+      const baseDate = new Date(1900, 0, 1);
+      const milliseconds = Math.round((adjustedExcelDate - 1) * 86400 * 1000);
+      const jsDate = new Date(baseDate.getTime() + milliseconds);
+      
+      // Sprawdź czy data jest w rozsądnym zakresie
+      const year = jsDate.getFullYear();
+      if (year >= 1900 && year <= 2100) {
+        return jsDate;
+      }
+      
+      return null;
+    }
+
+    // Formatowanie daty (RRRR-MM-DD)
+    function formatDate(date) {
+      if (!(date instanceof Date) || isNaN(date)) return '';
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      return `${year}-${month}-${day}`;
+    }
+
+    // Formatowanie kwoty
+    function formatAmount(value) {
+      if (typeof value !== 'number') return value;
+      return new Intl.NumberFormat('pl-PL', { 
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(value);
+    }
+
+    // Inteligentne formatowanie wartości
+    function formatCellValue(value, columnName, columnType) {
+      if (value === null || value === undefined || value === '') return '';
+      
+      // Użyj typu kolumny jeśli został określony
+      if (columnType === 'date' || (columnDataTypes[columnName] === 'date')) {
+        const date = parseDate(value);
+        if (date) return formatDate(date);
+      }
+      
+      // Sprawdź czy nazwa kolumny sugeruje kwotę
+      if (isAmountColumn(columnName)) {
+        if (typeof value === 'number') return formatAmount(value);
+      }
+      
+      return value;
+    }
+
+    // Funkcja sprawdzająca czy nazwa kolumny wskazuje na datę
+    function isDateColumn(columnName) {
+      if (!columnName) return false;
+      const lowerName = columnName.toLowerCase();
+      const dateKeywords = ['data', 'date', 'termin', 'czas', 'time', 'dzień', 'dzien', 'miesiac', 'miesiąc', 'rok', 'year', 'waznosc', 'ważność', 'day', 'deadline', 'created', 'updated', 'modified'];
+      return dateKeywords.some(keyword => lowerName.includes(keyword));
+    }
+
+    // Funkcja sprawdzająca czy nazwa kolumny wskazuje na kwotę
+    function isAmountColumn(columnName) {
+      if (!columnName) return false;
+      const lowerName = columnName.toLowerCase();
+      const amountKeywords = ['kwota', 'cena', 'suma', 'wartość', 'wartosc', 'koszt', 'amount', 'price', 'value', 'cost', 'zł', 'pln', 'eur', 'usd', 'netto', 'brutto', 'vat'];
+      return amountKeywords.some(keyword => lowerName.includes(keyword));
+    }
+
+    // Funkcja obliczająca podobieństwo Levenshtein
+    function levenshteinDistance(str1, str2) {
+      const m = str1.length;
+      const n = str2.length;
+      const dp = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+      
+      for (let i = 0; i <= m; i++) dp[i][0] = i;
+      for (let j = 0; j <= n; j++) dp[0][j] = j;
+      
+      for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+          if (str1[i - 1] === str2[j - 1]) {
+            dp[i][j] = dp[i - 1][j - 1];
+          } else {
+            dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+          }
+        }
+      }
+      
+      return dp[m][n];
+    }
+
+    // Funkcja obliczająca procent podobieństwa
+    function getSimilarityPercentage(str1, str2) {
+      const maxLen = Math.max(str1.length, str2.length);
+      if (maxLen === 0) return 100;
+      const distance = levenshteinDistance(str1, str2);
+      return Math.round((1 - distance / maxLen) * 100);
+    }
+
+    // Przetwarzanie danych przed wyświetleniem - POPRAWIONE
+    function processDataForDisplay(data) {
+      return data.map(row => {
+        const processedRow = { ...row };
+        // Zawsze ustaw status dopasowania
+        if (row.isFuzzyMatched) {
+          processedRow.statusDopasowania = `Dopasowano (${row.matchSimilarity || 0}%)`;
+        } else if (row.isMerged) {
+          processedRow.statusDopasowania = "Dopasowano";
+        } else {
+          processedRow.statusDopasowania = "Brak dopasowania";
+        }
+        
+        // Upewnij się, że wszystkie wartości są zdefiniowane
+        Object.keys(processedRow).forEach(key => {
+          if (processedRow[key] === undefined) {
+            processedRow[key] = '';
+          }
+        });
+        
+        return processedRow;
+      });
+    }
+
+    // Funkcja pomocnicza normalizująca wartość
+    function getNormalizedValue(row, columnName) {
+      let value = row[columnName];
+      if (value === undefined || value === null) return null;
+      
+      // Jeśli to data, skonwertuj do jednolitego formatu
+      if (columnDataTypes[columnName] === 'date' || isDateValue(value)) {
+        const date = parseDate(value);
+        if (date) {
+          value = formatDate(date);
+        }
+      }
+      
+      value = String(value);
+      
+      if (trimWhitespace) {
+        value = value.trim().replace(/\s+/g, ' ');
+      }
+      
+      if (!caseSensitive) {
+        value = value.toLowerCase();
+      }
+      
+      return value;
+    }
+
+    // Funkcja tworząca klucz dla wielu kolumn
+    function createMultiColumnKey(row, columns) {
+      return columns.map(col => getNormalizedValue(row, col) || '').join('|');
+    }
+
+    // Funkcja do automatycznego wykrywania kolumn
+    function autoDetectColumns() {
+      if (!file1Data || !file2Data) return;
+      
+      const headers1 = Object.keys(file1Data[0] || {});
+      const headers2 = Object.keys(file2Data[0] || {});
+      
+      let bestMatch = { cols1: [], cols2: [], score: 0 };
+      
+      // Sprawdzanie pojedynczych kolumn
+      headers1.forEach(h1 => {
+        headers2.forEach(h2 => {
+          const similarity = getSimilarityPercentage(h1.toLowerCase(), h2.toLowerCase());
+          if (similarity > 70 && similarity > bestMatch.score) {
+            bestMatch = { cols1: [h1], cols2: [h2], score: similarity };
+          }
+        });
+      });
+      
+      // Jeśli znaleziono dopasowanie, ustaw je
+      if (bestMatch.cols1.length > 0) {
+        matchingColumns1 = bestMatch.cols1;
+        matchingColumns2 = bestMatch.cols2;
+        
+        // Aktualizuj UI
+        createMultiSelectDropdown(file1Data, 'file1-dropdown', 'file1-selected', matchingColumns1);
+        createMultiSelectDropdown(file2Data, 'file2-dropdown', 'file2-selected', matchingColumns2);
+        updateSelectedColumns();
+        updateMatchingButtonState();
+        
+        // Pokaż komunikat
+        alert(`Automatycznie wykryto kolumny do dopasowania:\n${bestMatch.cols1.join(', ')} ↔ ${bestMatch.cols2.join(', ')}\n(${bestMatch.score}% podobieństwa)`);
+      } else {
+        alert('Nie znaleziono odpowiednich kolumn do automatycznego dopasowania.');
+      }
+    }
+
+    // Tworzenie dropdown dla wielu kolumn
+    function createMultiSelectDropdown(data, dropdownId, selectedId, selectedColumns) {
+      const dropdown = document.getElementById(dropdownId);
+      const selectedContainer = document.getElementById(selectedId);
+      dropdown.innerHTML = '';
+      
+      const headers = Object.keys(data[0] || {});
+      headers.forEach(header => {
+        const option = document.createElement('div');
+        option.className = 'multi-select-option';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = header;
+        checkbox.checked = selectedColumns.includes(header);
+        
+        const label = document.createElement('label');
+        label.textContent = header;
+        label.style.flex = '1';
+        label.style.cursor = 'pointer';
+        
+        option.appendChild(checkbox);
+        option.appendChild(label);
+        
+        option.addEventListener('click', (e) => {
+          if (e.target.tagName !== 'INPUT') {
+            checkbox.checked = !checkbox.checked;
+          }
+          updateSelectedFromDropdown(dropdownId === 'file1-dropdown' ? 1 : 2);
+        });
+        
+        dropdown.appendChild(option);
+      });
+    }
+
+    // Aktualizacja wybranych kolumn z dropdown
+    function updateSelectedFromDropdown(fileNum) {
+      const dropdownId = fileNum === 1 ? 'file1-dropdown' : 'file2-dropdown';
+      const checkboxes = document.querySelectorAll(`#${dropdownId} input[type="checkbox"]:checked`);
+      
+      if (fileNum === 1) {
+        matchingColumns1 = Array.from(checkboxes).map(cb => cb.value);
+      } else {
+        matchingColumns2 = Array.from(checkboxes).map(cb => cb.value);
+      }
+      
+      updateSelectedColumns();
+      updateMatchingButtonState();
+    }
+
+    // Aktualizacja wyświetlania wybranych kolumn
+    function updateSelectedColumns() {
+      // Aktualizuj plik 1
+      const container1 = document.getElementById('file1-selected');
+      container1.innerHTML = '';
+      matchingColumns1.forEach(col => {
+        const tag = document.createElement('div');
+        tag.className = 'selected-column-tag';
+        tag.innerHTML = `${col} <span class="remove" onclick="removeColumn(1, '${col}')">×</span>`;
+        container1.appendChild(tag);
+      });
+      
+      // Aktualizuj plik 2
+      const container2 = document.getElementById('file2-selected');
+      container2.innerHTML = '';
+      matchingColumns2.forEach(col => {
+        const tag = document.createElement('div');
+        tag.className = 'selected-column-tag';
+        tag.innerHTML = `${col} <span class="remove" onclick="removeColumn(2, '${col}')">×</span>`;
+        container2.appendChild(tag);
+      });
+    }
+
+    // Usuwanie kolumny z selekcji
+    function removeColumn(fileNum, column) {
+      if (fileNum === 1) {
+        matchingColumns1 = matchingColumns1.filter(col => col !== column);
+      } else {
+        matchingColumns2 = matchingColumns2.filter(col => col !== column);
+      }
+      
+      // Aktualizuj dropdowny
+      if (file1Data) {
+        createMultiSelectDropdown(file1Data, 'file1-dropdown', 'file1-selected', matchingColumns1);
+      }
+      if (file2Data) {
+        createMultiSelectDropdown(file2Data, 'file2-dropdown', 'file2-selected', matchingColumns2);
+      }
+      
+      updateSelectedColumns();
+      updateMatchingButtonState();
+    }
+
+    // Toggle dropdown visibility
+    document.getElementById('file1-column-select').addEventListener('click', function(e) {
+      e.stopPropagation();
+      const dropdown = document.getElementById('file1-dropdown');
+      dropdown.classList.toggle('show');
+      document.getElementById('file2-dropdown').classList.remove('show');
+    });
+
+    document.getElementById('file2-column-select').addEventListener('click', function(e) {
+      e.stopPropagation();
+      const dropdown = document.getElementById('file2-dropdown');
+      dropdown.classList.toggle('show');
+      document.getElementById('file1-dropdown').classList.remove('show');
+    });
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function() {
+      document.querySelectorAll('.multi-select-dropdown').forEach(dropdown => {
+        dropdown.classList.remove('show');
+      });
+    });
+
+    // Funkcja aktualizująca stan przycisku "Dopasuj i scal dane"
+    function updateMatchingButtonState() {
+      const button = document.getElementById('apply-matching');
+      const previewButton = document.getElementById('preview-matching');
+      
+      if (file1Data && file2Data && matchingColumns1.length > 0 && matchingColumns2.length > 0 && 
+          matchingColumns1.length === matchingColumns2.length) {
+        button.disabled = false;
+        button.classList.remove('opacity-50', 'cursor-not-allowed');
+        previewButton.disabled = false;
+        previewButton.classList.remove('opacity-50', 'cursor-not-allowed');
+      } else {
+        button.disabled = true;
+        button.classList.add('opacity-50', 'cursor-not-allowed');
+        previewButton.disabled = true;
+        previewButton.classList.add('opacity-50', 'cursor-not-allowed');
+      }
+    }
+
+    // Obsługa opcji zaawansowanych
+    document.getElementById('overwrite-columns').addEventListener('change', function() {
+      overwriteColumns = this.checked;
+    });
+
+    document.getElementById('fuzzy-matching').addEventListener('change', function() {
+      fuzzyMatching = this.checked;
+      document.getElementById('fuzzy-threshold-container').style.display = fuzzyMatching ? 'grid' : 'none';
+    });
+
+    document.getElementById('case-sensitive').addEventListener('change', function() {
+      caseSensitive = this.checked;
+    });
+
+    document.getElementById('trim-whitespace').addEventListener('change', function() {
+      trimWhitespace = this.checked;
+    });
+
+    document.getElementById('fuzzy-threshold').addEventListener('input', function() {
+      fuzzyThreshold = parseInt(this.value);
+      document.getElementById('threshold-value').textContent = fuzzyThreshold;
+    });
+
+    // Funkcja pomocnicza do aktualizacji interfejsu po wgraniu pliku
+    function updateUIafterFileUpload() {
+      if (file1Data && file2Data) {
+        document.getElementById('matching-options').style.display = 'block';
+        
+        // Analizuj typy danych w kolumnach
+        analyzeColumnTypes();
+        
+        analyzeDataQuality();
+        updateMatchingButtonState();
+        
+        const applyBtn = document.getElementById('apply-matching');
+        applyBtn.classList.add('animate-pulse');
+        setTimeout(() => {
+          applyBtn.classList.remove('animate-pulse');
+        }, 2000);
+      }
+    }
+
+    // Funkcja analizująca typy danych w kolumnach
+    function analyzeColumnTypes() {
+      columnDataTypes = {};
+      
+      if (file1Data && file1Data.length > 0) {
+        Object.keys(file1Data[0]).forEach(column => {
+          columnDataTypes[column] = analyzeColumnDataType(file1Data, column);
+        });
+      }
+      
+      if (file2Data && file2Data.length > 0) {
+        Object.keys(file2Data[0]).forEach(column => {
+          if (!columnDataTypes[column]) {
+            columnDataTypes[column] = analyzeColumnDataType(file2Data, column);
+          }
+        });
+      }
+      
+      console.log('Wykryte typy kolumn:', columnDataTypes);
+    }
+
+    // Obsługa importu pierwszego pliku
+    document.getElementById('import-files').addEventListener('click', function() {
+      const fileInput = document.getElementById('file-input');
+      const file = fileInput.files[0];
+      if (file) {
+        showLoading();
+        simulateProgress('progress-bar1');
+        setTimeout(() => {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            try {
+              const data = new Uint8Array(e.target.result);
+              const workbook = XLSX.read(data, {
+                type: 'array',
+                cellDates: true,  // Włącz automatyczne parsowanie dat
+                dateNF: 'yyyy-mm-dd'  // Format dat
+              });
+              const firstSheet = workbook.SheetNames[0];
+              file1Data = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet], {
+                raw: false,  // Konwertuj wartości
+                dateNF: 'yyyy-mm-dd'
+              });
+              
+              createMultiSelectDropdown(file1Data, 'file1-dropdown', 'file1-selected', matchingColumns1);
+              
+              document.getElementById('file-info').innerHTML = `
+                <i class="fas fa-check-circle text-green-500 mr-1"></i>
+                Załadowano <strong>${file1Data.length}</strong> wierszy z pliku <strong>${file.name}</strong>
+              `;
+              document.getElementById('file-info').className = 'mt-2 text-sm text-green-600';
+              
+              updateUIafterFileUpload();
+
+            } catch (error) {
+              console.error("Błąd podczas przetwarzania pliku 1:", error);
+              alert("Wystąpił błąd podczas odczytu pliku. Upewnij się, że ma poprawny format (np. XLSX, CSV).");
+              document.getElementById('file-info').innerHTML = `
+                <i class="fas fa-exclamation-triangle text-red-500 mr-1"></i>
+                Błąd przetwarzania pliku.
+              `;
+              document.getElementById('file-info').className = 'mt-2 text-sm text-red-600';
+            } finally {
+              hideLoading();
+            }
+          };
+          reader.readAsArrayBuffer(file);
+        }, 800);
+      } else {
+        document.getElementById('file-info').innerHTML = `
+          <i class="fas fa-exclamation-circle text-red-500 mr-1"></i>
+          Proszę wybrać plik
+        `;
+        document.getElementById('file-info').className = 'mt-2 text-sm text-red-600';
+      }
+    });
+
+    // Obsługa importu drugiego pliku
+    document.getElementById('import-file-2').addEventListener('click', function() {
+      const fileInput = document.getElementById('file-input-2');
+      const file = fileInput.files[0];
+      if (file) {
+        showLoading();
+        simulateProgress('progress-bar2');
+        setTimeout(() => {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            try {
+              const data = new Uint8Array(e.target.result);
+              const workbook = XLSX.read(data, {
+                type: 'array',
+                cellDates: true,  // Włącz automatyczne parsowanie dat
+                dateNF: 'yyyy-mm-dd'  // Format dat
+              });
+              const firstSheet = workbook.SheetNames[0];
+              file2Data = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet], {
+                raw: false,  // Konwertuj wartości
+                dateNF: 'yyyy-mm-dd'
+              });
+              
+              createMultiSelectDropdown(file2Data, 'file2-dropdown', 'file2-selected', matchingColumns2);
+              
+              document.getElementById('file-info-2').innerHTML = `
+                <i class="fas fa-check-circle text-green-500 mr-1"></i>
+                Załadowano <strong>${file2Data.length}</strong> wierszy z pliku <strong>${file.name}</strong>
+              `;
+              document.getElementById('file-info-2').className = 'mt-2 text-sm text-green-600';
+              
+              updateUIafterFileUpload();
+
+            } catch (error) {
+              console.error("Błąd podczas przetwarzania pliku 2:", error);
+              alert("Wystąpił błąd podczas odczytu pliku. Upewnij się, że ma poprawny format (np. XLSX, CSV).");
+              document.getElementById('file-info-2').innerHTML = `
+                <i class="fas fa-exclamation-triangle text-red-500 mr-1"></i>
+                Błąd przetwarzania pliku.
+              `;
+              document.getElementById('file-info-2').className = 'mt-2 text-sm text-red-600';
+            } finally {
+              hideLoading();
+            }
+          };
+          reader.readAsArrayBuffer(file);
+        }, 800);
+      } else {
+        document.getElementById('file-info-2').innerHTML = `
+          <i class="fas fa-exclamation-circle text-red-500 mr-1"></i>
+          Proszę wybrać plik
+        `;
+        document.getElementById('file-info-2').className = 'mt-2 text-sm text-red-600';
+      }
+    });
+
+    // Automatyczne wykrywanie kolumn
+    document.getElementById('auto-detect').addEventListener('click', autoDetectColumns);
+
+    // Podgląd zmian
+    document.getElementById('preview-matching').addEventListener('click', function() {
+      if (file1Data && file2Data) {
+        showLoading();
+        setTimeout(() => {
+          const previewData = generatePreview();
+          showPreviewModal(previewData);
+          hideLoading();
+        }, 500);
+      }
+    });
+
+    // Generowanie podglądu - ZMODYFIKOWANE
+    function generatePreview() {
+      const preview = {
+        totalRows: file1Data.length,
+        matched: 0,
+        fuzzyMatched: 0,
+        unmatched: 0,
+        overwrittenColumns: [],
+        newColumns: [],
+        samples: []
+      };
+      
+      const file2Map = new Map();
+      file2Data.forEach(row => {
+        const key = createMultiColumnKey(row, matchingColumns2);
+        if (key) {
+          file2Map.set(key, row);
+        }
+      });
+      
+      // Sprawdź które kolumny będą nadpisane lub zduplikowane
+      const file1Columns = Object.keys(file1Data[0] || {});
+      const file2Columns = Object.keys(file2Data[0] || {});
+      
+      file2Columns.forEach(col => {
+        if (file1Columns.includes(col)) {
+          if (overwriteColumns) {
+            preview.overwrittenColumns.push(col);
+          } else {
+            preview.newColumns.push(col + '_2');
+          }
+        } else {
+          preview.newColumns.push(col);
+        }
+      });
+      
+      file1Data.slice(0, 10).forEach(row1 => {
+        const key1 = createMultiColumnKey(row1, matchingColumns1);
+        let matched = false;
+        let fuzzyMatch = null;
+        let similarity = 0;
+        
+        if (key1 && file2Map.has(key1)) {
+          matched = true;
+          preview.matched++;
+        } else if (fuzzyMatching && key1) {
+          for (const [key2, row2] of file2Map) {
+            const sim = getSimilarityPercentage(key1, key2);
+            if (sim >= fuzzyThreshold && sim > similarity) {
+              similarity = sim;
+              fuzzyMatch = row2;
+            }
+          }
+          if (fuzzyMatch) preview.fuzzyMatched++;
+          else preview.unmatched++;
+        } else {
+          preview.unmatched++;
+        }
+        
+        preview.samples.push({
+          original: row1,
+          matched: matched ? file2Map.get(key1) : fuzzyMatch,
+          type: matched ? 'exact' : (fuzzyMatch ? 'fuzzy' : 'none'),
+          similarity: similarity
+        });
+      });
+      
+      return preview;
+    }
+
+    // Wyświetlanie modalu podglądu - ZMODYFIKOWANE
+    function showPreviewModal(previewData) {
+      const modal = document.getElementById('previewModal');
+      const content = document.getElementById('previewContent');
+      
+      let html = `
+        <div class="mb-4 p-4 bg-gray-50 rounded-lg">
+          <h3 class="font-medium text-gray-900 mb-2">Podsumowanie dopasowań (na podstawie 10 próbek):</h3>
+          <div class="grid grid-cols-3 gap-4 text-sm mb-3">
+            <div class="text-center"><div class="text-2xl font-bold text-green-600">${previewData.matched}</div><div class="text-gray-600">Dokładne</div></div>
+            <div class="text-center"><div class="text-2xl font-bold text-yellow-600">${previewData.fuzzyMatched}</div><div class="text-gray-600">Przybliżone</div></div>
+            <div class="text-center"><div class="text-2xl font-bold text-red-600">${previewData.unmatched}</div><div class="text-gray-600">Brak</div></div>
+          </div>
+          
+          <div class="border-t pt-3 mt-3">
+            <h4 class="font-medium text-gray-700 mb-2 text-sm">Zmiany w kolumnach:</h4>
+            ${overwriteColumns ? `
+              <p class="text-sm text-orange-600 mb-2">
+                <i class="fas fa-exclamation-triangle mr-1"></i>
+                <strong>Tryb nadpisywania włączony</strong> - istniejące dane zostaną zastąpione nowymi wartościami
+              </p>
+              ${previewData.overwrittenColumns.length > 0 ? `
+                <p class="text-xs text-gray-600">Kolumny do nadpisania: 
+                  <span class="font-mono">${previewData.overwrittenColumns.join(', ')}</span>
+                </p>
+              ` : ''}
+            ` : `
+              <p class="text-sm text-blue-600 mb-2">
+                <i class="fas fa-info-circle mr-1"></i>
+                <strong>Tryb dodawania włączony</strong> - nowe kolumny zostaną utworzone z suffiksem "_2"
+              </p>
+            `}
+            ${previewData.newColumns.length > 0 ? `
+              <p class="text-xs text-gray-600">Nowe kolumny: 
+                <span class="font-mono">${previewData.newColumns.join(', ')}</span>
+              </p>
+            ` : ''}
+          </div>
+        </div>
+        
+        <h3 class="font-medium text-gray-900 mb-2">Przykłady dopasowań:</h3>
+        <div class="space-y-4 max-h-96 overflow-y-auto">`;
+      
+      previewData.samples.forEach((sample, index) => {
+        let statusClass, statusIcon, statusText;
+        if (sample.type === 'exact') {
+          statusClass = 'border-green-400 bg-green-50'; statusIcon = '<i class="fas fa-check-circle text-green-600"></i>'; statusText = 'Dokładne dopasowanie';
+        } else if (sample.type === 'fuzzy') {
+          statusClass = 'border-yellow-400 bg-yellow-50'; statusIcon = '<i class="fas fa-exclamation-circle text-yellow-600"></i>'; statusText = `Przybliżone (${sample.similarity}%)`;
+        } else {
+          statusClass = 'border-red-400 bg-red-50'; statusIcon = '<i class="fas fa-times-circle text-red-600"></i>'; statusText = 'Brak dopasowania';
+        }
+        
+        html += `
+          <div class="border-l-4 ${statusClass} p-3 rounded-r">
+            <div class="flex items-center justify-between mb-2"><span class="font-medium text-sm">Wiersz ${index + 1}</span><span class="flex items-center gap-1 text-sm">${statusIcon} ${statusText}</span></div>
+            <div class="grid grid-cols-2 gap-4 text-xs">
+              <div><div class="font-medium text-gray-700 mb-1">Plik 1:</div><div class="text-gray-600">${matchingColumns1.map(col => {
+                const value = formatCellValue(sample.original[col], col);
+                return `${col}: ${value || '-'}`;
+              }).join(', ')}</div></div>
+              <div><div class="font-medium text-gray-700 mb-1">Plik 2:</div><div class="text-gray-600">${sample.matched ? matchingColumns2.map(col => {
+                const value = formatCellValue(sample.matched[col], col);
+                return `${col}: ${value || '-'}`;
+              }).join(', ') : 'Brak dopasowania'}</div></div>
+            </div>
+          </div>`;
+      });
+      
+      html += '</div>';
+      content.innerHTML = html;
+      modal.style.display = 'block';
+    }
+
+    // Zamykanie modalu
+    document.querySelector('.close').onclick = function() {
+      document.getElementById('previewModal').style.display = 'none';
+    }
+    window.onclick = function(event) {
+      const modal = document.getElementById('previewModal');
+      if (event.target == modal) {
+        modal.style.display = 'none';
+      }
+    }
+
+    // Obsługa przycisku "Dopasuj i scal dane"
+    document.getElementById('apply-matching').addEventListener('click', function() {
+      if (file1Data && file2Data) {
+        operationStartTime = new Date();
+        showLoading();
+        setTimeout(() => {
+          mergeAndDisplayData();
+          hideLoading();
+        }, 1000);
+      }
+    });
+
+    // Funkcja łącząca dane z obu plików - ZMODYFIKOWANA
+    function mergeAndDisplayData() {
+      if (matchingColumns1.length === 0 || matchingColumns2.length === 0) {
+        alert("Proszę wybrać kolumny dopasowania dla obu plików.");
+        hideLoading();
+        return;
+      }
+      
+      // Reset list
+      overwrittenColumns = [];
+      duplicatedColumns = {};
+      newColumnsFromFile2 = [];
+      
+      const file2Map = new Map();
+      const fuzzyMap = new Map();
+      
+      file2Data.forEach(row => {
+        const key = createMultiColumnKey(row, matchingColumns2);
+        if (key) file2Map.set(key, row);
+      });
+      
+      if (fuzzyMatching) {
+        file2Data.forEach(row => {
+          const key = createMultiColumnKey(row, matchingColumns2);
+          if (key) fuzzyMap.set(key, row);
+        });
+      }
+      
+      // Identyfikuj nowe kolumny z pliku 2
+      const file1Columns = Object.keys(file1Data[0] || {});
+      const file2Columns = Object.keys(file2Data[0] || {});
+      file2Columns.forEach(col => {
+        if (!file1Columns.includes(col)) {
+          newColumnsFromFile2.push(col);
+        }
+      });
+      
+      mergedData = file1Data.map(row1 => {
+        const mergedRow = { ...row1 };
+        const matchKey = createMultiColumnKey(row1, matchingColumns1);
+        
+        if (matchKey && file2Map.has(matchKey)) {
+          const row2 = file2Map.get(matchKey);
+          Object.keys(row2).forEach(key => {
+            if (overwriteColumns) {
+              // Nadpisz istniejące kolumny
+              mergedRow[key] = row2[key];
+              if (row1.hasOwnProperty(key)) {
+                overwrittenColumns.push(key);
+              }
+            } else {
+              // Utwórz nowe kolumny z suffiksem jeśli kolumna już istnieje
+              if (row1.hasOwnProperty(key)) {
+                mergedRow[key + '_2'] = row2[key];
+                duplicatedColumns[key] = key + '_2';
+              } else {
+                mergedRow[key] = row2[key];
+              }
+            }
+          });
+          mergedRow.isMerged = true;
+        } else if (fuzzyMatching && matchKey) {
+          let bestMatch = null, bestSimilarity = 0;
+          for (const [key2, row2] of fuzzyMap) {
+            const similarity = getSimilarityPercentage(matchKey, key2);
+            if (similarity >= fuzzyThreshold && similarity > bestSimilarity) {
+              bestSimilarity = similarity;
+              bestMatch = row2;
+            }
+          }
+          if (bestMatch) {
+            Object.keys(bestMatch).forEach(key => {
+              if (overwriteColumns) {
+                // Nadpisz istniejące kolumny
+                mergedRow[key] = bestMatch[key];
+                if (row1.hasOwnProperty(key)) {
+                  overwrittenColumns.push(key);
+                }
+              } else {
+                // Utwórz nowe kolumny z suffiksem jeśli kolumna już istnieje
+                if (row1.hasOwnProperty(key)) {
+                  mergedRow[key + '_2'] = bestMatch[key];
+                  duplicatedColumns[key] = key + '_2';
+                } else {
+                  mergedRow[key] = bestMatch[key];
+                }
+              }
+            });
+            mergedRow.isFuzzyMatched = true;
+            mergedRow.matchSimilarity = bestSimilarity;
+          }
+        }
+        return mergedRow;
+      });
+      
+      // Usuń duplikaty z list
+      overwrittenColumns = [...new Set(overwrittenColumns)];
+      
+      const processedData = processDataForDisplay(mergedData);
+      displayMergedData(processedData);
+      updateStats(mergedData, file2Map);
+      updateCharts(mergedData);
+      addToHistory();
+    }
+
+    // Funkcja do wyświetlania scalonych danych w tabeli - POPRAWIONA
+    function displayMergedData(data) {
+      // Pokaż legendę
+      document.getElementById('table-legend').style.display = 'flex';
+      
+      const file1Columns = Object.keys(file1Data[0] || {});
+      const extraColumns = new Set();
+      
+      // Zbierz wszystkie unikalne kolumny z scalonych danych
+      data.forEach(row => {
+        Object.keys(row).forEach(key => {
+          if (!['isMerged', 'isFuzzyMatched', 'matchSimilarity', 'statusDopasowania'].includes(key)) {
+            if (!file1Columns.includes(key)) {
+              extraColumns.add(key);
+            }
+          }
+        });
+      });
+      
+      let columnsToDisplay = ['statusDopasowania', ...file1Columns, ...Array.from(extraColumns)];
+      
+      // POPRAWKA: Upewnij się, że wszystkie wiersze mają wszystkie kolumny
+      data = data.map(row => {
+        const completeRow = {};
+        columnsToDisplay.forEach(col => {
+          // Jeśli kolumna nie istnieje w wierszu, ustaw pustą wartość
+          completeRow[col] = row.hasOwnProperty(col) ? row[col] : '';
+        });
+        // Zachowaj specjalne właściwości
+        if (row.isMerged) completeRow.isMerged = row.isMerged;
+        if (row.isFuzzyMatched) completeRow.isFuzzyMatched = row.isFuzzyMatched;
+        if (row.matchSimilarity) completeRow.matchSimilarity = row.matchSimilarity;
+        return completeRow;
+      });
+      
+      const columns = columnsToDisplay.map(column => ({
+        title: column === 'statusDopasowania' ? 'Status' : 
+               (column.endsWith('_2') ? `${column} <span class="new-column-suffix">(z pliku 2)</span>` : column),
+        data: column,
+        defaultContent: '', // WAŻNE: Dodaj domyślną zawartość dla brakujących danych
+        className: (() => {
+          if (newColumnsFromFile2.includes(column) || column.endsWith('_2')) {
+            return 'new-column-header';
+          }
+          return '';
+        })(),
+        createdCell: function(td, cellData, rowData, row, col) {
+          // Oznacz nowe kolumny
+          if (newColumnsFromFile2.includes(column) || column.endsWith('_2')) {
+            $(td).addClass('new-column-cell');
+          }
+          // Oznacz nadpisane kolumny
+          if (overwrittenColumns.includes(column) && (rowData.isMerged || rowData.isFuzzyMatched)) {
+            $(td).addClass('overwritten-column-cell');
+          }
+        },
+        render: function(data, type, row) {
+          // Obsłuż undefined i null
+          if (data === undefined || data === null) {
+            return '';
+          }
+          
+          if (column === 'statusDopasowania') {
+            if (String(data).includes('Dopasowano (')) return `<span class="match-status-fuzzy"><i class="fas fa-link"></i> ${data}</span>`;
+            if (data === 'Dopasowano') return `<span class="match-status-positive"><i class="fas fa-check-circle"></i> ${data}</span>`;
+            return `<span class="match-status-negative"><i class="fas fa-times-circle"></i> ${data}</span>`;
+          }
+          
+          // Użyj inteligentnego formatowania
+          return formatCellValue(data, column);
+        }
+      }));
+      
+      if (mergedTable) {
+        mergedTable.destroy();
+        $('#merged-table').empty(); // Wyczyść tabelę przed ponownym utworzeniem
+      }
+      
+      try {
+        mergedTable = $('#merged-table').DataTable({
+          data: data,
+          columns: columns,
+          pageLength: 25,
+          lengthChange: false,
+          dom: 'Bfrtip',
+          buttons: ['copy', 'csv', 'excel', 'pdf', 'print'].map(type => ({
+              extend: type,
+              text: `<i class="fas fa-file-${type === 'copy' ? 'copy' : (type === 'csv' ? 'csv' : (type === 'excel' ? 'excel' : (type === 'pdf' ? 'pdf' : 'print')))}"></i>`,
+              className: 'dt-button',
+              exportOptions: {
+                  columns: ':visible',
+                  format: {
+                      body: function ( data, row, column, node ) {
+                          // Usuń HTML z komórek statusu przed eksportem
+                          if (column === 0) {
+                              return $(data).text();
+                          }
+                          return data;
+                      }
+                  }
+              }
+          })),
+          rowCallback: function(row, data) {
+            // Oznacz wiersze kolorami na podstawie statusu
+            if (data.statusDopasowania === 'Dopasowano') {
+              $(row).addClass('matched-row');
+            } else if (data.statusDopasowania && String(data.statusDopasowania).includes('Dopasowano (')) {
+              $(row).addClass('fuzzy-matched-row');
+            } else if (data.statusDopasowania === 'Brak dopasowania') {
+              $(row).addClass('unmatched-row');
+            }
+          },
+          language: {
+            search: "🔍 Szukaj:",
+            zeroRecords: "Nie znaleziono pasujących rekordów",
+            info: "Pokazuje _START_ do _END_ z _TOTAL_ rekordów",
+            infoEmpty: "Pokazuje 0 do 0 z 0 rekordów",
+            infoFiltered: "(filtrowane z _MAX_ wszystkich rekordów)",
+            paginate: {
+              first: "Pierwsza",
+              last: "Ostatnia",
+              next: "Następna",
+              previous: "Poprzednia"
+            }
+          },
+          // Dodatkowe opcje dla obsługi błędów
+          columnDefs: [
+            {
+              targets: '_all',
+              defaultContent: '',
+              render: function(data, type, row, meta) {
+                if (data === undefined || data === null) {
+                  return '';
+                }
+                // Dla kolumny statusu
+                if (meta.col === 0) {
+                  if (String(data).includes('Dopasowano (')) return `<span class="match-status-fuzzy"><i class="fas fa-link"></i> ${data}</span>`;
+                  if (data === 'Dopasowano') return `<span class="match-status-positive"><i class="fas fa-check-circle"></i> ${data}</span>`;
+                  if (data === 'Brak dopasowania') return `<span class="match-status-negative"><i class="fas fa-times-circle"></i> ${data}</span>`;
+                  return data;
+                }
+                // Dla pozostałych kolumn
+                return formatCellValue(data, columnsToDisplay[meta.col]);
+              }
+            }
+          ]
+        });
+        
+        createColumnToggles(columnsToDisplay);
+        openTab('Zaimportowane');
+        
+        // Pokaż informację o trybie scalania
+        if (overwrittenColumns.length > 0 || Object.keys(duplicatedColumns).length > 0) {
+          const message = overwriteColumns ? 
+            `Nadpisano ${overwrittenColumns.length} kolumn: ${overwrittenColumns.slice(0, 5).join(', ')}${overwrittenColumns.length > 5 ? '...' : ''}` :
+            `Utworzono ${Object.keys(duplicatedColumns).length} nowych kolumn z suffiksem "_2"`;
+          
+          console.log(message);
+        }
+      } catch (error) {
+        console.error('Błąd podczas tworzenia tabeli:', error);
+        alert('Wystąpił błąd podczas wyświetlania danych. Sprawdź konsolę dla szczegółów.');
+        hideLoading();
+      }
+    }
+
+    // Obsługa widoczności kolumn
+    document.getElementById('toggle-column-visibility').addEventListener('click', function() {
+      const container = document.getElementById('column-toggles');
+      container.style.display = container.style.display === 'none' ? 'flex' : 'none';
+    });
+
+    // Tworzenie przełączników widoczności kolumn
+    function createColumnToggles(columns) {
+      const container = document.getElementById('column-toggles-list');
+      container.innerHTML = '';
+      columns.forEach((column, index) => {
+        const toggleDiv = document.createElement('div');
+        toggleDiv.className = 'column-toggle';
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = 'toggle-' + index;
+        checkbox.checked = true;
+        checkbox.addEventListener('change', function() {
+          mergedTable.column(index).visible(this.checked);
+        });
+        const label = document.createElement('label');
+        label.htmlFor = 'toggle-' + index;
+        label.textContent = column === 'statusDopasowania' ? 'Status dopasowania' : 
+                           (column.endsWith('_2') ? `${column.replace('_2', '')} (plik 2)` : column);
+        label.className = 'ml-1 text-sm';
+        toggleDiv.appendChild(checkbox);
+        toggleDiv.appendChild(label);
+        container.appendChild(toggleDiv);
+      });
+    }
+
+    // Obsługa przycisków zaznacz/odznacz wszystkie
+    document.getElementById('select-all-columns').addEventListener('click', function() {
+      if (!mergedTable) return;
+      document.querySelectorAll('#column-toggles-list input[type="checkbox"]').forEach(checkbox => {
+        checkbox.checked = true;
+        const index = parseInt(checkbox.id.replace('toggle-', ''));
+        mergedTable.column(index).visible(true);
+      });
+    });
+    
+    document.getElementById('deselect-all-columns').addEventListener('click', function() {
+      if (!mergedTable) return;
+      document.querySelectorAll('#column-toggles-list input[type="checkbox"]').forEach((checkbox, index) => {
+        if (index === 0) return;
+        checkbox.checked = false;
+        const colIndex = parseInt(checkbox.id.replace('toggle-', ''));
+        mergedTable.column(colIndex).visible(false);
+      });
+    });
+
+    // Obsługa zmiany liczby wyświetlanych wierszy
+    document.getElementById('page-length').addEventListener('change', function() {
+      if (mergedTable) {
+        mergedTable.page.len(parseInt(this.value)).draw();
+      }
+    });
+
+    // Funkcja aktualizująca statystyki - ZMODYFIKOWANA
+    function updateStats(mergedData, file2Map) {
+      const totalRows1 = file1Data.length;
+      const totalRows2 = file2Data.length;
+      const exactMatches = mergedData.filter(row => row.isMerged && !row.isFuzzyMatched).length;
+      const fuzzyMatches = mergedData.filter(row => row.isFuzzyMatched).length;
+      const totalMatches = exactMatches + fuzzyMatches;
+      const mergePercentage = Math.round(totalMatches / totalRows1 * 100);
+      
+      // Wyliczamy unikalne wartości dla "nie znaleziono"
+      const notFoundKeys = [];
+      mergedData.forEach(row => {
+        if (!row.isMerged && !row.isFuzzyMatched) {
+          const key = createMultiColumnKey(row, matchingColumns1);
+          if (key) notFoundKeys.push(key);
+        }
+      });
+      const uniqueNotFoundKeys = Array.from(new Set(notFoundKeys));
+      
+          // Wyliczamy unikalne wartości dla "nie dodano"
+      const addedKeys = new Set();
+      mergedData.forEach(row => {
+        if (row.isMerged || row.isFuzzyMatched) {
+          const key = createMultiColumnKey(row, matchingColumns1);
+          if (key) addedKeys.add(key);
+        }
+      });
+      
+      const notAddedKeys = [];
+      file2Data.forEach(row => {
+        const key = createMultiColumnKey(row, matchingColumns2);
+        if (key && !Array.from(addedKeys).some(addedKey => {
+          if (fuzzyMatching) {
+            return getSimilarityPercentage(key, addedKey) >= fuzzyThreshold;
+          }
+          return key === addedKey;
+        })) {
+          notAddedKeys.push(key);
+        }
+      });
+      const uniqueNotAddedKeys = Array.from(new Set(notAddedKeys));
+      
+      // Nowe kolumny
+      const file1Columns = Object.keys(file1Data[0] || {});
+      const extraColumns = new Set();
+      mergedData.forEach(row => {
+        if (row.isMerged || row.isFuzzyMatched) {
+          Object.keys(row).forEach(key => {
+            if (key !== 'isMerged' && key !== 'isFuzzyMatched' && key !== 'matchSimilarity' && !file1Columns.includes(key)) {
+              extraColumns.add(key);
+            }
+          });
+        }
+      });
+      
+      document.getElementById('stats-container').innerHTML = `
+        <div class="flex items-start">
+          <div class="mr-2 text-blue-500 mt-1"><i class="fas fa-chart-pie fa-2x"></i></div>
+          <div>
+            <h3 class="font-medium text-blue-800 text-lg">Statystyki ogólne</h3>
+            <div class="mt-2 space-y-1">
+              <p>Wierszy w pliku 1: <strong>${totalRows1}</strong></p>
+              <p>Wierszy w pliku 2: <strong>${totalRows2}</strong></p>
+              <p class="font-medium text-green-700">Dokładne dopasowania: <strong>${exactMatches}</strong></p>
+              <p class="font-medium text-yellow-700">Przybliżone dopasowania: <strong>${fuzzyMatches}</strong></p>
+                            <p class="font-medium text-indigo-700">Łącznie dopasowano: <strong>${totalMatches}</strong> wierszy (${mergePercentage}% pliku 1)</p>
+              <p class="text-sm mt-1">Kolumny dopasowania: <span class="font-mono bg-blue-100 px-1 rounded text-blue-800">${matchingColumns1.join(', ')}</span> ↔ <span class="font-mono bg-blue-100 px-1 rounded text-blue-800">${matchingColumns2.join(', ')}</span></p>
+              ${fuzzyMatching ? `<p class="text-sm">Fuzzy matching: <span class="font-medium text-purple-700">Włączony (próg ${fuzzyThreshold}%)</span></p>` : ''}
+              <p class="text-sm">Tryb kolumn: <span class="font-medium ${overwriteColumns ? 'text-orange-700' : 'text-blue-700'}">${overwriteColumns ? 'Nadpisywanie' : 'Dodawanie z suffiksem'}</span></p>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('not-found-container').innerHTML = `
+        <div class="flex items-start">
+          <div class="mr-2 text-yellow-500 mt-1"><i class="fas fa-triangle-exclamation fa-2x"></i></div>
+          <div class="w-full">
+            <h3 class="font-medium text-yellow-800 text-lg">Nie znaleziono w pliku 2 (${uniqueNotFoundKeys.length})</h3>
+            <p class="text-sm mt-1 text-yellow-600">Wartości z pliku 1, które nie mają odpowiednika w pliku 2:</p>
+            <div class="mt-2 text-sm overflow-auto max-h-60 bg-white bg-opacity-50 p-2 rounded">
+              ${uniqueNotFoundKeys.length > 0 ? uniqueNotFoundKeys.slice(0, 100).join(', ') + (uniqueNotFoundKeys.length > 100 ? '...' : '') : 'Brak - wszystkie wartości znaleziono'}
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('changed-container').innerHTML = `
+        <div class="flex items-start">
+          <div class="mr-2 text-green-500 mt-1"><i class="fas fa-check-circle fa-2x"></i></div>
+          <div class="w-full">
+            <h3 class="font-medium text-green-800 text-lg">Scalono (${totalMatches})</h3>
+            <p class="text-sm mt-1 text-green-600">Wartości, które zostały dopasowane i scalone:</p>
+            <div class="mt-2 text-sm overflow-auto max-h-60 bg-white bg-opacity-50 p-2 rounded">
+              ${Array.from(addedKeys).slice(0, 100).join(', ') + (addedKeys.size > 100 ? '...' : '')}
+            </div>
+            ${overwrittenColumns.length > 0 ? `
+              <p class="text-xs mt-2 text-orange-600">
+                <i class="fas fa-exclamation-triangle mr-1"></i>
+                Nadpisano kolumny: ${overwrittenColumns.join(', ')}
+              </p>
+            ` : ''}
+            ${Object.keys(duplicatedColumns).length > 0 ? `
+              <p class="text-xs mt-2 text-blue-600">
+                <i class="fas fa-info-circle mr-1"></i>
+                Zduplikowano kolumny: ${Object.keys(duplicatedColumns).map(k => `${k} → ${duplicatedColumns[k]}`).join(', ')}
+              </p>
+            ` : ''}
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('new-columns-container').innerHTML = `
+        <div class="flex items-start">
+          <div class="mr-2 text-purple-500 mt-1"><i class="fas fa-table-columns fa-2x"></i></div>
+          <div>
+            <h3 class="font-medium text-purple-800 text-lg">Nowe kolumny (${extraColumns.size})</h3>
+            <p class="text-sm mt-1 text-purple-600">Kolumny dodane z pliku 2, których nie było w pliku 1:</p>
+            <div class="mt-2 flex flex-wrap gap-1">
+              ${Array.from(extraColumns).map(col => `<span class="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">${col}</span>`).join(' ')}
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('not-added-container').innerHTML = `
+        <div class="flex items-start">
+          <div class="mr-2 text-red-500 mt-1"><i class="fas fa-circle-xmark fa-2x"></i></div>
+          <div class="w-full">
+            <h3 class="font-medium text-red-800 text-lg">Nie dodano z pliku 2 (${uniqueNotAddedKeys.length})</h3>
+            <p class="text-sm mt-1 text-red-600">Wartości z pliku 2, które nie zostały dodane do wyniku:</p>
+            <div class="mt-2 text-sm overflow-auto max-h-60 bg-white bg-opacity-50 p-2 rounded">
+              ${uniqueNotAddedKeys.slice(0, 100).join(', ') + (uniqueNotAddedKeys.length > 100 ? '...' : '')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Funkcja aktualizująca wykresy
+    function updateCharts(mergedData) {
+      // Wykres kołowy dopasowań
+      const ctx1 = document.getElementById('matchChart').getContext('2d');
+      const exactMatches = mergedData.filter(row => row.isMerged && !row.isFuzzyMatched).length;
+      const fuzzyMatches = mergedData.filter(row => row.isFuzzyMatched).length;
+      const unmatched = mergedData.filter(row => !row.isMerged && !row.isFuzzyMatched).length;
+      
+      new Chart(ctx1, {
+        type: 'pie',
+        data: {
+          labels: ['Dokładne', 'Przybliżone', 'Niedopasowane'],
+          datasets: [{
+            data: [exactMatches, fuzzyMatches, unmatched],
+            backgroundColor: ['#10B981', '#F59E0B', '#EF4444'],
+            borderWidth: 2,
+            borderColor: '#fff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.parsed || 0;
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = Math.round((value / total) * 100);
+                  return `${label}: ${value} (${percentage}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+      
+      // Wykres słupkowy statystyk kolumn
+      const ctx2 = document.getElementById('columnChart').getContext('2d');
+      const columnStats = {};
+      const columns = Object.keys(mergedData[0] || {}).filter(col => 
+        col !== 'isMerged' && col !== 'isFuzzyMatched' && col !== 'matchSimilarity' && col !== 'statusDopasowania'
+      );
+      
+      columns.forEach(col => {
+        columnStats[col] = {
+          filled: 0,
+          empty: 0
+        };
+        
+        mergedData.forEach(row => {
+          if (row[col] !== null && row[col] !== undefined && row[col] !== '') {
+            columnStats[col].filled++;
+          } else {
+            columnStats[col].empty++;
+          }
+        });
+      });
+      
+      const topColumns = Object.entries(columnStats)
+        .sort((a, b) => b[1].filled - a[1].filled)
+        .slice(0, 10);
+      
+      new Chart(ctx2, {
+        type: 'bar',
+        data: {
+          labels: topColumns.map(([col]) => col),
+          datasets: [{
+            label: 'Wypełnione',
+            data: topColumns.map(([, stats]) => stats.filled),
+            backgroundColor: '#4F46E5',
+          }, {
+            label: 'Puste',
+            data: topColumns.map(([, stats]) => stats.empty),
+            backgroundColor: '#E5E7EB',
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              stacked: true,
+            },
+            y: {
+              stacked: true
+            }
+          },
+          plugins: {
+            legend: {
+              position: 'bottom',
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.dataset.label || '';
+                  const value = context.parsed.y || 0;
+                  const total = mergedData.length;
+                  const percentage = Math.round((value / total) * 100);
+                  return `${label}: ${value} (${percentage}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Analiza jakości danych
+    function analyzeDataQuality() {
+      if (!file1Data || !file2Data) return;
+      
+      analyzeFileQuality(file1Data, 'quality-file1', 'Plik 1');
+      analyzeFileQuality(file2Data, 'quality-file2', 'Plik 2');
+      analyzeDataIssues();
+      createFillChart();
+    }
+
+    // Analiza jakości pojedynczego pliku
+    function analyzeFileQuality(data, containerId, fileName) {
+      const container = document.getElementById(containerId);
+      const totalRows = data.length;
+      const columns = Object.keys(data[0] || {});
+      
+      // Analiza duplikatów
+      const duplicates = {};
+      const seen = new Set();
+      data.forEach((row, index) => {
+        const key = JSON.stringify(row);
+        if (seen.has(key)) {
+          duplicates[key] = (duplicates[key] || 1) + 1;
+        }
+        seen.add(key);
+      });
+      const duplicateCount = Object.keys(duplicates).length;
+      
+      // Analiza pustych wartości
+      const emptyStats = {};
+      columns.forEach(col => {
+        emptyStats[col] = 0;
+        data.forEach(row => {
+          if (row[col] === null || row[col] === undefined || row[col] === '') {
+            emptyStats[col]++;
+          }
+        });
+      });
+      
+      // Oblicz ogólny wskaźnik jakości
+      const avgFillRate = columns.reduce((sum, col) => 
+        sum + (totalRows - emptyStats[col]) / totalRows, 0
+      ) / columns.length * 100;
+      
+      const qualityScore = Math.round(avgFillRate - (duplicateCount / totalRows * 100));
+      let qualityClass, qualityText;
+      
+      if (qualityScore >= 90) {
+        qualityClass = 'quality-good';
+        qualityText = 'Doskonała';
+      } else if (qualityScore >= 70) {
+        qualityClass = 'quality-warning';
+        qualityText = 'Dobra';
+      } else {
+        qualityClass = 'quality-poor';
+        qualityText = 'Wymaga uwagi';
+      }
+      
+      container.innerHTML = `
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-600">Jakość danych:</span>
+            <span class="quality-indicator ${qualityClass}">
+              ${qualityText} (${qualityScore}%)
+            </span>
+          </div>
+          
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-gray-600">Liczba wierszy:</span>
+              <span class="font-medium">${totalRows}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Liczba kolumn:</span>
+              <span class="font-medium">${columns.length}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Duplikaty:</span>
+              <span class="font-medium ${duplicateCount > 0 ? 'text-yellow-600' : 'text-green-600'}">
+                ${duplicateCount} ${duplicateCount > 0 ? '⚠️' : '✓'}
+              </span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Średnie wypełnienie:</span>
+              <span class="font-medium">${Math.round(avgFillRate)}%</span>
+            </div>
+          </div>
+          
+          <div class="mt-3 pt-3 border-t border-gray-200">
+            <p class="text-xs font-medium text-gray-700 mb-2">Puste wartości w kolumnach:</p>
+            <div class="space-y-1">
+              ${Object.entries(emptyStats)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5)
+                .map(([col, count]) => `
+                  <div class="flex justify-between text-xs">
+                    <span class="text-gray-600 truncate mr-2">${col}:</span>
+                    <span class="font-medium ${count > totalRows * 0.5 ? 'text-red-600' : ''}">${count} (${Math.round(count/totalRows*100)}%)</span>
+                  </div>
+                `).join('')}
+            </div>
+          </div>
+          
+          <div class="mt-3 pt-3 border-t border-gray-200">
+            <p class="text-xs font-medium text-gray-700 mb-2">Wykryte typy danych:</p>
+            <div class="space-y-1">
+              ${columns.slice(0, 5).map(col => {
+                const type = columnDataTypes[col] || 'text';
+                let typeIcon = '📝';
+                if (type === 'date') typeIcon = '📅';
+                else if (type === 'number') typeIcon = '🔢';
+                return `
+                  <div class="flex justify-between text-xs">
+                    <span class="text-gray-600 truncate mr-2">${col}:</span>
+                    <span class="font-medium">${typeIcon} ${type}</span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Analiza problemów z danymi - ZMODYFIKOWANA
+    function analyzeDataIssues() {
+      const container = document.getElementById('data-issues');
+      const issues = [];
+      
+      // Sprawdź podobne nazwy kolumn
+      const headers1 = Object.keys(file1Data[0] || {});
+      const headers2 = Object.keys(file2Data[0] || {});
+      
+      // Sprawdź kolumny które będą nadpisane/zduplikowane
+      const commonColumns = headers1.filter(h => headers2.includes(h));
+      if (commonColumns.length > 0) {
+        if (overwriteColumns) {
+          issues.push({
+            type: 'warning',
+            message: `${commonColumns.length} kolumn zostanie nadpisanych: ${commonColumns.slice(0, 5).join(', ')}${commonColumns.length > 5 ? '...' : ''}`,
+            suggestion: 'Upewnij się, że chcesz zastąpić istniejące dane. Możesz wyłączyć nadpisywanie aby zachować oryginalne wartości.'
+          });
+        } else {
+          issues.push({
+            type: 'info',
+            message: `${commonColumns.length} kolumn zostanie zduplikowanych z suffiksem "_2": ${commonColumns.slice(0, 5).join(', ')}${commonColumns.length > 5 ? '...' : ''}`,
+            suggestion: 'Nowe kolumny zostaną utworzone obok istniejących. Możesz włączyć nadpisywanie aby zastąpić oryginalne wartości.'
+          });
+        }
+      }
+      
+      headers1.forEach(h1 => {
+        headers2.forEach(h2 => {
+          if (h1 !== h2) {
+            const similarity = getSimilarityPercentage(h1.toLowerCase(), h2.toLowerCase());
+            if (similarity > 70 && similarity < 100) {
+              issues.push({
+                type: 'warning',
+                message: `Podobne nazwy kolumn: "${h1}" i "${h2}" (${similarity}% podobieństwa)`,
+                suggestion: 'Rozważ ujednolicenie nazw kolumn przed scaleniem'
+              });
+            }
+          }
+        });
+      });
+      
+      // Sprawdź różnice w typach danych
+      if (matchingColumns1.length > 0 && matchingColumns2.length > 0) {
+        matchingColumns1.forEach((col1, idx) => {
+          const col2 = matchingColumns2[idx];
+          const type1 = columnDataTypes[col1];
+          const type2 = columnDataTypes[col2];
+          
+          if (type1 && type2 && type1 !== type2) {
+            issues.push({
+              type: 'error',
+              message: `Różne typy danych w kolumnach dopasowania: ${col1} (${type1}) vs ${col2} (${type2})`,
+              suggestion: 'Upewnij się, że dane w kolumnach dopasowania mają ten sam typ'
+            });
+          }
+        });
+      }
+      
+      // Sprawdź czy są kolumny datowe bez właściwego formatowania
+      [...headers1, ...headers2].forEach(header => {
+        if (columnDataTypes[header] === 'date') {
+          const data = file1Data[0] && header in file1Data[0] ? file1Data : file2Data;
+          const sample = data.slice(0, 5).map(row => row[header]).filter(v => v);
+          const hasInconsistentDates = sample.some(v => !isDateValue(v));
+          
+          if (hasInconsistentDates) {
+            issues.push({
+              type: 'warning',
+              message: `Niespójne formaty dat w kolumnie "${header}"`,
+              suggestion: 'Sprawdź czy wszystkie daty w tej kolumnie mają jednolity format'
+            });
+          }
+        }
+      });
+      
+      // Wyświetl problemy
+      if (issues.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-8 text-gray-500">
+            <i class="fas fa-check-circle text-4xl text-green-500 mb-2"></i>
+            <p>Nie wykryto żadnych problemów z danymi</p>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div class="space-y-3">
+            ${issues.map(issue => `
+              <div class="border-l-4 ${issue.type === 'error' ? 'border-red-400 bg-red-50' : issue.type === 'info' ? 'border-blue-400 bg-blue-50' : 'border-yellow-400 bg-yellow-50'} p-3 rounded-r">
+                <div class="flex items-start">
+                  <i class="fas ${issue.type === 'error' ? 'fa-times-circle text-red-600' : issue.type === 'info' ? 'fa-info-circle text-blue-600' : 'fa-exclamation-triangle text-yellow-600'} mr-2 mt-0.5"></i>
+                  <div>
+                    <p class="text-sm font-medium ${issue.type === 'error' ? 'text-red-800' : issue.type === 'info' ? 'text-blue-800' : 'text-yellow-800'}">${issue.message}</p>
+                    <p class="text-xs ${issue.type === 'error' ? 'text-red-600' : issue.type === 'info' ? 'text-blue-600' : 'text-yellow-600'} mt-1">
+                      <i class="fas fa-lightbulb mr-1"></i>${issue.suggestion}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+    }
+
+    // Wykres wypełnienia kolumn
+    function createFillChart() {
+      const ctx = document.getElementById('fillChart').getContext('2d');
+      
+      // Zbierz dane o wypełnieniu
+      const allColumns = new Set();
+      if (file1Data) Object.keys(file1Data[0] || {}).forEach(col => allColumns.add(col));
+      if (file2Data) Object.keys(file2Data[0] || {}).forEach(col => allColumns.add(col));
+      
+      const columnFillData = Array.from(allColumns).map(col => {
+        let file1Fill = 0, file2Fill = 0;
+        
+        if (file1Data && file1Data[0] && col in file1Data[0]) {
+          const filled = file1Data.filter(row => 
+            row[col] !== null && row[col] !== undefined && row[col] !== ''
+          ).length;
+          file1Fill = Math.round((filled / file1Data.length) * 100);
+        }
+        
+        if (file2Data && file2Data[0] && col in file2Data[0]) {
+          const filled = file2Data.filter(row => 
+            row[col] !== null && row[col] !== undefined && row[col] !== ''
+          ).length;
+          file2Fill = Math.round((filled / file2Data.length) * 100);
+        }
+        
+        return { column: col, file1: file1Fill, file2: file2Fill };
+      });
+      
+      // Sortuj według średniego wypełnienia
+      columnFillData.sort((a, b) => 
+        ((b.file1 + b.file2) / 2) - ((a.file1 + a.file2) / 2)
+      );
+      
+      // Weź top 15 kolumn
+      const topColumns = columnFillData.slice(0, 15);
+      
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: topColumns.map(d => d.column),
+          datasets: [{
+            label: 'Plik 1',
+            data: topColumns.map(d => d.file1),
+            backgroundColor: '#4F46E5',
+            borderWidth: 0
+          }, {
+            label: 'Plik 2',
+            data: topColumns.map(d => d.file2),
+            backgroundColor: '#10B981',
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              ticks: {
+                callback: function(value) {
+                  return value + '%';
+                }
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              position: 'bottom',
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return context.dataset.label + ': ' + context.parsed.y + '%';
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Funkcja dodająca wpis do historii - ZMODYFIKOWANA
+    function addToHistory() {
+      const endTime = new Date();
+      const duration = Math.round((endTime - operationStartTime) / 1000);
+      
+      const exactMatches = mergedData.filter(row => row.isMerged && !row.isFuzzyMatched).length;
+      const fuzzyMatches = mergedData.filter(row => row.isFuzzyMatched).length;
+      
+      const historyEntry = {
+        timestamp: endTime,
+        duration: duration,
+        file1Name: document.querySelector('#file-input').files[0]?.name || 'Plik 1',
+        file2Name: document.querySelector('#file-input-2').files[0]?.name || 'Plik 2',
+        totalRows: file1Data.length,
+        exactMatches: exactMatches,
+        fuzzyMatches: fuzzyMatches,
+        matchingColumns: {
+          file1: matchingColumns1,
+          file2: matchingColumns2
+        },
+        options: {
+          overwriteColumns: overwriteColumns,
+          fuzzyMatching: fuzzyMatching,
+          fuzzyThreshold: fuzzyThreshold,
+          caseSensitive: caseSensitive,
+          trimWhitespace: trimWhitespace
+        },
+        overwrittenColumns: overwrittenColumns,
+        duplicatedColumns: Object.keys(duplicatedColumns)
+      };
+      
+      operationHistory.unshift(historyEntry);
+      if (operationHistory.length > 10) {
+        operationHistory = operationHistory.slice(0, 10);
+      }
+      
+      updateHistoryDisplay();
+      saveHistoryToLocalStorage();
+    }
+
+    // Aktualizacja wyświetlania historii - ZMODYFIKOWANA
+    function updateHistoryDisplay() {
+      const container = document.getElementById('history-timeline');
+      
+      if (operationHistory.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-8 text-gray-500">
+            <i class="fas fa-inbox text-4xl mb-2"></i>
+            <p>Brak historii operacji</p>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = operationHistory.map((entry, index) => `
+        <div class="timeline-item">
+          <div class="timeline-time">
+            ${formatDateTime(entry.timestamp)}
+            <span class="text-xs text-gray-400 ml-2">(${entry.duration}s)</span>
+          </div>
+          <div class="timeline-content">
+            <div class="flex justify-between items-start mb-2">
+              <div>
+                <p class="font-medium text-sm">${entry.file1Name} + ${entry.file2Name}</p>
+                <p class="text-xs text-gray-600 mt-1">
+                  Kolumny: ${entry.matchingColumns.file1.join(', ')} ↔ ${entry.matchingColumns.file2.join(', ')}
+                </p>
+              </div>
+              <button onclick="restoreFromHistory(${index})" class="text-xs text-indigo-600 hover:text-indigo-800">
+                <i class="fas fa-redo mr-1"></i>Przywróć
+              </button>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-xs">
+              <div class="text-center">
+                <div class="font-bold text-green-600">${entry.exactMatches}</div>
+                <div class="text-gray-500">Dokładnych</div>
+              </div>
+              <div class="text-center">
+                <div class="font-bold text-yellow-600">${entry.fuzzyMatches}</div>
+                <div class="text-gray-500">Przybliżonych</div>
+              </div>
+              <div class="text-center">
+                <div class="font-bold text-gray-600">${entry.totalRows}</div>
+                <div class="text-gray-500">Całkowita liczba</div>
+              </div>
+            </div>
+            ${entry.options.fuzzyMatching ? `
+              <div class="mt-2 text-xs text-gray-500">
+                <i class="fas fa-cog mr-1"></i>
+                Fuzzy: ${entry.options.fuzzyThreshold}% | 
+                Wielkość liter: ${entry.options.caseSensitive ? 'Tak' : 'Nie'} | 
+                Białe znaki: ${entry.options.trimWhitespace ? 'Usuń' : 'Zachowaj'} |
+                Nadpisywanie: ${entry.options.overwriteColumns ? 'Tak' : 'Nie'}
+              </div>
+            ` : ''}
+            ${entry.overwrittenColumns && entry.overwrittenColumns.length > 0 ? `
+              <div class="mt-1 text-xs text-orange-600">
+                <i class="fas fa-edit mr-1"></i>Nadpisano: ${entry.overwrittenColumns.join(', ')}
+              </div>
+            ` : ''}
+            ${entry.duplicatedColumns && entry.duplicatedColumns.length > 0 ? `
+              <div class="mt-1 text-xs text-blue-600">
+                <i class="fas fa-copy mr-1"></i>Zduplikowano: ${entry.duplicatedColumns.join(', ')}
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Formatowanie daty i czasu
+    function formatDateTime(date) {
+      const d = new Date(date);
+      const dateStr = d.toLocaleDateString('pl-PL');
+      const timeStr = d.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
+      return `${dateStr} ${timeStr}`;
+    }
+
+    // Przywracanie z historii - ZMODYFIKOWANE
+    function restoreFromHistory(index) {
+      const entry = operationHistory[index];
+      if (!entry) return;
+      
+      // Przywróć ustawienia
+      matchingColumns1 = entry.matchingColumns.file1;
+      matchingColumns2 = entry.matchingColumns.file2;
+      overwriteColumns = entry.options.overwriteColumns;
+      fuzzyMatching = entry.options.fuzzyMatching;
+      fuzzyThreshold = entry.options.fuzzyThreshold;
+      caseSensitive = entry.options.caseSensitive;
+      trimWhitespace = entry.options.trimWhitespace;
+      
+      // Aktualizuj UI
+      document.getElementById('overwrite-columns').checked = overwriteColumns;
+      document.getElementById('fuzzy-matching').checked = fuzzyMatching;
+      document.getElementById('fuzzy-threshold').value = fuzzyThreshold;
+      document.getElementById('threshold-value').textContent = fuzzyThreshold;
+      document.getElementById('case-sensitive').checked = caseSensitive;
+      document.getElementById('trim-whitespace').checked = trimWhitespace;
+      document.getElementById('fuzzy-threshold-container').style.display = fuzzyMatching ? 'grid' : 'none';
+      
+      updateSelectedColumns();
+      updateMatchingButtonState();
+      
+      alert('Ustawienia zostały przywrócone z historii. Kliknij "Dopasuj i scal dane" aby zastosować.');
+    }
+
+    // Zapisywanie historii do localStorage
+    function saveHistoryToLocalStorage() {
+      try {
+        localStorage.setItem('xlscale_history', JSON.stringify(operationHistory));
+      } catch (e) {
+        console.error('Nie udało się zapisać historii:', e);
+      }
+    }
+
+    // Wczytywanie historii z localStorage
+    function loadHistoryFromLocalStorage() {
+      try {
+        const saved = localStorage.getItem('xlscale_history');
+        if (saved) {
+          operationHistory = JSON.parse(saved);
+          updateHistoryDisplay();
+        }
+      } catch (e) {
+        console.error('Nie udało się wczytać historii:', e);
+      }
+    }
+
+    // Czyszczenie historii
+    document.getElementById('clear-history').addEventListener('click', function() {
+      if (confirm('Czy na pewno chcesz wyczyścić całą historię operacji?')) {
+        operationHistory = [];
+        updateHistoryDisplay();
+        saveHistoryToLocalStorage();
+      }
+    });
+
+    // Funkcja eksportu z filtrem
+    document.getElementById('export-filter').addEventListener('change', function() {
+      const filterValue = this.value;
+      if (mergedTable) {
+        // Tymczasowo przechowaj oryginalne dane
+        const originalData = mergedTable.data().toArray();
+        
+        // Filtruj dane według wybranej opcji
+        let filteredData = originalData;
+        if (filterValue === 'matched') {
+          filteredData = originalData.filter(row => row.statusDopasowania === 'Dopasowano');
+        } else if (filterValue === 'unmatched') {
+          filteredData = originalData.filter(row => row.statusDopasowania === 'Brak dopasowania');
+        } else if (filterValue === 'fuzzy') {
+          filteredData = originalData.filter(row => row.statusDopasowania.includes('Dopasowano ('));
+        }
+        
+        // Informuj użytkownika o filtrowaniu
+        const count = filteredData.length;
+        const total = originalData.length;
+        if (filterValue !== 'all') {
+          alert(`Eksport będzie zawierał ${count} z ${total} wierszy (${filterValue})`);
+        }
+      }
+    });
+
+    // Inicjalizacja po załadowaniu strony
+    document.addEventListener('DOMContentLoaded', function() {
+      loadHistoryFromLocalStorage();
+      
+      // Ustaw domyślne wartości
+      document.getElementById('trim-whitespace').checked = true;
+      document.getElementById('overwrite-columns').checked = false;
+      
+      // Dodaj skróty klawiszowe
+      document.addEventListener('keydown', function(e) {
+        // Ctrl+O - otwórz plik
+        if (e.ctrlKey && e.key === 'o') {
+          e.preventDefault();
+          document.getElementById('file-input').click();
+        }
+        
+        // Ctrl+M - scal dane
+        if (e.ctrlKey && e.key === 'm') {
+          e.preventDefault();
+          const button = document.getElementById('apply-matching');
+          if (!button.disabled) {
+            button.click();
+          }
+        }
+        
+        // Ctrl+H - pokaż historię
+        if (e.ctrlKey && e.key === 'h') {
+          e.preventDefault();
+          openTab('Historia');
+        }
+      });
+      
+      // Dodaj drag & drop dla plików
+      const dropZones = document.querySelectorAll('.import-container');
+      
+      dropZones.forEach((zone, index) => {
+        zone.addEventListener('dragover', function(e) {
+          e.preventDefault();
+          zone.style.borderColor = 'var(--primary-color)';
+          zone.style.backgroundColor = '#F3F4F6';
+        });
+        
+        zone.addEventListener('dragleave', function(e) {
+          e.preventDefault();
+          zone.style.borderColor = '#E5E7EB';
+          zone.style.backgroundColor = 'white';
+        });
+        
+        zone.addEventListener('drop', function(e) {
+          e.preventDefault();
+          zone.style.borderColor = '#E5E7EB';
+          zone.style.backgroundColor = 'white';
+          
+          const files = e.dataTransfer.files;
+          if (files.length > 0) {
+            const fileInput = index === 0 ? document.getElementById('file-input') : document.getElementById('file-input-2');
+            fileInput.files = files;
+            const button = index === 0 ? document.getElementById('import-files') : document.getElementById('import-file-2');
+            button.click();
+          }
+        });
+      });
+      
+      // Pokaż komunikat powitalny
+      setTimeout(() => {
+        const hasSeenWelcome = localStorage.getItem('xlscale_welcome_shown_v72');
+        if (!hasSeenWelcome) {
+          alert('Witaj w XLScale Pro v7.2.0! 🎉\n\nUlepszenia w tej wersji:\n• Poprawione menu opcji dopasowania - węższe przełączniki\n• Kolorowe oznaczenia w tabeli:\n  - Zielony: dokładne dopasowania\n  - Żółty: przybliżone dopasowania\n  - Czerwony: brak dopasowania\n  - Fioletowy: nowe kolumny\n• Lepsza wizualizacja scalonych danych\n• Legenda kolorów w tabeli\n\nPrzecześnij pliki bezpośrednio do obszarów importu!');
+          localStorage.setItem('xlscale_welcome_shown_v72', 'true');
+        }
+      }, 1000);
+    });
+
+    // Funkcja do debugowania (można wywołać z konsoli)
+    window.xlscaleDebug = {
+      getData: () => ({ file1Data, file2Data, mergedData }),
+      getSettings: () => ({ 
+        matchingColumns1, 
+        matchingColumns2,
+        overwriteColumns, 
+        fuzzyMatching, 
+        fuzzyThreshold, 
+        caseSensitive, 
+        trimWhitespace 
+      }),
+      getHistory: () => operationHistory,
+      getColumnTypes: () => columnDataTypes,
+      getOverwrittenColumns: () => ({ overwrittenColumns, duplicatedColumns, newColumnsFromFile2 }),
+      testDateDetection: (value) => {
+        console.log(`Value: "${value}"`);
+        console.log(`Is Date: ${isDateValue(value)}`);
+        const parsed = parseDate(value);
+        console.log(`Parsed: ${parsed}`);
+        if (parsed) console.log(`Formatted: ${formatDate(parsed)}`);
+      },
+      exportMergedData: () => {
+        if (mergedData) {
+          const ws = XLSX.utils.json_to_sheet(mergedData);
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, "Merged Data");
+          XLSX.writeFile(wb, "xlscale_merged_data.xlsx");
+        }
+      }
+    };
+
+    // Obsługa błędów
+    window.addEventListener('error', function(e) {
+      console.error('XLScale Error:', e);
+      hideLoading();
+    });
+
+    // Wyczyść loading jeśli coś pójdzie nie tak
+    setInterval(() => {
+      const loadingOverlay = document.getElementById('loading-overlay');
+      if (loadingOverlay.classList.contains('show-loading')) {
+        const loadingTime = loadingOverlay.dataset.loadingTime || 0;
+        if (Date.now() - loadingTime > 30000) { // 30 sekund timeout
+          hideLoading();
+          alert('Operacja trwa zbyt długo. Spróbuj ponownie z mniejszymi plikami.');
+        }
+      }
+    }, 1000);
+
+    // Ustaw czas rozpoczęcia ładowania
+    const originalShowLoading = showLoading;
+    showLoading = function() {
+      document.getElementById('loading-overlay').dataset.loadingTime = Date.now();
+      originalShowLoading();
+    };
+  </script>
+</body>
+</html>
