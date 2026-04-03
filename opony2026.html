@@ -1517,6 +1517,13 @@ tbody tr:hover { background: var(--shadow-inset-light); }
                             <div id="typDrop" class="dropdown"></div>
                         </div>
                     </div>
+                    <div class="filter" id="zamFilter" style="display:none;">
+                        <label>Zamawiający</label>
+                        <div class="dropdown-wrap">
+                            <button id="zamBtn" class="neu-raised">Wszystkie</button>
+                            <div id="zamDrop" class="dropdown"></div>
+                        </div>
+                    </div>
                     <div class="filter">
                         <label>Zakup</label>
                         <select id="zakup" class="neu-raised">
@@ -1593,6 +1600,8 @@ tbody tr:hover { background: var(--shadow-inset-light); }
                                 <label class="neu-raised"><input type="radio" name="group" value="oddzial" checked><span>Oddział</span></label>
                                 <label class="neu-raised"><input type="radio" name="group" value="adres"><span>Adres</span></label>
                                 <label class="neu-raised"><input type="radio" name="group" value="rozmiar"><span>Rozmiar</span></label>
+                                <label class="neu-raised" id="zamRadioLabel" style="display:none;"><input type="radio" name="group" value="zamawiajacy"><span>Zamawiający</span></label>
+                                <label class="neu-raised" id="markaRadioLabel" style="display:none;"><input type="radio" name="group" value="marka"><span>Marka</span></label>
                             </div>
                             <div class="export">
                                 <button id="xlsx" class="btn neu-raised">Excel</button>
@@ -1717,7 +1726,7 @@ tbody tr:hover { background: var(--shadow-inset-light); }
 let _dtFilter = null;
 let S = {
     data: [], cols: [], heads: [], spec: {},
-    group: 'oddzial', table: null, odd: [], typ: [],
+    group: 'oddzial', table: null, odd: [], typ: [], zam: [],
     editingKey: null, missingTires: new Set()
 };
 
@@ -1799,14 +1808,16 @@ const detect = h => {
         ilosc: /ilość|ilosc|szt/i,
         adr: /adres/i,
         uwagi: /uwagi|uwaga/i,
+        zam: /osoba.*kontakt|kontakt.*osoba|osobakontakt|zamawiaj/i,
         marka: /marka|brand|producent.*pojazd/i,
         model: /model(?!.*opony)/i,
         rok: /rok.*prod|rocznik|rok.*wyp/i
     };
     S.spec = {};
     h.forEach((v, i) => {
+        const vn = normCol(v);
         for (const [k, r] of Object.entries(p)) {
-            if (r.test(v)) { S.spec[k] = i; break; }
+            if (r.test(v) || (k === 'zam' && r.test(vn))) { S.spec[k] = i; break; }
         }
     });
 };
@@ -1957,6 +1968,7 @@ const loadFromHistory = (id) => {
     S.cols = entry.cols;
     S.heads = entry.heads;
     S.spec = entry.spec;
+    detect(S.heads); // odśwież spec — wyłapie nowe wzorce (np. zam) w starych importach
     
     updateFilters();
     initTable();
@@ -2446,6 +2458,18 @@ const init = () => {
 };
 
 // Filtry
+const getSelArr = field => {
+    if (field === 'odd') return S.odd;
+    if (field === 'typ') return S.typ;
+    if (field === 'zam') return S.zam;
+    return [];
+};
+const setSelArr = (field, val) => {
+    if (field === 'odd') S.odd = val;
+    else if (field === 'typ') S.typ = val;
+    else if (field === 'zam') S.zam = val;
+};
+
 const makeFilter = (btnId, dropId, vals, field) => {
     const btn = $(`#${btnId}`);
     const drop = $(`#${dropId}`);
@@ -2455,7 +2479,7 @@ const makeFilter = (btnId, dropId, vals, field) => {
         drop.toggleClass('on');
     });
     
-    const sel = field === 'odd' ? S.odd : S.typ;
+    const sel = getSelArr(field);
     
     drop.html(`
         <div class="dropdown-item">
@@ -2470,8 +2494,7 @@ const makeFilter = (btnId, dropId, vals, field) => {
     
     $(`#${field}-all`).on('change', e => {
         $(`.${field}-opt`).prop('checked', e.target.checked);
-        if (field === 'odd') S.odd = e.target.checked ? [...vals] : [];
-        else S.typ = e.target.checked ? [...vals] : [];
+        setSelArr(field, e.target.checked ? [...vals] : []);
         updateBtn(btn, field);
         S.table?.draw();
         updateCount();
@@ -2479,8 +2502,7 @@ const makeFilter = (btnId, dropId, vals, field) => {
     
     $(`.${field}-opt`).on('change', () => {
         const checked = $(`.${field}-opt:checked`).map((i,el) => el.value).get();
-        if (field === 'odd') S.odd = checked;
-        else S.typ = checked;
+        setSelArr(field, checked);
         $(`#${field}-all`).prop('checked', checked.length === vals.length);
         updateBtn(btn, field);
         S.table?.draw();
@@ -2491,7 +2513,7 @@ const makeFilter = (btnId, dropId, vals, field) => {
 };
 
 const updateBtn = (btn, field) => {
-    const sel = field === 'odd' ? S.odd : S.typ;
+    const sel = getSelArr(field);
     const text = sel.length === 0 ? 'Wszystkie' : sel.length === 1 ? sel[0] : `${sel.length} wybr.`;
     btn.text(text).toggleClass('active', sel.length > 0);
 };
@@ -2738,6 +2760,9 @@ const initTable = () => {
         if (S.typ.length && S.spec.typ !== undefined) {
             if (!S.typ.includes(r[S.cols[S.spec.typ]])) return false;
         }
+        if (S.zam.length && S.spec.zam !== undefined) {
+            if (!S.zam.includes(r[S.cols[S.spec.zam]])) return false;
+        }
         const z = $('#zakup').val();
         if (z && S.spec.zakup !== undefined) {
             if (String(r[S.cols[S.spec.zakup]]).toUpperCase() !== z) return false;
@@ -2786,6 +2811,21 @@ const updateFilters = () => {
         const v = [...new Set(S.data.map(i => i[S.cols[S.spec.typ]]))].filter(Boolean).sort();
         S.typ = [];
         makeFilter('typBtn', 'typDrop', v, 'typ');
+    }
+    if (S.spec.marka !== undefined || S.spec.model !== undefined) {
+        $('#markaRadioLabel').css('display', 'flex');
+    } else {
+        $('#markaRadioLabel').hide();
+    }
+    if (S.spec.zam !== undefined) {
+        const v = [...new Set(S.data.map(i => i[S.cols[S.spec.zam]]))].filter(Boolean).sort();
+        S.zam = [];
+        makeFilter('zamBtn', 'zamDrop', v, 'zam');
+        $('#zamFilter').show();
+        $('#zamRadioLabel').css('display', 'flex');
+    } else {
+        $('#zamFilter').hide();
+        $('#zamRadioLabel').hide();
     }
 };
 
@@ -2959,6 +2999,174 @@ const showDetail = d => {
         return;
     }
     
+    // Tryb grupowania według MARKI pojazdu
+    if (mode === 'marka') {
+        if (S.spec.marka === undefined && S.spec.nazwa === undefined) {
+            $('#detailBox').addClass('hide');
+            return;
+        }
+
+        const c = {
+            r: S.spec.rozm  !== undefined ? S.cols[S.spec.rozm]  : null,
+            i: S.spec.ilosc !== undefined ? S.cols[S.spec.ilosc] : null,
+            o: S.spec.odd   !== undefined ? S.cols[S.spec.odd]   : null,
+            u: S.spec.uwagi !== undefined ? S.cols[S.spec.uwagi] : null
+        };
+
+        const g = {};
+        d.forEach(row => {
+            const mk = getMarka(row) || 'Brak marki';
+            if (!g[mk]) g[mk] = [];
+            g[mk].push(row);
+        });
+
+        $('#detailBody').html(`
+            <table class="compact">
+                <tbody>
+                    ${Object.keys(g).sort().map(mk => {
+                        const rs = g[mk];
+                        const tot = c.i ? rs.reduce((s,r) => s + (parseFloat(r[c.i]) || 0), 0) : rs.length;
+                        let tv = 0;
+                        rs.forEach(r => {
+                            if (c.r && c.i) {
+                                const t = getTire(r[c.r]);
+                                if (t) tv += (parseFloat(r[c.i]) || 0) * t.n;
+                            }
+                        });
+
+                        return `
+                            <tr class="group">
+                                <td colspan="11">
+                                    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                                        <strong>🚗 ${mk}</strong>
+                                        <div class="group-stats">
+                                            <span>Pojazdy: <strong>${rs.length}</strong></span>
+                                            <span>Opony: <strong>${tot}</strong></span>
+                                            <span>Wartość: <strong>${tv.toFixed(2)}</strong></span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr><th>Nr rej</th><th>Nazwa</th><th>Model</th><th>Rocznik</th><th>Rozmiar</th><th>Producent</th><th>Bieżnik</th><th>Ilość</th><th>Wartość</th><th>Oddział</th><th>Uwagi</th></tr>
+                            ${rs.map(row => {
+                                const t = c.r ? getTire(row[c.r]) : null;
+                                const q = c.i ? (parseFloat(row[c.i]) || 0) : 1;
+                                const v = t ? q * t.n : 0;
+                                return `<tr>
+                                    <td>${getNr(row)}</td>
+                                    <td>${getNazwa(row)}</td>
+                                    <td><span class="vehicle-model">${getModel(row)}</span></td>
+                                    <td><span class="vehicle-year">${getRok(row)}</span></td>
+                                    <td><strong class="tire-size">${c.r ? row[c.r] : '-'}</strong></td>
+                                    <td>${t ? t.p : '-'}</td>
+                                    <td>${t ? t.b : '-'}</td>
+                                    <td><span class="num">${q}</span></td>
+                                    <td><span class="money">${v > 0 ? v.toFixed(2) : '-'}</span></td>
+                                    <td>${c.o ? row[c.o] : '-'}</td>
+                                    <td><span class="note">${c.u ? row[c.u] : ''}</span></td>
+                                </tr>`;
+                            }).join('')}
+                            <tr><td colspan="11" style="padding:4px;"></td></tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            </table>
+        `);
+
+        $('#detailBox').removeClass('hide');
+        return;
+    }
+
+    // Tryb grupowania według ZAMAWIAJĄCEGO (Osoba kontakt)
+    if (mode === 'zamawiajacy') {
+        if (S.spec.zam === undefined) {
+            $('#detailBox').addClass('hide');
+            return;
+        }
+        
+        const c = {
+            g: S.cols[S.spec.zam],
+            r: (S.spec.rozm !== undefined) ? S.cols[S.spec.rozm] : null,
+            i: S.spec.ilosc ? S.cols[S.spec.ilosc] : null,
+            o: S.spec.odd !== undefined ? S.cols[S.spec.odd] : null,
+            a: S.spec.adr !== undefined ? S.cols[S.spec.adr] : null,
+            u: S.spec.uwagi ? S.cols[S.spec.uwagi] : null
+        };
+        
+        const g = {};
+        d.forEach(r => {
+            const k = r[c.g] || 'Brak zamawiającego';
+            if (!g[k]) g[k] = [];
+            g[k].push(r);
+        });
+        
+        $('#detailBody').html(`
+            <table class="compact">
+                <tbody>
+                    ${Object.keys(g).sort().map(k => {
+                        const rs = g[k];
+                        const tot = c.i ? rs.reduce((s,r) => s + (parseFloat(r[c.i]) || 0), 0) : rs.length;
+                        let tv = 0;
+                        rs.forEach(r => {
+                            if (c.r && c.i) {
+                                const t = getTire(r[c.r]);
+                                if (t) tv += (parseFloat(r[c.i]) || 0) * t.n;
+                            }
+                        });
+                        
+                        // Distinct oddziały dla tej grupy
+                        const oddzialy = c.o
+                            ? [...new Set(rs.map(r => r[c.o]).filter(Boolean))].sort().join(', ')
+                            : '';
+                        
+                        return `
+                            <tr class="group">
+                                <td colspan="10">
+                                    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                                        <div>
+                                            <strong>👤 ${k}</strong>
+                                            ${oddzialy ? `<span style="font-size:8px;color:var(--text-tertiary);margin-left:10px;">📍 ${oddzialy}</span>` : ''}
+                                        </div>
+                                        <div class="group-stats">
+                                            <span>Pojazdy: <strong>${rs.length}</strong></span>
+                                            <span>Opony: <strong>${tot}</strong></span>
+                                            <span>Wartość: <strong>${tv.toFixed(2)}</strong></span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr><th>Nr rej</th><th>Nazwa</th><th>Rozmiar</th><th>Producent</th><th>Bieżnik</th><th>Ilość</th><th>Wartość</th><th>Oddział</th><th>Adres dostawy</th><th>Uwagi</th></tr>
+                            ${rs.map(row => {
+                                const nrRej = getNr(row);
+                                const nazwa = getNazwa(row);
+                                const t = c.r ? getTire(row[c.r]) : null;
+                                const q = c.i ? (parseFloat(row[c.i]) || 0) : 1;
+                                const v = t ? q * t.n : 0;
+                                
+                                return `<tr>
+                                    <td>${nrRej}</td>
+                                    <td>${nazwa}</td>
+                                    <td><strong class="tire-size">${c.r ? row[c.r] : '-'}</strong></td>
+                                    <td>${t ? t.p : '-'}</td>
+                                    <td>${t ? t.b : '-'}</td>
+                                    <td><span class="num">${q}</span></td>
+                                    <td><span class="money">${v > 0 ? v.toFixed(2) : '-'}</span></td>
+                                    <td>${c.o ? row[c.o] : '-'}</td>
+                                    <td>${c.a ? row[c.a] : '-'}</td>
+                                    <td><span class="note">${c.u ? row[c.u] : ''}</span></td>
+                                </tr>`;
+                            }).join('')}
+                            <tr><td colspan="10" style="padding:4px;"></td></tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            </table>
+        `);
+        
+        $('#detailBox').removeClass('hide');
+        return;
+    }
+    
     // Tryb grupowania według ODDZIAŁU lub ADRESU
     const isOdd = mode === 'oddzial';
     const gi = isOdd ? S.spec.odd : S.spec.adr;
@@ -3116,6 +3324,46 @@ const exportXlsx = () => {
     }
     
     const wb = XLSX.utils.book_new();
+
+    if (mode === 'marka') {
+        const lab = 'Marka';
+        Object.keys(g).sort().forEach(k => {
+            const rs = g[k];
+            const tot = rs.reduce((s,r) => s + (parseFloat(r.i) || 0), 0);
+            const tv  = rs.reduce((s,r) => s + r.w, 0);
+            const d = [
+                [lab, k],
+                ['Pojazdy:', rs.length, 'Opony:', tot, 'Wartosc:', tv.toFixed(2)],
+                [],
+                ['Nr rej', 'Nazwa', 'Model', 'Rocznik', 'Rozmiar', 'Producent', 'Bieznik', 'Ilosc', 'Netto', 'Wartosc', 'Oddzial', 'Uwagi'],
+                ...rs.map(r => [r.nr, r.naz, r.model, r.rok, r.r, r.p, r.b, r.i, r.n > 0 ? r.n.toFixed(2) : '-', r.w > 0 ? r.w.toFixed(2) : '-', r.s, r.u])
+            ];
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(d), k.substring(0, 31));
+        });
+        XLSX.writeFile(wb, `Podsumowanie_marka_${new Date().toISOString().slice(0,10)}.xlsx`);
+        showAlert('Eksport do Excel zakończony', 'success');
+        return;
+    }
+
+    if (mode === 'zamawiajacy') {
+        Object.keys(g).sort().forEach(k => {
+            const rs = g[k];
+            const tot = rs.reduce((s,r) => s + (parseFloat(r.i) || 0), 0);
+            const tv  = rs.reduce((s,r) => s + r.w, 0);
+            const d = [
+                ['Zamawiajacy', k],
+                ['Pojazdy:', rs.length, 'Opony:', tot, 'Wartosc:', tv.toFixed(2)],
+                [],
+                ['Nr rej', 'Nazwa', 'Rozmiar', 'Producent', 'Bieznik', 'Ilosc', 'Netto', 'Wartosc', 'Oddzial', 'Adres dostawy', 'Uwagi'],
+                ...rs.map(r => [r.nr, r.naz, r.r, r.p, r.b, r.i, r.n > 0 ? r.n.toFixed(2) : '-', r.w > 0 ? r.w.toFixed(2) : '-', r.s, r.a, r.u])
+            ];
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(d), k.substring(0, 31));
+        });
+        XLSX.writeFile(wb, `Podsumowanie_zamawiajacy_${new Date().toISOString().slice(0,10)}.xlsx`);
+        showAlert('Eksport do Excel zakończony', 'success');
+        return;
+    }
+
     const lab = mode === 'oddzial' ? 'Oddzial' : 'Adres';
     const sec = mode === 'oddzial' ? 'Adres' : 'Oddzial';
     
@@ -3242,6 +3490,74 @@ const exportPdf = () => {
     }
     
     const doc = new jsPDF({ orientation: 'landscape', format: 'a4' });
+
+    if (mode === 'marka') {
+        Object.keys(g).sort().forEach((k, i) => {
+            if (i > 0) doc.addPage();
+            const rs = g[k];
+            const tot = rs.reduce((s,r) => s + (parseFloat(r.i) || 0), 0);
+            const tv  = rs.reduce((s,r) => s + r.w, 0);
+            doc.setFontSize(14);
+            doc.text(cl(`Marka: ${k}`), 14, 15);
+            doc.setFontSize(10);
+            doc.text(cl(`Pojazdy: ${rs.length} | Opony: ${tot} | Wartosc: ${tv.toFixed(2)}`), 14, 22);
+            const td = rs.map(r => [cl(r.nr), cl(r.naz), cl(r.model), cl(r.rok), cl(r.r), cl(r.p), cl(r.b), cl(r.i), r.w > 0 ? r.w.toFixed(2) : '-', cl(r.s), cl(r.u)]);
+            td.push(['SUMA','','','','','','', tot.toString(), tv.toFixed(2), '', '']);
+            doc.autoTable({
+                startY: 28,
+                head: [['Nr', 'Nazwa', 'Model', 'Rocznik', 'Rozmiar', 'Prod', 'Bieznik', 'Ilosc', 'Wartosc', 'Oddzial', 'Uwagi']],
+                body: td,
+                styles: { fontSize: 7, cellPadding: 2, lineColor: [200,200,200], lineWidth: 0.1 },
+                headStyles: { fillColor: [30,64,175], textColor: [255,255,255], fontStyle: 'bold', lineColor: [200,200,200], lineWidth: 0.1 },
+                theme: 'grid',
+                didParseCell: data => {
+                    if (data.section === 'body' && data.row.index === td.length - 1) {
+                        data.cell.styles.fontStyle = 'bold';
+                        data.cell.styles.fillColor = [240,240,240];
+                        data.cell.styles.textColor = [0,0,0];
+                    }
+                }
+            });
+        });
+        doc.save(cl(`Podsumowanie_marka_${new Date().toISOString().slice(0,10)}.pdf`));
+        showAlert('Eksport do PDF zakończony', 'success');
+        return;
+    }
+
+    if (mode === 'zamawiajacy') {
+        Object.keys(g).sort().forEach((k, i) => {
+            if (i > 0) doc.addPage();
+            const rs = g[k];
+            const tot = rs.reduce((s,r) => s + (parseFloat(r.i) || 0), 0);
+            const tv  = rs.reduce((s,r) => s + r.w, 0);
+            doc.setFontSize(14);
+            doc.text(cl(`Zamawiajacy: ${k}`), 14, 15);
+            doc.setFontSize(10);
+            doc.text(cl(`Pojazdy: ${rs.length} | Opony: ${tot} | Wartosc: ${tv.toFixed(2)}`), 14, 22);
+            const td = rs.map(r => [cl(r.nr), cl(r.naz), cl(r.r), cl(r.p), cl(r.b), cl(r.i), r.w > 0 ? r.w.toFixed(2) : '-', cl(r.s), cl(r.a), cl(r.u)]);
+            td.push(['SUMA','','','','', tot.toString(), tv.toFixed(2), '','','']);
+            doc.autoTable({
+                startY: 28,
+                head: [['Nr', 'Nazwa', 'Rozmiar', 'Prod', 'Bieznik', 'Ilosc', 'Wartosc', 'Oddzial', 'Adres dostawy', 'Uwagi']],
+                body: td,
+                styles: { fontSize: 7, cellPadding: 2, lineColor: [200,200,200], lineWidth: 0.1 },
+                headStyles: { fillColor: [30,64,175], textColor: [255,255,255], fontStyle: 'bold', lineColor: [200,200,200], lineWidth: 0.1 },
+                columnStyles: { 9: { cellWidth: 40, textColor: [180,180,180] } },
+                theme: 'grid',
+                didParseCell: data => {
+                    if (data.section === 'body' && data.row.index === td.length - 1) {
+                        data.cell.styles.fontStyle = 'bold';
+                        data.cell.styles.fillColor = [240,240,240];
+                        data.cell.styles.textColor = [0,0,0];
+                    }
+                }
+            });
+        });
+        doc.save(cl(`Podsumowanie_zamawiajacy_${new Date().toISOString().slice(0,10)}.pdf`));
+        showAlert('Eksport do PDF zakończony', 'success');
+        return;
+    }
+
     const lab = mode === 'oddzial' ? 'Oddzial' : 'Adres';
     
     Object.keys(g).sort().forEach((k,i) => {
@@ -3359,36 +3675,85 @@ const exportPdf = () => {
 
 const getGrouped = () => {
     const f = getFiltered();
-    const isOdd = S.group === 'oddzial';
-    const gi = isOdd ? S.spec.odd : S.spec.adr;
+    const mode = S.group;
+
+    // --- MARKA ---
+    if (mode === 'marka') {
+        if (S.spec.marka === undefined && S.spec.nazwa === undefined) return {};
+        const c = {
+            r: S.spec.rozm  !== undefined ? S.cols[S.spec.rozm]  : null,
+            i: S.spec.ilosc !== undefined ? S.cols[S.spec.ilosc] : null,
+            o: S.spec.odd   !== undefined ? S.cols[S.spec.odd]   : null,
+            u: S.spec.uwagi !== undefined ? S.cols[S.spec.uwagi] : null
+        };
+        const g = {};
+        f.forEach(row => {
+            const mk = getMarka(row) || 'Brak marki';
+            if (!g[mk]) g[mk] = [];
+            const t = c.r ? getTire(row[c.r]) : null;
+            const q = c.i ? row[c.i] : '1';
+            g[mk].push({
+                nr:    getNr(row),
+                naz:   getNazwa(row),
+                model: getModel(row),
+                rok:   getRok(row),
+                r:     c.r ? row[c.r] : '-',
+                p:     t ? t.p : '-',
+                b:     t ? t.b : '-',
+                i:     q,
+                n:     t ? t.n : 0,
+                w:     t ? (parseFloat(q) || 0) * t.n : 0,
+                s:     c.o ? row[c.o] : '-',
+                u:     c.u ? row[c.u] : ''
+            });
+        });
+        return g;
+    }
+
+    // --- ZAMAWIAJACY / ODDZIAL / ADRES ---
+    let gi, groupLabel;
+    if (mode === 'zamawiajacy') {
+        gi = S.spec.zam;
+        groupLabel = 'zamawiajacego';
+    } else {
+        const isOdd = mode === 'oddzial';
+        gi = isOdd ? S.spec.odd : S.spec.adr;
+        groupLabel = isOdd ? 'oddzialu' : 'adresu';
+    }
+    if (gi === undefined) return {};
     const gc = S.cols[gi];
-    
+
+    const isOdd = mode === 'oddzial';
     const c = {
-        r: (S.spec.rozm !== undefined) ? S.cols[S.spec.rozm] : null,
-        i: S.spec.ilosc ? S.cols[S.spec.ilosc] : null,
-        s: isOdd ? (S.spec.adr ? S.cols[S.spec.adr] : null) : (S.spec.odd ? S.cols[S.spec.odd] : null),
-        u: S.spec.uwagi ? S.cols[S.spec.uwagi] : null
+        r: S.spec.rozm  !== undefined ? S.cols[S.spec.rozm]  : null,
+        i: S.spec.ilosc !== undefined ? S.cols[S.spec.ilosc] : null,
+        s: mode === 'zamawiajacy'
+            ? (S.spec.odd !== undefined ? S.cols[S.spec.odd] : null)
+            : isOdd ? (S.spec.adr ? S.cols[S.spec.adr] : null) : (S.spec.odd ? S.cols[S.spec.odd] : null),
+        a: mode === 'zamawiajacy'
+            ? (S.spec.adr !== undefined ? S.cols[S.spec.adr] : null)
+            : null,
+        u: S.spec.uwagi !== undefined ? S.cols[S.spec.uwagi] : null
     };
-    
+
     const g = {};
     f.forEach(row => {
-        const k = row[gc] || `Brak ${isOdd ? 'oddzialu' : 'adresu'}`;
+        const k = row[gc] || `Brak ${groupLabel}`;
         if (!g[k]) g[k] = [];
-        
         const t = c.r ? getTire(row[c.r]) : null;
         const q = c.i ? row[c.i] : '1';
-        
         g[k].push({
-            nr: getNr(row),
+            nr:  getNr(row),
             naz: getNazwa(row),
-            r: c.r ? row[c.r] : '-',
-            p: t ? t.p : '-',
-            b: t ? t.b : '-',
-            i: q,
-            n: t ? t.n : 0,
-            w: t ? (parseFloat(q) || 0) * t.n : 0,
-            s: c.s ? row[c.s] : '-',
-            u: c.u ? row[c.u] : ''
+            r:   c.r ? row[c.r] : '-',
+            p:   t ? t.p : '-',
+            b:   t ? t.b : '-',
+            i:   q,
+            n:   t ? t.n : 0,
+            w:   t ? (parseFloat(q) || 0) * t.n : 0,
+            s:   c.s ? row[c.s] : '-',
+            a:   c.a ? row[c.a] : '-',
+            u:   c.u ? row[c.u] : ''
         });
     });
     return g;
@@ -3424,7 +3789,7 @@ const clear = () => {
         }
         S.table.destroy();
     }
-    S = { data: [], cols: [], heads: [], spec: {}, group: 'oddzial', table: null, odd: [], typ: [], editingKey: null, missingTires: new Set() };
+    S = { data: [], cols: [], heads: [], spec: {}, group: 'oddzial', table: null, odd: [], typ: [], zam: [], editingKey: null, missingTires: new Set() };
     $('#tbody, #thead').html('');
     $('#tableBox, #summary').addClass('hide');
     $('#empty').removeClass('hide');
@@ -3432,6 +3797,12 @@ const clear = () => {
     $('#fileName').text('Nie wybrano');
     $('#oddzialBtn').text('Wszystkie').removeClass('active');
     $('#typBtn').text('Wszystkie').removeClass('active');
+    $('#zamBtn').text('Wszystkie').removeClass('active');
+    $('#zamFilter').hide();
+    $('#zamRadioLabel').hide();
+    $('#markaRadioLabel').hide();
+    $('input[name="group"][value="oddzial"]').prop('checked', true);
+    S.group = 'oddzial';
     $('#zakup').val('');
     $('#quickSearch').val('');
     $('#total, #tak, #suma, #visible').text('0');
