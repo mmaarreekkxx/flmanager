@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#1f2937">
 <meta name="description" content="FLMANAGER - Zaawansowany system zarządzania flotą pojazdów z MCE, analizą kosztów i raportowaniem">
-<title>FLMANAGER v4.70d</title>
+<title>FLMANAGER v4.71c</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Roboto+Condensed:wght@400;600;700&family=Roboto+Mono:wght@400;500;600&family=Orbitron:wght@900&family=Chakra+Petch:wght@600&family=Inter:wght@400;500;600;700&display=swap">
@@ -90,6 +90,9 @@
 .df-gauge-lbl{text-align:center;font-size:.58rem;color:var(--tx-s)}
 /* DualFuel main table */
 .df-tbl-wrap{background:var(--bg-card);border:1px solid var(--bd);border-radius:var(--rmd);overflow:hidden;margin-top:10px}.df-inc-row{background:rgba(239,68,68,.03);border-top:none!important}.df-inc-row td{padding:0!important;border-top:none!important}.df-inc-detail{padding:8px 12px 10px 32px;border-top:1px dashed rgba(239,68,68,.25)}.df-inc-detail table{width:100%;border-collapse:collapse;font-size:.58rem}.df-inc-detail th{padding:3px 6px;font-size:.52rem;font-weight:700;color:var(--tx-m);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--bd);text-align:left;white-space:nowrap}.df-inc-detail td{padding:3px 6px;border-bottom:1px solid var(--bg-t);vertical-align:top}.df-inc-badge{display:inline-block;font-size:.5rem;font-weight:800;padding:1px 5px;border-radius:3px;white-space:nowrap}.df-inc-badge.cert{background:#dc262622;color:#dc2626;border:1px solid #dc262644}.df-inc-badge.susp{background:#f59e0b22;color:#d97706;border:1px solid #f59e0b44}.df-inc-tx{font-family:var(--font-mono);font-size:.57rem}.df-inc-toggle{cursor:pointer;user-select:none}.df-inc-toggle:hover{opacity:.7}
+.df-loss-tip{vertical-align:middle}
+.df-loss-tip-box{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:rgba(15,23,42,.95);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.12);color:#f1f5f9;font-size:.6rem;font-weight:400;line-height:1.5;padding:8px 11px;border-radius:6px;white-space:nowrap;pointer-events:none;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,.4);text-transform:none;letter-spacing:0;text-align:left;min-width:220px}
+.df-loss-tip:hover .df-loss-tip-box{display:block}
 .df-tbl-hdr{padding:10px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
 .df-tbl-hdr h3{font-size:.78rem;font-weight:700}
 .df-filters{display:flex;gap:4px;flex-wrap:wrap}
@@ -110,11 +113,12 @@ table.df-dt{width:100%;min-width:780px;border-collapse:collapse;font-size:.63rem
 #df-main-table col.c-pbl   {width:68px}
 #df-main-table col.c-dist  {width:68px}
 #df-main-table col.c-cost  {width:56px}
-#df-main-table col.c-tx    {width:56px}
+#df-main-table col.c-tx    {width:70px}
 #df-main-table col.c-inc   {width:46px}
 #df-main-table col.c-loss  {width:68px}
 #df-main-table col.c-status{width:68px}
 #df-main-table col.c-rec   {width:auto;min-width:220px}
+#df-main-table td.c-tx-cell {white-space:nowrap;width:70px}
 #df-main-table td{font-family:inherit}
 .df-vid{font-weight:700;color:var(--act);cursor:pointer}
 .df-bar-c{min-width:80px}
@@ -276,7 +280,7 @@ table.df-dt{width:100%;min-width:780px;border-collapse:collapse;font-size:.63rem
 
 <div id="vehicleModal" class="modal"><div class="modal-content modal-content-wide"><div class="modal-header"><i class="fas fa-car" style="font-size:.85rem;opacity:.9;flex-shrink:0"></i><h3 id="vehicleModalTitle" class="modal-title"><span id="vehicleModalReg" onclick="closeVehicleModal()" title="Kliknij aby zamknąć" style="font-family:var(--font-mono);background:rgba(255,255,255,.18);padding:1px 8px;border-radius:5px;letter-spacing:1px;cursor:pointer;transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.32)'" onmouseout="this.style.background='rgba(255,255,255,.18)'">—</span><span id="vehicleModalMeta" style="font-size:.6rem;font-weight:400;opacity:.8;font-family:var(--font-text);margin-left:4px"></span><div id="customLegend" style="display:flex;gap:8px;overflow-x:auto;white-space:nowrap;margin-left:10px;scrollbar-width:none;flex-shrink:1;min-width:0"></div></h3><div style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto"><button id="vehicleModalPDF" onclick="exportVehicleModalPDF()" title="Eksport PDF" style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:5px;padding:3px 10px;font-size:.65rem;font-family:var(--font-text);font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:background .15s"><i class="fas fa-file-pdf"></i> PDF</button></div></div><div class="modal-body"><div class="chart-container"><canvas id="vehicleChart"></canvas></div><div id="vehicleSummary" style="padding:0 8px 12px"></div></div></div></div>
 <div class="app-container">
-<div class="header neu-card" style="padding:4px 12px;min-height:auto"><div class="app-title" style="gap:8px"><i class="fa-solid fa-truck-fast"></i><div style="display:flex;flex-direction:column;justify-content:center;line-height:1"><span style="font-size:.95rem;letter-spacing:.5px">FLMANAGER</span><span class="app-version" style="font-size:.55rem;font-weight:400;opacity:.7">v4.70d</span></div></div><div class="flex items-center gap-2"><span id="datasetName" class="dataset-name">Brak danych</span><div class="control-group mce-toggle-group"><label class="switch"><input type="checkbox" id="aiCorrectionToggle" checked onchange="recalcAll()"><span class="slider"></span></label><span class="mce-label">MCE</span></div><button class="neu-btn async-status async-status-btn" id="asyncStatus" onclick="testAsync()" title="Test animacji async"><span class="async-dot"></span> Async</button><input type="checkbox" id="themeToggle" style="display:none"><button id="ai-open-btn" class="theme-toggle-btn" title="Gemini AI — Analiza floty" style="border-color:var(--act);border-radius:4px;width:auto;padding:0 8px;gap:5px;font-size:.65rem;font-weight:700;color:var(--act);font-family:var(--font-text);letter-spacing:.3px"><i class="fas fa-robot"></i><span id="ai-btn-label">AI</span></button><label for="themeToggle" class="theme-toggle-btn" title="Zmień motyw"><i id="themeIcon" class="fas fa-sun"></i></label></div></div>
+<div class="header neu-card" style="padding:4px 12px;min-height:auto"><div class="app-title" style="gap:8px"><i class="fa-solid fa-truck-fast"></i><div style="display:flex;flex-direction:column;justify-content:center;line-height:1"><span style="font-size:.95rem;letter-spacing:.5px">FLMANAGER</span><span class="app-version" style="font-size:.55rem;font-weight:400;opacity:.7">v4.71c</span></div></div><div class="flex items-center gap-2"><span id="datasetName" class="dataset-name">Brak danych</span><div class="control-group mce-toggle-group"><label class="switch"><input type="checkbox" id="aiCorrectionToggle" checked onchange="recalcAll()"><span class="slider"></span></label><span class="mce-label">MCE</span></div><button class="neu-btn async-status async-status-btn" id="asyncStatus" onclick="testAsync()" title="Test animacji async"><span class="async-dot"></span> Async</button><input type="checkbox" id="themeToggle" style="display:none"><button id="ai-open-btn" class="theme-toggle-btn" title="Gemini AI — Analiza floty" style="border-color:var(--act);border-radius:4px;width:auto;padding:0 8px;gap:5px;font-size:.65rem;font-weight:700;color:var(--act);font-family:var(--font-text);letter-spacing:.3px"><i class="fas fa-robot"></i><span id="ai-btn-label">AI</span></button><label for="themeToggle" class="theme-toggle-btn" title="Zmień motyw"><i id="themeIcon" class="fas fa-sun"></i></label></div></div>
 <div class="neu-card upload-card"><div class="flex items-center gap-2 upload-controls"><input type="file" id="fileInput" multiple style="display:none" onchange="loadFiles()"><div id="dropZone" class="drop-zone" onclick="$('fileInput').click()"><i class="fa-solid fa-cloud-arrow-up upload-icon"></i><div class="upload-text-wrapper"><span>Wgraj pliki</span><span class="upload-subtext">Upuść lub kliknij</span></div></div><button class="neu-btn" id="fileListToggle" onclick="(function(){var c=$('fileListContainer');var v=c.style.display==='flex';c.style.display=v?'none':'flex';$('fileListToggle').classList.toggle('active',!v)})()" title="Lista plików" style="display:none"><i class="fas fa-folder-open"></i></button><div class="flex-spacer"></div><button class="neu-btn btn-demo" onclick="loadSampleData()"><i class="fas fa-database"></i> Demo</button><button class="neu-btn btn-danger" onclick="clearData()"><i class="fas fa-trash"></i></button></div><div id="fileListContainer" class="file-list-container" style="display:none"></div></div>
 <div class="tabs-nav">
   <button class="tab-btn active" onclick="switchTab('main', this)"><i class="fa-solid fa-table"></i> Dane</button>
@@ -420,6 +424,33 @@ table.df-dt{width:100%;min-width:780px;border-collapse:collapse;font-size:.63rem
       <input type="text" id="dualfuelSearch" class="rc-input" placeholder="Szukaj pojazdu..." oninput="renLPGAnalysis()">
     </div>
     <div class="rc-spacer"></div>
+    <div style="width:1px;height:14px;background:#c4c9d4;flex-shrink:0;margin:0 6px;display:block"></div>
+    <div class="rcg" style="position:relative">
+      <button class="rc-btn df-savings-info-btn" style="color:#f59e0b;gap:4px;border-color:#f59e0b44" onmouseenter="this.nextElementSibling.style.display='block'" onmouseleave="this.nextElementSibling.style.display='none'" title="Kliknij aby zobaczyć wyjaśnienie kolumny Utrata (zł)"><i class="fas fa-sack-dollar"></i><span style="font-size:.6rem;font-weight:600">Utrata&nbsp;Pb?</span></button>
+      <div style="display:none;position:absolute;top:calc(100% + 6px);right:0;width:272px;background:rgba(10,17,36,.97);backdrop-filter:blur(8px);border:1px solid rgba(245,158,11,.25);color:#f1f5f9;font-size:.6rem;line-height:1.6;padding:12px 14px;border-radius:8px;white-space:normal;z-index:300;box-shadow:0 6px 24px rgba(0,0,0,.55);pointer-events:none">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid rgba(245,158,11,.2)">
+          <i class="fas fa-sack-dollar" style="color:#f59e0b;font-size:.75rem"></i>
+          <b style="color:#f59e0b;font-size:.68rem;letter-spacing:.02em">Utrata oszczędności na benzynie</b>
+        </div>
+        <div style="margin-bottom:7px;color:#cbd5e1">Ile <b style="color:#f1f5f9">przepłacono za benzynę</b> w stosunku do tego,<br>ile kosztowałoby pokonanie tej samej trasy na <b style="color:#f59e0b">LPG</b>.</div>
+        <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:5px;padding:6px 9px;margin-bottom:8px">
+          <div style="color:#94a3b8;font-size:.55rem;margin-bottom:3px;text-transform:uppercase;letter-spacing:.05em">Wzór</div>
+          <span style="font-family:monospace;color:#fcd34d">Koszt_Pb</span><span style="color:#94a3b8"> − (</span><span style="font-family:monospace;color:#fcd34d">Litry_Pb</span><span style="color:#94a3b8"> × 1,15 × </span><span style="font-family:monospace;color:#fcd34d">śr._cena_LPG</span><span style="color:#94a3b8">)</span>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border-radius:5px;padding:6px 9px;margin-bottom:8px">
+          <div style="color:#94a3b8;font-size:.55rem;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">Przykład</div>
+          <div style="display:grid;grid-template-columns:auto 1fr;gap:2px 8px;color:#94a3b8">
+            <span style="color:#cbd5e1">Zapłacono za Pb:</span><span style="font-family:monospace;color:#f1f5f9">50 L × 6,80 zł = <b style="color:#ef4444">340,00 zł</b></span>
+            <span style="color:#cbd5e1">Ekwiwalent LPG:</span><span style="font-family:monospace;color:#f1f5f9">50 × 1,15 × 3,00 zł = <b style="color:#22c55e">172,50 zł</b></span>
+            <span style="color:#cbd5e1;border-top:1px solid rgba(255,255,255,.08);padding-top:3px">Utrata:</span><span style="font-family:monospace;border-top:1px solid rgba(255,255,255,.08);padding-top:3px;color:#f59e0b;font-weight:700">167,50 zł przepłacono</span>
+          </div>
+        </div>
+        <div style="color:#64748b;font-size:.55rem;line-height:1.5">
+          <i class="fas fa-circle-info" style="color:#475569;margin-right:3px"></i>×1,15 — LPG ma niższą gęstość energii, potrzeba ok. 15% więcej litrów na km<br>
+          <i class="fas fa-circle-exclamation" style="color:#dc2626;margin-right:3px"></i>Wartości <b style="color:#ef4444">&gt; 100 zł</b> wyróżnione czerwonym kolorem w tabeli
+        </div>
+      </div>
+    </div>
     <div style="width:1px;height:14px;background:#c4c9d4;flex-shrink:0;margin:0 5px;display:block"></div>
     <div class="rcg">
       <button class="rc-btn e-csv" onclick="expDualFuelCSV()" title="CSV — DualFuel"><i class="fas fa-file-csv"></i></button>
@@ -529,7 +560,7 @@ table.df-dt{width:100%;min-width:780px;border-collapse:collapse;font-size:.63rem
           <th onclick="sortLpgAnalysis('totalDist')" title="Różnica max–min licznika (km)">Dystans ⇅</th>
           <th onclick="sortLpgAnalysis('totalCost')" title="Łączny koszt LPG + Benzyna">Koszt ⇅</th>
           <th onclick="sortLpgAnalysis('trans')" title="Transakcje: LPG / Pb / Weekendy">Tx&nbsp;L/P/W ⇅</th>
-          <th onclick="sortLpgAnalysis('potentialSavings')" title="Koszt Pb − ekwiwalent LPG">Utrata&nbsp;(zł) ⇅</th>
+          <th onclick="sortLpgAnalysis('potentialSavings')" title="Utrata oszczędności — ile przepłacono za benzynę zamiast jazdy na LPG&#10;Wzór: Koszt_Pb − (Litry_Pb × 1,15 × śr._cena_LPG)&#10;Czerwony = ponad 100 zł przepłaty · Kliknij ⓘ Utrata Pb? po szczegóły">Utrata&nbsp;(zł) ⇅</th>
           <th>Status</th>
           <th onclick="sortLpgAnalysis('suspiciousCount')" title="Incydenty pewne (×) i podejrzane (?) — wyjeżdżanie obu baków">Inc. ⇅</th>
           <th title="Rekomendacja na podstawie wzorców tankowania i specyfikacji pojazdu">Rekomendacja</th>
@@ -1107,7 +1138,8 @@ const renLPGAnalysis=()=>{
   const q=$('dualfuelSearch')?$('dualfuelSearch').value.toLowerCase():'';
   const filtered=q?data.filter(r=>r.reg.toLowerCase().includes(q)):data;
   const _dfRegsAll=new Set(data.map(function(r){return r.reg}));
-  const weekendCounts=S.data.reduce(function(acc,t){if(t._opt&&t._opt.isWeekend&&_dfRegsAll.has(t._opt.reg)){acc[t._opt.reg]=(acc[t._opt.reg]||0)+1}return acc},{});
+  const _dfYearSet=new Set((S.selY.ranking||[]));
+  const weekendCounts=S.data.reduce(function(acc,t){if(t._opt&&t._opt.isWeekend&&_dfRegsAll.has(t._opt.reg)&&(_dfYearSet.size===0||_dfYearSet.has(t._opt.year))){acc[t._opt.reg]=(acc[t._opt.reg]||0)+1}return acc},{});
   const noData='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;color:var(--tx-m)"><i class="fas fa-gas-pump fa-2x" style="opacity:.2;margin-bottom:8px"></i><p style="font-size:.75rem">Brak danych DualFuel</p></div>';
   if(!filtered.length){
     ['dfc1','dfc2','dfc3','dfc4','dfc5','dfc6','dfc7','dfc8','dfc9','dfc10'].forEach(id=>dfSet(id,noData));
@@ -1374,11 +1406,11 @@ const renLPGAnalysis=()=>{
     return '<tr data-sc="'+r.statusCode+'" id="'+rowId+'">'
       +'<td class="df-vid" onclick="showVehicleChart(\''+r.reg+'\')" style="white-space:nowrap">'+r.reg+(r.maxMeter>0?'<div style="font-size:.48rem;font-weight:400;color:var(--tx-m);margin-top:1px">'+fmtI(r.maxMeter)+' km</div>':'')+'</td>'
       +'<td class="df-bar-c"><div class="df-bbg"><div class="df-bf '+bc+'" style="width:'+Math.min(100,r.lpgShare)+'%">'+r.lpgShare.toFixed(0)+'%</div></div></td>'
-      +'<td style="color:#10b981;font-weight:600">'+fmtN(r.lpgLit)+'<div style="font-size:.5rem;color:var(--tx-s)">'+avgLpg100+' L/100km</div></td>'
-      +'<td style="color:#ef4444;font-weight:600">'+fmtN(r.pbLit)+'<div style="font-size:.5rem;color:var(--tx-s)">'+avgPb100+' L/100km</div></td>'
+      +'<td style="color:#f59e0b;font-weight:600">'+fmtN(r.lpgLit)+'<div style="font-size:.5rem;color:var(--tx-s)">'+avgLpg100+' L/100km</div></td>'
+      +'<td style="color:#10b981;font-weight:600">'+fmtN(r.pbLit)+'<div style="font-size:.5rem;color:var(--tx-s)">'+avgPb100+' L/100km</div></td>'
       +'<td style="color:var(--tx-m)">'+fmtN(r.totalDist)+' km<div style="font-size:.5rem;color:var(--tx-s)">śr. '+fmtN(r.avgDistBetweenFills)+' km</div></td>'
-      +'<td style="color:var(--tx-m);white-space:nowrap;text-align:right">'+fmtC(r.totalCost)+'</td>'
-      +'<td style="text-align:center;font-size:.6rem"><span style="color:#10b981;font-weight:700">'+r.lpgTrans+'</span><span style="color:var(--tx-s)">/</span><span style="color:#ef4444;font-weight:700">'+r.pbTrans+'</span>'+wkndCell+'</td>'
+      +'<td style="color:var(--tx-m);white-space:nowrap;text-align:right">'+fmtC(r.totalCost)+(r.totalDist>0?'<div style="font-size:.5rem;color:var(--tx-m)">CPK: '+fmtC(r.totalCost/r.totalDist)+'/km</div>':'')+'</td>'
+      +'<td class="c-tx-cell" style="text-align:center;font-size:.6rem"><span style="color:#f59e0b;font-weight:700">'+r.lpgTrans+'</span><span style="color:var(--tx-s)">/</span><span style="color:#10b981;font-weight:700">'+r.pbTrans+'</span>'+wkndCell+'</td>'
       +(window._dfIncPatterns[rowId]=r.suspiciousPatterns,'')
       +'<td style="text-align:right;color:'+lossColor+';font-weight:'+lossFw+'">'+lossVal+'</td>'
       +'<td><span class="df-badge '+dfBadge(r.statusCode)+'">'+dfBadgeTxt(r.statusCode)+'</span></td>'
@@ -1796,7 +1828,7 @@ window.expDualFuelPDF=function(){
     var doc=new J('l','mm','a4');
     doc.setFontSize(13);
     doc.text('Raport DualFuel \u2014 LPG vs Benzyna',14,14);
-    var wkndC=S.data.reduce(function(acc,t){if(t._opt&&t._opt.isWeekend){acc[t._opt.reg]=(acc[t._opt.reg]||0)+1}return acc},{});
+    var _expYS=new Set(S.selY.ranking||[]);var wkndC=S.data.reduce(function(acc,t){if(t._opt&&t._opt.isWeekend&&(_expYS.size===0||_expYS.has(t._opt.year))){acc[t._opt.reg]=(acc[t._opt.reg]||0)+1}return acc},{});
     var rows=data.map(function(r){
       var avgLpg100=r.totalDist>0?(r.lpgLit/r.totalDist*100).toFixed(1):'—';
       var avgPb100=r.totalDist>0?(r.pbLit/r.totalDist*100).toFixed(1):'—';
@@ -1812,6 +1844,7 @@ window.expDualFuelPDF=function(){
         fmtN(r.totalDist)+' km',
         fmtN(r.avgDistBetweenFills)+' km',
         fmtC(r.totalCost),
+        r.totalDist>0?fmtC(r.totalCost/r.totalDist)+'/km':'—',
         r.lpgTrans+'/'+r.pbTrans,
         wknd||'—',
         incDisp,
@@ -1821,7 +1854,7 @@ window.expDualFuelPDF=function(){
       ];
     });
     doc.autoTable({
-      head:[['Pojazd','LPG%','LPG (L)','LPG L/100','Pb (L)','Pb L/100','Dystans','Śr.tank.','Koszt','Tx L/P','Wknd','Incyd.','Utrata','Status','Rekomendacja']],
+      head:[['Pojazd','LPG%','LPG (L)','LPG L/100','Pb (L)','Pb L/100','Dystans','Śr.tank.','Koszt','CPK zł/km','Tx L/P','Wknd','Incyd.','Utrata','Status','Rekomendacja']],
       body:rows,
       startY:22,
       styles:{fontSize:6,font:'helvetica'},
@@ -1835,7 +1868,7 @@ window.expDualFuelPDF=function(){
 window.expDualFuelCSV=function(){
   var data=S.rep.lpgAnalysis||[];
   if(!data.length){showToast('Brak danych');return}
-  var wkndC=S.data.reduce(function(acc,t){if(t._opt&&t._opt.isWeekend){acc[t._opt.reg]=(acc[t._opt.reg]||0)+1}return acc},{});
+  var _expYS=new Set(S.selY.ranking||[]);var wkndC=S.data.reduce(function(acc,t){if(t._opt&&t._opt.isWeekend&&(_expYS.size===0||_expYS.has(t._opt.year))){acc[t._opt.reg]=(acc[t._opt.reg]||0)+1}return acc},{});
   saveCSV(data.map(function(r){
     var avgLpg100=r.totalDist>0?+(r.lpgLit/r.totalDist*100).toFixed(2):null;
     var avgPb100=r.totalDist>0?+(r.pbLit/r.totalDist*100).toFixed(2):null;
@@ -1850,6 +1883,7 @@ window.expDualFuelCSV=function(){
       'Benzyna koszt (PLN)':+r.pbCost.toFixed(2),
       'Benzyna spal. L/100km':avgPb100,
       'Koszt lacznie (PLN)':+r.totalCost.toFixed(2),
+      'CPK (PLN/km)':r.totalDist>0?+Number(r.totalCost/r.totalDist).toFixed(4):null,
       'Dystans (km)':Math.round(r.totalDist),
       'Sr. dystans miedzy tank. (km)':Math.round(r.avgDistBetweenFills||0),
       'Tx LPG':r.lpgTrans,
@@ -1882,6 +1916,7 @@ window.expLpgXLSX=()=>{
       "Benzyna Koszt (PLN)":toNum(r.pbCost,2),
       "Benzyna Śr. spalanie (L/100km)":toNum(avgPb100,2),
       "Koszt łącznie (PLN)":toNum(r.totalCost,2),
+      "CPK (PLN/km)":r.totalDist>0?toNum(r.totalCost/r.totalDist,4):null,
       "Dystans (km)":toInt(r.totalDist),
       "Śr. dystans między tank. (km)":toInt(r.avgDistBetweenFills||0),
       "Liczba Transakcji LPG":toInt(r.lpgTrans),
@@ -1936,7 +1971,7 @@ const initDragDrop=()=>{renderMap('header');renderMap('value');renderMap('regist
 const initDateFilters=()=>{if(!$('dateFrom')){const grp=$('searchInput')?.parentElement;if(!grp)return;const d1=document.createElement('input');d1.type='date';d1.id='dateFrom';d1.className='neu-input';d1.style.display='none';d1.onchange=()=>filtTab(true);const d2=document.createElement('input');d2.type='date';d2.id='dateTo';d2.className='neu-input';d2.style.display='none';d2.onchange=()=>filtTab(true);grp.insertBefore(d1,$('searchInput'));grp.insertBefore(d2,$('searchInput'))}};
 const initNameOverride=()=>{const chk=$('check-nameOverride');if(chk){chk.checked=!!S.nameOv;chk.onchange=toggleNameOverride}};
 function copyMceCode(btn){const codeBlock=btn.closest('.mce-code-block')?.querySelector('.mce-code');if(!codeBlock)return;const text=codeBlock.textContent;navigator.clipboard.writeText(text).then(()=>{const icon=btn.querySelector('i');if(icon){icon.className='fas fa-check';btn.style.color='var(--succ)';setTimeout(()=>{icon.className='fas fa-copy';btn.style.color=''},2000)}}).catch(e=>console.error('Copy failed:',e))}
-const initApp=()=>{loadSettings();initTheme();initSearchListeners();_initMdpListener();initDragDrop();initDateFilters();initNameOverride();console.log('FLManager v4.70d załadowany!');console.log('Async chunked processing - działa lokalnie');console.log('Płynne przetwarzanie dużych zbiorów danych')};
+const initApp=()=>{loadSettings();initTheme();initSearchListeners();_initMdpListener();initDragDrop();initDateFilters();initNameOverride();console.log('FLManager v4.71c załadowany!');console.log('Async chunked processing - działa lokalnie');console.log('Płynne przetwarzanie dużych zbiorów danych')};
 initApp();
 
 
@@ -2426,8 +2461,9 @@ window.updateTaDualfuel = function updateTaDualfuel(lpg) {
   const good      = lpg.filter(r=>r.statusCode==='GOOD').length;
   const dualDrain = lpg.filter(r=>r.statusCode==='DUAL_DRAIN').length;
 
+  const _taYearSet = new Set(S.selY.ranking||[]);
   const wkndCounts = S.data.reduce((acc,t)=>{
-    if(t._opt?.isWeekend && t._opt?.reg) acc[t._opt.reg]=(acc[t._opt.reg]||0)+1;
+    if(t._opt?.isWeekend && t._opt?.reg && (_taYearSet.size===0||_taYearSet.has(t._opt.year))) acc[t._opt.reg]=(acc[t._opt.reg]||0)+1;
     return acc;
   },{});
   const totalWknd = lpg.reduce((s,r)=>s+(wkndCounts[r.reg]||0),0);
