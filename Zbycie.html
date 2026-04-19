@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="pl" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="theme-color" content="#f4f5f7" id="metaTheme">
+<title>Zbycie Pojazdu · Import Faktury</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+
+[data-theme="dark"]{
+  --bg:#0f0f12;--bg2:#16161a;--bg-card:#1c1c22;
+  --border:rgba(255,255,255,0.10);--border-l:rgba(255,255,255,0.18);
+  --txt:#eaeaea;--txt2:#c0c0c8;--txt3:#8a8a96;
+  --hover:rgba(255,255,255,.07);--hover2:rgba(255,255,255,.12);
+  --shadow:0 2px 16px rgba(0,0,0,.55);
+  --accent:#8b5cf6;--accent2:#c084fc;
+  --green-bg:rgba(34,197,94,.18);--green-txt:#4ade80;
+  --red-bg:rgba(239,68,68,.22);--red-txt:#fca5a5;
+  --yellow-bg:rgba(234,179,8,.18);--yellow-txt:#fde047;
+  --blue-bg:rgba(59,130,246,.18);--blue-txt:#93c5fd;
+  --purple-bg:rgba(124,58,237,.22);--purple-txt:#c4b5fd;
+  --teal-bg:rgba(20,184,166,.20);--teal-txt:#5eead4;
+  --neutral-bg:rgba(255,255,255,.09);--neutral-txt:#c0c0c8;
+  --toggle-bg:#444;--toggle-dot:#fff;
+  --input-bg:#22222a;--input-border:#3a3a48;
+  --drop-border:rgba(255,255,255,.25);--drop-bg:rgba(255,255,255,.04);
+  --log-bg:#12121a;
+  --ext-bg:#16161e;
+  --doc-bg:#1c1c24;--doc-txt:#ddd;--doc-border:#3a3a48;
+  --preview-bg:#16161e;
+}
+[data-theme="light"]{
+  --bg:#f4f5f7;--bg2:#eee;--bg-card:#fff;
+  --border:rgba(0,0,0,0.08);--border-l:rgba(0,0,0,0.12);
+  --txt:#111;--txt2:#666;--txt3:#999;
+  --hover:rgba(0,0,0,.04);--hover2:rgba(0,0,0,.07);
+  --shadow:0 2px 16px rgba(0,0,0,.08);
+  --accent:#7c3aed;--accent2:#9333ea;
+  --green-bg:rgba(34,197,94,.12);--green-txt:#16a34a;
+  --red-bg:rgba(239,68,68,.12);--red-txt:#dc2626;
+  --yellow-bg:rgba(234,179,8,.1);--yellow-txt:#b45309;
+  --blue-bg:rgba(59,130,246,.1);--blue-txt:#2563eb;
+  --purple-bg:rgba(124,58,237,.12);--purple-txt:#7c3aed;
+  --teal-bg:rgba(20,184,166,.12);--teal-txt:#0f766e;
+  --neutral-bg:rgba(0,0,0,.06);--neutral-txt:#555;
+  --toggle-bg:#ccc;--toggle-dot:#fff;
+  --input-bg:#f4f5f7;--input-border:#ddd;
+  --drop-border:rgba(0,0,0,.18);--drop-bg:rgba(0,0,0,.02);
+  --log-bg:#f9f9f9;
+  --ext-bg:#f4f5f7;
+  --doc-bg:#fff;--doc-txt:#111;--doc-border:#ddd;
+  --preview-bg:#f0f0f0;
+}
+
+html{height:100%;overflow-x:hidden}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--txt);min-height:100dvh;-webkit-font-smoothing:antialiased;transition:background .2s,color .2s}
+
+
+/* ── NAVBAR ── */
+.navbar{display:flex;align-items:center;justify-content:space-between;padding:6px 14px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;background:var(--bg);backdrop-filter:blur(8px)}
+.nav-brand{display:flex;align-items:center;gap:9px}
+.nav-logo{width:30px;height:30px;flex-shrink:0}
+.nav-name{font-size:13px;font-weight:700;letter-spacing:-.2px}
+.nav-ver{font-size:10px;color:var(--txt3);background:var(--hover);padding:2px 7px;border-radius:100px;border:1px solid var(--border)}
+.nav-sep{width:1px;height:16px;background:var(--border-l);margin:0 4px}
+.nav-sub{font-size:11px;color:var(--txt3)}
+.nav-right{display:flex;align-items:center;gap:8px}
+
+/* ── THEME TOGGLE ── */
+.theme-toggle{position:relative;width:44px;height:24px;background:var(--toggle-bg);border-radius:12px;cursor:pointer;border:none;flex-shrink:0;transition:background .3s}
+.theme-toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--toggle-dot);transition:transform .3s}
+[data-theme="light"] .theme-toggle::after{transform:translateX(20px)}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:500;font-family:inherit;cursor:pointer;transition:all .15s;white-space:nowrap;border:none;text-decoration:none}
+.btn-ghost{background:transparent;color:var(--txt2)}
+.btn-ghost:hover{background:var(--hover);color:var(--txt)}
+.btn-outline{background:var(--bg-card);border:1px solid var(--border-l);color:var(--txt)}
+.btn-outline:hover{border-color:rgba(124,58,237,.5)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{opacity:.9}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.btn-danger{background:var(--red-bg);border:1px solid rgba(239,68,68,.25);color:var(--red-txt)}
+.btn-danger:hover{background:rgba(239,68,68,.28)}
+.btn-teal{background:var(--teal-bg);border:1px solid rgba(20,184,166,.25);color:var(--teal-txt)}
+.btn-teal:hover{background:rgba(20,184,166,.26)}
+
+/* ── WORKSPACE LAYOUT ── */
+.workspace{display:flex;height:calc(100dvh - 49px);overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{width:300px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;background:var(--bg);transition:transform .25s}
+.sidebar::-webkit-scrollbar{width:3px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--txt3);border-radius:3px}
+
+.sb-section{padding:14px 14px 0}
+.sb-section:last-child{padding-bottom:14px}
+.sb-label{font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+
+/* ── SIDEBAR TOGGLE (navbar) ── */
+.btn-sidebar{background:var(--hover);border:1px solid var(--border-l);color:var(--txt2)}
+.btn-sidebar:hover{background:var(--hover2);color:var(--txt)}
+.btn-sidebar.active{background:rgba(124,58,237,.12);border-color:rgba(124,58,237,.35);color:var(--accent)}
+
+/* ── DROP ZONE ── */
+.dz{border:2px dashed var(--drop-border);border-radius:10px;padding:16px;cursor:pointer;transition:all .2s;background:var(--drop-bg);display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;position:relative}
+.dz:hover,.dz.over{border-color:var(--accent);background:rgba(124,58,237,.06)}
+.dz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.dz-ico{font-size:22px;opacity:.5}
+.dz-p{font-size:12px;font-weight:500;color:var(--txt)}
+.dz-h{font-size:11px;color:var(--txt3)}
+
+/* ── FILE CHIP ── */
+.fchip{display:flex;align-items:center;gap:9px;padding:9px 11px;background:var(--bg-card);border:1px solid var(--border);border-radius:9px;display:none}
+.fchip.on{display:flex}
+.fchip-ico{font-size:16px;flex-shrink:0}
+.fchip-info{flex:1;min-width:0}
+.fchip-name{font-size:12px;font-weight:500;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fchip-size{font-size:10px;color:var(--txt3);margin-top:1px}
+.fchip-del{background:none;border:none;color:var(--txt3);cursor:pointer;font-size:14px;padding:2px 4px;border-radius:4px;line-height:1}
+.fchip-del:hover{color:var(--red-txt);background:var(--red-bg)}
+
+/* ── LOG ── */
+.log{background:var(--log-bg);border:1px solid var(--border);border-radius:9px;padding:9px 11px;font-size:11px;font-family:'SF Mono','Cascadia Code',monospace;max-height:110px;overflow-y:auto;display:flex;flex-direction:column;gap:3px}
+.log::-webkit-scrollbar{width:2px}
+.log::-webkit-scrollbar-thumb{background:var(--txt3);border-radius:2px}
+.l-info{color:var(--txt3)}
+[data-theme="dark"] .l-info{color:#7a8aaa}
+.l-ok{color:var(--green-txt)}
+.l-err{color:var(--red-txt)}
+.l-warn{color:var(--yellow-txt)}
+
+/* ── EXT CARD ── */
+.ext{background:var(--ext-bg);border:1px solid var(--border);border-radius:9px;overflow:hidden;display:none}
+.ext.on{display:block}
+.ext-row{display:flex;align-items:baseline;gap:8px;padding:7px 11px;border-bottom:1px solid var(--border)}
+.ext-row:last-child{border-bottom:none}
+.ext-k{font-size:10px;color:var(--txt3);font-weight:600;min-width:68px;flex-shrink:0}
+.ext-v{font-size:12px;font-weight:500;color:var(--txt)}
+.ext-v.ok{color:var(--green-txt)}
+.ext-empty{font-size:11px;color:var(--txt3);padding:14px;text-align:center;font-style:italic}
+
+/* ── MAIN AREA ── */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.main::-webkit-scrollbar{width:4px}
+.main::-webkit-scrollbar-thumb{background:var(--txt3);border-radius:3px}
+
+/* ── MAIN HEADER ── */
+.main-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap;flex-shrink:0}
+.main-hdr-left h1{font-size:16px;font-weight:800;letter-spacing:-.3px}
+.main-hdr-left p{font-size:11px;color:var(--txt3);margin-top:2px}
+
+/* ── FORM CONTENT ── */
+.form-content{padding:14px 18px;display:flex;flex-direction:column;gap:12px}
+
+/* ── CARD ── */
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:background .3s,border-color .3s}
+.card-hdr{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;font-weight:600;color:var(--txt)}
+.card-hdr .card-ico{font-size:14px}
+.card-body{padding:14px}
+[data-theme="dark"] .card{background:var(--bg-card);box-shadow:0 1px 3px rgba(0,0,0,.4)}
+[data-theme="dark"] .card-hdr{background:rgba(255,255,255,.03)}
+
+/* ── FORM GRID ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.gc23{grid-column:1/3}
+.gc13{grid-column:1/3}
+
+/* ── FORM GROUP ── */
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg label{font-size:11px;font-weight:500;color:var(--txt3);cursor:pointer;}
+.fg input,.fg select{background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;padding:8px 10px;font-size:12px;font-family:inherit;color:var(--txt);outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
+.fg input:focus,.fg select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(139,92,246,.15)}
+.fg input::placeholder{color:var(--txt3);opacity:.9}
+[data-theme="dark"] .fg input,[data-theme="dark"] .fg select{color:var(--txt);caret-color:var(--accent2)}
+.fg input.ok{border-color:rgba(34,197,94,.5);background:rgba(34,197,94,.04)}
+
+/* ── PDF VIEWER ── */
+.pdf-viewer{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:none}
+.pdf-viewer.on{display:block}
+.pdf-top{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--border);gap:10px;flex-wrap:wrap}
+.pdf-info{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500;color:var(--txt2)}
+.pdf-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.pdf-controls{display:flex;align-items:center;gap:4px}
+.pdf-btn{background:var(--hover);border:1px solid var(--border-l);border-radius:6px;padding:4px 9px;font-size:11px;font-family:inherit;color:var(--txt2);cursor:pointer;transition:all .15s}
+.pdf-btn:hover:not(:disabled){background:var(--hover2);color:var(--txt)}
+.pdf-btn:disabled{opacity:.35;cursor:not-allowed}
+.pdf-page{font-size:11px;color:var(--txt3);padding:0 6px;min-width:40px;text-align:center}
+.pdf-canvas-wrap{overflow:auto;max-height:500px;background:var(--bg2);padding:14px;text-align:center;line-height:0}
+.pdf-canvas-wrap::-webkit-scrollbar{width:4px;height:4px}
+.pdf-canvas-wrap::-webkit-scrollbar-thumb{background:var(--txt3);border-radius:3px}
+#pdfCanvas{border-radius:4px;box-shadow:0 4px 20px rgba(0,0,0,.3);display:inline-block}
+
+/* ── DOCUMENT PREVIEW ── */
+.preview-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.prev-hdr{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;font-weight:500;color:var(--txt2)}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#4ade80;flex-shrink:0;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.prev-body{padding:14px;background:var(--preview-bg)}
+[data-theme="dark"] .prev-body{background:#1a1a24}
+[data-theme="dark"] .doc{box-shadow:0 4px 28px rgba(0,0,0,.7);outline:1px solid rgba(255,255,255,.06)}
+
+/* ── DOCUMENT OUTPUT STYLES ── */
+.doc{background:#fff;color:#000;font-family:'Times New Roman',serif;font-size:9.5pt;line-height:1.42;padding:16mm 18mm;max-width:680px;margin:0 auto;box-shadow:0 4px 24px rgba(0,0,0,.3);border-radius:4px}
+[data-theme="light"] .doc{box-shadow:0 2px 12px rgba(0,0,0,.12)}
+.doc-top{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:0 14px;margin-bottom:12px}
+.doc-date{grid-column:2;grid-row:1;text-align:right;font-size:9pt;white-space:nowrap;padding-bottom:5px}
+.doc-owner{grid-column:1;grid-row:2;padding-right:10px}
+.doc-owner p{margin-bottom:1px;font-size:9.5pt}
+.ob-lbl{display:block;font-size:6.5pt;color:#555;border-top:.3pt solid #ccc;padding-top:2px;margin-top:2px;margin-bottom:5px}
+.doc-office{grid-column:2;grid-row:2;min-width:155px}
+.office-box{border:.3pt solid #ccc;padding:6px 10px;font-size:9pt;line-height:1.5}
+.doc-title{text-align:center;font-size:11.5pt;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;margin:10px 0 9px;border-top:.3pt solid #ccc;border-bottom:.3pt solid #ccc;padding:5px 0}
+.opt-note{font-size:7pt;font-style:italic;color:#555;margin-bottom:8px;padding:4px 8px;background:#f8f8f8;border-left:2pt solid #ccc}
+.veh-box{border:.4pt solid #aaa;padding:7px 11px;margin:6px 0 8px}
+.veh-box strong{display:block;margin-bottom:2px;font-size:10pt}
+.veh-sub{font-size:6.5pt;color:#555;font-weight:normal;border-top:.3pt solid #ddd;padding-top:2px;margin-top:2px}
+.sale-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px 18px;margin:7px 0 9px}
+.sg-lbl{font-size:7.5pt;color:#333;font-weight:bold;margin-bottom:2px}
+.sg-val{border-bottom:.4pt solid #aaa;min-height:19px;padding:1px 3px;font-size:9.5pt}
+.sg-sub{font-size:6.5pt;color:#666;margin-top:2px}
+.rodo{font-size:7.5pt;font-style:italic;color:#333;margin-top:10px;padding:6px 9px;border:.3pt solid #ddd}
+.sig-row{display:flex;justify-content:flex-end;margin-top:44px}
+.sig-blk{text-align:center;width:240px}
+.sig-line{border-top:.4pt solid #999;height:0;margin-bottom:4px}
+.sig-lbl{font-size:6.5pt;color:#777}
+.office-sec{margin-top:16px;padding-top:9px;border-top:.5pt solid #bbb;font-size:8pt}
+.od-title{font-weight:bold;margin-bottom:7px;font-size:9pt}
+.od-line{margin-bottom:16px}
+.od-sig-row{display:flex;justify-content:flex-end;margin-top:7px}
+.empty-val{color:#aaa;font-style:italic;font-weight:normal} /* Dodano styl dla pustych stanów */
+/* ── WYPOWIEDZENIE OC STYLES ── */
+.wyp-doc{background:#fff;color:#000;font-family:'Times New Roman',serif;font-size:10pt;line-height:1.5;padding:14mm 16mm;max-width:680px;margin:0 auto;box-shadow:0 4px 24px rgba(0,0,0,.3);border-radius:4px}
+[data-theme="light"] .wyp-doc{box-shadow:0 2px 12px rgba(0,0,0,.12)}
+
+/* Tytuł */
+.wyp-title{text-align:center;font-size:12pt;font-weight:bold;text-transform:uppercase;letter-spacing:1px;margin-bottom:20px;padding-bottom:10px;border-bottom:2pt solid #000}
+
+/* Bloki stron */
+.wyp-party{margin-bottom:14px}
+.wyp-party-hd{font-size:7pt;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#fff;background:#444;padding:3px 8px;margin-bottom:0;display:inline-block}
+.wyp-party-body{border:1pt solid #bbb;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.wyp-field{display:flex;flex-direction:column}
+.wyp-field-lbl{font-size:7pt;color:#666;font-style:italic;margin-bottom:2px}
+.wyp-field-val{font-size:10.5pt;border-bottom:.5pt solid #999;min-height:21px;padding:1px 3px 2px;line-height:1.4}
+.wyp-field-val b{font-weight:700}
+.wyp-2col{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+
+/* Pojazd */
+.wyp-vehicle{border:1.2pt solid #555;padding:9px 12px;margin-bottom:14px}
+.wyp-vehicle-hd{font-size:7pt;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#555;margin-bottom:6px}
+
+/* Treść */
+.wyp-sep{border:none;border-top:1pt solid #ccc;margin:16px 0}
+.wyp-section-hd{text-align:center;font-size:11pt;font-weight:bold;letter-spacing:3px;margin-bottom:12px}
+.wyp-text{font-size:10pt;line-height:1.7;text-align:justify}
+
+/* Podpisy */
+.wyp-sigs{display:grid;grid-template-columns:1fr 1fr;gap:0 40px;margin-top:52px}
+.wyp-sig-blk{text-align:center}
+.wyp-sig-line{border-top:.5pt solid #888;margin-bottom:4px}
+.wyp-sig-lbl{font-size:7pt;color:#555;font-style:italic}
+
+/* ── SPIN ── */
+.spin{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;animation:spin .7s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── TOAST ── */
+#toastCont{position:fixed;top:12px;right:12px;z-index:9999;display:flex;flex-direction:column;gap:6px;max-width:300px}
+.toast{display:flex;align-items:center;gap:8px;padding:9px 13px;border-radius:9px;font-size:12px;font-weight:500;animation:tIn .2s ease;box-shadow:var(--shadow);cursor:pointer}
+@keyframes tIn{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:none}}
+.t-success{background:var(--green-bg);border:1px solid rgba(34,197,94,.3);color:var(--green-txt)}
+.t-error{background:var(--red-bg);border:1px solid rgba(239,68,68,.3);color:var(--red-txt)}
+
+/* ── SEPARATOR ── */
+.sb-divider{height:1px;background:var(--border);margin:0 14px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .workspace{display:block;height:auto;overflow:visible}
+  .sidebar{width:100%;border-right:none;border-bottom:1px solid var(--border);max-height:none;transition:none}
+  .sidebar.hidden{display:none}
+  .main{overflow:visible}
+  .g3{grid-template-columns:1fr 1fr}
+  .gc23{grid-column:1/3}
+  .main-hdr{padding:12px 14px}
+  .form-content{padding:12px 14px}
+}
+@media(max-width:520px){
+  .g2,.g3{grid-template-columns:1fr}
+  .gc23,.gc13{grid-column:auto}
+  .nav-sub{display:none}
+  .nav-sep{display:none}
+}
+</style>
+</head>
+<body>
+
+<div id="toastCont"></div>
+
+<nav class="navbar">
+  <div class="nav-brand">
+    <svg class="nav-logo" viewBox="0 0 30 30" fill="none">
+      <rect width="30" height="30" rx="7" fill="#0a0a0a"/>
+      <rect width="30" height="30" rx="7" fill="rgba(124,58,237,.15)"/>
+      <path d="M8 22h14M8 22l3-6 3 4 3-8 3 10" stroke="#7c3aed" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="21" cy="10" r="2.5" fill="none" stroke="#c084fc" stroke-width="1.5"/>
+      <line x1="21" y1="12.5" x2="21" y2="16" stroke="#c084fc" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    <span class="nav-name">Zbycie<span style="color:var(--accent)">·</span>Pojazdu</span>
+    <span class="nav-ver">v2.5</span>
+  </div>
+  <div class="nav-right" style="gap:6px">
+    <button class="btn btn-danger" id="clearBtn" style="display:none" title="Wyczyść dane i formularz">
+      <svg width="10" height="10" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="1,3 13,3"/><path d="M4 3V2a1 1 0 011-1h4a1 1 0 011 1v1M5.5 6v4M8.5 6v4"/><rect x="2" y="3" width="10" height="10" rx="1"/></svg>
+      Wyczyść
+    </button>
+    <button class="btn btn-sidebar active" id="sbToggle" title="Panel importu PDF">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+      Import PDF
+    </button>
+    <button class="theme-toggle" id="themeToggle" title="Przełącz motyw"></button>
+    <button class="btn btn-teal" id="printBtn" title="Drukuj zawiadomienie o zbyciu">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Zbycie
+    </button>
+    <button class="btn" style="background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.35);color:#d97706" id="printBtn2" title="Drukuj wypowiedzenie OC">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Wyp. OC
+    </button>
+  </div>
+</nav>
+
+<div class="workspace">
+
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sb-section">
+      <div class="sb-label">1 · Faktura PDF</div>
+      <div class="dz" id="dz">
+        <input type="file" id="fileIn" accept=".pdf,application/pdf">
+        <div class="dz-ico">📄</div>
+        <div class="dz-p">Upuść fakturę PDF tutaj</div>
+        <div class="dz-h">lub kliknij, aby wybrać</div>
+      </div>
+    </div>
+
+    <div class="sb-section" style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+      <div class="fchip" id="chip">
+        <span class="fchip-ico">📑</span>
+        <div class="fchip-info">
+          <div class="fchip-name" id="chipName">—</div>
+          <div class="fchip-size" id="chipSize">—</div>
+        </div>
+        <button class="fchip-del" id="chipDel" title="Usuń plik">✕</button>
+      </div>
+      <button class="btn btn-primary" id="parseBtn" disabled style="width:100%;justify-content:center;padding:9px">
+        <span id="bIco">📥</span><span id="bTxt">Parsuj fakturę</span>
+      </button>
+    </div>
+
+    <div class="sb-divider" style="margin-top:12px"></div>
+
+    <div class="sb-section" style="margin-top:12px">
+      <div class="sb-label">Log ekstrakcji</div>
+      <div class="log" id="log"><span class="l-info">Gotowy · wczytaj plik PDF.</span></div>
+    </div>
+
+    <div class="sb-divider" style="margin-top:12px"></div>
+
+    <div class="sb-section" style="margin-top:12px">
+      <div class="sb-label">Wykryte dane</div>
+      <div class="ext" id="extCard">
+        <div class="ext-row"><span class="ext-k">Nr faktury</span><span class="ext-v" id="e_nrfak">—</span></div>
+        <div class="ext-row"><span class="ext-k">Data</span><span class="ext-v" id="e_data">—</span></div>
+        <div class="ext-row"><span class="ext-k">Pojazd</span><span class="ext-v" id="e_pojazd">—</span></div>
+        <div class="ext-row"><span class="ext-k">Nr rej.</span><span class="ext-v" id="e_nrrej">—</span></div>
+        <div class="ext-row"><span class="ext-k">VIN</span><span class="ext-v" id="e_vin">—</span></div>
+        <div class="ext-row"><span class="ext-k">Nabywca</span><span class="ext-v" id="e_nab">—</span></div>
+        <div class="ext-row"><span class="ext-k">NIP</span><span class="ext-v" id="e_nip">—</span></div>
+        <div class="ext-row"><span class="ext-k">Kwota</span><span class="ext-v" id="e_kwota">—</span></div>
+      </div>
+      <div class="ext-empty" id="extEmpty">Brak danych — wczytaj fakturę.</div>
+    </div>
+
+  </aside>
+
+  <div class="main" id="mainArea">
+
+    <div class="main-hdr">
+      <div class="main-hdr-left">
+        <h1>Zawiadomienie o Zbyciu Pojazdu</h1>
+        <p>Starostwo Powiatowe w Mogilnie · ul. Narutowicza 1, 88-300 Mogilno</p>
+      </div>
+    </div>
+
+    <div class="form-content">
+
+      <div class="pdf-viewer" id="pdfViewer">
+        <div class="pdf-top">
+          <div class="pdf-info">
+            <div class="pdf-dot"></div>
+            Podgląd faktury PDF
+          </div>
+          <div class="pdf-controls">
+            <button class="pdf-btn" id="prevPage">◀ Poprzednia</button>
+            <span class="pdf-page" id="pageInfo">—</span>
+            <button class="pdf-btn" id="nextPage">Następna ▶</button>
+            <button class="pdf-btn" id="zoomOut">−</button>
+            <button class="pdf-btn" id="zoomIn">+</button>
+          </div>
+        </div>
+        <div class="pdf-canvas-wrap" id="pdfWrap">
+          <canvas id="pdfCanvas"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hdr"><span class="card-ico">📅</span> Daty</div>
+        <div class="card-body">
+          <div class="g2">
+            <div class="fg">
+              <label for="f_doc_date">Data wniosku (górny prawy róg)</label>
+              <input type="date" id="f_doc_date">
+            </div>
+            <div class="fg">
+              <label for="f_sale_date">Data zbycia pojazdu</label>
+              <input type="date" id="f_sale_date">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hdr"><span class="card-ico">🚗</span> Dane pojazdu</div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
+          <div class="g3">
+            <div class="fg"><label for="f_marka">Marka</label><input type="text" id="f_marka" placeholder="Skoda"></div>
+            <div class="fg"><label for="f_model">Model</label><input type="text" id="f_model" placeholder="Superb"></div>
+            <div class="fg"><label for="f_nrrej">Nr rejestracyjny</label><input type="text" id="f_nrrej" placeholder="CMG0000A"></div>
+          </div>
+          <div class="g3">
+            <div class="fg gc23"><label for="f_vin">Nr VIN / nadwozia</label><input type="text" id="f_vin" placeholder="17 znaków"></div>
+            <div class="fg"><label for="f_rok">Rok produkcji</label><input type="text" id="f_rok" placeholder="2022"></div>
+          </div>
+          <div class="g3">
+            <div class="fg"><label for="f_km">Przebieg</label><input type="text" id="f_km" placeholder="151 468 km"></div>
+            <div class="fg"><label for="f_faktura">Nr faktury sprzedaży</label><input type="text" id="f_faktura" placeholder="FS-FLLG/26/01/"></div>
+            <div class="fg"><label for="f_cena">Cena brutto (PLN)</label><input type="text" id="f_cena" placeholder="60 000,00"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hdr"><span class="card-ico">🏢</span> Dane nabywcy</div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
+          <div class="fg"><label for="f_naz">Pełna nazwa / imię i nazwisko</label><input type="text" id="f_naz" placeholder="Nazwa firmy lub imię i nazwisko"></div>
+          <div class="g2">
+            <div class="fg"><label for="f_ulica">Ulica i numer</label><input type="text" id="f_ulica" placeholder="ulica 1b"></div>
+            <div class="fg"><label for="f_miasto">Kod pocztowy i miejscowość</label><input type="text" id="f_miasto" placeholder="11-100 Miasto"></div>
+          </div>
+          <div class="g2">
+            <div class="fg"><label for="f_nip">NIP nabywcy</label><input type="text" id="f_nip" placeholder="0002223333"></div>
+            <div class="fg"><label for="f_regon">REGON (opcjonalnie)</label><input type="text" id="f_regon" placeholder="123456789"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hdr"><span class="card-ico">🛡️</span> Polisa OC — dane do wypowiedzenia</div>
+        <div class="card-body">
+          <div class="g2">
+            <div class="fg"><label for="f_polisa">Nr polisy OC zbywcy</label><input type="text" id="f_polisa" placeholder="np. POUG5235/24/KOM/C000291"></div>
+            <div class="fg">
+              <label for="f_ubezp_sel">Zakład ubezpieczeń</label>
+              <select id="f_ubezp_sel">
+                <option value="UNIQA">UNIQA</option>
+                <option value="HESTIA">HESTIA</option>
+                <option value="inne">— wpisz ręcznie —</option>
+              </select>
+              <input type="text" id="f_ubezp" placeholder="Wpisz nazwę ubezpieczyciela" style="display:none;margin-top:5px">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="preview-card">
+        <div class="prev-hdr">
+          <div class="live-dot"></div>
+          Zawiadomienie o Zbyciu Pojazdu · aktualizuje się na bieżąco
+        </div>
+        <div class="prev-body">
+          <div id="docOut"></div>
+        </div>
+      </div>
+
+      <div class="preview-card" style="margin-top:12px">
+        <div class="prev-hdr">
+          <div class="live-dot" style="background:#f59e0b"></div>
+          Wypowiedzenie umowy OC · aktualizuje się na bieżąco
+        </div>
+        <div class="prev-body">
+          <div id="docOut2"></div>
+        </div>
+      </div>
+
+    </div></div></div><div id="printTarget" style="display:none"></div>
+
+<script>
+// ══ UŻYTECZNE FUNKCJE / NARZĘDZIA ════════════════════════════════════════
+// Optymalizacja wydajności formularza
+function debounce(func, wait) {
+  let timeout;
+  return function(...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), wait);
+  };
+}
+
+// Zabezpieczenie przed XSS
+function escapeHTML(str) {
+  if (!str) return '';
+  return String(str).replace(/[&<>'"]/g, tag => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    "'": '&#39;',
+    '"': '&quot;'
+  }[tag] || tag));
+}
+
+// ══ PDF.js CONFIG ═════════════════════════════════════════════════════
+if(typeof pdfjsLib!=='undefined')
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// ══ THEME TOGGLE ══════════════════════════════════════════════════════
+const html=document.documentElement;
+document.getElementById('themeToggle').addEventListener('click',()=>{
+  html.dataset.theme=html.dataset.theme==='dark'?'light':'dark';
+  document.getElementById('metaTheme').content=html.dataset.theme==='dark'?'#0a0a0a':'#f4f5f7';
+});
+
+// ══ SIDEBAR TOGGLE ════════════════════════════════════════════════════
+const sbBtn=document.getElementById('sbToggle');
+const sbEl=document.getElementById('sidebar');
+sbBtn.addEventListener('click',()=>{
+  const hidden=sbEl.classList.toggle('hidden');
+  sbBtn.classList.toggle('active',!hidden);
+});
+
+// ══ PDF VIEWER STATE ══════════════════════════════════════════════════
+let pdfDoc=null,currentPage=1,zoomLevel=1;
+const canvas=document.getElementById('pdfCanvas');
+const ctx=canvas.getContext('2d');
+
+async function renderPdfPage(pageNum){
+  if(!pdfDoc)return;
+  try{
+    const page=await pdfDoc.getPage(pageNum);
+    const viewport=page.getViewport({scale:zoomLevel});
+    const dpr=window.devicePixelRatio||1;
+    
+    // Ustawienie wymiarów
+    canvas.width =Math.floor(viewport.width *dpr);
+    canvas.height=Math.floor(viewport.height*dpr);
+    canvas.style.width =Math.floor(viewport.width )+'px';
+    canvas.style.height=Math.floor(viewport.height)+'px';
+    
+    // CZYSZCZENIE CANVAS (Optymalizacja pamięci i renderowania)
+    ctx.clearRect(0, 0, canvas.width, canvas.height); 
+    
+    const transform=dpr!==1?[dpr,0,0,dpr,0,0]:null;
+    await page.render({canvasContext:ctx,viewport,...(transform?{transform}:{})}).promise;
+    
+    document.getElementById('pageInfo').textContent=`${pageNum} / ${pdfDoc.numPages}`;
+    document.getElementById('prevPage').disabled=pageNum===1;
+    document.getElementById('nextPage').disabled=pageNum===pdfDoc.numPages;
+  }catch(err){log('Błąd renderowania: '+err.message,'err')}
+}
+
+document.getElementById('prevPage').addEventListener('click',()=>{if(currentPage>1){currentPage--;renderPdfPage(currentPage)}});
+document.getElementById('nextPage').addEventListener('click',()=>{if(pdfDoc&&currentPage<pdfDoc.numPages){currentPage++;renderPdfPage(currentPage)}});
+document.getElementById('zoomIn').addEventListener('click',()=>{zoomLevel=Math.min(zoomLevel+.25,3);renderPdfPage(currentPage)});
+document.getElementById('zoomOut').addEventListener('click',()=>{zoomLevel=Math.max(zoomLevel-.25,.5);renderPdfPage(currentPage)});
+
+async function loadPdfViewer(blob){
+  try{
+    const ab=await blob.arrayBuffer();
+    pdfDoc=await pdfjsLib.getDocument({data:ab}).promise;
+    currentPage=1;
+    await renderPdfPage(currentPage);
+    document.getElementById('pdfViewer').classList.add('on');
+    log('Podgląd PDF załadowany ✓','ok');
+  }catch(err){log('Błąd ładowania PDF: '+err.message,'err');console.error(err)}
+}
+
+// ══ PARSER ════════════════════════════════════════════════════════════
+// Uporządkowany parser dla lepszej czytelności
+function parseInvoiceText(text){
+  const raw=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+  const lines=raw.split('\n').map(l=>l.trim()).filter(Boolean);
+  const full=lines.join(' ');
+  
+  // Helpers
+  function parseDate(s){if(!s)return null;let m=s.match(/(\d{4})-(\d{2})-(\d{2})/);if(m)return`${m[1]}-${m[2]}-${m[3]}`;m=s.match(/(\d{1,2})[.\-\/](\d{1,2})[.\-\/](\d{4})/);if(m)return`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;return null}
+  function parseAmt(s){if(!s)return null;return parseFloat(s.replace(/\s/g,'').replace(',','.').replace(/[^\d.]/g,''))||null}
+  function find(re){const m=full.match(re);return m?(m[1]??m[0]).trim():null}
+  function findL(re){for(const l of lines){const m=l.match(re);if(m)return(m[1]??m[0]).trim()}return null}
+  
+  // 1. Podstawowe dane faktury
+  const nr_faktury=find(/Faktura\s+VAT\s+(?:nr\s+|nr:\s*)([\w\-\/]+)/i)||find(/Faktura\s+(?:nr\s+|nr:\s*)([\w\-\/]+)/i)||find(/Nr\s+faktury[:\s]+([\w\-\/]+)/i)||findL(/^(FS-[\w\/]+)$/)||null;
+  const data_wystawienia=parseDate(find(/Data\s+wystawienia[:\s]+([\d\-./]+)/i));
+  const data_sprzedazy=parseDate(find(/Data\s+dostawy[^:]*:\s*([\d\-./]+)/i)||find(/Data\s+sprzeda[żz]y?[:\s]*([\d\-./]+)/i)||find(/Sprzeda[żz]\s+z\s+([\d\-./]+)/i))||data_wystawienia;
+  
+  // 2. Ekstrakcja nabywcy
+  let nabywca_nazwa=null,nabywca_nip=null,nabywca_regon=null,nabywca_ulica=null,nabywca_kod_miasto=null;
+  const iN=lines.findIndex(l=>/^Nabywca[:\s]*/i.test(l));
+  if(iN!==-1){
+    let iEnd=lines.length;
+    for(let i=iN+1;i<Math.min(iN+25,lines.length);i++){if(/^(Odbiorca|Lp\.?|Nr\s+p\/p|Pozycja|Tabela|Razem|Zam[óo]wienia)/i.test(lines[i])||/^\d+\s+\d{4,}/.test(lines[i])){iEnd=i;break;}}
+    const buyerLines=lines.slice(iN+1,iEnd),buyerText=buyerLines.join(' ');
+    const nazwaLines=[];
+    for(let i=0;i<Math.min(7,buyerLines.length);i++){const l=buyerLines[i];if(/^\[[\w\d\s]+\]$/.test(l))continue;if(/^NIP/i.test(l)||/^REGON/i.test(l))break;if(/^\d{2}-\d{3}/.test(l))break;if(/^(ul\.|al\.|os\.|pl\.)/i.test(l))break;if(/^(imię|kod|pese|nr\s+zam)/i.test(l))break;if(/\s+\d+[A-Z0-9\/]*$/i.test(l)&&!/^[A-ZĄĆĘŁŃÓŚŹŻ\s]{10,}$/.test(l))break;if(l.length>2)nazwaLines.push(l);}
+    if(nazwaLines.length)nabywca_nazwa=nazwaLines.join(' ').replace(/\s{2,}/g,' ');
+    
+    const nipM=buyerText.match(/NIP[:\s]+([\d\s\-]{10,14})/i);if(nipM)nabywca_nip=nipM[1].replace(/[\s\-]/g,'');
+    const regM=buyerText.match(/REGON[:\s]+([\d]{9,14})/i);if(regM)nabywca_regon=regM[1];
+    const kodM=buyerText.match(/(\d{2}-\d{3}\s+[A-ZĄĆĘŁŃÓŚŹŻ][A-ZĄĆĘŁŃÓŚŹŻa-ząćęłńóśźż\s\-]+?)(?:\s{2,}|NIP|REGON|Odbiorca|$)/i);if(kodM)nabywca_kod_miasto=kodM[1].trim();
+    
+    for(const l of buyerLines){const uM=l.match(/^((?:ul\.|al\.|os\.|pl\.)\s*[\w\sĄĆĘŁŃÓŚŹŻąćęłńóśźż]+\d+[\w\/]*)$/i);if(uM){nabywca_ulica=uM[1];break;}}
+    if(!nabywca_ulica){for(const l of buyerLines){if(/^\d{2}-\d{3}/.test(l)||/^NIP/i.test(l)||/^REGON/i.test(l)||/^\[/.test(l))continue;if(/^[A-ZĄĆĘŁŃÓŚŹŻ][A-ZĄĆĘŁŃÓŚŹŻa-ząćęłńóśźż\s\-]{2,}\s+\d+[A-Z0-9\/]*$/i.test(l)){nabywca_ulica=l;break;}}}
+  }
+  if(!nabywca_regon){const rgM=full.match(/REGON[:\s]+([\d]{9,14})/i);if(rgM)nabywca_regon=rgM[1];}
+  const kupujacy={nazwa:nabywca_nazwa,ulica:nabywca_ulica,kod_miasto:nabywca_kod_miasto,nip:nabywca_nip,regon:nabywca_regon};
+  
+  // 3. Ekstrakcja pojazdów
+  const RE_P=/(?:sam(?:och[oó]d)?\.?\s+(?:osob(?:owy)?\.?|cię[żz]arowy|ciez?arowy|dostawczy)?\.?\s*)?([A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+(?:\s+[A-ZĄĆĘŁŃÓŚŹŻ]?[a-ząćęłńóśźż]+)*)[,\s]+nr\s+rej\.?\s*([A-Z]{1,3}\s?[A-Z0-9]{4,8})/i;
+  const RE_SAM=/(?:sam(?:ochód?)?\.?\s+(?:osobowy|cię[żz]arowy|dostawczy))[,.\s]+([A-ZĄĆĘŁŃÓŚŹŻa-ząćęłńóśźż]+)\s+([A-ZĄĆĘŁŃÓŚŹŻa-ząćęłńóśźż]+)[,\s]+nr\s+rej\.?\s*([A-Z]{1,3}\s?[A-Z0-9]{4,8})/i;
+  const pozycje=[];const usedIdx=new Set();
+  
+  for(let i=0;i<lines.length;i++){
+    if(usedIdx.has(i))continue;const line=lines[i];let marka=null,model=null,nr_rej=null,matched=false;
+    const ms=line.match(RE_SAM);if(ms){marka=ms[1];model=ms[2];nr_rej=ms[3]?.replace(/\s/g,'').toUpperCase()||null;usedIdx.add(i);matched=true;}
+    else{const mp=line.match(RE_P);if(mp){usedIdx.add(i);matched=true;const ctx0=lines.slice(Math.max(0,i-1),Math.min(lines.length,i+5)).join(' ');const mm=ctx0.match(/(?:osobowy|cię[żz]arowy|dostawczy)[,.\s]+([A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+)\s+([A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+(?:\s+[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+)?)/i);if(mm){marka=mm[1];model=mm[2]}else{const pp=mp[1].trim().split(/\s+/);marka=pp[0]||null;model=pp.slice(1).join(' ')||null}nr_rej=mp[2]?.replace(/\s/g,'').toUpperCase()||null;}}
+    if(!matched)continue;
+    const ctx=lines.slice(Math.max(0,i-1),Math.min(lines.length,i+6)).join(' ');
+    const vM=ctx.match(/(?:VIN|nr\s+(?:nadwozia|vin))[:\s]*([A-HJ-NPR-Z0-9]{17})/i);
+    const rM=ctx.match(/(?:rok\s+produkcji?|rok)[:\s]*(\d{4})/i);
+    const kM=ctx.match(/(?:przebieg)[:\s]*([\d\s]+?)\s*km/i);
+    const nM=ctx.match(/([\d\s]{3,}[,.][\d]{2})\s+(?:23|8|5|0)%/);
+    const kdM=line.match(/^\s*\d+\s+(\d{4,8})\s+/);
+    pozycje.push({lp:pozycje.length+1,kod:kdM?kdM[1]:null,marka,model,nr_rej,nr_vin:vM?vM[1].toUpperCase():null,rok:rM?rM[1]:null,przebieg:kM?kM[1].replace(/\s/g,'')+'km':null,cena_netto:nM?parseAmt(nM[1]):null});
+  }
+  {const seen=new Map();for(const p of pozycje){const k=p.nr_rej||`${p.marka}_${p.lp}`;if(!seen.has(k))seen.set(k,p);else if(p.kod&&!seen.get(k).kod)seen.set(k,{...seen.get(k),...p})}pozycje.length=0;let lp=1;for(const p of seen.values()){p.lp=lp++;pozycje.push(p)}}
+  
+  // 4. Podsumowanie kwot
+  const rL=lines.find(l=>/^Razem:/i.test(l)&&/\d/.test(l));let sN=null,sV=null,sB=null;
+  if(rL){const ns=[...rL.matchAll(/([\d\s]+[,.][\d]{2})/g)].map(x=>parseAmt(x[1]));if(ns.length>=3)[sN,sV,sB]=ns;else if(ns.length===1)sB=ns[0]}
+  if(!sB){const rd=find(/Razem\s+do\s+zap[łl]aty[:\s]+([\d\s,]+)\s*PLN/i);sB=rd?parseAmt(rd):null}
+  
+  return{nr_faktury,data_wystawienia,data_sprzedazy,kupujacy,pozycje,suma_netto:sN,suma_vat:sV,suma_brutto:sB,forma_platnosci:find(/Forma\s+p[łl]atno[sś]ci[:\s]+([A-Za-z]+)/i)||findL(/^(Przelew|Gotówka|Karta)$/i),termin_platnosci:parseDate(find(/Termin[:\s]+([\d\-./]+)/i)),_meta:{linii:lines.length,znakow:text.length,pojazdow:pozycje.length}};
+}
+
+// ══ PDF EXTRACTOR ═════════════════════════════════════════════════════
+async function extractPdfText(blob){
+  const ab=await blob.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:ab}).promise;
+  let out='';
+  for(let p=1;p<=pdf.numPages;p++){
+    const page=await pdf.getPage(p);
+    const content=await page.getTextContent();
+    let lastY=null;
+    for(const item of content.items){const y=Math.round(item.transform[5]);if(lastY!==null&&Math.abs(y-lastY)>4)out+='\n';out+=item.str+' ';lastY=y;}
+    out+='\n';
+  }
+  return out;
+}
+
+// ══ STATE & REFS ══════════════════════════════════════════════════════
+let pdfBlob=null;
+const dzEl=document.getElementById('dz'),fileIn=document.getElementById('fileIn');
+const chip=document.getElementById('chip'),chipName=document.getElementById('chipName'),chipSize=document.getElementById('chipSize'),chipDel=document.getElementById('chipDel');
+const parseBtn=document.getElementById('parseBtn'),logEl=document.getElementById('log');
+const clearBtn=document.getElementById('clearBtn');
+document.getElementById('f_doc_date').value=new Date().toISOString().split('T')[0];
+
+// ══ FILE HANDLING ══════════════════════════════════════════════════════
+dzEl.addEventListener('dragover',e=>{e.preventDefault();dzEl.classList.add('over')});
+dzEl.addEventListener('dragleave',()=>dzEl.classList.remove('over'));
+dzEl.addEventListener('drop',e=>{e.preventDefault();dzEl.classList.remove('over');const f=e.dataTransfer.files[0];if(f&&f.type==='application/pdf')loadFile(f);else log('Akceptowane są tylko pliki PDF.','err')});
+fileIn.addEventListener('change',e=>{if(e.target.files[0])loadFile(e.target.files[0])});
+chipDel.addEventListener('click',clearFile);
+clearBtn.addEventListener('click',clearFile);
+
+function loadFile(f){
+  chipName.textContent=f.name;chipSize.textContent=(f.size/1024).toFixed(1)+' KB';
+  chip.classList.add('on');parseBtn.disabled=false;
+  clearBtn.style.display='';
+  log(`Załadowano: ${f.name}`,'ok');
+  pdfBlob=f;
+  loadPdfViewer(pdfBlob);
+  runParse();
+}
+function clearFile(){
+  pdfBlob=null;fileIn.value='';pdfDoc=null;
+  chip.classList.remove('on');parseBtn.disabled=true;
+  clearBtn.style.display='none';
+  document.getElementById('extCard').classList.remove('on');
+  document.getElementById('extEmpty').style.display='';
+  document.getElementById('pdfViewer').classList.remove('on');
+  
+  // reset formularza
+  ['f_sale_date','f_marka','f_model','f_nrrej','f_vin','f_rok','f_km','f_faktura','f_cena','f_naz','f_ulica','f_miasto','f_nip','f_regon','f_polisa','f_ubezp']
+    .forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.classList.remove('ok')}});
+  // reset selecta ubezpieczyciela
+  const sel=document.getElementById('f_ubezp_sel');
+  if(sel){sel.value='UNIQA';}
+  document.getElementById('f_ubezp').style.display='none';
+  document.getElementById('f_doc_date').value=new Date().toISOString().split('T')[0];
+  renderDoc();
+  renderWypowiedzenie();
+  log('Dane wyczyszczone.','warn');
+}
+
+// ══ LOG ═══════════════════════════════════════════════════════════════
+function log(msg,type='info'){
+  const d=document.createElement('div');d.className=`l-${type}`;
+  const ts=new Date().toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  d.textContent=`[${ts}] ${msg}`;logEl.appendChild(d);logEl.scrollTop=logEl.scrollHeight;
+}
+
+// ══ TOAST ═════════════════════════════════════════════════════════════
+function toast(msg,type='success'){
+  const t=document.createElement('div');t.className=`toast t-${type}`;t.textContent=msg;
+  document.getElementById('toastCont').appendChild(t);
+  t.addEventListener('click',()=>t.remove());setTimeout(()=>t.remove(),3500);
+}
+
+// ══ PARSE PIPELINE ════════════════════════════════════════════════════
+parseBtn.addEventListener('click',runParse);
+
+async function runParse(){
+  if(!pdfBlob)return;
+  parseBtn.disabled=true;
+  document.getElementById('bIco').innerHTML='<span class="spin"></span>';
+  document.getElementById('bTxt').textContent='Parsowanie…';
+  try{
+    if(typeof pdfjsLib==='undefined')throw new Error('PDF.js niedostępne — sprawdź połączenie z internetem.');
+    log('Ekstrakcja warstwy tekstowej…','info');
+    const text=await extractPdfText(pdfBlob);
+    log(`Wyodrębniono ${text.length} znaków.`,'ok');
+    
+    const parsed=parseInvoiceText(text);
+    log(`Parser OK · ${parsed._meta.pojazdow} pojazd(ów).`,'ok');
+    fillForm(parsed);fillExt(parsed);
+    log('Formularz wypełniony ✓','ok');
+    toast('Formularz wypełniony pomyślnie','success');
+    
+    if(window.innerWidth<=900&&!sbEl.classList.contains('hidden')){sbEl.classList.add('hidden');sbBtn.classList.remove('active');}
+    
+    // Autofocus na kluczowe pole po załadowaniu
+    setTimeout(() => {
+        const markaInput = document.getElementById('f_marka');
+        if (markaInput) markaInput.focus();
+    }, 100);
+
+  }catch(err){log(`BŁĄD: ${err.message}`,'err');toast(err.message,'error');console.error(err)}
+  finally{parseBtn.disabled=false;document.getElementById('bIco').textContent='🔄';document.getElementById('bTxt').textContent='Parsuj ponownie';}
+}
+
+// ══ FILL FORM ═════════════════════════════════════════════════════════
+function sf(id,val){const el=document.getElementById(id);if(!el||!val)return;el.value=val;el.classList.add('ok');el.addEventListener('input',()=>el.classList.remove('ok'),{once:true});}
+function fPLN(n){if(!n)return'';return n.toLocaleString('pl-PL',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function fillForm(d){
+  sf('f_sale_date',d.data_sprzedazy);
+  const p=d.pozycje[0];
+  if(p){sf('f_marka',p.marka);sf('f_model',p.model);sf('f_nrrej',p.nr_rej);sf('f_vin',p.nr_vin);sf('f_rok',p.rok);sf('f_km',p.przebieg);if(d.suma_brutto)sf('f_cena',fPLN(d.suma_brutto))}
+  sf('f_faktura',d.nr_faktury);
+  const k=d.kupujacy;sf('f_naz',k.nazwa);sf('f_ulica',k.ulica);sf('f_miasto',k.kod_miasto);sf('f_nip',k.nip);sf('f_regon',k.regon);
+  renderDoc();
+  renderWypowiedzenie();
+}
+function fillExt(d){
+  const p=d.pozycje[0];
+  const s=(id,val)=>{const el=document.getElementById(id);el.textContent=val||'—';val?el.classList.add('ok'):el.classList.remove('ok')};
+  s('e_nrfak',d.nr_faktury);s('e_data',d.data_sprzedazy);
+  s('e_pojazd',p?`${p.marka||''} ${p.model||''}`.trim():null);
+  s('e_nrrej',p?.nr_rej);s('e_vin',p?.nr_vin);
+  s('e_nab',d.kupujacy.nazwa?d.kupujacy.nazwa.substring(0,28)+'…':null);
+  s('e_nip',d.kupujacy.nip);s('e_kwota',d.suma_brutto?fPLN(d.suma_brutto)+' PLN':null);
+  document.getElementById('extCard').classList.add('on');
+  document.getElementById('extEmpty').style.display='none';
+}
+
+// ══ LIVE RENDER Z DEBOUNCE I XSS PROTECTION ════════════════════════════
+const debouncedRender = debounce(renderDoc, 250);
+
+['f_doc_date','f_sale_date','f_marka','f_model','f_nrrej','f_vin','f_rok','f_km','f_faktura','f_cena','f_naz','f_ulica','f_miasto','f_nip','f_regon','f_polisa']
+  .forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.addEventListener('input', ()=>{debouncedRender();renderWypowiedzenie();});
+  });
+
+// Funkcja pobierająca z ucieczką znaków (XSS)
+const fv=id=>{
+  const el=document.getElementById(id);
+  return escapeHTML(el ? el.value.trim() : '');
+};
+
+function fDate(iso){
+  if(!iso)return'<span class="empty-val">______________________</span>';
+  const d=new Date(iso);if(isNaN(d))return escapeHTML(iso);
+  return escapeHTML(d.toLocaleDateString('pl-PL',{day:'2-digit',month:'long',year:'numeric'}));
+}
+
+function renderDoc(){
+  const marka=fv('f_marka'),model=fv('f_model'),nrrej=fv('f_nrrej'),vin=fv('f_vin');
+  const rok=fv('f_rok'),km=fv('f_km'),nrfak=fv('f_faktura'),cena=fv('f_cena');
+  const docD=fv('f_doc_date'),salD=fv('f_sale_date');
+  const naz=fv('f_naz'),ulica=fv('f_ulica'),miasto=fv('f_miasto'),nip=fv('f_nip'),regon=fv('f_regon');
+  const vLine=[[marka,model].filter(Boolean).join(' '),nrrej?`nr rej. ${nrrej}`:'',vin?`VIN: ${vin}`:'',rok?`rok prod. ${rok}`:'',km?`przebieg: ${km}`:''].filter(Boolean).join(', ');
+  
+  document.getElementById('docOut').innerHTML=`
+<div class="doc">
+  <div class="doc-top">
+    <div class="doc-date">Mogilno, dnia <strong>${fDate(docD)}</strong></div>
+    <div class="doc-owner">
+      <p><strong>PUH CHEMIROL SP. Z O.O.</strong></p>
+      <span class="ob-lbl">imię i nazwisko / nazwa właściciela</span>
+      <p>Przemysłowa 3</p>
+      <span class="ob-lbl">ulica</span>
+      <p>88-300 Mogilno</p>
+      <span class="ob-lbl">kod pocztowy, miejscowość</span>
+      <p>092949480</p>
+      <span class="ob-lbl">PESEL / REGON</span>
+    </div>
+    <div class="doc-office">
+      <div class="office-box">
+        <strong>Starosta Mogileński</strong><br>
+        ul. Narutowicza 1<br>
+        88-300 Mogilno
+      </div>
+    </div>
+  </div>
+  <div class="doc-title">Zawiadomienie o Zbyciu Pojazdu</div>
+  <div class="opt-note">
+    <strong>Dane nieobowiązkowe:</strong> nr tel. +48 723 683 310, e-mail: flota@chemirol.com —
+    Podanie tych danych jest jednocześnie wyrażeniem zgody na ich przetwarzanie.
+  </div>
+  <p style="margin-bottom:6px;font-size:10pt">Zawiadamiam, że pojazd:</p>
+  <div class="veh-box">
+    <strong>${vLine||'<span class="empty-val">Dane pojazdu — wypełnij formularz lub zaimportuj fakturę</span>'}</strong>
+    <div class="veh-sub">marka / model / nr rejestracyjny / nr nadwozia (VIN) / rok produkcji / przebieg</div>
+  </div>
+  <div class="sale-grid">
+    <div>
+      <div class="sg-lbl">Został zbyty w dniu:</div>
+      <div class="sg-val">${fDate(salD)}</div>
+      ${nrfak?`<div class="sg-sub">Faktura VAT nr ${nrfak}${cena?' · brutto: '+cena+' PLN':''}</div>`:''}
+    </div>
+    <div>
+      <div class="sg-lbl">na rzecz:</div>
+      <div class="sg-val">${naz||'<span class="empty-val">______________________________</span>'}</div>
+      <div class="sg-sub">(imię i nazwisko lub nazwa nabywcy)</div>
+    </div>
+    <div>
+      <div class="sg-lbl">Adres nabywcy:</div>
+      <div class="sg-val">${[ulica,miasto].filter(Boolean).join(', ')||'&nbsp;'}</div>
+    </div>
+    <div>
+      <div class="sg-lbl">NIP / REGON nabywcy:</div>
+      <div class="sg-val">${nip||'&nbsp;'}${regon?`<span style="margin-left:20px">${regon}</span>`:''}</div>
+    </div>
+  </div>
+  <div class="rodo">
+    Oświadczam, że podane we wniosku dane są aktualne i zgodne ze stanem faktycznym oraz zapoznałem się
+    z klauzulą informacyjną RODO znajdującą się na wniosku.
+  </div>
+  <div class="sig-row" style="margin-top:62px">
+    <div class="sig-blk">
+      <div class="sig-line"></div>
+      <div class="sig-lbl">(podpis właściciela / współwłaściciela)</div>
+    </div>
+  </div>
+  <div class="office-sec" style="margin-top:28px">
+    <div class="od-title">Wypełnia Urząd</div>
+    <div class="od-line">Odnotowano w informatycznej bazie danych w dniu <span class="empty-val">_________________________</span></div>
+    <div class="od-sig-row" style="margin-top:20px">
+      <div class="sig-blk">
+        <div class="sig-line"></div>
+        <div class="sig-lbl">(podpis i pieczęć pracownika)</div>
+      </div>
+    </div>
+  </div>
+</div>`;
+}
+
+// ══ WYPOWIEDZENIE OC ══════════════════════════════════════════════════
+function addDays(iso, days) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (isNaN(d)) return null;
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split('T')[0];
+}
+
+function fDateShort(iso){
+  if(!iso)return'<span class="empty-val">__-__-____</span>';
+  const d=new Date(iso);if(isNaN(d))return escapeHTML(iso);
+  const dd=String(d.getDate()).padStart(2,'0');
+  const mm=String(d.getMonth()+1).padStart(2,'0');
+  return `${dd}-${mm}-${d.getFullYear()}`;
+}
+
+function getUbezp(){
+  const sel=document.getElementById('f_ubezp_sel');
+  if(!sel)return'';
+  return sel.value==='inne' ? fv('f_ubezp') : escapeHTML(sel.value);
+}
+
+function renderWypowiedzenie() {
+  const marka  = fv('f_marka'), model = fv('f_model'), nrrej = fv('f_nrrej');
+  const salIso = document.getElementById('f_sale_date').value;
+  const naz    = fv('f_naz'), ulica = fv('f_ulica'), miasto = fv('f_miasto');
+  const polisa = fv('f_polisa');
+  const ubezp  = getUbezp();
+  const wypIso = addDays(salIso, 30);
+
+  const pojazd = [marka, model].filter(Boolean).join(' ') + (nrrej ? `, nr rej. ${nrrej}` : '');
+  const polisaLine = [polisa, ubezp].filter(Boolean).join(', ') || '<span class="empty-val">______________________________</span>';
+  const adres = [ulica, miasto].filter(Boolean).join(', ');
+  const E = s => s || '<span class="empty-val">______________________________</span>';
+
+  document.getElementById('docOut2').innerHTML = `
+<div class="wyp-doc">
+
+  <div class="wyp-title">Wypowiedzenie umowy ubezpieczenia OC<br>przez nabywcę pojazdu</div>
+
+  <!-- NABYWCA -->
+  <div class="wyp-party">
+    <div class="wyp-party-hd">Nabywca pojazdu</div>
+    <div class="wyp-party-body">
+      <div class="wyp-field">
+        <span class="wyp-field-lbl">imię i nazwisko / nazwa firmy</span>
+        <div class="wyp-field-val"><b>${naz || '<span class="empty-val">______________________________</span>'}</b></div>
+      </div>
+      <div class="wyp-field">
+        <span class="wyp-field-lbl">adres</span>
+        <div class="wyp-field-val">${E(adres)}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POJAZD / POLISA -->
+  <div class="wyp-vehicle">
+    <div class="wyp-vehicle-hd">Dane pojazdu i polisy</div>
+    <div class="wyp-2col" style="gap:8px 16px">
+      <div class="wyp-field">
+        <span class="wyp-field-lbl">marka, typ, nr rej. pojazdu</span>
+        <div class="wyp-field-val"><b>${E(pojazd)}</b></div>
+      </div>
+      <div class="wyp-field">
+        <span class="wyp-field-lbl">data nabycia pojazdu</span>
+        <div class="wyp-field-val">${fDateShort(salIso)}</div>
+      </div>
+      <div class="wyp-field" style="grid-column:1/-1">
+        <span class="wyp-field-lbl">nr polisy OC, nazwa zakładu ubezpieczeń (zbywcy pojazdu)</span>
+        <div class="wyp-field-val">${polisaLine}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ZBYWCA -->
+  <div class="wyp-party">
+    <div class="wyp-party-hd">Zbywca pojazdu</div>
+    <div class="wyp-party-body">
+      <div class="wyp-2col">
+        <div class="wyp-field">
+          <span class="wyp-field-lbl">nazwa firmy</span>
+          <div class="wyp-field-val"><b>PUH CHEMIROL SP. Z O.O.</b></div>
+        </div>
+        <div class="wyp-field">
+          <span class="wyp-field-lbl">adres</span>
+          <div class="wyp-field-val">ul. Przemysłowa 3, 88-300 Mogilno</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="wyp-sep">
+
+  <div class="wyp-section-hd">W Y P O W I E D Z E N I E</div>
+
+  <p class="wyp-text">
+    Niniejszym zgodnie z art.&nbsp;31 ust.&nbsp;1 ustawy z dnia 22 maja 2003&nbsp;r. o ubezpieczeniach
+    obowiązkowych, Ubezpieczeniowym Funduszu Gwarancyjnym i Polskim Biurze Ubezpieczycieli
+    Komunikacyjnych (Dz.U. z 2003&nbsp;r. nr&nbsp;124 poz.&nbsp;1152 z późn.&nbsp;zm.) wypowiadam
+    z dniem <strong>${fDateShort(wypIso)}</strong> umowę ubezpieczenia OC o wskazanym powyżej numerze.
+  </p>
+
+  <div class="wyp-sigs">
+    <div class="wyp-sig-blk">
+      <div class="wyp-sig-line"></div>
+      <div class="wyp-sig-lbl">miejscowość, dnia</div>
+    </div>
+    <div class="wyp-sig-blk">
+      <div class="wyp-sig-line"></div>
+      <div class="wyp-sig-lbl">podpis nabywcy pojazdu</div>
+    </div>
+  </div>
+
+</div>`;
+}
+
+// ══ PRINT ═════════════════════════════════════════════════════════════
+document.getElementById('printBtn').addEventListener('click',()=>{
+  const content=document.getElementById('docOut').innerHTML;
+  if(!content.includes('doc-title')){toast('Wypełnij formularz przed drukowaniem.','error');return;}
+  const w=window.open('','_blank','width=860,height=700');
+  w.document.write(`<!DOCTYPE html><html lang="pl"><head>
+<meta charset="UTF-8">
+<title>Zawiadomienie o Zbyciu Pojazdu · Chemirol</title>
+<style>
+@page{size:A4 portrait;margin:14mm 16mm}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Times New Roman',serif;font-size:9.5pt;color:#000;line-height:1.42}
+.doc{width:100%;max-width:100%}
+.doc-top{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:0 14px;margin-bottom:12px}
+.doc-date{grid-column:2;grid-row:1;text-align:right;font-size:9pt;white-space:nowrap;padding-bottom:5px}
+.doc-owner{grid-column:1;grid-row:2;padding-right:10px}
+.doc-owner p{margin-bottom:1px;font-size:9.5pt}
+.ob-lbl{display:block;font-size:6.5pt;color:#555;border-top:.3pt solid #ccc;padding-top:2px;margin-top:2px;margin-bottom:5px}
+.doc-office{grid-column:2;grid-row:2;min-width:155px}
+.office-box{border:.3pt solid #ccc;padding:6px 10px;font-size:9pt;line-height:1.5}
+.doc-title{text-align:center;font-size:11.5pt;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;margin:10px 0 9px;border-top:.3pt solid #ccc;border-bottom:.3pt solid #ccc;padding:5px 0}
+.opt-note{font-size:7pt;font-style:italic;color:#555;margin-bottom:8px;padding:4px 8px;background:#f8f8f8;border-left:2pt solid #ccc}
+.veh-box{border:.4pt solid #aaa;padding:7px 11px;margin:6px 0 8px}
+.veh-box strong{display:block;margin-bottom:2px;font-size:10pt}
+.veh-sub{font-size:6.5pt;color:#555;font-weight:normal;border-top:.3pt solid #ddd;padding-top:2px;margin-top:2px}
+.sale-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px 18px;margin:7px 0 9px}
+.sg-lbl{font-size:7.5pt;color:#333;font-weight:bold;margin-bottom:2px}
+.sg-val{border-bottom:.4pt solid #aaa;min-height:19px;padding:1px 3px;font-size:9.5pt}
+.sg-sub{font-size:6.5pt;color:#666;margin-top:2px}
+.rodo{font-size:7.5pt;font-style:italic;color:#333;margin-top:10px;padding:6px 9px;border:.3pt solid #ddd}
+.sig-row{display:flex;justify-content:flex-end;margin-top:44px}
+.sig-blk{text-align:center;width:240px}
+.sig-line{border-top:.4pt solid #999;height:0;margin-bottom:4px}
+.sig-lbl{font-size:6.5pt;color:#777}
+.office-sec{margin-top:16px;padding-top:9px;border-top:.5pt solid #bbb;font-size:8pt}
+.od-title{font-weight:bold;margin-bottom:7px;font-size:9pt}
+.od-line{margin-bottom:16px}
+.od-sig-row{display:flex;justify-content:flex-end;margin-top:7px}
+.empty-val{color:#000;font-style:normal;} /* Reset na wydruku, by podłogi były czarne */
+</style></head><body>${content}</body></html>`);
+  w.document.close();w.onload=()=>{w.focus();w.print()};
+});
+
+// Init
+renderDoc();
+renderWypowiedzenie();
+
+// ══ UBEZP SELECT ══════════════════════════════════════════════════════
+document.getElementById('f_ubezp_sel').addEventListener('change', function(){
+  const customEl = document.getElementById('f_ubezp');
+  if(this.value === 'inne'){
+    customEl.style.display = '';
+    customEl.focus();
+  } else {
+    customEl.style.display = 'none';
+  }
+  renderWypowiedzenie();
+});
+document.getElementById('f_ubezp').addEventListener('input', renderWypowiedzenie);
+
+// ══ PRINT WYPOWIEDZENIE OC ════════════════════════════════════════════
+document.getElementById('printBtn2').addEventListener('click',()=>{
+  const content=document.getElementById('docOut2').innerHTML;
+  const w=window.open('','_blank','width=860,height=700');
+  w.document.write(`<!DOCTYPE html><html lang="pl"><head>
+<meta charset="UTF-8">
+<title>Wypowiedzenie OC · Chemirol</title>
+<style>
+@page{size:A4 portrait;margin:18mm 20mm}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Times New Roman',serif;font-size:10pt;color:#000;line-height:1.5}
+.wyp-doc{width:100%}
+.wyp-title{text-align:center;font-size:12pt;font-weight:bold;text-transform:uppercase;letter-spacing:1px;margin-bottom:20px;padding-bottom:10px;border-bottom:2pt solid #000}
+.wyp-party{margin-bottom:14px}
+.wyp-party-hd{font-size:7pt;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#fff;background:#444;padding:3px 8px;display:inline-block;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.wyp-party-body{border:1pt solid #bbb;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.wyp-field{display:flex;flex-direction:column}
+.wyp-field-lbl{font-size:7pt;color:#666;font-style:italic;margin-bottom:2px}
+.wyp-field-val{font-size:10.5pt;border-bottom:.5pt solid #999;min-height:21px;padding:1px 3px 2px;line-height:1.4}
+.wyp-2col{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px}
+.wyp-vehicle{border:1.2pt solid #555;padding:9px 12px;margin-bottom:14px}
+.wyp-vehicle-hd{font-size:7pt;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#555;margin-bottom:6px}
+.wyp-sep{border:none;border-top:1pt solid #ccc;margin:16px 0}
+.wyp-section-hd{text-align:center;font-size:11pt;font-weight:bold;letter-spacing:3px;margin-bottom:12px}
+.wyp-text{font-size:10pt;line-height:1.7;text-align:justify}
+.wyp-sigs{display:grid;grid-template-columns:1fr 1fr;gap:0 40px;margin-top:52px}
+.wyp-sig-blk{text-align:center}
+.wyp-sig-line{border-top:.5pt solid #888;margin-bottom:4px}
+.wyp-sig-lbl{font-size:7pt;color:#555;font-style:italic}
+.empty-val{color:#000;font-style:normal}
+</style></head><body>${content}</body></html>`);
+  w.document.close();w.onload=()=>{w.focus();w.print()};
+});
+</script>
+</body>
+  </html>
