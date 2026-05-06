@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="pl" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#f4f5f7" id="metaTheme">
+  <title>PSFimport v6.6</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+[data-theme="dark"]{
+  --bg:#0a0a0a;--bg2:#111;--bg-card:#151515;
+  --border:rgba(255,255,255,0.07);--border-l:rgba(255,255,255,0.12);
+  --txt:#e8e8e8;--txt2:#888;--txt3:#555;
+  --hover:rgba(255,255,255,.05);--hover2:rgba(255,255,255,.09);
+  --shadow:0 2px 16px rgba(0,0,0,.5);
+  --accent:#7c3aed;--accent2:#c084fc;
+  --green-bg:rgba(34,197,94,.15);--green-txt:#4ade80;
+  --red-bg:rgba(239,68,68,.2);--red-txt:#fca5a5;
+  --yellow-bg:rgba(234,179,8,.15);--yellow-txt:#fde047;
+  --blue-bg:rgba(59,130,246,.15);--blue-txt:#93c5fd;
+  --purple-bg:rgba(124,58,237,.2);--purple-txt:#c4b5fd;
+  --teal-bg:rgba(20,184,166,.18);--teal-txt:#5eead4;
+  --orange-bg:rgba(249,115,22,.18);--orange-txt:#fb923c;
+  --neutral-bg:rgba(255,255,255,.07);--neutral-txt:#aaa;
+  --toggle-bg:#333;--toggle-dot:#fff;
+  --input-bg:#222;--input-border:#333;
+  --drop-border:rgba(255,255,255,.2);--drop-bg:rgba(255,255,255,.03);
+  --muted:#555;
+  --tag-r-bg:#2a0f0f;--tag-r-c:#fca5a5;--tag-r-b:rgba(239,68,68,.3);
+  --tag-p-bg:#0f2a1a;--tag-p-c:#4ade80;--tag-p-b:rgba(34,197,94,.3);
+  --tag-n-bg:#0f1e35;--tag-n-c:#93c5fd;--tag-n-b:rgba(59,130,246,.3);
+  --tag-s-bg:#2a1a0f;--tag-s-c:#fbbf24;--tag-s-b:rgba(234,179,8,.3);
+}
+[data-theme="light"]{
+  --bg:#f4f5f7;--bg2:#eee;--bg-card:#fff;
+  --border:rgba(0,0,0,0.08);--border-l:rgba(0,0,0,0.12);
+  --txt:#111;--txt2:#666;--txt3:#999;
+  --hover:rgba(0,0,0,.04);--hover2:rgba(0,0,0,.07);
+  --shadow:0 2px 16px rgba(0,0,0,.08);
+  --accent:#7c3aed;--accent2:#9333ea;
+  --green-bg:rgba(34,197,94,.12);--green-txt:#16a34a;
+  --red-bg:rgba(239,68,68,.12);--red-txt:#dc2626;
+  --yellow-bg:rgba(234,179,8,.1);--yellow-txt:#b45309;
+  --blue-bg:rgba(59,130,246,.1);--blue-txt:#2563eb;
+  --purple-bg:rgba(124,58,237,.12);--purple-txt:#7c3aed;
+  --teal-bg:rgba(20,184,166,.12);--teal-txt:#0f766e;
+  --orange-bg:rgba(249,115,22,.12);--orange-txt:#c2410c;
+  --neutral-bg:rgba(0,0,0,.06);--neutral-txt:#555;
+  --toggle-bg:#ccc;--toggle-dot:#fff;
+  --input-bg:#f4f5f7;--input-border:#ddd;
+  --drop-border:rgba(0,0,0,.18);--drop-bg:rgba(0,0,0,.02);
+  --muted:#999;
+  --tag-r-bg:#fef2f2;--tag-r-c:#b91c1c;--tag-r-b:#fecaca;
+  --tag-p-bg:#ecfdf5;--tag-p-c:#065f46;--tag-p-b:#a7f3d0;
+  --tag-n-bg:#eff6ff;--tag-n-c:#1d4ed8;--tag-n-b:#bfdbfe;
+  --tag-s-bg:#fff7ed;--tag-s-c:#c2410c;--tag-s-b:#fed7aa;
+}
+
+html{height:100%;overflow-x:hidden}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--txt);min-height:100dvh;-webkit-font-smoothing:antialiased;transition:background .3s,color .3s}
+
+/* ── NAVBAR ── */
+.navbar{display:flex;align-items:center;justify-content:space-between;padding:9px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;background:var(--bg)}
+.nav-brand{display:flex;align-items:center;gap:8px}
+.nav-name{font-size:13px;font-weight:700;letter-spacing:-.2px}
+.nav-ver{font-size:10px;color:var(--txt3);background:var(--hover);padding:2px 6px;border-radius:100px}
+.nav-right{display:flex;align-items:center;gap:8px}
+
+/* ── THEME TOGGLE ── */
+.theme-toggle{position:relative;width:44px;height:24px;background:var(--toggle-bg);border-radius:12px;cursor:pointer;border:none;flex-shrink:0;transition:background .3s}
+.theme-toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--toggle-dot);transition:transform .3s}
+[data-theme="light"] .theme-toggle::after{transform:translateX(20px)}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;font-size:12px;font-weight:500;font-family:inherit;cursor:pointer;transition:all .15s;white-space:nowrap;border:none}
+.btn-ghost{background:transparent;color:var(--txt2)}
+.btn-ghost:hover{background:var(--hover);color:var(--txt)}
+.btn-outline{background:var(--bg-card);border:1px solid var(--border-l);color:var(--txt)}
+.btn-outline:hover{border-color:rgba(124,58,237,.5)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{opacity:.9}
+.btn-danger{background:var(--red-bg);border:1px solid rgba(239,68,68,.25);color:var(--red-txt)}
+.btn-danger:hover{background:rgba(239,68,68,.28)}
+
+/* ── LAYOUT ── */
+.page{padding:14px 18px 60px;max-width:1400px;margin:0 auto}
+
+/* ── HEADER ROW ── */
+.hdr-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px;flex-wrap:wrap}
+.hdr-left h1{font-size:22px;font-weight:800;letter-spacing:-.5px}
+.hdr-left p{font-size:11px;color:var(--txt3);margin-top:2px}
+
+/* ── DROPZONE INLINE ── */
+.drop-section{margin-bottom:14px}
+.drop-zone{border:2px dashed var(--drop-border);border-radius:12px;padding:18px 20px;cursor:pointer;transition:all .2s;background:var(--drop-bg);display:flex;align-items:center;gap:14px}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--accent);background:rgba(124,58,237,.06)}
+.drop-zone-icon{font-size:26px;opacity:.6;flex-shrink:0}
+.drop-zone-text{font-size:13px;font-weight:500;color:var(--txt)}
+.drop-zone-hint{font-size:11px;color:var(--txt3);margin-top:2px}
+.drop-zone-actions{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.file-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.file-chip{display:inline-flex;align-items:center;gap:7px;padding:5px 10px;background:var(--hover);border-radius:8px;font-size:12px}
+.file-chip-name{font-weight:500;color:var(--txt)}
+.file-chip-size{color:var(--txt3)}
+.file-chip-rm{background:none;border:none;color:var(--txt3);cursor:pointer;font-size:13px;padding:0 2px;line-height:1}
+.file-chip-rm:hover{color:var(--red-txt)}
+.import-status{padding:8px 12px;border-radius:8px;font-size:12px;font-weight:500;margin-top:8px;display:none}
+.import-status.success{display:block;background:var(--green-bg);color:var(--green-txt)}
+.import-status.error{display:block;background:var(--red-bg);color:var(--red-txt)}
+.spinner{width:14px;height:14px;border-radius:50%;border:2px solid rgba(124,58,237,.2);border-top-color:var(--accent);animation:spin 1s linear infinite;display:none;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── CARD ── */
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;transition:background .3s,border-color .3s}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px}
+.card-title{font-size:12px;font-weight:600;color:var(--txt)}
+.sec-gap{margin-bottom:12px}
+
+/* ── STATS GRID ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+.stat-card{padding:14px 16px}
+.stat-label{font-size:11px;font-weight:500;color:var(--txt2)}
+.stat-value{font-size:26px;font-weight:700;letter-spacing:-1px;line-height:1;margin-top:8px}
+.stat-value.netto{color:var(--blue-txt)}
+.stat-value.vat{color:var(--yellow-txt)}
+.stat-value.brutto{color:var(--green-txt)}
+.stat-value.recs{color:var(--purple-txt)}
+.stat-delta{font-size:10px;color:var(--txt3);margin-top:4px}
+
+/* ── CHART PILLS ── */
+.chart-pills{display:flex;flex-wrap:wrap;gap:3px}
+.cpill{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:100px;border:1px solid var(--border-l);background:var(--hover);font-size:11px;font-weight:500;font-family:inherit;cursor:pointer;color:var(--txt2);transition:.15s;white-space:nowrap}
+.cpill:hover{border-color:var(--accent);color:var(--txt)}
+.cpill.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.cpill i{font-size:9px}
+
+/* ── CHARTS ── */
+.charts-full{margin-bottom:12px}
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+
+/* ── GROUPING SECTION ── */
+.grp-bar{display:flex;align-items:center;gap:6px;margin-bottom:10px;position:sticky;top:47px;z-index:20;background:var(--bg);padding:8px 0 10px;overflow-x:auto;white-space:nowrap}
+.grp-bar h2{font-size:13px;font-weight:700}
+.toggle-btns{display:flex;background:var(--hover);border-radius:8px;padding:2px;gap:1px}
+.tb{padding:5px 12px;border-radius:6px;font-size:12px;font-weight:500;border:none;background:none;color:var(--txt2);cursor:pointer;font-family:inherit;transition:all .15s}
+.tb.active{background:var(--bg-card);color:var(--txt);box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.grp-spacer{flex:1}
+.search-inp{background:var(--input-bg);color:var(--txt);border:1px solid var(--input-border);border-radius:8px;padding:5px 11px;font-size:12px;font-family:inherit;outline:none;transition:border-color .2s}
+.search-inp:focus{border-color:var(--accent)}
+.search-inp::placeholder{color:var(--txt3)}
+
+/* ── GROUP LIST (members style) ── */
+.group-list{display:flex;flex-direction:column}
+.group-card{background:var(--bg-card);border-radius:14px;border:1px solid var(--border);overflow:hidden;margin-bottom:8px}
+.group-row{display:flex;align-items:center;padding:14px 16px;cursor:pointer;transition:background .15s;gap:14px}
+.group-row:hover{background:var(--hover)}
+.group-avatar{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.group-avatar svg{width:18px;height:18px;stroke-width:1.8;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
+.g-896{background:var(--blue-bg);color:var(--blue-txt)}
+.g-898{background:var(--teal-bg);color:var(--teal-txt)}
+.g-903{background:var(--yellow-bg);color:var(--yellow-txt)}
+.g-905{background:var(--teal-bg);color:var(--teal-txt)}
+.g-909{background:var(--orange-bg);color:var(--orange-txt)}
+.g-other{background:var(--neutral-bg);color:var(--neutral-txt)}
+.group-left{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+.group-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--txt)}
+.group-sub{font-size:12px;color:var(--txt3);margin-top:2px}
+.group-count-badge{display:inline-flex;align-items:center;padding:4px 11px;border-radius:6px;font-size:12px;font-weight:500;white-space:nowrap;background:var(--neutral-bg);color:var(--neutral-txt);flex-shrink:0}
+.group-progress-cell{display:flex;align-items:center;gap:10px;width:110px;flex-shrink:0}
+.group-progress-bar{flex:1;height:5px;background:var(--bar-bg);border-radius:3px;overflow:hidden}
+.group-progress-fill{height:100%;background:var(--accent);border-radius:3px}
+.group-pct-text{font-size:12px;color:var(--txt2);white-space:nowrap;min-width:36px}
+.group-amount{text-align:right;white-space:nowrap;flex-shrink:0}
+.group-amount-label{font-size:11px;color:var(--txt3);margin-bottom:1px}
+.group-amount-val{font-size:13px;font-weight:600;color:var(--txt)}
+.group-chevron{color:var(--txt3);transition:transform .2s;flex-shrink:0;font-size:13px;line-height:1}
+
+/* ── GROUP DETAIL ── */
+.group-detail{display:none;border-top:1px solid var(--border);background:var(--bg2)}
+.group-detail-scroll{max-height:calc(40 * 26px);overflow-y:auto;overflow-x:auto}
+.group-detail-scroll::-webkit-scrollbar{width:3px}
+.group-detail-scroll::-webkit-scrollbar-thumb{background:var(--txt3);border-radius:3px}
+.detail-tbl{width:100%;border-collapse:collapse;font-size:12px;min-width:520px}
+.detail-tbl thead th{padding:8px 14px;text-align:left;font-size:10px;font-weight:600;color:var(--txt3);border-bottom:1px solid var(--border);background:var(--bg-card);position:sticky;top:0;z-index:1;white-space:nowrap;text-transform:uppercase;letter-spacing:.03em}
+.detail-tbl tbody td{padding:8px 14px;border-bottom:1px solid var(--border);color:var(--txt2)}
+.detail-tbl tbody tr:hover td{background:var(--hover)}
+.detail-tbl tbody tr:last-child td{border-bottom:none}
+.load-more-row td{text-align:center;padding:8px;font-size:12px;color:var(--accent);cursor:pointer;background:var(--bg-card);font-weight:500}
+.load-more-row:hover td{background:var(--hover2)}
+
+/* ── SUPERGROUP SECTION ── */
+.sg-section{margin-bottom:12px}
+.sg-section-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--bg-card);border:1px solid var(--border-l);border-radius:12px;cursor:pointer;transition:background .15s;gap:12px;position:sticky;top:102px;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.sg-section-hdr:hover{background:var(--hover2)}
+.sg-icon-wrap{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.sg-name{font-size:13px;font-weight:700;color:var(--txt)}
+.sg-sub{font-size:11px;color:var(--txt3);margin-top:1px}
+.sg-body{padding:4px 0 0 0;display:flex;flex-direction:column;gap:0}
+.sg-body .group-card{border-radius:10px;margin-bottom:5px;margin-left:8px}
+
+/* ── SMART TAGS ── */
+.tag-rozrzad{background:var(--tag-r-bg);color:var(--tag-r-c);border:1px solid var(--tag-r-b);border-radius:3px;padding:0 4px;font-size:9px;font-weight:600;white-space:nowrap}
+.tag-przeglad{background:var(--tag-p-bg);color:var(--tag-p-c);border:1px solid var(--tag-p-b);border-radius:3px;padding:0 4px;font-size:9px;font-weight:600;white-space:nowrap}
+.tag-naprawa{background:var(--tag-n-bg);color:var(--tag-n-c);border:1px solid var(--tag-n-b);border-radius:3px;padding:0 4px;font-size:9px;font-weight:600;white-space:nowrap}
+.tag-pasek{background:var(--tag-s-bg);color:var(--tag-s-c);border:1px solid var(--tag-s-b);border-radius:3px;padding:0 4px;font-size:9px;font-weight:600;white-space:nowrap}
+
+/* ── DATATABLE ── */
+table.dataTable{width:100%!important;border-collapse:collapse!important}
+table.dataTable thead th{text-align:left!important;font-size:10px!important;font-weight:600!important;color:var(--txt3)!important;padding:8px 10px!important;border-bottom:1px solid var(--border)!important;white-space:nowrap;background:var(--bg-card)!important;text-transform:uppercase;letter-spacing:.03em}
+table.dataTable tbody td{padding:7px 10px!important;font-size:12px!important;border-bottom:1px solid var(--border)!important;color:var(--txt)!important;vertical-align:middle}
+table.dataTable tbody tr:hover td{background:var(--hover)!important}
+table.dataTable tbody tr:last-child td{border-bottom:none!important}
+.dataTables_wrapper .dataTables_length,.dataTables_wrapper .dataTables_filter,.dataTables_wrapper .dataTables_info,.dataTables_wrapper .dataTables_paginate{color:var(--txt2)!important;font-size:11px!important;margin:8px 0!important}
+.dataTables_wrapper .dataTables_filter input,.dataTables_wrapper .dataTables_length select{background:var(--input-bg)!important;color:var(--txt)!important;border:1px solid var(--input-border)!important;border-radius:7px!important;padding:4px 9px!important;font-size:11px!important;margin-left:5px!important;outline:none!important;font-family:inherit!important}
+.dataTables_wrapper .dataTables_paginate .paginate_button{color:var(--txt2)!important;border-radius:5px!important;border:none!important;padding:3px 8px!important;font-size:11px!important}
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover{background:var(--hover)!important;color:var(--txt)!important}
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover{background:var(--accent)!important;color:#fff!important}
+.dt-buttons{display:none!important}
+.dataTables_wrapper .dataTables_filter{display:none}
+
+/* ── EXPORT DROPDOWN ── */
+.exp-wrap{position:relative}
+.exp-menu{display:none;position:absolute;right:0;top:calc(100% + 5px);background:var(--bg-card);border:1px solid var(--border-l);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);z-index:60;min-width:120px}
+.exp-menu.show{display:block}
+.exp-item{display:flex;align-items:center;gap:8px;padding:9px 14px;font-size:12px;cursor:pointer;color:var(--txt2);border:none;background:none;width:100%;font-family:inherit;text-align:left;transition:background .15s}
+.exp-item:hover{background:var(--hover);color:var(--txt)}
+
+/* ── TOAST ── */
+#toastCont{position:fixed;top:12px;right:12px;z-index:9999;display:flex;flex-direction:column;gap:6px;max-width:280px}
+.toast{display:flex;align-items:center;gap:8px;padding:9px 13px;border-radius:9px;font-size:12px;font-weight:500;animation:tIn .2s ease;box-shadow:var(--shadow);cursor:pointer}
+@keyframes tIn{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:none}}
+.t-success{background:var(--green-bg);border:1px solid rgba(34,197,94,.3);color:var(--green-txt)}
+.t-error{background:var(--red-bg);border:1px solid rgba(239,68,68,.3);color:var(--red-txt)}
+.t-info{background:var(--blue-bg);border:1px solid rgba(59,130,246,.3);color:var(--blue-txt)}
+
+/* ── EMPTY ── */
+.empty-state{text-align:center;padding:40px 20px;color:var(--txt3);display:flex;flex-direction:column;align-items:center;gap:8px}
+.empty-state .ei{font-size:36px;opacity:.3}
+.empty-state h3{font-size:15px;font-weight:600;color:var(--txt2)}
+
+/* ── SCROLLBARS ── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--txt3);border-radius:3px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1100px){.charts-row{grid-template-columns:1fr}.stats-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){.page{padding:10px 10px 50px}.stats-grid{grid-template-columns:repeat(2,1fr)}.stat-value{font-size:20px}.drop-zone{flex-wrap:wrap}.drop-zone-actions{margin-left:0}}
+@media(max-width:520px){.stats-grid{grid-template-columns:1fr}}
+:fullscreen .page,:-webkit-full-screen .page{padding:10px 18px 40px;max-width:100%}
+:fullscreen .charts-row,:-webkit-full-screen .charts-row{gap:10px}
+</style>
+</head>
+<body>
+
+<div id="toastCont"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-brand" id="fsBtn" title="Kliknij aby włączyć pełny ekran" style="cursor:pointer;user-select:none">
+    <svg viewBox="0 0 34 34" width="32" height="32" fill="none">
+      <rect width="34" height="34" rx="8" fill="#0a0a0a"/>
+      <path d="M6 24 A12 12 0 0 1 28 24" stroke="#333" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M6 24 A12 12 0 0 1 22 13" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="17" y1="24" x2="22" y2="13.5" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
+      <circle cx="17" cy="24" r="2" fill="#7c3aed"/>
+    </svg>
+    <span class="nav-name">PSFimport</span>
+    <span class="nav-ver">v6.6</span>
+  </div>
+  <div class="nav-right">
+    <span id="fileBadge" style="display:none;font-size:11px;font-weight:600;color:var(--txt3);padding:3px 10px;border-radius:20px;background:var(--hover)"></span>
+    <button class="btn-icon" id="navImportBtn" title="Importuj pliki" style="display:none;border:1px solid var(--border)">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 11v2.5a1 1 0 001 1h10a1 1 0 001-1V11M5 5l3-3 3 3M8 2v8"/></svg>
+    </button>
+    <button class="btn btn-danger" id="clearBtn">
+      <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="1,3 13,3"/><path d="M4 3V2a1 1 0 011-1h4a1 1 0 011 1v1M5.5 6v4M8.5 6v4"/><rect x="2" y="3" width="10" height="10" rx="1"/></svg>
+      Wyczyść
+    </button>
+    <div class="exp-wrap">
+      <button class="btn btn-outline" id="expBtn1">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 7l3 3 3-3M8 4v6M3 13h10"/></svg>
+        Eksportuj
+      </button>
+      <div class="exp-menu" id="expMenu1">
+        <button class="exp-item" id="expXl">📗 Excel</button>
+        <button class="exp-item" id="expPdf">📕 PDF</button>
+        <button class="exp-item" id="expCsv">📘 CSV</button>
+      </div>
+    </div>
+    <button class="theme-toggle" id="themeToggle" title="Motyw"></button>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- HEADER + DROPZONE -->
+  <div class="hdr-row">
+    <div class="hdr-left">
+      <h1>Analiza PSF</h1>
+      <p>Chemirol — Dział Floty</p>
+    </div>
+  </div>
+
+  <!-- DROPZONE INLINE -->
+  <div class="drop-section" id="dropSection">
+    <div class="drop-zone" id="dropzone">
+      <div class="drop-zone-icon">📂</div>
+      <div style="flex:1">
+        <div class="drop-zone-text">Przeciągnij pliki lub kliknij aby wybrać</div>
+        <div class="drop-zone-hint">CSV · XLSX · XLS — import automatyczny</div>
+      </div>
+      <div class="spinner" id="spinner"></div>
+      <input type="file" id="fileInput" multiple accept=".csv,.xlsx,.xls" style="display:none">
+    </div>
+    <div class="file-chips" id="fileChips"></div>
+    <div class="import-status" id="importStatus"></div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="card stat-card">
+      <div class="stat-label">Łącznie Netto</div>
+      <div class="stat-value netto" id="sNetto">—</div>
+      <div class="stat-delta" id="dFiles">Brak danych</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-label">Łącznie VAT</div>
+      <div class="stat-value vat" id="sVAT">—</div>
+      <div class="stat-delta" id="dRecords">0 rekordów</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-label">Łącznie Brutto</div>
+      <div class="stat-value brutto" id="sBrutto">—</div>
+      <div class="stat-delta" id="dGroups">0 grup</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-label">Liczba rekordów</div>
+      <div class="stat-value recs" id="sRecords">0</div>
+      <div class="stat-delta" id="dAvg">Śr. brutto: —</div>
+    </div>
+  </div>
+
+  <!-- CHART 1: Usługi vs Materiały -->
+  <div class="card charts-full">
+    <div class="card-header">
+      <span class="card-title">Usługi vs Materiały — netto</span>
+      <div class="chart-pills" id="pills-sg">
+        <button class="cpill on" data-chart="sg" data-type="donut"><i class="fas fa-circle-notch"></i> Donut</button>
+        <button class="cpill" data-chart="sg" data-type="pie"><i class="fas fa-chart-pie"></i> Kołowy</button>
+        <button class="cpill" data-chart="sg" data-type="bar"><i class="fas fa-chart-bar"></i> Słupki</button>
+        <button class="cpill" data-chart="sg" data-type="bar_horiz"><i class="fas fa-bars"></i> Poziome</button>
+        <button class="cpill" data-chart="sg" data-type="radialBar"><i class="fas fa-bullseye"></i> Radialny</button>
+        <button class="cpill" data-chart="sg" data-type="polarArea"><i class="fas fa-solar-panel"></i> Polarny</button>
+        <button class="cpill" data-chart="sg" data-type="treemap"><i class="fas fa-th-large"></i> Treemap</button>
+      </div>
+    </div>
+    <div id="chart-sg" style="min-height:220px"></div>
+  </div>
+
+  <!-- CHARTS 2+3: Trendy -->
+  <div class="charts-row">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Trend miesięczny — Usługi</span>
+        <div class="chart-pills" id="pills-us">
+          <button class="cpill on" data-chart="us" data-type="area"><i class="fas fa-chart-area"></i> Area</button>
+          <button class="cpill" data-chart="us" data-type="line"><i class="fas fa-chart-line"></i> Linia</button>
+          <button class="cpill" data-chart="us" data-type="bar"><i class="fas fa-chart-bar"></i> Słupki</button>
+          <button class="cpill" data-chart="us" data-type="bar_stacked"><i class="fas fa-layer-group"></i> Stacked</button>
+          <button class="cpill" data-chart="us" data-type="heatmap"><i class="fas fa-th"></i> Heatmap</button>
+        </div>
+      </div>
+      <div id="chart-us" style="min-height:200px"></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Trend miesięczny — Materiały</span>
+        <div class="chart-pills" id="pills-mat">
+          <button class="cpill on" data-chart="mat" data-type="area"><i class="fas fa-chart-area"></i> Area</button>
+          <button class="cpill" data-chart="mat" data-type="line"><i class="fas fa-chart-line"></i> Linia</button>
+          <button class="cpill" data-chart="mat" data-type="bar"><i class="fas fa-chart-bar"></i> Słupki</button>
+          <button class="cpill" data-chart="mat" data-type="bar_stacked"><i class="fas fa-layer-group"></i> Stacked</button>
+          <button class="cpill" data-chart="mat" data-type="heatmap"><i class="fas fa-th"></i> Heatmap</button>
+        </div>
+      </div>
+      <div id="chart-mat" style="min-height:200px"></div>
+    </div>
+  </div>
+
+  <!-- CHART 4: Per produkt -->
+  <div class="card charts-full">
+    <div class="card-header">
+      <span class="card-title">Netto per produkt</span>
+      <div class="chart-pills" id="pills-prod">
+        <button class="cpill" data-chart="prod" data-type="bar"><i class="fas fa-chart-bar"></i> Słupki</button>
+        <button class="cpill on" data-chart="prod" data-type="bar_horiz"><i class="fas fa-bars"></i> Poziome</button>
+        <button class="cpill" data-chart="prod" data-type="treemap"><i class="fas fa-th-large"></i> Treemap</button>
+        <button class="cpill" data-chart="prod" data-type="radar"><i class="fas fa-spider"></i> Radar</button>
+        <button class="cpill" data-chart="prod" data-type="donut"><i class="fas fa-circle-notch"></i> Donut</button>
+        <button class="cpill" data-chart="prod" data-type="polarArea"><i class="fas fa-solar-panel"></i> Polarny</button>
+        <button class="cpill" data-chart="prod" data-type="radialBar"><i class="fas fa-bullseye"></i> Radialny</button>
+      </div>
+    </div>
+    <div id="chart-prod"></div>
+  </div>
+
+  <!-- GRUPOWANIE -->
+  <div class="sec-gap">
+    <div class="grp-bar">
+      <h2>Grupowanie</h2>
+      <div class="toggle-btns">
+        <button class="tb active" id="groupByProduct">Produkt</button>
+        <button class="tb" id="groupByRegistration">Rejestracja</button>
+      </div>
+      <div class="toggle-btns" style="margin-left:4px">
+        <button class="tb active" id="viewFlat">Lista</button>
+        <button class="tb" id="viewGrouped">Grupy</button>
+      </div>
+      <button class="btn btn-outline" id="expandAllGroups" style="padding:4px 10px;font-size:11px">Rozwiń</button>
+      <button class="btn btn-outline" id="collapseAllGroups" style="padding:4px 10px;font-size:11px">Zwiń</button>
+      <input class="search-inp" id="groupSearch" type="text" placeholder="Szukaj…" style="width:150px;flex-shrink:0">
+    </div>
+    <div class="group-list" id="productGroupsSummary">
+      <div class="empty-state"><div class="ei">🗂️</div><h3>Brak danych</h3></div>
+    </div>
+  </div>
+
+  <!-- TABELA -->
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px">
+      <span style="font-size:13px;font-weight:700;color:var(--txt)">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="vertical-align:middle;margin-right:5px"><rect x="1" y="1" width="14" height="14" rx="2"/><path d="M1 5h14M1 9h14M5 5v9"/></svg>
+        Tabela danych
+      </span>
+      <div style="display:flex;align-items:center;gap:7px">
+        <input class="search-inp" id="tableSearch" type="text" placeholder="Szukaj…" style="min-width:120px">
+        <div class="exp-wrap">
+          <button class="btn btn-outline" id="expBtn2" style="padding:5px 11px;font-size:11px">
+            <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 7l3 3 3-3M8 4v6M3 11h8"/></svg>
+            Eksport
+          </button>
+          <div class="exp-menu" id="expMenu2">
+            <button class="exp-item" id="expXl2">📗 Excel</button>
+            <button class="exp-item" id="expPdf2">📕 PDF</button>
+            <button class="exp-item" id="expCsv2">📘 CSV</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:0 14px 14px;overflow-x:auto">
+      <table id="dataTable" style="width:100%"></table>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+"use strict";
+
+(function(){
+  const t=localStorage.getItem('psfTheme')||'light';
+  document.documentElement.setAttribute('data-theme',t);
+  document.getElementById('metaTheme').content=t==='dark'?'#0a0a0a':'#f4f5f7';
+})();
+document.getElementById('themeToggle').onclick=function(){
+  const h=document.documentElement,n=h.getAttribute('data-theme')==='dark'?'light':'dark';
+  h.setAttribute('data-theme',n);localStorage.setItem('psfTheme',n);
+  document.getElementById('metaTheme').content=n==='dark'?'#0a0a0a':'#f4f5f7';
+  if(window._S&&_S.data.length)drawAllCharts();
+};
+
+function toast(type,msg){
+  const t=document.createElement('div');
+  t.className='toast t-'+type;t.innerHTML='<span style="flex:1">'+msg+'</span>';
+  t.onclick=()=>t.remove();
+  document.getElementById('toastCont').appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300)},4000);
+}
+
+const fsBtn=document.getElementById('fsBtn');
+fsBtn.onclick=()=>{const d=document.documentElement;if(!document.fullscreenElement&&!document.webkitFullscreenElement){if(d.requestFullscreen)d.requestFullscreen();else if(d.webkitRequestFullscreen)d.webkitRequestFullscreen();}else{if(document.exitFullscreen)document.exitFullscreen();else if(document.webkitExitFullscreen)document.webkitExitFullscreen();}};
+const ufs=()=>{const is=document.fullscreenElement||document.webkitFullscreenElement;fsBtn.style.opacity=is?'0.6':'1';setTimeout(()=>{if(window._S&&_S.data.length)drawAllCharts();},300);};
+document.addEventListener('fullscreenchange',ufs);document.addEventListener('webkitfullscreenchange',ufs);
+
+const deb=(fn,d)=>{let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn.apply(this,a),d);}};
+$(function(){
+const GRC=250;
+window.addEventListener('orientationchange',()=>{setTimeout(()=>{if(S.data.length)drawAllCharts();},400);});
+window.addEventListener('resize',deb(()=>{if(S.data.length)drawAllCharts();},250));
+const fmt=v=>new Intl.NumberFormat('pl-PL',{minimumFractionDigits:2,maximumFractionDigits:2,style:'currency',currency:'PLN'}).format(parseFloat(v)||0);
+const fmtN=v=>new Intl.NumberFormat('pl-PL',{minimumFractionDigits:2,maximumFractionDigits:2}).format(parseFloat(v)||0);
+const fmtS=n=>{n=Math.abs(parseFloat(n)||0);if(n>=1e6)return(n/1e6).toFixed(2).replace('.',',')+' M';if(n>=1e3)return(n/1e3).toFixed(1).replace('.',',')+' tys.';return n.toFixed(0)};
+const fmtYMD=d=>{let x=d instanceof Date?d:new Date(d);if(isNaN(x))return d;return`${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`};
+const fmtYM=d=>{let x=d instanceof Date?d:new Date(d);if(isNaN(x))return'';return`${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}`};
+const dark=()=>document.documentElement.getAttribute('data-theme')==='dark';
+
+const detectTags=tresc=>{
+  const t=(tresc||'').toLowerCase();const tags=[];
+  if(/rozrz[aą]d|timing|łańcuch rozrządu|pas rozrządu/.test(t))tags.push('<span class="tag-rozrzad">Rozrząd</span>');
+  else if(/pasek(?! rozrz)|pas klinowy|klinowy|wieloklinowy/.test(t))tags.push('<span class="tag-pasek">Pasek</span>');
+  if(/przegl[aą]d|obsługa|serwis|olej|wymiana oleju|filtr oleju/.test(t))tags.push('<span class="tag-przeglad">Przegląd</span>');
+  if(!tags.length&&/naprawa|usterka|awaria|wymiana|uszkodzenie/.test(t))tags.push('<span class="tag-naprawa">Naprawa</span>');
+  return tags.join(' ');
+};
+
+// STATE
+const S={data:[],files:[],summary:{totalNetto:0,totalVAT:0,totalBrutto:0,productGroups:{}},
+  settings:{groupBy:'IMPORTKODPRODUKTU',groupView:'flat',chartTypes:{sg:'donut',us:'area',mat:'area',prod:'bar_horiz'}},
+  charts:{sg:null,us:null,mat:null,prod:null},dt:null};
+window._S=S;
+
+// CONFIG
+const CFG={
+  colMap:{'NR. REJ.':['NR. REJ.','ImportNrRejestracyjny','Nr rejestracyjny'],'IMPORTKODPOZYCJI':['IMPORTKODPOZYCJI','Importkodpozycji'],'STAWKAVAT':['STAWKAVAT','Stawka vat'],'IMPORTKODPRODUKTU':['IMPORTKODPRODUKTU','Produkt','Grupa prod'],'NETTO':['NETTO','Wartość netto','Wartość netto fak'],'VAT':['VAT','Wartość vat fak'],'StanLicznika':['StanLicznika','Licznik'],'DataTransakcji':['Data realizacji','Data transakcji','DataTransakcji'],'TRESC':['TRESC','Dane kosztowe','Opis']},
+  rejMap:{'CB032NM':'CMG4651A','CB885NL':'CMG4649A','CB976NL':'CMG4724A','CB027NM':'CMG4647A','CB977NL':'CMG4728A','CB698NL':'CMG4650A','CB026NM':'CMG4773A','CB884NL':'CMG4729A','CB864NL':'CMG4743A','CB196NL':'CMG4652A','CB861NL':'CMG4732A','CB623NK':'CMG4648A','CB449NL':'CMG4758A','CB029NM':'CMG4754A','CB964NK':'CMG4891A','CB695NL':'CMG4850A','CB447NL':'CMG4757A','CB697NL':'CMG4731A','CB195NL':'CMG4755A','CB949NL':'CMG4759A','CB185NN':'CMG4750A','CB807NN':'CMG4751A','CB671NN':'CMG4748A','CB629NN':'CMG4752A','CB827NN':'CMG4753A','CB826NN':'CMG4746A','CB498NN':'CMG4727A','CB802NN':'CMG4726A','CB499NN':'CMG4745A','CB805NN':'CMG4730A','CB801NN':'CMG4725A','CB184NN':'CMG4756A','CB674NN':'CMG4890A'},
+  reqCols:['NR. REJ.','','','NETTO','STAWKAVAT','VAT','TRESC','IMPORTKODPRODUKTU'],
+  prodKody:{'Obsługa techniczna':'909','Normy czasowe':'903','Usługa warsztatowa':'903','Usługa inna':'903','Usługa oponiarska':'905','Usługa kurierska':'903','Przechowanie opon':'905','Wydanie opon z przechowalni':'905','Części do obsługi technicznej':'896','Części do norm czasowych':'896','Część':'896','Opona letnia':'898','Opona zimowa':'898','Opona całoroczna':'898','Felga':'898'},
+  prodNames:{'896':'Części','898':'Opony/Felgi','903':'Usł. warsztat.','905':'Usł. oponiarska','909':'Obsługa tech.','':'Inne'},
+  prodIcons:{'896':'fa-screwdriver-wrench','898':'fa-arrows-rotate','903':'fa-wrench','905':'fa-warehouse','909':'fa-oil-can','':'fa-box'},
+  prodStyle:{'896':{accent:'#3B82F6',bg:'#EFF6FF',txt:'#1D4ED8'},'898':{accent:'#14b8a6',bg:'#F0FDFA',txt:'#0f766e'},'903':{accent:'#F59E0B',bg:'#FFFBEB',txt:'#B45309'},'905':{accent:'#0d9488',bg:'#F0FDFA',txt:'#0f766e'},'909':{accent:'#f97316',bg:'#FFF7ED',txt:'#c2410c'},'':{accent:'#9CA3AF',bg:'#F9FAFB',txt:'#4B5563'}},
+  superGroups:{
+    'Usługi':{codes:['903','905','909'],accent:'#F59E0B',icon:'fa-car-wrench',svg:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>'},
+    'Materiały':{codes:['896','898'],accent:'#14b8a6',icon:'fa-boxes-stacked',svg:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>'}
+  }
+};
+
+// PROCESS DATA
+const processData=rows=>{
+  const maps=Object.entries(CFG.colMap);
+  return rows.map(row=>{
+    const c={};
+    for(const [std,poss] of maps)for(const col of poss){const m=Object.keys(row).find(k=>k.trim().toUpperCase()===col.trim().toUpperCase());if(m){c[std]=row[m];break;}}
+    if(c['NR. REJ.']){const t=c['NR. REJ.'].toString().trim();c['NR. REJ.']=CFG.rejMap[t]||t;}
+    const netto=parseFloat(c.NETTO)||0,vat=parseFloat(c.VAT)||0;
+    c.BRUTTO=(netto+vat).toFixed(2);
+    c.PRODUKTKOD=CFG.prodKody[c.IMPORTKODPRODUKTU||'']||'';
+    if(c.DataTransakcji)c.DataTransakcji=fmtYMD(c.DataTransakcji);
+    return c;
+  });
+};
+
+const calcSum=(data,groupBy='IMPORTKODPRODUKTU')=>{
+  const s={totalNetto:0,totalVAT:0,totalBrutto:0,productGroups:{}};
+  for(const row of data){
+    const netto=parseFloat(row.NETTO)||0,vat=parseFloat(row.VAT)||0,brutto=netto+vat;
+    const key=row[groupBy]||'Nieznany';
+    const code=groupBy==='IMPORTKODPRODUKTU'?(CFG.prodKody[key]||''):(CFG.prodKody[row.IMPORTKODPRODUKTU]||'');
+    s.totalNetto+=netto;s.totalVAT+=vat;s.totalBrutto+=brutto;
+    if(!s.productGroups[key])s.productGroups[key]={netto:0,vat:0,brutto:0,count:0,details:[],code};
+    const g=s.productGroups[key];g.netto+=netto;g.vat+=vat;g.brutto+=brutto;g.count++;
+    g.details.push({tresc:row.TRESC||'',importNr:row['NR. REJ.']||'',netto,vat,brutto,stawkaVAT:row.STAWKAVAT||'',DataTransakcji:row.DataTransakcji||'',StanLicznika:row.StanLicznika||''});
+  }
+  return s;
+};
+
+const calcMonthlyPerSubgroup=(data,filterCodes)=>{
+  const m={};
+  for(const row of data){
+    const code=CFG.prodKody[row.IMPORTKODPRODUKTU||'']||'';
+    if(!filterCodes.includes(code))continue;
+    const subName=row.IMPORTKODPRODUKTU||'Inne';
+    const ym=fmtYM(row.DataTransakcji||'');if(!ym)continue;
+    if(!m[subName])m[subName]={};
+    if(!m[subName][ym])m[subName][ym]=0;
+    m[subName][ym]+=parseFloat(row.NETTO)||0;
+  }
+  return m;
+};
+
+// APEX BASE
+const base=(height=200)=>{
+  const d=dark();
+  return{
+    chart:{height,fontFamily:"'Inter',sans-serif",toolbar:{show:false},background:'transparent',foreColor:d?'#888':'#666',animations:{enabled:true,speed:400}},
+    tooltip:{theme:d?'dark':'light',y:{formatter:v=>fmt(v)}},
+    legend:{position:'bottom',fontSize:'11px',markers:{width:9,height:9,radius:3},labels:{colors:d?'#888':'#666'}},
+    dataLabels:{enabled:false},
+    grid:{borderColor:d?'rgba(255,255,255,.06)':'#f0f0f0',strokeDashArray:3},
+    stroke:{curve:'smooth',width:2}
+  };
+};
+
+// CHART: Usługi vs Materiały
+function drawSg(type){
+  const summary=calcSum(S.data,'IMPORTKODPRODUKTU');
+  const sgData={};
+  for(const [sgName,sgCfg] of Object.entries(CFG.superGroups))sgData[sgName]={netto:0,accent:sgCfg.accent};
+  for(const [,grp] of Object.entries(summary.productGroups)){
+    const code=grp.code||'';let matched=false;
+    for(const [sgName,sgCfg] of Object.entries(CFG.superGroups)){if(sgCfg.codes.includes(code)){sgData[sgName].netto+=grp.netto;matched=true;break;}}
+    if(!matched){if(!sgData['Inne'])sgData['Inne']={netto:0,accent:'#9CA3AF'};sgData['Inne'].netto+=grp.netto;}
+  }
+  const labels=[],data=[],colors=[];
+  for(const [n,d] of Object.entries(sgData)){if(d.netto===0)continue;labels.push(n);data.push(parseFloat(d.netto.toFixed(2)));colors.push(d.accent);}
+  if(S.charts.sg){S.charts.sg.destroy();S.charts.sg=null;}
+  const b=base(220);let opts={};
+  if(type==='donut'||type==='pie'){
+    opts={...b,series:data,chart:{...b.chart,type},labels,colors,
+      dataLabels:{enabled:true,formatter:(v,{seriesIndex:i})=>`${labels[i]}: ${fmtS(data[i])} zł`,style:{fontSize:'11px'}},
+      plotOptions:type==='donut'?{pie:{donut:{size:'55%',labels:{show:true,total:{show:true,showAlways:true,label:'Łącznie',fontSize:'11px',formatter:w=>fmtS(w.globals.seriesTotals.reduce((a,b)=>a+b,0))+' zł'}}}}}:{}};
+  }else if(type==='bar'){
+    opts={...b,series:[{name:'Netto',data}],chart:{...b.chart,type:'bar'},xaxis:{categories:labels,labels:{style:{fontSize:'11px'}}},yaxis:{labels:{formatter:v=>fmtS(v)+' zł',style:{fontSize:'10px'}}},colors,plotOptions:{bar:{borderRadius:6,columnWidth:'50%'}},dataLabels:{enabled:true,formatter:v=>fmtS(v)+' zł',style:{fontSize:'10px'}}};
+  }else if(type==='bar_horiz'){
+    opts={...b,series:[{name:'Netto',data}],chart:{...b.chart,type:'bar'},xaxis:{labels:{formatter:v=>fmtS(v),style:{fontSize:'10px'}}},yaxis:{categories:labels,labels:{style:{fontSize:'10px'}}},colors,plotOptions:{bar:{borderRadius:5,horizontal:true,distributed:true,barHeight:'55%'}},legend:{show:false},dataLabels:{enabled:true,formatter:v=>fmtS(v)+' zł',style:{fontSize:'10px'}}};
+  }else if(type==='treemap'){
+    opts={...b,series:[{data:labels.map((l,i)=>({x:l,y:data[i]}))}],chart:{...b.chart,type:'treemap'},colors,dataLabels:{enabled:true,style:{fontSize:'11px'}},tooltip:{y:{formatter:v=>fmt(v)}}};
+  }else if(type==='polarArea'){
+    opts={...b,series:data,chart:{...b.chart,type:'polarArea'},labels,colors,stroke:{width:1},fill:{opacity:.85},dataLabels:{enabled:false},legend:{show:true,position:'bottom',fontSize:'11px'}};
+  }else if(type==='radialBar'){
+    const total=data.reduce((a,b)=>a+b,0);
+    opts={...b,series:data.map(v=>parseFloat((v/total*100).toFixed(1))),chart:{...b.chart,type:'radialBar'},labels,colors,
+      plotOptions:{radialBar:{hollow:{size:'30%'},dataLabels:{name:{fontSize:'11px'},value:{fontSize:'11px',formatter:v=>v+'%'},total:{show:true,label:'Suma',fontSize:'10px',formatter:()=>fmtS(total)+' zł'}}}},legend:{show:true,position:'bottom',fontSize:'11px'}};
+  }
+  S.charts.sg=new ApexCharts(document.querySelector('#chart-sg'),opts);S.charts.sg.render();
+}
+
+// CHART: Trend per subgrupa
+function drawTrend(chartId,elId,codes,type){
+  const mps=calcMonthlyPerSubgroup(S.data,codes);
+  const subNames=Object.keys(mps);
+  if(!subNames.length)return;
+  const allMonths=[...new Set(subNames.flatMap(n=>Object.keys(mps[n])))].sort();
+  if(S.charts[chartId]){S.charts[chartId].destroy();S.charts[chartId]=null;}
+  const xCats=allMonths.map(ym=>ym.replace(/\d{4}-/,''));
+  const series=subNames.map(n=>({name:n,data:allMonths.map(ym=>parseFloat(((mps[n]&&mps[n][ym])||0).toFixed(2)))}));
+  const colors=subNames.map(n=>(CFG.prodStyle[CFG.prodKody[n]||'']||CFG.prodStyle['']).accent);
+  const b=base(200);let opts={};
+  if(type==='area'||type==='line'){
+    const isArea=type==='area';
+    opts={...b,series,chart:{...b.chart,type:isArea?'area':'line'},xaxis:{categories:xCats,labels:{style:{fontSize:'10px'}},axisBorder:{show:false}},yaxis:{labels:{formatter:v=>fmtS(v),style:{fontSize:'10px'}}},colors,fill:isArea?{type:'gradient',gradient:{shadeIntensity:.4,opacityFrom:.25,opacityTo:.02,stops:[0,100]}}:{},stroke:{curve:'smooth',width:2},markers:{size:0}};
+  }else if(type==='bar'){
+    opts={...b,series,chart:{...b.chart,type:'bar'},xaxis:{categories:xCats,labels:{style:{fontSize:'10px'}}},yaxis:{labels:{formatter:v=>fmtS(v),style:{fontSize:'10px'}}},colors,plotOptions:{bar:{borderRadius:3,columnWidth:'65%'}},stroke:{width:0}};
+  }else if(type==='bar_stacked'){
+    opts={...b,series,chart:{...b.chart,type:'bar',stacked:true},xaxis:{categories:xCats,labels:{style:{fontSize:'10px'}}},yaxis:{labels:{formatter:v=>fmtS(v),style:{fontSize:'10px'}}},colors,plotOptions:{bar:{columnWidth:'65%'}},stroke:{width:0},dataLabels:{enabled:false}};
+  }else if(type==='heatmap'){
+    opts={...b,series,chart:{...b.chart,type:'heatmap'},xaxis:{categories:xCats,labels:{style:{fontSize:'10px'}}},colors:['#7c3aed'],dataLabels:{enabled:false},plotOptions:{heatmap:{colorScale:{ranges:[{from:0,to:500,color:'#1a1a2e',name:'Brak'},{from:501,to:5000,color:'#4b2d8f',name:'Niskie'},{from:5001,to:20000,color:'#7c3aed',name:'Średnie'},{from:20001,to:999999,color:'#c084fc',name:'Wysokie'}]}}}};
+  }
+  S.charts[chartId]=new ApexCharts(document.querySelector('#'+elId),opts);S.charts[chartId].render();
+}
+
+// CHART: Per produkt
+function drawProd(type){
+  const summary=calcSum(S.data,'IMPORTKODPRODUKTU');
+  const entries=Object.entries(summary.productGroups)
+    .filter(([,g])=>g.netto>0)
+    .sort((a,b)=>b[1].netto-a[1].netto);
+  const labels=entries.map(([name])=>name);
+  const data=entries.map(([,g])=>parseFloat(g.netto.toFixed(2)));
+  const colors=entries.map(([,g])=>(CFG.prodStyle[g.code||'']||CFG.prodStyle['']).accent);
+  if(S.charts.prod){S.charts.prod.destroy();S.charts.prod=null;}
+  if(!entries.length)return;
+  const d=dark();
+  const fc=d?'#888':'#555';
+  const n=entries.length;
+  const hHoriz=Math.max(320,n*44);
+  const hVert=Math.max(360,n*32);
+  const baseOpts={
+    chart:{fontFamily:"'Inter',sans-serif",toolbar:{show:false},background:'transparent',foreColor:fc,animations:{enabled:true,speed:400}},
+    tooltip:{theme:d?'dark':'light',y:{formatter:v=>fmt(v)}},
+    grid:{borderColor:d?'rgba(255,255,255,.05)':'#f0f0f0',strokeDashArray:4,padding:{left:4,right:16}},
+    dataLabels:{enabled:false},
+    legend:{show:false}
+  };
+  let opts={};
+  if(type==='bar'){
+    opts={...baseOpts,series:[{name:'Netto',data}],chart:{...baseOpts.chart,type:'bar',height:hVert},xaxis:{categories:labels,labels:{style:{fontSize:'11px',colors:fc},trim:true,maxHeight:80},axisBorder:{show:false},axisTicks:{show:false}},yaxis:{labels:{formatter:v=>fmtS(v),style:{fontSize:'11px',colors:fc}}},colors,plotOptions:{bar:{borderRadius:6,columnWidth:n>8?'70%':'50%',distributed:true}},dataLabels:{enabled:true,formatter:v=>fmtS(v)+' zł',style:{fontSize:'11px',fontWeight:600,colors:d?['#e8e8e8']:['#333']},offsetY:-6,dropShadow:{enabled:false}},tooltip:{theme:d?'dark':'light',y:{formatter:v=>fmt(v)}}};
+  }else if(type==='bar_horiz'){
+    opts={...baseOpts,series:[{name:'Netto',data}],chart:{...baseOpts.chart,type:'bar',height:hHoriz},xaxis:{labels:{formatter:v=>fmtS(v),style:{fontSize:'11px',colors:fc}},axisBorder:{show:false},axisTicks:{show:false}},yaxis:{labels:{style:{fontSize:'12px',colors:fc,fontWeight:500},maxWidth:160},categories:labels},colors,plotOptions:{bar:{borderRadius:5,horizontal:true,distributed:true,barHeight:n>10?'65%':'50%',dataLabels:{position:'right'}}},dataLabels:{enabled:true,formatter:v=>fmtS(v)+' zł',style:{fontSize:'11px',fontWeight:600,colors:d?['#e8e8e8']:['#333']},offsetX:6,dropShadow:{enabled:false}},tooltip:{theme:d?'dark':'light',y:{formatter:v=>fmt(v)}}};
+  }else if(type==='treemap'){
+    opts={...baseOpts,series:[{data:labels.map((l,i)=>({x:l,y:data[i]}))}],chart:{...baseOpts.chart,type:'treemap',height:hVert},colors,dataLabels:{enabled:true,style:{fontSize:'12px',fontWeight:600}},tooltip:{theme:d?'dark':'light',y:{formatter:v=>fmt(v)}}};
+  }else if(type==='radar'){
+    opts={...baseOpts,series:[{name:'Netto',data}],chart:{...baseOpts.chart,type:'radar',height:380},xaxis:{categories:labels,labels:{style:{fontSize:'11px',colors:fc}}},yaxis:{show:false},colors:['#7c3aed'],fill:{opacity:.15},stroke:{width:2},markers:{size:4}};
+  }else if(type==='donut'){
+    opts={...baseOpts,series:data,chart:{...baseOpts.chart,type:'donut',height:380},labels,colors,dataLabels:{enabled:true,formatter:(v,{seriesIndex:i})=>fmtS(data[i])+' zł',style:{fontSize:'11px'}},plotOptions:{pie:{donut:{size:'58%',labels:{show:true,name:{fontSize:'13px',color:fc},value:{fontSize:'20px',fontWeight:700,color:d?'#e8e8e8':'#111',formatter:v=>fmtS(v)+' zł'},total:{show:true,showAlways:true,label:'Suma',fontSize:'12px',color:fc,formatter:w=>fmtS(w.globals.seriesTotals.reduce((a,b)=>a+b,0))+' zł'}}}}},legend:{show:true,position:'bottom',fontSize:'12px',labels:{colors:fc}}};
+  }else if(type==='polarArea'){
+    opts={...baseOpts,series:data,chart:{...baseOpts.chart,type:'polarArea',height:380},labels,colors,stroke:{width:1},fill:{opacity:.8},dataLabels:{enabled:false},legend:{show:true,position:'bottom',fontSize:'12px',labels:{colors:fc}}};
+  }else if(type==='radialBar'){
+    const total=data.reduce((a,b)=>a+b,0);
+    opts={...baseOpts,series:data.map(v=>parseFloat((v/total*100).toFixed(1))),chart:{...baseOpts.chart,type:'radialBar',height:Math.max(380,n*36)},labels,colors,plotOptions:{radialBar:{hollow:{size:'15%'},track:{background:d?'#222':'#eee'},dataLabels:{name:{fontSize:'11px',colors:fc},value:{fontSize:'12px',fontWeight:600,formatter:v=>v+'%'},total:{show:true,label:'Suma',fontSize:'11px',color:fc,formatter:()=>fmtS(total)+' zł'}}}},legend:{show:true,position:'bottom',fontSize:'12px',labels:{colors:fc}}};
+  }
+  S.charts.prod=new ApexCharts(document.querySelector('#chart-prod'),opts);S.charts.prod.render();
+}
+
+function drawAllCharts(){
+  if(!S.data.length)return;
+  drawSg(S.settings.chartTypes.sg);
+  drawTrend('us','chart-us',CFG.superGroups['Usługi'].codes,S.settings.chartTypes.us);
+  drawTrend('mat','chart-mat',CFG.superGroups['Materiały'].codes,S.settings.chartTypes.mat);
+  drawProd(S.settings.chartTypes.prod);
+}
+
+// GROUP ROWS
+const renderGRows=(details,start,count)=>
+  details.slice(start,start+count).map(d=>{
+    const tags=detectTags(d.tresc);
+    const desc=(d.tresc||'').replace(/[^a-zA-Z0-9\sąćęłńóśźżĄĆĘŁŃÓŚŹŻ.,\-\/]/g,'');
+    return`<tr><td>${d.importNr}</td><td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${tags?tags+' ':''}<span>${desc}</span></td><td>${d.stawkaVAT?d.stawkaVAT+'%':''}</td><td style="text-align:right">${fmtN(d.netto)}</td><td style="text-align:right;font-weight:600;color:var(--green-txt)">${fmt(d.brutto)}</td><td>${d.DataTransakcji||''}</td><td>${d.StanLicznika||''}</td></tr>`;
+  }).join('');
+
+const renderGroupItem=(name,grp,i,totalNetto)=>{
+  const code=grp.code||'';
+  const cls={'896':'g-896','898':'g-898','903':'g-903','905':'g-905','909':'g-909'}[code]||'g-other';
+  const SVG={
+    'wrench':`<svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>`,
+    'gear':`<svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
+    'tire':`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="3" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="21"/><line x1="3" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="21" y2="12"/></svg>`,
+    'oil':`<svg viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-2.5-5.5L12 2l-4.5 7.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>`,
+    'snowflake':`<svg viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="20" y1="4" x2="4" y2="20"/><line x1="4" y1="4" x2="20" y2="20"/><polyline points="12 6 12 2 8 4"/><polyline points="12 6 12 2 16 4"/><polyline points="12 18 12 22 8 20"/><polyline points="12 18 12 22 16 20"/></svg>`,
+    'sun':`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
+    'rotate':`<svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`,
+    'rim':`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="14.6" y1="9.7" x2="20.6" y2="6.3"/><line x1="14.6" y1="14.3" x2="20.6" y2="17.7"/><line x1="12" y1="15" x2="12" y2="22"/><line x1="9.4" y1="14.3" x2="3.4" y2="17.7"/><line x1="9.4" y1="9.7" x2="3.4" y2="6.3"/></svg>`,
+    'warehouse':`<svg viewBox="0 0 24 24"><path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35z"/><polyline points="6 18 6 12 18 12 18 18"/><line x1="12" y1="12" x2="12" y2="18"/></svg>`,
+    'release':`<svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`,
+    'gauge':`<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v2"/><path d="M6.3 9.7l1.4 1.4"/><path d="M12 12l4.5-2.6"/><circle cx="12" cy="12" r="1"/></svg>`,
+    'stopwatch':`<svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 15 16"/><line x1="9.5" y1="2" x2="14.5" y2="2"/><line x1="12" y1="2" x2="12" y2="5"/></svg>`,
+    'truck':`<svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>`,
+    'hammer':`<svg viewBox="0 0 24 24"><path d="m15 12-8.5 8.5a2.12 2.12 0 0 1-3-3L12 9"/><path d="M17.64 15 22 10.64"/><path d="m20.91 11.7-1.25-1.25c-.6-.6-.93-1.4-.93-2.25v-.86L16.01 5.6a5.009 5.009 0 0 0-6.22.28 5 5 0 0 0-.27 6.21L11 13.5c.16.16.46.16.6 0l7.17-7.17"/></svg>`,
+    'box':`<svg viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`
+  };
+  const nameIconMap={
+    'Obsługa techniczna':'gauge','Normy czasowe':'stopwatch','Usługa warsztatowa':'wrench','Usługa inna':'hammer','Usługa kurierska':'truck','Usługa oponiarska':'rotate','Przechowanie opon':'warehouse','Wydanie opon z przechowalni':'release','Części do obsługi technicznej':'gear','Części do norm czasowych':'gear','Część':'gear','Opona letnia':'sun','Opona zimowa':'snowflake','Opona całoroczna':'rotate','Felga':'rim'
+  };
+  const codeIconMap={'896':'gear','898':'tire','903':'wrench','905':'warehouse','909':'gauge','':'box'};
+  const iconKey=nameIconMap[name]||codeIconMap[code]||'box';
+  const icon=SVG[iconKey]||SVG.box;
+  const codeName=CFG.prodNames[code]||name;
+  const pct=totalNetto>0?((grp.netto/totalNetto)*100).toFixed(1):'0.0';
+  const uid='gd-'+i;
+  return`<div class="group-card">
+    <div class="group-row" data-uid="${uid}">
+      <div class="group-left">
+        <div class="group-avatar ${cls}">${icon}</div>
+        <div>
+          <div class="group-name">${name||'Nieznany'}</div>
+          <div class="group-sub">${codeName}</div>
+        </div>
+      </div>
+      <span class="group-count-badge">${grp.count} poz.</span>
+      <div class="group-progress-cell">
+        <div class="group-progress-bar"><div class="group-progress-fill" style="width:${pct}%"></div></div>
+        <span class="group-pct-text">${pct}%</span>
+      </div>
+      <div class="group-amount always">
+        <div class="group-amount-label">Netto</div>
+        <div class="group-amount-val">${fmt(grp.netto)}</div>
+      </div>
+      <div class="group-amount">
+        <div class="group-amount-label">Brutto</div>
+        <div class="group-amount-val" style="color:var(--green-txt)">${fmt(grp.brutto)}</div>
+      </div>
+      <span class="group-chevron">▼</span>
+    </div>
+    <div class="group-detail" id="${uid}">
+      <div class="group-detail-scroll">
+        <table class="detail-tbl">
+          <thead><tr><th>Nr. Rej.</th><th>Opis / Tagi</th><th>VAT</th><th style="text-align:right">Netto</th><th style="text-align:right">Brutto</th><th>Data</th><th>Licznik</th></tr></thead>
+          <tbody id="gtb-${i}">${renderGRows(grp.details,0,GRC)}</tbody>
+        </table>
+      </div>
+      ${grp.details.length>GRC?`<div class="load-more-row-wrap"><table style="width:100%"><tbody><tr class="load-more-row" data-gi="${i}" data-gn="${name}" data-loaded="${GRC}"><td colspan="7">▼ Więcej (${grp.details.length-GRC})</td></tr></tbody></table></div>`:''}
+    </div>
+  </div>`;
+};
+
+// Build per-group search cache
+let _searchCache={};
+const buildSearchCache=summary=>{
+  _searchCache={};
+  for(const [name,grp] of Object.entries(summary.productGroups)){
+    _searchCache[name]=name.toLowerCase()+' '+grp.details.map(d=>d.tresc||'').join(' ').toLowerCase();
+  }
+};
+const matchSearch=(name,search)=>!search||_searchCache[name]?.includes(search)||false;
+
+const renderSuperGroup=(sgName,sgCfg,items,summary,startIdx)=>{
+  const sgN=items.reduce((s,[,g])=>s+g.netto,0);
+  const sgB=items.reduce((s,[,g])=>s+g.brutto,0);
+  const sgC=items.reduce((s,[,g])=>s+g.count,0);
+  const sgPct=summary.totalNetto>0?((sgN/summary.totalNetto)*100).toFixed(1):'0.0';
+  const sgId='sgc-'+sgName.replace(/\s/g,'');
+  let itemsHtml='',idx=startIdx;
+  items.forEach(([n,g])=>{itemsHtml+=renderGroupItem(n,g,idx,summary.totalNetto);idx++;});
+  return`<div class="sg-section" id="${sgId}">
+    <div class="sg-section-hdr" data-sgid="${sgId}">
+      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+        <div class="sg-icon-wrap" style="background:${sgCfg.accent}22;color:${sgCfg.accent}">${sgCfg.svg}</div>
+        <div>
+          <div class="sg-name">${sgName}</div>
+          <div class="sg-sub">${sgC} pozycji</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;flex-shrink:0">
+        <div style="text-align:right"><div style="font-size:10px;color:var(--txt3)">netto</div><div style="font-size:13px;font-weight:700;color:${sgCfg.accent}">${fmt(sgN)}</div></div>
+        <div style="text-align:right"><div style="font-size:10px;color:var(--txt3)">brutto</div><div style="font-size:13px;font-weight:700;color:var(--green-txt)">${fmt(sgB)}</div></div>
+        <div style="font-size:12px;color:var(--txt3);min-width:36px;text-align:right">${sgPct}%</div>
+        <span class="sg-chevron" style="color:var(--txt3);font-size:12px;transition:transform .2s">▼</span>
+      </div>
+    </div>
+    <div class="sg-body" id="${sgId}-body">${itemsHtml}</div>
+  </div>`;
+};
+
+const updateGroupsUI=summary=>{
+  const el=document.getElementById('productGroupsSummary');
+  const search=$('#groupSearch').val().trim().toLowerCase();
+  const sorted=Object.entries(summary.productGroups).sort((a,b)=>b[1].netto-a[1].netto);
+  const isGrouped=S.settings.groupView==='grouped'&&S.settings.groupBy==='IMPORTKODPRODUKTU';
+  let html='',total=0,idx=0;
+
+  if(isGrouped){
+    for(const [sgName,sgCfg] of Object.entries(CFG.superGroups)){
+      const items=sorted.filter(([,g])=>sgCfg.codes.includes(g.code||''));
+      const shown=search?items.filter(([n])=>matchSearch(n,search)):items;
+      if(!shown.length)continue;
+      total+=shown.length;
+      html+=renderSuperGroup(sgName,sgCfg,shown,summary,idx);
+      idx+=shown.length;
+    }
+    const allCodes=Object.values(CFG.superGroups).flatMap(s=>s.codes);
+    const others=sorted.filter(([,g])=>!allCodes.includes(g.code||''));
+    const shownO=search?others.filter(([n])=>matchSearch(n,search)):others;
+    shownO.forEach(([n,g])=>{total++;html+=renderGroupItem(n,g,idx,summary.totalNetto);idx++;});
+  }else{
+    sorted.forEach(([n,g])=>{
+      if(search&&!matchSearch(n,search))return;
+      total++;html+=renderGroupItem(n,g,idx,summary.totalNetto);idx++;
+    });
+  }
+  if(!total)html=`<div class="empty-state"><div class="ei">🔍</div><h3>Brak wyników${search?' dla „'+search+'"':''}</h3></div>`;
+  el.innerHTML=html;
+};
+
+// STATS UI
+const updateStatsUI=sum=>{
+  $('#sNetto').text(fmt(sum.totalNetto));
+  $('#sVAT').text(fmt(sum.totalVAT));
+  $('#sBrutto').text(fmt(sum.totalBrutto));
+  $('#sRecords').text(S.data.length.toLocaleString('pl-PL'));
+  const fc=S.files.length;
+  $('#dFiles').text(`${fc} plik${fc===1?'':fc<5?'i':'ów'} zaimportowanych`);
+  $('#dRecords').text(`${S.data.length.toLocaleString('pl-PL')} rekordów`);
+  $('#dGroups').text(`${Object.keys(sum.productGroups).length} grup`);
+  const avg=S.data.length?sum.totalBrutto/S.data.length:0;
+  $('#dAvg').text('Śr. brutto: '+fmt(avg));
+  const fb=$('#fileBadge');
+  fc?fb.text(`${fc} plik${fc===1?'':fc<5?'i':'ów'}`).show():fb.hide();
+};
+
+// DATATABLE
+const displayDT=data=>{
+  const dayMaxMap={};
+  data.forEach((r,i)=>{
+    const rej=r['NR. REJ.']||'',dat=r.DataTransakcji||'',netto=parseFloat(r.NETTO)||0,licz=r.StanLicznika||'';
+    if(!rej||!dat||!licz)return;
+    const key=rej+'|'+dat;
+    if(!dayMaxMap[key]||netto>dayMaxMap[key].netto)dayMaxMap[key]={netto,idx:i};
+  });
+  data.forEach(r=>delete r._showLicznik);
+  Object.values(dayMaxMap).forEach(v=>{data[v.idx]._showLicznik=true;});
+  const cols=CFG.reqCols.map(col=>{
+    if(col==='')return{title:'',data:null,defaultContent:'',orderable:false,width:'2%'};
+    if(col==='IMPORTKODPRODUKTU')return{title:'Prod.',data:r=>r.PRODUKTKOD||'',render:d=>{const accent=(CFG.prodStyle[d]||CFG.prodStyle['']).accent;return`<span style="display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700;background:${accent};color:#fff">${d||'—'}</span>`;}};
+    if(col==='TRESC')return{title:'Opis',data:r=>r[col],render:(d,type,set,meta)=>{
+      const desc=(d||'').replace(/[^a-zA-Z0-9\sąćęłńóśźżĄĆĘŁŃÓŚŹŻ.,\-\/]/g,'');
+      const row=meta.settings.aoData[meta.row]._aData;
+      const licznik=(row._showLicznik&&row.StanLicznika)?row.StanLicznika:'';
+      if(type!=='display'){return(licznik?`[${licznik} km] `:'')+desc;}
+      const tags=detectTags(d);
+      const lTag=licznik?`<span style="display:inline-block;padding:0 5px;border-radius:3px;font-size:9px;font-weight:600;background:var(--neutral-bg);color:var(--txt2);border:1px solid var(--border-l)">${licznik} km</span> `:'';
+      return(tags?tags+' ':'')+lTag+`<span style="color:var(--txt2)">${desc}</span>`;
+    }};
+    return{title:col,data:r=>r[col],render:d=>{if(col==='NETTO'||col==='VAT')return`<span style="color:var(--txt2)">${fmtN(d)}</span>`;if(col==='STAWKAVAT'&&d)return d+'%';return d||'';}};
+  });
+  if(S.dt)S.dt.destroy();
+  S.dt=$('#dataTable').DataTable({data,columns:cols,dom:'Blfrtip',paging:true,pagingType:'simple_numbers',lengthMenu:[[10,25,50,100],[10,25,50,100]],pageLength:25,deferRender:true,scrollY:'340px',scrollCollapse:false,
+    buttons:[{extend:'excel',text:'Excel',className:'dt-button-excel',exportOptions:{orthogonal:'export'}},{extend:'pdf',text:'PDF',className:'dt-button-pdf',exportOptions:{orthogonal:'export'}},{extend:'csvHtml5',text:'CSV',className:'dt-button-csv',bom:false,fieldSeparator:';',quoteChar:'',escapeChar:'',quoteStrings:'',exportOptions:{columns:':visible',orthogonal:'export'},customize:csv=>csv.replace(/"/g,'').split('\n').slice(1).join('\n')},{extend:'print',text:'Drukuj',className:'dt-button-print'}],
+    language:{url:'//cdn.datatables.net/plug-ins/1.13.7/i18n/pl.json'}});
+};
+
+// FILE PROCESSING
+const processFile=file=>new Promise((res,rej)=>{
+  const ft=file.name.split('.').pop().toLowerCase();
+  if(!['csv','xlsx','xls'].includes(ft)){rej(new Error('Nieobsługiwany: '+ft));return;}
+  const reader=new FileReader();
+  reader.onload=e=>{try{let j=[];if(ft==='csv')j=Papa.parse(e.target.result,{header:true,skipEmptyLines:true}).data;else{const wb=XLSX.read(e.target.result,{type:'binary',cellDates:true});j=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{raw:false});}const p=processData(j);res({name:file.name,data:p,rc:p.length,ft});}catch(err){rej(err);}};
+  reader.onerror=()=>rej(new Error('Błąd: '+file.name));
+  ft==='csv'?reader.readAsText(file):reader.readAsBinaryString(file);
+});
+
+const doImport=async files=>{
+  const valid=Array.from(files).filter(f=>{const ft=f.name.split('.').pop().toLowerCase();if(!['csv','xlsx','xls'].includes(ft)){toast('error',f.name+': nieobsługiwany');return false;}return true;});
+  const newFiles=valid.filter(f=>!S.files.some(x=>x.name===f.name));
+  if(!newFiles.length)return;
+  $('#spinner').show();$('#importStatus').removeClass('success error').hide();
+  const chips=$('#fileChips').empty();
+  newFiles.forEach(f=>{const ft=f.name.split('.').pop().toLowerCase();chips.append(`<div class="file-chip"><span class="file-chip-icon">${ft==='csv'?'📄':'📊'}</span><span class="file-chip-name">${f.name}</span><span class="file-chip-size">${(f.size/1024).toFixed(0)} KB</span></div>`);});
+  const results=await Promise.allSettled(newFiles.map(f=>processFile(f)));
+  let ok=0,fail=[];
+  results.forEach((r,i)=>{
+    if(r.status==='fulfilled'){S.files.push({name:r.value.name,rc:r.value.rc});S.data=[...S.data,...r.value.data];ok+=r.value.rc;}
+    else fail.push(newFiles[i].name);
+  });
+  $('#spinner').hide();
+  if(S.data.length){S.summary=calcSum(S.data,S.settings.groupBy);buildSearchCache(S.summary);updateStatsUI(S.summary);updateGroupsUI(S.summary);drawAllCharts();displayDT(S.data);}
+  if(ok){$('#importStatus').text('✅ Zaimportowano '+ok+' rekordów').addClass('success').show();$('#dropSection').slideUp(300);$('#navImportBtn').show();}
+  if(fail.length){toast('error','Błąd: '+fail.join(', '));}
+  toast(ok?'success':'error',ok?'Zaimportowano '+ok+' rekordów':'Błąd importu');
+};
+
+// DROPZONE
+const dz=document.getElementById('dropzone');
+['dragenter','dragover','dragleave','drop'].forEach(ev=>{dz.addEventListener(ev,e=>{e.preventDefault();e.stopPropagation();});document.body.addEventListener(ev,e=>{e.preventDefault();e.stopPropagation();});});
+['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,()=>dz.classList.add('drag-over')));
+['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,()=>dz.classList.remove('drag-over')));
+dz.addEventListener('drop',e=>{if(e.dataTransfer.files.length)doImport(e.dataTransfer.files);});
+dz.addEventListener('click',()=>document.getElementById('fileInput').click());
+$('#fileInput').on('change',e=>doImport(e.target.files));
+
+// NAV IMPORT BTN
+$('#navImportBtn').on('click',()=>{$('#dropSection').slideToggle(200);});
+
+// CLEAR
+$('#clearBtn').on('click',()=>{
+  if(!S.data.length){toast('info','Brak danych');return;}
+  if(!confirm('Wyczyścić wszystkie dane?'))return;
+  S.data=[];S.files=[];S.summary={totalNetto:0,totalVAT:0,totalBrutto:0,productGroups:{}};
+  Object.keys(S.charts).forEach(k=>{if(S.charts[k]){S.charts[k].destroy();S.charts[k]=null;}});
+  if(S.dt)S.dt.clear().draw();
+  $('#sNetto,#sVAT,#sBrutto').text('—');$('#sRecords').text('0');
+  $('#dFiles').text('Brak danych');$('#dRecords').text('0 rekordów');$('#dGroups').text('0 grup');$('#dAvg').text('Śr. brutto: —');
+  $('#fileBadge').hide();$('#productGroupsSummary').html('<div class="empty-state"><div class="ei">🗂️</div><h3>Brak danych</h3></div>');
+  $('#fileChips').empty();$('#importStatus').hide();
+  $('#dropSection').slideDown(200);$('#navImportBtn').hide();
+  toast('success','Dane wyczyszczone');
+});
+
+// CHART PILLS
+$(document).on('click','.cpill',function(){
+  const chart=$(this).data('chart'),type=$(this).data('type');
+  $(`[data-chart="${chart}"]`).removeClass('on');$(this).addClass('on');
+  S.settings.chartTypes[chart]=type;
+  if(!S.data.length)return;
+  if(chart==='sg')drawSg(type);
+  else if(chart==='us')drawTrend('us','chart-us',CFG.superGroups['Usługi'].codes,type);
+  else if(chart==='mat')drawTrend('mat','chart-mat',CFG.superGroups['Materiały'].codes,type);
+  else if(chart==='prod')drawProd(type);
+});
+
+// GROUPING SWITCH
+$('#groupByProduct').on('click',function(){
+  S.settings.groupBy='IMPORTKODPRODUKTU';
+  $('#groupByProduct,#groupByRegistration').removeClass('active');$(this).addClass('active');
+  if(S.data.length){S.summary=calcSum(S.data,S.settings.groupBy);buildSearchCache(S.summary);updateGroupsUI(S.summary);}
+});
+$('#groupByRegistration').on('click',function(){
+  S.settings.groupBy='NR. REJ.';
+  $('#groupByProduct,#groupByRegistration').removeClass('active');$(this).addClass('active');
+  S.settings.groupView='flat';$('#viewFlat,#viewGrouped').removeClass('active');$('#viewFlat').addClass('active');
+  if(S.data.length){S.summary=calcSum(S.data,S.settings.groupBy);buildSearchCache(S.summary);updateGroupsUI(S.summary);}
+});
+$('#viewFlat').on('click',function(){
+  S.settings.groupView='flat';
+  $('#viewFlat,#viewGrouped').removeClass('active');$(this).addClass('active');
+  if(S.data.length)updateGroupsUI(S.summary);
+});
+$('#viewGrouped').on('click',function(){
+  S.settings.groupView='grouped';
+  S.settings.groupBy='IMPORTKODPRODUKTU';
+  $('#groupByProduct,#groupByRegistration').removeClass('active');$('#groupByProduct').addClass('active');
+  $('#viewFlat,#viewGrouped').removeClass('active');$(this).addClass('active');
+  if(S.data.length){S.summary=calcSum(S.data,S.settings.groupBy);buildSearchCache(S.summary);updateGroupsUI(S.summary);}
+});
+
+// EXPAND / COLLAPSE
+$('#expandAllGroups').on('click',()=>{$('.group-detail,.sg-body').slideDown(150);$('.group-chevron,.sg-chevron').css('transform','rotate(180deg)');});
+$('#collapseAllGroups').on('click',()=>{$('.group-detail,.sg-body').slideUp(150);$('.group-chevron,.sg-chevron').css('transform','');});
+$(document).on('click','.sg-section-hdr',function(){
+  const body=$(this).next('.sg-body'),chev=$(this).find('.sg-chevron');
+  if(body.is(':visible')){body.slideUp(150);chev.css('transform','');}
+  else{body.slideDown(150);chev.css('transform','rotate(180deg)');}
+});
+$('#groupSearch').on('input',deb(()=>{if(S.summary)updateGroupsUI(S.summary);},350));
+
+// GROUP CLICK EVENTS
+$(document).on('click','.group-row',function(){const uid=$(this).data('uid');const det=$('#'+uid);const chev=$(this).find('.group-chevron');if(det.is(':visible')){det.slideUp(150);chev.css('transform','');}else{det.slideDown(150);chev.css('transform','rotate(180deg)');}});
+$(document).on('click','.load-more-row',function(){const row=$(this),gi=row.data('gi'),gn=row.data('gn'),loaded=parseInt(row.data('loaded'));const g=S.summary.productGroups[gn];if(!g)return;const tl=Math.min(g.details.length-loaded,GRC);if(tl<=0)return;$('#gtb-'+gi).append(renderGRows(g.details,loaded,tl));const nl=loaded+tl;row.data('loaded',nl);if(nl>=g.details.length)row.closest('.load-more-row-wrap').remove();else row.find('td').text(`▼ Więcej (${g.details.length-nl})`);});
+
+// EXPORT
+function expMenu(btnId,menuId){$('#'+btnId).on('click',function(e){e.stopPropagation();$('#'+menuId).toggleClass('show');});}
+expMenu('expBtn1','expMenu1');
+$(document).on('click',()=>$('.exp-menu').removeClass('show'));
+$('#expXl,#expXl2').on('click',()=>{$('.dt-button-excel').click();$('.exp-menu').removeClass('show');});
+$('#expPdf,#expPdf2').on('click',()=>{$('.dt-button-pdf').click();$('.exp-menu').removeClass('show');});
+$('#expCsv,#expCsv2').on('click',()=>{$('.dt-button-csv').click();$('.exp-menu').removeClass('show');});
+
+// TABLE SEARCH
+$('#tableSearch').on('input keyup',deb(()=>{if(S.dt)S.dt.search($('#tableSearch').val()).draw();},280));
+
+// EXPORT btn2
+expMenu('expBtn2','expMenu2');
+$('#expXl2').on('click',()=>{$('#expXl').click();});
+$('#expPdf2').on('click',()=>{$('#expPdf').click();});
+$('#expCsv2').on('click',()=>{$('#expCsv').click();});
+
+}); // end jQuery
+</script>
+</body>
+</html>
