@@ -11,7 +11,6 @@
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 
-
 [data-theme="dark"]{
   --bg:#0f0f12;--bg2:#16161a;--bg-card:#1c1c22;
   --border:rgba(255,255,255,0.10);--border-l:rgba(255,255,255,0.18);
@@ -58,8 +57,7 @@
 }
 
 html{height:100%;overflow-x:hidden}
-body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--txt);min-height:100dvh;-webkit-font-smoothing:antialiased;transition:background .2s,color .2s}
-
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--txt);min-height:100dvh;-webkit-font-smoothing:antialiased;transition:background .3s,color .3s}
 
 /* ── NAVBAR ── */
 .navbar{display:flex;align-items:center;justify-content:space-between;padding:6px 14px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;background:var(--bg);backdrop-filter:blur(8px)}
@@ -102,7 +100,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .sb-section:last-child{padding-bottom:14px}
 .sb-label{font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
 
-/* ── SIDEBAR TOGGLE (navbar) ── */
+/* ── SIDEBAR TOGGLE ── */
 .btn-sidebar{background:var(--hover);border:1px solid var(--border-l);color:var(--txt2)}
 .btn-sidebar:hover{background:var(--hover2);color:var(--txt)}
 .btn-sidebar.active{background:rgba(124,58,237,.12);border-color:rgba(124,58,237,.35);color:var(--accent)}
@@ -174,12 +172,18 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 
 /* ── FORM GROUP ── */
 .fg{display:flex;flex-direction:column;gap:5px}
-.fg label{font-size:11px;font-weight:500;color:var(--txt3);cursor:pointer;}
+.fg label{font-size:11px;font-weight:500;color:var(--txt3);cursor:pointer}
 .fg input,.fg select{background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;padding:8px 10px;font-size:12px;font-family:inherit;color:var(--txt);outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
 .fg input:focus,.fg select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(139,92,246,.15)}
 .fg input::placeholder{color:var(--txt3);opacity:.9}
 [data-theme="dark"] .fg input,[data-theme="dark"] .fg select{color:var(--txt);caret-color:var(--accent2)}
 .fg input.ok{border-color:rgba(34,197,94,.5);background:rgba(34,197,94,.04)}
+.fg input.err{border-color:rgba(239,68,68,.6);background:rgba(239,68,68,.04)}
+
+/* ── VIN COUNTER ── */
+.vin-counter{font-size:10px;color:var(--txt3);text-align:right;margin-top:2px;transition:color .2s}
+.vin-counter.ok{color:var(--green-txt)}
+.vin-counter.err{color:var(--red-txt)}
 
 /* ── PDF VIEWER ── */
 .pdf-viewer{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:none}
@@ -234,15 +238,12 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .od-title{font-weight:bold;margin-bottom:7px;font-size:9pt}
 .od-line{margin-bottom:16px}
 .od-sig-row{display:flex;justify-content:flex-end;margin-top:7px}
-.empty-val{color:#aaa;font-style:italic;font-weight:normal} /* Dodano styl dla pustych stanów */
+.empty-val{color:#aaa;font-style:italic;font-weight:normal}
+
 /* ── WYPOWIEDZENIE OC STYLES ── */
 .wyp-doc{background:#fff;color:#000;font-family:'Times New Roman',serif;font-size:10pt;line-height:1.5;padding:14mm 16mm;max-width:680px;margin:0 auto;box-shadow:0 4px 24px rgba(0,0,0,.3);border-radius:4px}
 [data-theme="light"] .wyp-doc{box-shadow:0 2px 12px rgba(0,0,0,.12)}
-
-/* Tytuł */
 .wyp-title{text-align:center;font-size:12pt;font-weight:bold;text-transform:uppercase;letter-spacing:1px;margin-bottom:20px;padding-bottom:10px;border-bottom:2pt solid #000}
-
-/* Bloki stron */
 .wyp-party{margin-bottom:14px}
 .wyp-party-hd{font-size:7pt;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#fff;background:#444;padding:3px 8px;margin-bottom:0;display:inline-block}
 .wyp-party-body{border:1pt solid #bbb;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
@@ -251,21 +252,21 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .wyp-field-val{font-size:10.5pt;border-bottom:.5pt solid #999;min-height:21px;padding:1px 3px 2px;line-height:1.4}
 .wyp-field-val b{font-weight:700}
 .wyp-2col{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
-
-/* Pojazd */
 .wyp-vehicle{border:1.2pt solid #555;padding:9px 12px;margin-bottom:14px}
 .wyp-vehicle-hd{font-size:7pt;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#555;margin-bottom:6px}
-
-/* Treść */
 .wyp-sep{border:none;border-top:1pt solid #ccc;margin:16px 0}
 .wyp-section-hd{text-align:center;font-size:11pt;font-weight:bold;letter-spacing:3px;margin-bottom:12px}
 .wyp-text{font-size:10pt;line-height:1.7;text-align:justify}
-
-/* Podpisy */
 .wyp-sigs{display:grid;grid-template-columns:1fr 1fr;gap:0 40px;margin-top:52px}
 .wyp-sig-blk{text-align:center}
 .wyp-sig-line{border-top:.5pt solid #888;margin-bottom:4px}
 .wyp-sig-lbl{font-size:7pt;color:#555;font-style:italic}
+
+/* ── VALIDATION BANNER ── */
+.val-banner{display:none;align-items:center;gap:8px;padding:9px 14px;background:var(--red-bg);border:1px solid rgba(239,68,68,.3);border-radius:9px;font-size:12px;color:var(--red-txt);margin-bottom:4px}
+.val-banner.on{display:flex}
+.val-banner ul{margin:0;padding-left:16px}
+.val-banner li{font-size:11px;margin-top:2px}
 
 /* ── SPIN ── */
 .spin{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;animation:spin .7s linear infinite;vertical-align:middle}
@@ -277,6 +278,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 @keyframes tIn{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:none}}
 .t-success{background:var(--green-bg);border:1px solid rgba(34,197,94,.3);color:var(--green-txt)}
 .t-error{background:var(--red-bg);border:1px solid rgba(239,68,68,.3);color:var(--red-txt)}
+.t-warn{background:var(--yellow-bg);border:1px solid rgba(234,179,8,.3);color:var(--yellow-txt)}
 
 /* ── SEPARATOR ── */
 .sb-divider{height:1px;background:var(--border);margin:0 14px}
@@ -306,7 +308,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 
 <nav class="navbar">
   <div class="nav-brand">
-    <svg class="nav-logo" viewBox="0 0 30 30" fill="none">
+    <svg class="nav-logo" viewBox="0 0 30 30" fill="none" aria-hidden="true">
       <rect width="30" height="30" rx="7" fill="#0a0a0a"/>
       <rect width="30" height="30" rx="7" fill="rgba(124,58,237,.15)"/>
       <path d="M8 22h14M8 22l3-6 3 4 3-8 3 10" stroke="#7c3aed" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -314,24 +316,49 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
       <line x1="21" y1="12.5" x2="21" y2="16" stroke="#c084fc" stroke-width="1.5" stroke-linecap="round"/>
     </svg>
     <span class="nav-name">Zbycie<span style="color:var(--accent)">·</span>Pojazdu</span>
-    <span class="nav-ver">v2.5</span>
+    <span class="nav-ver">v3.4</span>
   </div>
   <div class="nav-right" style="gap:6px">
-    <button class="btn btn-danger" id="clearBtn" style="display:none" title="Wyczyść dane i formularz">
-      <svg width="10" height="10" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="1,3 13,3"/><path d="M4 3V2a1 1 0 011-1h4a1 1 0 011 1v1M5.5 6v4M8.5 6v4"/><rect x="2" y="3" width="10" height="10" rx="1"/></svg>
+    <button class="btn btn-danger" id="clearBtn" style="display:none"
+            title="Wyczyść dane i formularz" aria-label="Wyczyść dane i formularz">
+      <svg width="10" height="10" viewBox="0 0 14 14" fill="none" stroke="currentColor"
+           stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+        <polyline points="1,3 13,3"/>
+        <path d="M4 3V2a1 1 0 011-1h4a1 1 0 011 1v1M5.5 6v4M8.5 6v4"/>
+        <rect x="2" y="3" width="10" height="10" rx="1"/>
+      </svg>
       Wyczyść
     </button>
-    <button class="btn btn-sidebar active" id="sbToggle" title="Panel importu PDF">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
-      Import PDF
+    <button class="btn btn-sidebar active" id="sbToggle"
+            title="Panel importu PDF" aria-label="Pokaż/ukryj panel importu PDF">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <line x1="9" y1="3" x2="9" y2="21"/>
+      </svg>
+      Import
     </button>
-    <button class="theme-toggle" id="themeToggle" title="Przełącz motyw"></button>
-    <button class="btn btn-teal" id="printBtn" title="Drukuj zawiadomienie o zbyciu">
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    <button class="theme-toggle" id="themeToggle"
+            title="Przełącz motyw" aria-label="Przełącz motyw jasny/ciemny"></button>
+    <button class="btn btn-teal" id="printBtn"
+            title="Drukuj zawiadomienie o zbyciu" aria-label="Drukuj zawiadomienie o zbyciu pojazdu">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="6 9 6 2 18 2 18 9"/>
+        <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
+        <rect x="6" y="14" width="12" height="8"/>
+      </svg>
       Zbycie
     </button>
-    <button class="btn" style="background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.35);color:#d97706" id="printBtn2" title="Drukuj wypowiedzenie OC">
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    <button class="btn" id="printBtn2"
+            style="background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.35);color:#d97706"
+            title="Drukuj wypowiedzenie OC" aria-label="Drukuj wypowiedzenie umowy OC">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="6 9 6 2 18 2 18 9"/>
+        <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
+        <rect x="6" y="14" width="12" height="8"/>
+      </svg>
       Wyp. OC
     </button>
   </div>
@@ -339,13 +366,14 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 
 <div class="workspace">
 
+  <!-- ══ SIDEBAR ══ -->
   <aside class="sidebar" id="sidebar">
 
     <div class="sb-section">
       <div class="sb-label">1 · Faktura PDF</div>
-      <div class="dz" id="dz">
-        <input type="file" id="fileIn" accept=".pdf,application/pdf">
-        <div class="dz-ico">📄</div>
+      <div class="dz" id="dz" role="button" aria-label="Upuść fakturę PDF lub kliknij, aby wybrać plik">
+        <input type="file" id="fileIn" accept=".pdf,application/pdf" aria-label="Wybierz plik PDF">
+        <div class="dz-ico" aria-hidden="true">📄</div>
         <div class="dz-p">Upuść fakturę PDF tutaj</div>
         <div class="dz-h">lub kliknij, aby wybrać</div>
       </div>
@@ -353,15 +381,18 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 
     <div class="sb-section" style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
       <div class="fchip" id="chip">
-        <span class="fchip-ico">📑</span>
+        <span class="fchip-ico" aria-hidden="true">📑</span>
         <div class="fchip-info">
           <div class="fchip-name" id="chipName">—</div>
           <div class="fchip-size" id="chipSize">—</div>
         </div>
-        <button class="fchip-del" id="chipDel" title="Usuń plik">✕</button>
+        <button class="fchip-del" id="chipDel" title="Usuń plik" aria-label="Usuń wybrany plik">✕</button>
       </div>
-      <button class="btn btn-primary" id="parseBtn" disabled style="width:100%;justify-content:center;padding:9px">
-        <span id="bIco">📥</span><span id="bTxt">Parsuj fakturę</span>
+      <button class="btn btn-primary" id="parseBtn" disabled
+              style="width:100%;justify-content:center;padding:9px"
+              aria-label="Parsuj fakturę PDF i wypełnij formularz">
+        <span id="bIco" aria-hidden="true">📥</span>
+        <span id="bTxt">Parsuj fakturę</span>
       </button>
     </div>
 
@@ -369,21 +400,23 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 
     <div class="sb-section" style="margin-top:12px">
       <div class="sb-label">Log ekstrakcji</div>
-      <div class="log" id="log"><span class="l-info">Gotowy · wczytaj plik PDF.</span></div>
+      <div class="log" id="log" role="log" aria-live="polite" aria-label="Log ekstrakcji danych">
+        <span class="l-info">Gotowy · wczytaj plik PDF.</span>
+      </div>
     </div>
 
     <div class="sb-divider" style="margin-top:12px"></div>
 
     <div class="sb-section" style="margin-top:12px">
       <div class="sb-label">Wykryte dane</div>
-      <div class="ext" id="extCard">
+      <div class="ext" id="extCard" aria-label="Wykryte dane z faktury">
         <div class="ext-row"><span class="ext-k">Nr faktury</span><span class="ext-v" id="e_nrfak">—</span></div>
         <div class="ext-row"><span class="ext-k">Data</span><span class="ext-v" id="e_data">—</span></div>
         <div class="ext-row"><span class="ext-k">Pojazd</span><span class="ext-v" id="e_pojazd">—</span></div>
         <div class="ext-row"><span class="ext-k">Nr rej.</span><span class="ext-v" id="e_nrrej">—</span></div>
         <div class="ext-row"><span class="ext-k">VIN</span><span class="ext-v" id="e_vin">—</span></div>
         <div class="ext-row"><span class="ext-k">Nabywca</span><span class="ext-v" id="e_nab">—</span></div>
-        <div class="ext-row"><span class="ext-k">NIP</span><span class="ext-v" id="e_nip">—</span></div>
+        <div class="ext-row"><span class="ext-k" data-nip>NIP</span><span class="ext-v" id="e_nip">—</span></div>
         <div class="ext-row"><span class="ext-k">Kwota</span><span class="ext-v" id="e_kwota">—</span></div>
       </div>
       <div class="ext-empty" id="extEmpty">Brak danych — wczytaj fakturę.</div>
@@ -391,6 +424,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 
   </aside>
 
+  <!-- ══ MAIN ══ -->
   <div class="main" id="mainArea">
 
     <div class="main-hdr">
@@ -402,27 +436,29 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 
     <div class="form-content">
 
+      <!-- Podgląd PDF -->
       <div class="pdf-viewer" id="pdfViewer">
         <div class="pdf-top">
           <div class="pdf-info">
-            <div class="pdf-dot"></div>
+            <div class="pdf-dot" aria-hidden="true"></div>
             Podgląd faktury PDF
           </div>
           <div class="pdf-controls">
-            <button class="pdf-btn" id="prevPage">◀ Poprzednia</button>
-            <span class="pdf-page" id="pageInfo">—</span>
-            <button class="pdf-btn" id="nextPage">Następna ▶</button>
-            <button class="pdf-btn" id="zoomOut">−</button>
-            <button class="pdf-btn" id="zoomIn">+</button>
+            <button class="pdf-btn" id="prevPage" aria-label="Poprzednia strona">◀ Poprzednia</button>
+            <span class="pdf-page" id="pageInfo" aria-live="polite">—</span>
+            <button class="pdf-btn" id="nextPage" aria-label="Następna strona">Następna ▶</button>
+            <button class="pdf-btn" id="zoomOut" aria-label="Pomniejsz">−</button>
+            <button class="pdf-btn" id="zoomIn" aria-label="Powiększ">+</button>
           </div>
         </div>
         <div class="pdf-canvas-wrap" id="pdfWrap">
-          <canvas id="pdfCanvas"></canvas>
+          <canvas id="pdfCanvas" role="img" aria-label="Podgląd strony faktury PDF"></canvas>
         </div>
       </div>
 
+      <!-- Daty -->
       <div class="card">
-        <div class="card-hdr"><span class="card-ico">📅</span> Daty</div>
+        <div class="card-hdr"><span class="card-ico" aria-hidden="true">📅</span> Daty</div>
         <div class="card-body">
           <div class="g2">
             <div class="fg">
@@ -437,46 +473,107 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
         </div>
       </div>
 
+      <!-- Pojazd -->
       <div class="card">
-        <div class="card-hdr"><span class="card-ico">🚗</span> Dane pojazdu</div>
+        <div class="card-hdr"><span class="card-ico" aria-hidden="true">🚗</span> Dane pojazdu</div>
         <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
-          <div class="g3">
-            <div class="fg"><label for="f_marka">Marka</label><input type="text" id="f_marka" placeholder="Skoda"></div>
-            <div class="fg"><label for="f_model">Model</label><input type="text" id="f_model" placeholder="Superb"></div>
-            <div class="fg"><label for="f_nrrej">Nr rejestracyjny</label><input type="text" id="f_nrrej" placeholder="CMG0000A"></div>
+          <div class="fg">
+            <label for="f_typ">Typ pojazdu</label>
+            <select id="f_typ">
+              <option value="">— wybierz lub zostanie wykryty z PDF —</option>
+              <option value="Samochód osobowy">Samochód osobowy</option>
+              <option value="Samochód ciężarowy">Samochód ciężarowy</option>
+              <option value="Samochód dostawczy">Samochód dostawczy</option>
+              <option value="Przyczepa">Przyczepa</option>
+              <option value="Wózek widłowy">Wózek widłowy</option>
+            </select>
           </div>
           <div class="g3">
-            <div class="fg gc23"><label for="f_vin">Nr VIN / nadwozia</label><input type="text" id="f_vin" placeholder="17 znaków"></div>
-            <div class="fg"><label for="f_rok">Rok produkcji</label><input type="text" id="f_rok" placeholder="2022"></div>
+            <div class="fg">
+              <label for="f_marka">Marka</label>
+              <input type="text" id="f_marka" placeholder="Skoda">
+            </div>
+            <div class="fg">
+              <label for="f_model">Model</label>
+              <input type="text" id="f_model" placeholder="Superb">
+            </div>
+            <div class="fg">
+              <label for="f_nrrej">Nr rejestracyjny</label>
+              <input type="text" id="f_nrrej" placeholder="CMG0000A">
+            </div>
           </div>
           <div class="g3">
-            <div class="fg"><label for="f_km">Przebieg</label><input type="text" id="f_km" placeholder="151 468 km"></div>
-            <div class="fg"><label for="f_faktura">Nr faktury sprzedaży</label><input type="text" id="f_faktura" placeholder="FS-FLLG/26/01/"></div>
-            <div class="fg"><label for="f_cena">Cena brutto (PLN)</label><input type="text" id="f_cena" placeholder="60 000,00"></div>
+            <div class="fg gc23">
+              <label for="f_vin">Nr VIN / nadwozia</label>
+              <input type="text" id="f_vin" placeholder="17 znaków" maxlength="17"
+                     autocomplete="off" spellcheck="false">
+              <div class="vin-counter" id="vinCounter">0 / 17</div>
+            </div>
+            <div class="fg">
+              <label for="f_rok">Rok produkcji</label>
+              <input type="text" id="f_rok" placeholder="2022" maxlength="4">
+            </div>
+          </div>
+          <div class="g3">
+            <div class="fg">
+              <label for="f_km">Przebieg</label>
+              <input type="text" id="f_km" placeholder="151 468 km">
+            </div>
+            <div class="fg">
+              <label for="f_faktura">Nr faktury sprzedaży</label>
+              <input type="text" id="f_faktura" placeholder="FS-FLLG/26/01/">
+            </div>
+            <div class="fg">
+              <label for="f_cena">Cena brutto (PLN)</label>
+              <input type="text" id="f_cena" placeholder="60 000,00">
+            </div>
           </div>
         </div>
       </div>
 
+      <!-- Nabywca -->
       <div class="card">
-        <div class="card-hdr"><span class="card-ico">🏢</span> Dane nabywcy</div>
+        <div class="card-hdr"><span class="card-ico" aria-hidden="true">🏢</span> Dane nabywcy</div>
         <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
-          <div class="fg"><label for="f_naz">Pełna nazwa / imię i nazwisko</label><input type="text" id="f_naz" placeholder="Nazwa firmy lub imię i nazwisko"></div>
-          <div class="g2">
-            <div class="fg"><label for="f_ulica">Ulica i numer</label><input type="text" id="f_ulica" placeholder="ulica 1b"></div>
-            <div class="fg"><label for="f_miasto">Kod pocztowy i miejscowość</label><input type="text" id="f_miasto" placeholder="11-100 Miasto"></div>
+          <div class="fg">
+            <label for="f_naz">Pełna nazwa / imię i nazwisko</label>
+            <input type="text" id="f_naz" placeholder="Nazwa firmy lub imię i nazwisko">
           </div>
           <div class="g2">
-            <div class="fg"><label for="f_nip">NIP nabywcy</label><input type="text" id="f_nip" placeholder="0002223333"></div>
-            <div class="fg"><label for="f_regon">REGON (opcjonalnie)</label><input type="text" id="f_regon" placeholder="123456789"></div>
+            <div class="fg">
+              <label for="f_ulica">Ulica i numer</label>
+              <input type="text" id="f_ulica" placeholder="ulica 1b">
+            </div>
+            <div class="fg">
+              <label for="f_miasto">Kod pocztowy i miejscowość</label>
+              <input type="text" id="f_miasto" placeholder="11-100 Miasto">
+            </div>
+          </div>
+          <div class="g2">
+            <div class="fg">
+              <label for="f_nip" id="f_nip_label">NIP nabywcy</label>
+              <input type="text" id="f_nip" placeholder="0002223333">
+            </div>
+            <div class="fg">
+              <label for="f_regon">REGON (opcjonalnie)</label>
+              <input type="text" id="f_regon" placeholder="123456789">
+            </div>
           </div>
         </div>
       </div>
 
+      <!-- OC -->
       <div class="card">
-        <div class="card-hdr"><span class="card-ico">🛡️</span> Polisa OC — dane do wypowiedzenia</div>
+        <div class="card-hdr">
+          <span class="card-ico" aria-hidden="true">🛡️</span>
+          Polisa OC — dane do wypowiedzenia
+        </div>
         <div class="card-body">
           <div class="g2">
-            <div class="fg"><label for="f_polisa">Nr polisy OC zbywcy</label><input type="text" id="f_polisa" placeholder="np. POUG5235/24/KOM/C000291"></div>
+            <div class="fg">
+              <label for="f_polisa">Nr polisy OC zbywcy</label>
+              <input type="text" id="f_polisa" placeholder="np. POUG5235/24/KOM/C000291">
+            </div>
             <div class="fg">
               <label for="f_ubezp_sel">Zakład ubezpieczeń</label>
               <select id="f_ubezp_sel">
@@ -484,37 +581,57 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
                 <option value="HESTIA">HESTIA</option>
                 <option value="inne">— wpisz ręcznie —</option>
               </select>
-              <input type="text" id="f_ubezp" placeholder="Wpisz nazwę ubezpieczyciela" style="display:none;margin-top:5px">
+              <input type="text" id="f_ubezp"
+                     placeholder="Wpisz nazwę ubezpieczyciela"
+                     style="display:none;margin-top:5px"
+                     aria-label="Ręczna nazwa zakładu ubezpieczeń">
             </div>
           </div>
         </div>
       </div>
 
+      <!-- Baner walidacji -->
+      <div class="val-banner" id="valBanner" role="alert" aria-live="assertive">
+        <span aria-hidden="true">⚠️</span>
+        <div>
+          <strong>Przed drukiem uzupełnij:</strong>
+          <ul id="valList"></ul>
+        </div>
+      </div>
+
+      <!-- Podgląd: Zbycie -->
       <div class="preview-card">
         <div class="prev-hdr">
-          <div class="live-dot"></div>
+          <div class="live-dot" aria-hidden="true"></div>
           Zawiadomienie o Zbyciu Pojazdu · aktualizuje się na bieżąco
         </div>
         <div class="prev-body">
-          <div id="docOut"></div>
+          <div id="docOut" aria-label="Podgląd dokumentu zawiadomienia o zbyciu pojazdu"></div>
         </div>
       </div>
 
+      <!-- Podgląd: Wypowiedzenie OC -->
       <div class="preview-card" style="margin-top:12px">
         <div class="prev-hdr">
-          <div class="live-dot" style="background:#f59e0b"></div>
+          <div class="live-dot" style="background:#f59e0b" aria-hidden="true"></div>
           Wypowiedzenie umowy OC · aktualizuje się na bieżąco
         </div>
         <div class="prev-body">
-          <div id="docOut2"></div>
+          <div id="docOut2" aria-label="Podgląd dokumentu wypowiedzenia OC"></div>
         </div>
       </div>
 
-    </div></div></div><div id="printTarget" style="display:none"></div>
+    </div>
+  </div>
+</div>
 
 <script>
-// ══ UŻYTECZNE FUNKCJE / NARZĘDZIA ════════════════════════════════════════
-// Optymalizacja wydajności formularza
+'use strict';
+
+// ══════════════════════════════════════════════════════════════════════
+// NARZĘDZIA
+// ══════════════════════════════════════════════════════════════════════
+
 function debounce(func, wait) {
   let timeout;
   return function(...args) {
@@ -523,310 +640,922 @@ function debounce(func, wait) {
   };
 }
 
-// Zabezpieczenie przed XSS
+/** Zabezpieczenie przed XSS — zamiana znaków specjalnych HTML */
 function escapeHTML(str) {
-  if (!str) return '';
+  if (str === null || str === undefined) return '';
   return String(str).replace(/[&<>'"]/g, tag => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    "'": '&#39;',
-    '"': '&quot;'
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;'
   }[tag] || tag));
 }
 
-// ══ PDF.js CONFIG ═════════════════════════════════════════════════════
-if(typeof pdfjsLib!=='undefined')
-  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-// ══ THEME TOGGLE ══════════════════════════════════════════════════════
-const html=document.documentElement;
-document.getElementById('themeToggle').addEventListener('click',()=>{
-  html.dataset.theme=html.dataset.theme==='dark'?'light':'dark';
-  document.getElementById('metaTheme').content=html.dataset.theme==='dark'?'#0a0a0a':'#f4f5f7';
-});
-
-// ══ SIDEBAR TOGGLE ════════════════════════════════════════════════════
-const sbBtn=document.getElementById('sbToggle');
-const sbEl=document.getElementById('sidebar');
-sbBtn.addEventListener('click',()=>{
-  const hidden=sbEl.classList.toggle('hidden');
-  sbBtn.classList.toggle('active',!hidden);
-});
-
-// ══ PDF VIEWER STATE ══════════════════════════════════════════════════
-let pdfDoc=null,currentPage=1,zoomLevel=1;
-const canvas=document.getElementById('pdfCanvas');
-const ctx=canvas.getContext('2d');
-
-async function renderPdfPage(pageNum){
-  if(!pdfDoc)return;
-  try{
-    const page=await pdfDoc.getPage(pageNum);
-    const viewport=page.getViewport({scale:zoomLevel});
-    const dpr=window.devicePixelRatio||1;
-    
-    // Ustawienie wymiarów
-    canvas.width =Math.floor(viewport.width *dpr);
-    canvas.height=Math.floor(viewport.height*dpr);
-    canvas.style.width =Math.floor(viewport.width )+'px';
-    canvas.style.height=Math.floor(viewport.height)+'px';
-    
-    // CZYSZCZENIE CANVAS (Optymalizacja pamięci i renderowania)
-    ctx.clearRect(0, 0, canvas.width, canvas.height); 
-    
-    const transform=dpr!==1?[dpr,0,0,dpr,0,0]:null;
-    await page.render({canvasContext:ctx,viewport,...(transform?{transform}:{})}).promise;
-    
-    document.getElementById('pageInfo').textContent=`${pageNum} / ${pdfDoc.numPages}`;
-    document.getElementById('prevPage').disabled=pageNum===1;
-    document.getElementById('nextPage').disabled=pageNum===pdfDoc.numPages;
-  }catch(err){log('Błąd renderowania: '+err.message,'err')}
+// ══════════════════════════════════════════════════════════════════════
+// PDF.js — bezpieczna inicjalizacja
+// ══════════════════════════════════════════════════════════════════════
+if (typeof pdfjsLib !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+} else {
+  console.error('PDF.js nie został załadowany. Sprawdź połączenie z internetem.');
 }
 
-document.getElementById('prevPage').addEventListener('click',()=>{if(currentPage>1){currentPage--;renderPdfPage(currentPage)}});
-document.getElementById('nextPage').addEventListener('click',()=>{if(pdfDoc&&currentPage<pdfDoc.numPages){currentPage++;renderPdfPage(currentPage)}});
-document.getElementById('zoomIn').addEventListener('click',()=>{zoomLevel=Math.min(zoomLevel+.25,3);renderPdfPage(currentPage)});
-document.getElementById('zoomOut').addEventListener('click',()=>{zoomLevel=Math.max(zoomLevel-.25,.5);renderPdfPage(currentPage)});
+// ══════════════════════════════════════════════════════════════════════
+// MOTYW
+// ══════════════════════════════════════════════════════════════════════
+const html = document.documentElement;
+document.getElementById('themeToggle').addEventListener('click', () => {
+  html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.getElementById('metaTheme').content =
+    html.dataset.theme === 'dark' ? '#0a0a0a' : '#f4f5f7';
+});
 
-async function loadPdfViewer(blob){
-  try{
-    const ab=await blob.arrayBuffer();
-    pdfDoc=await pdfjsLib.getDocument({data:ab}).promise;
-    currentPage=1;
+// ══════════════════════════════════════════════════════════════════════
+// SIDEBAR TOGGLE
+// ══════════════════════════════════════════════════════════════════════
+const sbBtn = document.getElementById('sbToggle');
+const sbEl  = document.getElementById('sidebar');
+sbBtn.addEventListener('click', () => {
+  const hidden = sbEl.classList.toggle('hidden');
+  sbBtn.classList.toggle('active', !hidden);
+  sbBtn.setAttribute('aria-expanded', String(!hidden));
+});
+sbBtn.setAttribute('aria-expanded', 'true');
+
+// ══════════════════════════════════════════════════════════════════════
+// PDF VIEWER
+// ══════════════════════════════════════════════════════════════════════
+let pdfDoc = null, currentPage = 1, zoomLevel = 1;
+const canvas = document.getElementById('pdfCanvas');
+const ctx    = canvas.getContext('2d');
+
+async function renderPdfPage(pageNum) {
+  if (!pdfDoc) return;
+  try {
+    const page     = await pdfDoc.getPage(pageNum);
+    const viewport = page.getViewport({ scale: zoomLevel });
+    const dpr      = window.devicePixelRatio || 1;
+
+    canvas.width        = Math.floor(viewport.width  * dpr);
+    canvas.height       = Math.floor(viewport.height * dpr);
+    canvas.style.width  = Math.floor(viewport.width)  + 'px';
+    canvas.style.height = Math.floor(viewport.height) + 'px';
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const transform = dpr !== 1 ? [dpr, 0, 0, dpr, 0, 0] : null;
+    await page.render({
+      canvasContext: ctx,
+      viewport,
+      ...(transform ? { transform } : {})
+    }).promise;
+
+    document.getElementById('pageInfo').textContent =
+      `${pageNum} / ${pdfDoc.numPages}`;
+    document.getElementById('prevPage').disabled = pageNum === 1;
+    document.getElementById('nextPage').disabled = pageNum === pdfDoc.numPages;
+  } catch (err) {
+    log('Błąd renderowania: ' + err.message, 'err');
+  }
+}
+
+document.getElementById('prevPage').addEventListener('click', () => {
+  if (currentPage > 1) { currentPage--; renderPdfPage(currentPage); }
+});
+document.getElementById('nextPage').addEventListener('click', () => {
+  if (pdfDoc && currentPage < pdfDoc.numPages) { currentPage++; renderPdfPage(currentPage); }
+});
+document.getElementById('zoomIn').addEventListener('click', () => {
+  zoomLevel = Math.min(zoomLevel + 0.25, 3); renderPdfPage(currentPage);
+});
+document.getElementById('zoomOut').addEventListener('click', () => {
+  zoomLevel = Math.max(zoomLevel - 0.25, 0.5); renderPdfPage(currentPage);
+});
+
+async function loadPdfViewer(blob) {
+  try {
+    // Zniszczy poprzedni dokument, żeby nie było wycieku pamięci
+    if (pdfDoc) { pdfDoc.destroy(); pdfDoc = null; }
+
+    const ab = await blob.arrayBuffer();
+    pdfDoc   = await pdfjsLib.getDocument({ data: ab }).promise;
+    currentPage = 1;
+    zoomLevel   = 1;
     await renderPdfPage(currentPage);
     document.getElementById('pdfViewer').classList.add('on');
-    log('Podgląd PDF załadowany ✓','ok');
-  }catch(err){log('Błąd ładowania PDF: '+err.message,'err');console.error(err)}
+    log('Podgląd PDF załadowany ✓', 'ok');
+  } catch (err) {
+    log('Błąd ładowania PDF: ' + err.message, 'err');
+    console.error(err);
+  }
 }
 
-// ══ PARSER ════════════════════════════════════════════════════════════
-// Uporządkowany parser dla lepszej czytelności
-function parseInvoiceText(text){
-  const raw=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
-  const lines=raw.split('\n').map(l=>l.trim()).filter(Boolean);
-  const full=lines.join(' ');
-  
-  // Helpers
-  function parseDate(s){if(!s)return null;let m=s.match(/(\d{4})-(\d{2})-(\d{2})/);if(m)return`${m[1]}-${m[2]}-${m[3]}`;m=s.match(/(\d{1,2})[.\-\/](\d{1,2})[.\-\/](\d{4})/);if(m)return`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;return null}
-  function parseAmt(s){if(!s)return null;return parseFloat(s.replace(/\s/g,'').replace(',','.').replace(/[^\d.]/g,''))||null}
-  function find(re){const m=full.match(re);return m?(m[1]??m[0]).trim():null}
-  function findL(re){for(const l of lines){const m=l.match(re);if(m)return(m[1]??m[0]).trim()}return null}
-  
-  // 1. Podstawowe dane faktury
-  const nr_faktury=find(/Faktura\s+VAT\s+(?:nr\s+|nr:\s*)([\w\-\/]+)/i)||find(/Faktura\s+(?:nr\s+|nr:\s*)([\w\-\/]+)/i)||find(/Nr\s+faktury[:\s]+([\w\-\/]+)/i)||findL(/^(FS-[\w\/]+)$/)||null;
-  const data_wystawienia=parseDate(find(/Data\s+wystawienia[:\s]+([\d\-./]+)/i));
-  const data_sprzedazy=parseDate(find(/Data\s+dostawy[^:]*:\s*([\d\-./]+)/i)||find(/Data\s+sprzeda[żz]y?[:\s]*([\d\-./]+)/i)||find(/Sprzeda[żz]\s+z\s+([\d\-./]+)/i))||data_wystawienia;
-  
-  // 2. Ekstrakcja nabywcy
-  let nabywca_nazwa=null,nabywca_nip=null,nabywca_regon=null,nabywca_ulica=null,nabywca_kod_miasto=null;
-  const iN=lines.findIndex(l=>/^Nabywca[:\s]*/i.test(l));
-  if(iN!==-1){
-    let iEnd=lines.length;
-    for(let i=iN+1;i<Math.min(iN+25,lines.length);i++){if(/^(Odbiorca|Lp\.?|Nr\s+p\/p|Pozycja|Tabela|Razem|Zam[óo]wienia)/i.test(lines[i])||/^\d+\s+\d{4,}/.test(lines[i])){iEnd=i;break;}}
-    const buyerLines=lines.slice(iN+1,iEnd),buyerText=buyerLines.join(' ');
-    const nazwaLines=[];
-    for(let i=0;i<Math.min(7,buyerLines.length);i++){const l=buyerLines[i];if(/^\[[\w\d\s]+\]$/.test(l))continue;if(/^NIP/i.test(l)||/^REGON/i.test(l))break;if(/^\d{2}-\d{3}/.test(l))break;if(/^(ul\.|al\.|os\.|pl\.)/i.test(l))break;if(/^(imię|kod|pese|nr\s+zam)/i.test(l))break;if(/\s+\d+[A-Z0-9\/]*$/i.test(l)&&!/^[A-ZĄĆĘŁŃÓŚŹŻ\s]{10,}$/.test(l))break;if(l.length>2)nazwaLines.push(l);}
-    if(nazwaLines.length)nabywca_nazwa=nazwaLines.join(' ').replace(/\s{2,}/g,' ');
-    
-    const nipM=buyerText.match(/NIP[:\s]+([\d\s\-]{10,14})/i);if(nipM)nabywca_nip=nipM[1].replace(/[\s\-]/g,'');
-    const regM=buyerText.match(/REGON[:\s]+([\d]{9,14})/i);if(regM)nabywca_regon=regM[1];
-    const kodM=buyerText.match(/(\d{2}-\d{3}\s+[A-ZĄĆĘŁŃÓŚŹŻ][A-ZĄĆĘŁŃÓŚŹŻa-ząćęłńóśźż\s\-]+?)(?:\s{2,}|NIP|REGON|Odbiorca|$)/i);if(kodM)nabywca_kod_miasto=kodM[1].trim();
-    
-    for(const l of buyerLines){const uM=l.match(/^((?:ul\.|al\.|os\.|pl\.)\s*[\w\sĄĆĘŁŃÓŚŹŻąćęłńóśźż]+\d+[\w\/]*)$/i);if(uM){nabywca_ulica=uM[1];break;}}
-    if(!nabywca_ulica){for(const l of buyerLines){if(/^\d{2}-\d{3}/.test(l)||/^NIP/i.test(l)||/^REGON/i.test(l)||/^\[/.test(l))continue;if(/^[A-ZĄĆĘŁŃÓŚŹŻ][A-ZĄĆĘŁŃÓŚŹŻa-ząćęłńóśźż\s\-]{2,}\s+\d+[A-Z0-9\/]*$/i.test(l)){nabywca_ulica=l;break;}}}
+// ══════════════════════════════════════════════════════════════════════
+// PARSER FAKTUR v2.8
+// ══════════════════════════════════════════════════════════════════════
+function parseInvoiceText(text) {
+  const raw   = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+  const full  = lines.join(' ');
+
+  // ── Helpers ────────────────────────────────────────────────────────
+  function parseDate(s) {
+    if (!s) return null;
+    let m = s.match(/(\d{4})-(\d{2})-(\d{2})/);
+    if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+    m = s.match(/(\d{1,2})[.\-\/](\d{1,2})[.\-\/](\d{4})/);
+    if (m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+    return null;
   }
-  if(!nabywca_regon){const rgM=full.match(/REGON[:\s]+([\d]{9,14})/i);if(rgM)nabywca_regon=rgM[1];}
-  const kupujacy={nazwa:nabywca_nazwa,ulica:nabywca_ulica,kod_miasto:nabywca_kod_miasto,nip:nabywca_nip,regon:nabywca_regon};
-  
-  // 3. Ekstrakcja pojazdów
-  const RE_P=/(?:sam(?:och[oó]d)?\.?\s+(?:osob(?:owy)?\.?|cię[żz]arowy|ciez?arowy|dostawczy)?\.?\s*)?([A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+(?:\s+[A-ZĄĆĘŁŃÓŚŹŻ]?[a-ząćęłńóśźż]+)*)[,\s]+nr\s+rej\.?\s*([A-Z]{1,3}\s?[A-Z0-9]{4,8})/i;
-  const RE_SAM=/(?:sam(?:ochód?)?\.?\s+(?:osobowy|cię[żz]arowy|dostawczy))[,.\s]+([A-ZĄĆĘŁŃÓŚŹŻa-ząćęłńóśźż]+)\s+([A-ZĄĆĘŁŃÓŚŹŻa-ząćęłńóśźż]+)[,\s]+nr\s+rej\.?\s*([A-Z]{1,3}\s?[A-Z0-9]{4,8})/i;
-  const pozycje=[];const usedIdx=new Set();
-  
-  for(let i=0;i<lines.length;i++){
-    if(usedIdx.has(i))continue;const line=lines[i];let marka=null,model=null,nr_rej=null,matched=false;
-    const ms=line.match(RE_SAM);if(ms){marka=ms[1];model=ms[2];nr_rej=ms[3]?.replace(/\s/g,'').toUpperCase()||null;usedIdx.add(i);matched=true;}
-    else{const mp=line.match(RE_P);if(mp){usedIdx.add(i);matched=true;const ctx0=lines.slice(Math.max(0,i-1),Math.min(lines.length,i+5)).join(' ');const mm=ctx0.match(/(?:osobowy|cię[żz]arowy|dostawczy)[,.\s]+([A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+)\s+([A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+(?:\s+[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+)?)/i);if(mm){marka=mm[1];model=mm[2]}else{const pp=mp[1].trim().split(/\s+/);marka=pp[0]||null;model=pp.slice(1).join(' ')||null}nr_rej=mp[2]?.replace(/\s/g,'').toUpperCase()||null;}}
-    if(!matched)continue;
-    const ctx=lines.slice(Math.max(0,i-1),Math.min(lines.length,i+6)).join(' ');
-    const vM=ctx.match(/(?:VIN|nr\s+(?:nadwozia|vin))[:\s]*([A-HJ-NPR-Z0-9]{17})/i);
-    const rM=ctx.match(/(?:rok\s+produkcji?|rok)[:\s]*(\d{4})/i);
-    const kM=ctx.match(/(?:przebieg)[:\s]*([\d\s]+?)\s*km/i);
-    const nM=ctx.match(/([\d\s]{3,}[,.][\d]{2})\s+(?:23|8|5|0)%/);
-    const kdM=line.match(/^\s*\d+\s+(\d{4,8})\s+/);
-    pozycje.push({lp:pozycje.length+1,kod:kdM?kdM[1]:null,marka,model,nr_rej,nr_vin:vM?vM[1].toUpperCase():null,rok:rM?rM[1]:null,przebieg:kM?kM[1].replace(/\s/g,'')+'km':null,cena_netto:nM?parseAmt(nM[1]):null});
+  function parseAmt(s) {
+    if (!s) return null;
+    const v = parseFloat(
+      s.replace(/\s/g,'').replace(',','.').replace(/[^\d.]/g,'')
+    );
+    return isNaN(v) ? null : v;
   }
-  {const seen=new Map();for(const p of pozycje){const k=p.nr_rej||`${p.marka}_${p.lp}`;if(!seen.has(k))seen.set(k,p);else if(p.kod&&!seen.get(k).kod)seen.set(k,{...seen.get(k),...p})}pozycje.length=0;let lp=1;for(const p of seen.values()){p.lp=lp++;pozycje.push(p)}}
-  
-  // 4. Podsumowanie kwot
-  const rL=lines.find(l=>/^Razem:/i.test(l)&&/\d/.test(l));let sN=null,sV=null,sB=null;
-  if(rL){const ns=[...rL.matchAll(/([\d\s]+[,.][\d]{2})/g)].map(x=>parseAmt(x[1]));if(ns.length>=3)[sN,sV,sB]=ns;else if(ns.length===1)sB=ns[0]}
-  if(!sB){const rd=find(/Razem\s+do\s+zap[łl]aty[:\s]+([\d\s,]+)\s*PLN/i);sB=rd?parseAmt(rd):null}
-  
-  return{nr_faktury,data_wystawienia,data_sprzedazy,kupujacy,pozycje,suma_netto:sN,suma_vat:sV,suma_brutto:sB,forma_platnosci:find(/Forma\s+p[łl]atno[sś]ci[:\s]+([A-Za-z]+)/i)||findL(/^(Przelew|Gotówka|Karta)$/i),termin_platnosci:parseDate(find(/Termin[:\s]+([\d\-./]+)/i)),_meta:{linii:lines.length,znakow:text.length,pojazdow:pozycje.length}};
+  function find(re)  { const m = full.match(re);  return m ? (m[1] ?? m[0]).trim() : null; }
+  function findL(re) { for (const l of lines) { const m = l.match(re); if (m) return (m[1] ?? m[0]).trim(); } return null; }
+
+  function findDateNearLabel(labelRe) {
+    for (let i = 0; i < lines.length; i++) {
+      if (!labelRe.test(lines[i])) continue;
+      let m = lines[i].match(/(\d{4}-\d{2}-\d{2}|\d{1,2}[.\-\/]\d{1,2}[.\-\/]\d{4})/);
+      if (m) return parseDate(m[1]);
+      for (let j = i - 1; j >= Math.max(0, i - 4); j--) {
+        m = lines[j].match(/^(\d{4}-\d{2}-\d{2})$/);
+        if (m) return parseDate(m[1]);
+      }
+      for (let j = i + 1; j <= Math.min(lines.length - 1, i + 4); j++) {
+        m = lines[j].match(/^(\d{4}-\d{2}-\d{2})$/);
+        if (m) return parseDate(m[1]);
+      }
+    }
+    return null;
+  }
+
+  // ── 1. NR FAKTURY ──────────────────────────────────────────────────
+  function isValidNr(s) {
+    return s && s.length >= 4 && /[\d\/\-]/.test(s) &&
+           !/^(PUH|sp|ul|NIP|BDO|DZIA)/i.test(s);
+  }
+
+  let nr_faktury = (() => {
+    const m = full.match(/Faktura\s+VAT\s+nr\.?\s+([\w][\w\-\/]{3,})/i);
+    return m && isValidNr(m[1]) ? m[1] : null;
+  })();
+  if (!nr_faktury) {
+    const m = full.match(/\bnr\s+((?:FS|FV|FVS|FAK|FLLG|FLS|FKS|FLG|FL[A-Z]{0,3})[-\/][\w\-\/]{3,})/i);
+    if (m && isValidNr(m[1])) nr_faktury = m[1];
+  }
+  if (!nr_faktury) {
+    const m = full.match(/(?:Nr\.?|Numer)\s+(?:faktury|dokumentu)\s*[:]\s*([\w\-\/]{4,})/i);
+    if (m && isValidNr(m[1])) nr_faktury = m[1];
+  }
+  if (!nr_faktury) {
+    for (const l of lines) {
+      const m = l.match(/\b((?:FS|FV|FVS|FAK|FLLG|FLS|FKS|FLG|FL[A-Z]{0,3})[-\/][\w\-\/]{3,})/i);
+      if (m && isValidNr(m[1])) { nr_faktury = m[1]; break; }
+    }
+  }
+  if (!nr_faktury) {
+    for (const l of lines) {
+      const m = l.match(/^([A-Z]{2,8}[-\/]\w{2,}[-\/]\w{2,}(?:[-\/]\w+)?)(?:\s|$)/i);
+      if (m && isValidNr(m[1])) { nr_faktury = m[1]; break; }
+    }
+  }
+
+  // ── 2. DATY ────────────────────────────────────────────────────────
+  let data_wystawienia =
+    findDateNearLabel(/Data\s+wystawienia/i) ||
+    parseDate(find(/Data\s+wystawienia[:\s]+([\d\-./]+)/i));
+  let data_sprzedazy =
+    findDateNearLabel(/Data\s+(?:dostawy|sprzeda[żź]y?)/i) ||
+    parseDate(find(/Data\s+dostawy[^:]*:\s*([\d\-./]+)/i))  ||
+    parseDate(find(/Data\s+sprzeda[żź]y?[:\s]*([\d\-./]+)/i)) ||
+    parseDate(find(/Sprzeda[żź]\s+z\s+([\d\-./]+)/i));
+
+  if (!data_wystawienia || !data_sprzedazy) {
+    const pureDates = lines
+      .filter(l => /^\d{4}-\d{2}-\d{2}$/.test(l))
+      .map(l => l.trim());
+    if (pureDates.length >= 1 && !data_wystawienia) data_wystawienia = pureDates[0];
+    if (pureDates.length >= 2 && !data_sprzedazy)   data_sprzedazy  = pureDates[1];
+  }
+  data_sprzedazy = data_sprzedazy || data_wystawienia;
+
+  // ── 3. NABYWCA ─────────────────────────────────────────────────────
+  let nabywca_nazwa = null, nabywca_nip = null, nabywca_pesel = null,
+      nabywca_regon = null, nabywca_ulica = null, nabywca_kod_miasto = null;
+
+  const iN = lines.findIndex(l => /(?:^|\s|:)Nabywca[:\s]/i.test(l));
+  if (iN !== -1) {
+    let iEnd = lines.length;
+    for (let i = iN + 1; i < Math.min(iN + 30, lines.length); i++) {
+      if (/^(?:Odbiorca|Lp\.?|Nr\s+p\/p|Pozycja|Tabela|Razem|Numer\s+zam|Opis:)/i.test(lines[i]) ||
+          /^\d+\s+\d{4,}/.test(lines[i])) { iEnd = i; break; }
+    }
+    const buyerLines = lines.slice(iN + 1, iEnd);
+    const nazwaLines = [];
+    for (let i = 0; i < Math.min(8, buyerLines.length); i++) {
+      const l = buyerLines[i];
+      if (/^\[[\w\d\s]+\]$/.test(l)) continue;
+      if (/^NIP/i.test(l) || /^REGON/i.test(l) || /^PESEL/i.test(l)) break;
+      if (/^\d{2}-\d{3}/.test(l)) break;
+      if (/^(ul\.|al\.|os\.|pl\.)/i.test(l)) break;
+      if (/^(Numer|Opis|Procedura)/i.test(l)) break;
+      if (/\s\d+[A-Z0-9\/]*$/i.test(l) && !/^[A-ZĄĆĘŁŃÓŚŹŻ\s]{10,}$/.test(l)) {
+        if (!nazwaLines.length) break; else break;
+      }
+      if (l.length > 1) nazwaLines.push(l);
+    }
+    if (nazwaLines.length)
+      nabywca_nazwa = nazwaLines.join(' ').replace(/\s{2,}/g, ' ').trim();
+
+    const buyerText = buyerLines.join(' ');
+    const nipM = buyerText.match(/NIP\s*[:]\s*([\d\s\-]{10,14})/i);
+    if (nipM) nabywca_nip = nipM[1].replace(/[\s\-]/g, '');
+    const regM = buyerText.match(/REGON\s*[:]\s*([\d]{9,14})/i);
+    if (regM) nabywca_regon = regM[1];
+    const kodM = buyerText.match(
+      /(\d{2}-\d{3}\s+[A-ZĄĆĘŁŃÓŚŹŻA-Z][A-ZĄĆĘŁŃÓŚŹŻa-ząćęłńóśźż\s\-]+?)(?:\s{2,}|NIP|REGON|PESEL|$)/i
+    );
+    if (kodM) nabywca_kod_miasto = kodM[1].trim();
+    for (const l of buyerLines) {
+      const uM = l.match(
+        /^((?:ul\.|al\.|os\.|pl\.)\s*[\w\sĄĆĘŁŃÓŚŹŻąćęłńóśźż]+\d+[\w\/]*)$/i
+      );
+      if (uM) { nabywca_ulica = uM[1]; break; }
+    }
+    if (!nabywca_ulica) {
+      for (const l of buyerLines) {
+        if (/^\d{2}-\d{3}/.test(l) || /^NIP/i.test(l) || /^REGON/i.test(l) || /^\[/.test(l)) continue;
+        if (/^[A-ZĄĆĘŁŃÓŚŹŻ][A-ZĄĆĘŁŃÓŚŹŻa-ząćęłńóśźż\s\-]{2,}\s+\d+[A-Z0-9\/]*$/i.test(l)) {
+          nabywca_ulica = l; break;
+        }
+      }
+    }
+  }
+
+  // Globalny NIP / REGON / PESEL
+  if (!nabywca_nip) {
+    const allNIP = [...full.matchAll(/NIP\s*[:]\s*([\d]{10})/ig)].map(m => m[1].replace(/[\s\-]/g, ''));
+    if (allNIP.length >= 2)      nabywca_nip = allNIP[1];
+    else if (allNIP.length === 1) nabywca_nip = allNIP[0];
+  }
+  if (!nabywca_regon) {
+    const rgM = full.match(/REGON\s*[:\s]+([\d]{9,14})/i);
+    if (rgM) nabywca_regon = rgM[1];
+  }
+  {
+    const pM = full.match(/PESEL\s*[:]\s*(\d{11})/i) || full.match(/PESEL\s+(\d{11})/i);
+    if (pM) nabywca_pesel = pM[1];
+  }
+
+  const kupujacy = {
+    nazwa: nabywca_nazwa, ulica: nabywca_ulica, kod_miasto: nabywca_kod_miasto,
+    nip: nabywca_nip, pesel: nabywca_pesel, regon: nabywca_regon
+  };
+
+  // ── 4. VIN globalny ────────────────────────────────────────────────
+  let globalVin = (() => {
+    const m = full.match(/(?:VIN|nr\s+nadwozia|NR\s+VIN)\s*[:]\s*([A-HJ-NPR-Z0-9]{17})/i);
+    return m ? m[1].toUpperCase() : null;
+  })();
+  if (!globalVin) {
+    for (const l of lines) {
+      const m = l.match(/\b([A-HJ-NPR-Z0-9]{17})\b/i);
+      if (m) { globalVin = m[1].toUpperCase(); break; }
+    }
+  }
+
+  // ── 5. Nr rej globalny ─────────────────────────────────────────────
+  let globalNrRej = (() => {
+    const m = full.match(
+      /(?:NR\s+REJ(?:ESTRACYJNY)?\.|nr\.?\s*rej(?:estracyjny)?\.?)\s*([A-Z]{2,3}\s?[A-Z0-9]{4,8})/i
+    );
+    return m ? m[1].replace(/\s/g, '').toUpperCase() : null;
+  })();
+  if (!globalNrRej) {
+    const PLATE = /\b([A-Z]{2,3}[A-Z0-9]{4,8})\b/g;
+    const SKIP  = /^(NIP|VIN|PLN|VAT|PL|UE|EU|PKD|KRS|PUH|GUS|CEP|CMR|WZ|ZW|ZP|FV|FS|ROK|NR|KM)/;
+    for (const l of lines) {
+      if (!/sam(?:och[oóo]d)?|pojazd|nr\.?\s*rej|rejestr/i.test(l)) continue;
+      for (const m of l.matchAll(PLATE)) {
+        const v = m[1];
+        if (SKIP.test(v) || v.length < 5 || v.length > 9) continue;
+        globalNrRej = v; break;
+      }
+      if (globalNrRej) break;
+    }
+  }
+
+  // ── 6. EKSTRAKCJA POJAZDÓW ─────────────────────────────────────────
+  function detectTyp(src) {
+    if (/SAM(?:OCHOD)?\.\s*(?:OSOB|OS\.)/i.test(src)   || /Samoch[oó]d\s+osobowy/i.test(src))    return 'Samochód osobowy';
+    if (/SAM(?:OCHOD)?\.\s*CI[EĘ][ZŻ]AROWY/i.test(src) || /Samoch[oó]d\s+ci[eę][żz]arowy/i.test(src)) return 'Samochód ciężarowy';
+    if (/SAM(?:OCHOD)?\.\s*DOSTAWCZY/i.test(src)        || /Samoch[oó]d\s+dostawczy/i.test(src))  return 'Samochód dostawczy';
+    if (/PRZYCZEPA|Przyczepa/i.test(src))                                                           return 'Przyczepa';
+    if (/W[OÓ]ZEK\s+WID[ŁL]OWY/i.test(src))                                                       return 'Wózek widłowy';
+    return null;
+  }
+  const globalTyp = detectTyp(full);
+
+  const PREFIX_TYP =
+    /(?:SAM(?:OCHOD)?\.\s*(?:OSOBOWY|OS\.?|CI[EĘ][ZŻ]AROWY|DOSTAWCZY)|Samoch[oó]d\s+(?:osobowy|ci[eę][żz]arowy|dostawczy)|PRZYCZEPA|W[OÓ]ZEK\s+WID[ŁL]OWY|Przyczepa|W[oó]zek\s+wid[łl]owy)\s*/i;
+
+  function extractNrRej(src) {
+    const m = src.match(/NR\.?\s*REJ\.?\s*([A-Z]{2,3}\s?[A-Z0-9]{4,8})/i);
+    return m ? m[1].replace(/\s/g, '').toUpperCase() : null;
+  }
+
+  const pozycje = [];
+  const usedIdx = new Set();
+
+  for (let i = 0; i < lines.length; i++) {
+    if (usedIdx.has(i)) continue;
+    const line = lines[i];
+    let typ = null, marka = null, model = null, nr_rej = null, matched = false;
+
+    // Wzorzec A: PREFIX_TYP
+    if (!matched) {
+      const pm = line.match(PREFIX_TYP);
+      if (pm && pm.index !== undefined) {
+        const rest = line.slice(pm.index + pm[0].length);
+        const mm   = rest.match(/^([A-ZĄĆĘŁŃÓŚŹŻa-ząćęłńóśźż][A-ZĄĆĘŁŃÓŚŹŻa-ząćęłńóśźż0-9\-]+)/);
+        if (mm) {
+          marka = mm[1];
+          const afterMarka = rest.slice(mm[0].length).replace(/^\s+/, '');
+          const sm = afterMarka.match(
+            /^([\w\s.\-\/]*?)(?=\s*[,;]\s*(?:NR\.?\s*REJ|VIN|ROK\s+PROD|PRZEBIEG)|$)/i
+          );
+          model  = sm && sm[1] ? sm[1].trim() : null;
+          nr_rej = extractNrRej(line);
+          if (!nr_rej && lines[i + 1] && !/^(?:SAM|Samoch|PRZYCZEPA|WÓZEK|Przycz)/i.test(lines[i + 1])) {
+            nr_rej = extractNrRej(lines[i + 1]);
+            if (nr_rej) usedIdx.add(i + 1);
+          }
+          typ = detectTyp(pm[0]);
+          usedIdx.add(i);
+          matched = true;
+        }
+      }
+    }
+
+    // Wzorzec B: mixed-case
+    if (!matched) {
+      const tm = line.match(
+        /Samoch[oó]d\s+(osobowy|ci[eę][żz]arowy|dostawczy)\s+([A-ZĄĆĘŁŃÓŚŹŻa-ząćęłńóśźż][A-ZĄĆĘŁŃÓŚŹŻa-ząćęłńóśźż0-9\-]+)([\w\s.\-\/]*?)(?:[,\s]+nr\s+rej\.?\s*([A-Z]{2,3}\s?[A-Z0-9]{4,8}))?(?:[,\s]|$)/i
+      );
+      if (tm) {
+        const tl = tm[1].toLowerCase();
+        typ   = tl.includes('ci') ? 'Samochód ciężarowy' : tl.includes('dost') ? 'Samochód dostawczy' : 'Samochód osobowy';
+        marka = tm[2];
+        model = tm[3] ? tm[3].replace(/[,;\s]+$/, '').trim() || null : null;
+        nr_rej = tm[4] ? tm[4].replace(/\s/g, '').toUpperCase() : null;
+        if (!nr_rej && lines[i + 1]) {
+          const nm = lines[i + 1].match(/^([A-Z]{2,3}[A-Z0-9]{4,8})$/);
+          if (nm) { nr_rej = nm[1]; usedIdx.add(i + 1); }
+        }
+        usedIdx.add(i);
+        matched = true;
+      }
+    }
+
+    // Wzorzec C: Przyczepa / Wózek
+    if (!matched) {
+      const wm = line.match(
+        /(?:^|\s)(PRZYCZEPA|W[OÓ]ZEK\s+WID[ŁL]OWY)\s+([A-ZĄĆĘŁŃÓŚŹŻa-ząćęłńóśźż][A-ZĄĆĘŁŃÓŚŹŻa-ząćęłńóśźż0-9\-]+)([\w\s.\-\/]*?)(?:[,\s]+(?:NR\.?\s*REJ\.?)\s*([A-Z]{2,3}\s?[A-Z0-9]{4,8}))?/i
+      );
+      if (wm) {
+        typ    = /WÓZEK|WOZEK/i.test(wm[1]) ? 'Wózek widłowy' : 'Przyczepa';
+        marka  = wm[2];
+        model  = wm[3] ? wm[3].replace(/[,;\s]+$/, '').trim() || null : null;
+        nr_rej = wm[4] ? wm[4].replace(/\s/g, '').toUpperCase() : null;
+        usedIdx.add(i);
+        matched = true;
+      }
+    }
+
+    if (!matched) continue;
+
+    const ctxStr = lines.slice(Math.max(0, i - 1), Math.min(lines.length, i + 5)).join(' ');
+    const vM = ctxStr.match(/(?:NR\s+VIN|VIN)\s*[:\s]*([A-HJ-NPR-Z0-9]{17})/i) ||
+               ctxStr.match(/\b([A-HJ-NPR-Z0-9]{17})\b/i);
+    const rM = ctxStr.match(/ROK\s+PRODUKCJI[:\s]*(\d{4})/i) || ctxStr.match(/\brok[:\s]*(\d{4})/i);
+    const kM = ctxStr.match(/PRZEBIEG[:\s]*([\d\s]+?)\s*KM/i);
+    const kdM = line.match(/^\s*\d+\s+(\d{4,8})\s+/);
+
+    if (!nr_rej) nr_rej = globalNrRej;
+    if (!typ)    typ    = globalTyp;
+    if (model)   model  = model.replace(/[,;\s]+$/, '').trim() || null;
+
+    pozycje.push({
+      lp: pozycje.length + 1, kod: kdM ? kdM[1] : null,
+      typ, marka, model, nr_rej,
+      nr_vin:    vM ? vM[1].toUpperCase() : (globalVin || null),
+      rok:       rM ? rM[1] : null,
+      przebieg:  kM ? kM[1].replace(/\s/g, '') + 'km' : null,
+      cena_netto: null
+    });
+  }
+
+  // Deduplikacja
+  {
+    const seen = new Map();
+    for (const p of pozycje) {
+      const k = p.nr_rej || `${p.marka}_${p.lp}`;
+      if (!seen.has(k)) seen.set(k, p);
+      else if (p.nr_vin && !seen.get(k).nr_vin) seen.set(k, { ...seen.get(k), ...p });
+    }
+    pozycje.length = 0;
+    let lp = 1;
+    for (const p of seen.values()) { p.lp = lp++; pozycje.push(p); }
+  }
+
+  if (pozycje.length === 0 && (globalVin || globalNrRej)) {
+    pozycje.push({
+      lp: 1, kod: null, typ: globalTyp, marka: null, model: null,
+      nr_rej: globalNrRej, nr_vin: globalVin, rok: null, przebieg: null, cena_netto: null
+    });
+  }
+
+  // ── 7. KWOTY ───────────────────────────────────────────────────────
+  const rL = lines.find(l => /^Razem[:\s]/i.test(l) && /\d/.test(l));
+  let sN = null, sV = null, sB = null;
+  if (rL) {
+    const ns = [...rL.matchAll(/([\d\s]+[,.]\d{2})/g)]
+      .map(x => parseAmt(x[1])).filter(Boolean);
+    if      (ns.length >= 3) [sN, sV, sB] = ns;
+    else if (ns.length === 1) sB = ns[0];
+  }
+  if (!sB) {
+    const rd = find(/Razem\s+do\s+zap[łl]aty[:\s]+([\d\s,]+)\s*PLN/i) ||
+               find(/Razem\s+do\s+zap[łl]aty\s+([\d\s,]+)/i);
+    if (rd) sB = parseAmt(rd);
+  }
+  if (!sB) {
+    const rd2 = find(/Do\s+zap[łl]aty[:\s]+([\d\s,]+)\s*(?:PLN|zł)/i)    ||
+                find(/Suma\s+brutto[:\s]+([\d\s,]+)/i)                      ||
+                find(/Kwota\s+do\s+zap[łl]aty[:\s]+([\d\s,]+)/i)           ||
+                find(/Warto[sś][cć]\s+brutto[:\s]+([\d\s,]+)/i);
+    if (rd2) sB = parseAmt(rd2);
+  }
+  if (!sB) {
+    const m = full.match(/Przelew\s+\d{4}-\d{2}-\d{2}\s+([\d\s,]+[,.][\d]{2})\s+PLN/i);
+    if (m) sB = parseAmt(m[1]);
+  }
+
+  return {
+    nr_faktury, data_wystawienia, data_sprzedazy, kupujacy, pozycje,
+    suma_netto: sN, suma_vat: sV, suma_brutto: sB,
+    forma_platnosci: find(/Forma\s+p[łl]atno[sś]ci[:\s]+([A-Za-z]+)/i) || findL(/^(Przelew|Gotówka|Karta)$/i),
+    termin_platnosci: parseDate(find(/Termin[:\s]+([\d\-./]+)/i)),
+    _meta: {
+      linii: lines.length, znakow: text.length,
+      pojazdow: pozycje.length, globalVin, globalNrRej
+    }
+  };
 }
 
-// ══ PDF EXTRACTOR ═════════════════════════════════════════════════════
-async function extractPdfText(blob){
-  const ab=await blob.arrayBuffer();
-  const pdf=await pdfjsLib.getDocument({data:ab}).promise;
-  let out='';
-  for(let p=1;p<=pdf.numPages;p++){
-    const page=await pdf.getPage(p);
-    const content=await page.getTextContent();
-    let lastY=null;
-    for(const item of content.items){const y=Math.round(item.transform[5]);if(lastY!==null&&Math.abs(y-lastY)>4)out+='\n';out+=item.str+' ';lastY=y;}
-    out+='\n';
+// ══════════════════════════════════════════════════════════════════════
+// PDF TEXT CLEANER
+// ══════════════════════════════════════════════════════════════════════
+function cleanPdfText(t) {
+  const U = 'ĄĆĘŁŃÓŚŹŻ';
+  const L = 'ąćęłńóśźż';
+  const P = U + L;
+  for (let pass = 0; pass < 5; pass++) {
+    t = t.replace(new RegExp(',\\s*([' + P + '])', 'g'), '$1');
+    t = t.replace(new RegExp('([' + P + ']) ([a-z' + L + '])', 'g'), '$1$2');
+    t = t.replace(new RegExp('([a-zA-Z' + P + ']) ([' + L + '])', 'g'), '$1$2');
+    t = t.replace(new RegExp('([a-zA-Z' + P + ']) ([' + U + '])(?=[a-zA-Z' + P + '])', 'g'), '$1$2');
+    t = t.replace(new RegExp('([' + U + ']) ([A-Z])(?=[a-zA-Z' + P + '])', 'g'), '$1$2');
+    t = t.replace(new RegExp('([a-zA-Z' + P + ']) ([' + U + '])(?=[\\s,\\.;]|$)', 'g'), '$1$2');
+  }
+  t = t.replace(/[ \t]{3,}/g, '  ');
+  return t;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// PDF EXTRACTOR
+// ══════════════════════════════════════════════════════════════════════
+async function extractPdfText(blob) {
+  const ab  = await blob.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
+  let out   = '';
+  for (let p = 1; p <= pdf.numPages; p++) {
+    const page    = await pdf.getPage(p);
+    const content = await page.getTextContent();
+    let lastY     = null;
+    for (const item of content.items) {
+      const y = Math.round(item.transform[5]);
+      if (lastY !== null && Math.abs(y - lastY) > 4) out += '\n';
+      out  += item.str + ' ';
+      lastY = y;
+    }
+    out += '\n';
   }
   return out;
 }
 
-// ══ STATE & REFS ══════════════════════════════════════════════════════
-let pdfBlob=null;
-const dzEl=document.getElementById('dz'),fileIn=document.getElementById('fileIn');
-const chip=document.getElementById('chip'),chipName=document.getElementById('chipName'),chipSize=document.getElementById('chipSize'),chipDel=document.getElementById('chipDel');
-const parseBtn=document.getElementById('parseBtn'),logEl=document.getElementById('log');
-const clearBtn=document.getElementById('clearBtn');
-document.getElementById('f_doc_date').value=new Date().toISOString().split('T')[0];
+// ══════════════════════════════════════════════════════════════════════
+// STATE I REFERENCJE DOM
+// ══════════════════════════════════════════════════════════════════════
+let pdfBlob = null;
+const dzEl    = document.getElementById('dz');
+const fileIn  = document.getElementById('fileIn');
+const chip    = document.getElementById('chip');
+const chipName = document.getElementById('chipName');
+const chipSize = document.getElementById('chipSize');
+const chipDel  = document.getElementById('chipDel');
+const parseBtn = document.getElementById('parseBtn');
+const logEl    = document.getElementById('log');
+const clearBtn = document.getElementById('clearBtn');
 
-// ══ FILE HANDLING ══════════════════════════════════════════════════════
-dzEl.addEventListener('dragover',e=>{e.preventDefault();dzEl.classList.add('over')});
-dzEl.addEventListener('dragleave',()=>dzEl.classList.remove('over'));
-dzEl.addEventListener('drop',e=>{e.preventDefault();dzEl.classList.remove('over');const f=e.dataTransfer.files[0];if(f&&f.type==='application/pdf')loadFile(f);else log('Akceptowane są tylko pliki PDF.','err')});
-fileIn.addEventListener('change',e=>{if(e.target.files[0])loadFile(e.target.files[0])});
-chipDel.addEventListener('click',clearFile);
-clearBtn.addEventListener('click',clearFile);
+// Ustaw dzisiejszą datę jako domyślną
+document.getElementById('f_doc_date').value = new Date().toISOString().split('T')[0];
 
-function loadFile(f){
-  chipName.textContent=f.name;chipSize.textContent=(f.size/1024).toFixed(1)+' KB';
-  chip.classList.add('on');parseBtn.disabled=false;
-  clearBtn.style.display='';
-  log(`Załadowano: ${f.name}`,'ok');
-  pdfBlob=f;
+// ══════════════════════════════════════════════════════════════════════
+// OBSŁUGA PLIKU
+// ══════════════════════════════════════════════════════════════════════
+dzEl.addEventListener('dragover', e => { e.preventDefault(); dzEl.classList.add('over'); });
+dzEl.addEventListener('dragleave', ()  => dzEl.classList.remove('over'));
+dzEl.addEventListener('drop', e => {
+  e.preventDefault();
+  dzEl.classList.remove('over');
+  const f = e.dataTransfer.files[0];
+  if (f && f.type === 'application/pdf') loadFile(f);
+  else log('Akceptowane są tylko pliki PDF.', 'err');
+});
+fileIn.addEventListener('change', e => { if (e.target.files[0]) loadFile(e.target.files[0]); });
+chipDel.addEventListener('click', clearFile);
+clearBtn.addEventListener('click', clearFile);
+
+function loadFile(f) {
+  chipName.textContent = f.name;
+  chipSize.textContent = (f.size / 1024).toFixed(1) + ' KB';
+  chip.classList.add('on');
+  parseBtn.disabled = false;
+  clearBtn.style.display = '';
+  log(`Załadowano: ${f.name}`, 'ok');
+  pdfBlob = f;
   loadPdfViewer(pdfBlob);
   runParse();
 }
-function clearFile(){
-  pdfBlob=null;fileIn.value='';pdfDoc=null;
-  chip.classList.remove('on');parseBtn.disabled=true;
-  clearBtn.style.display='none';
+
+function clearFile() {
+  pdfBlob = null;
+  fileIn.value = '';
+  if (pdfDoc) { pdfDoc.destroy(); pdfDoc = null; }
+
+  chip.classList.remove('on');
+  parseBtn.disabled = true;
+  clearBtn.style.display = 'none';
   document.getElementById('extCard').classList.remove('on');
-  document.getElementById('extEmpty').style.display='';
+  document.getElementById('extEmpty').style.display = '';
   document.getElementById('pdfViewer').classList.remove('on');
-  
-  // reset formularza
-  ['f_sale_date','f_marka','f_model','f_nrrej','f_vin','f_rok','f_km','f_faktura','f_cena','f_naz','f_ulica','f_miasto','f_nip','f_regon','f_polisa','f_ubezp']
-    .forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.classList.remove('ok')}});
-  // reset selecta ubezpieczyciela
-  const sel=document.getElementById('f_ubezp_sel');
-  if(sel){sel.value='UNIQA';}
-  document.getElementById('f_ubezp').style.display='none';
-  document.getElementById('f_doc_date').value=new Date().toISOString().split('T')[0];
-  renderDoc();
-  renderWypowiedzenie();
-  log('Dane wyczyszczone.','warn');
-}
 
-// ══ LOG ═══════════════════════════════════════════════════════════════
-function log(msg,type='info'){
-  const d=document.createElement('div');d.className=`l-${type}`;
-  const ts=new Date().toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  d.textContent=`[${ts}] ${msg}`;logEl.appendChild(d);logEl.scrollTop=logEl.scrollHeight;
-}
-
-// ══ TOAST ═════════════════════════════════════════════════════════════
-function toast(msg,type='success'){
-  const t=document.createElement('div');t.className=`toast t-${type}`;t.textContent=msg;
-  document.getElementById('toastCont').appendChild(t);
-  t.addEventListener('click',()=>t.remove());setTimeout(()=>t.remove(),3500);
-}
-
-// ══ PARSE PIPELINE ════════════════════════════════════════════════════
-parseBtn.addEventListener('click',runParse);
-
-async function runParse(){
-  if(!pdfBlob)return;
-  parseBtn.disabled=true;
-  document.getElementById('bIco').innerHTML='<span class="spin"></span>';
-  document.getElementById('bTxt').textContent='Parsowanie…';
-  try{
-    if(typeof pdfjsLib==='undefined')throw new Error('PDF.js niedostępne — sprawdź połączenie z internetem.');
-    log('Ekstrakcja warstwy tekstowej…','info');
-    const text=await extractPdfText(pdfBlob);
-    log(`Wyodrębniono ${text.length} znaków.`,'ok');
-    
-    const parsed=parseInvoiceText(text);
-    log(`Parser OK · ${parsed._meta.pojazdow} pojazd(ów).`,'ok');
-    fillForm(parsed);fillExt(parsed);
-    log('Formularz wypełniony ✓','ok');
-    toast('Formularz wypełniony pomyślnie','success');
-    
-    if(window.innerWidth<=900&&!sbEl.classList.contains('hidden')){sbEl.classList.add('hidden');sbBtn.classList.remove('active');}
-    
-    // Autofocus na kluczowe pole po załadowaniu
-    setTimeout(() => {
-        const markaInput = document.getElementById('f_marka');
-        if (markaInput) markaInput.focus();
-    }, 100);
-
-  }catch(err){log(`BŁĄD: ${err.message}`,'err');toast(err.message,'error');console.error(err)}
-  finally{parseBtn.disabled=false;document.getElementById('bIco').textContent='🔄';document.getElementById('bTxt').textContent='Parsuj ponownie';}
-}
-
-// ══ FILL FORM ═════════════════════════════════════════════════════════
-function sf(id,val){const el=document.getElementById(id);if(!el||!val)return;el.value=val;el.classList.add('ok');el.addEventListener('input',()=>el.classList.remove('ok'),{once:true});}
-function fPLN(n){if(!n)return'';return n.toLocaleString('pl-PL',{minimumFractionDigits:2,maximumFractionDigits:2})}
-function fillForm(d){
-  sf('f_sale_date',d.data_sprzedazy);
-  const p=d.pozycje[0];
-  if(p){sf('f_marka',p.marka);sf('f_model',p.model);sf('f_nrrej',p.nr_rej);sf('f_vin',p.nr_vin);sf('f_rok',p.rok);sf('f_km',p.przebieg);if(d.suma_brutto)sf('f_cena',fPLN(d.suma_brutto))}
-  sf('f_faktura',d.nr_faktury);
-  const k=d.kupujacy;sf('f_naz',k.nazwa);sf('f_ulica',k.ulica);sf('f_miasto',k.kod_miasto);sf('f_nip',k.nip);sf('f_regon',k.regon);
-  renderDoc();
-  renderWypowiedzenie();
-}
-function fillExt(d){
-  const p=d.pozycje[0];
-  const s=(id,val)=>{const el=document.getElementById(id);el.textContent=val||'—';val?el.classList.add('ok'):el.classList.remove('ok')};
-  s('e_nrfak',d.nr_faktury);s('e_data',d.data_sprzedazy);
-  s('e_pojazd',p?`${p.marka||''} ${p.model||''}`.trim():null);
-  s('e_nrrej',p?.nr_rej);s('e_vin',p?.nr_vin);
-  s('e_nab',d.kupujacy.nazwa?d.kupujacy.nazwa.substring(0,28)+'…':null);
-  s('e_nip',d.kupujacy.nip);s('e_kwota',d.suma_brutto?fPLN(d.suma_brutto)+' PLN':null);
-  document.getElementById('extCard').classList.add('on');
-  document.getElementById('extEmpty').style.display='none';
-}
-
-// ══ LIVE RENDER Z DEBOUNCE I XSS PROTECTION ════════════════════════════
-const debouncedRender = debounce(renderDoc, 250);
-
-['f_doc_date','f_sale_date','f_marka','f_model','f_nrrej','f_vin','f_rok','f_km','f_faktura','f_cena','f_naz','f_ulica','f_miasto','f_nip','f_regon','f_polisa']
-  .forEach(id=>{
-      const el=document.getElementById(id);
-      if(el) el.addEventListener('input', ()=>{debouncedRender();renderWypowiedzenie();});
+  // Reset wszystkich pól formularza
+  [
+    'f_sale_date','f_marka','f_model','f_nrrej','f_vin','f_rok',
+    'f_km','f_faktura','f_cena','f_naz','f_ulica','f_miasto',
+    'f_nip','f_regon','f_polisa','f_ubezp'
+  ].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value = ''; el.classList.remove('ok', 'err'); }
   });
 
-// Funkcja pobierająca z ucieczką znaków (XSS)
-const fv=id=>{
-  const el=document.getElementById(id);
+  // Reset selecta ubezpieczyciela i ukrycie pola ręcznego
+  const sel = document.getElementById('f_ubezp_sel');
+  if (sel) sel.value = 'UNIQA';
+  document.getElementById('f_ubezp').style.display = 'none';
+
+  // Reset labela NIP
+  const nipLabel = document.getElementById('f_nip_label');
+  if (nipLabel) nipLabel.textContent = 'NIP nabywcy';
+
+  // Reset licznika VIN
+  updateVinCounter('');
+
+  // Reset f_typ
+  const typSel = document.getElementById('f_typ');
+  if (typSel) typSel.value = '';
+
+  document.getElementById('f_doc_date').value = new Date().toISOString().split('T')[0];
+
+  // Schowaj baner walidacji
+  document.getElementById('valBanner').classList.remove('on');
+
+  renderDoc();
+  renderWypowiedzenie();
+  log('Dane wyczyszczone.', 'warn');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// LOG (max 50 wpisów)
+// ══════════════════════════════════════════════════════════════════════
+function log(msg, type = 'info') {
+  const d  = document.createElement('div');
+  d.className = `l-${type}`;
+  const ts = new Date().toLocaleTimeString('pl-PL', {
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  });
+  d.textContent = `[${ts}] ${msg}`;
+  logEl.appendChild(d);
+  // Ogranicz do 50 wpisów, żeby log nie rósł w nieskończoność
+  while (logEl.children.length > 50) logEl.removeChild(logEl.firstChild);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════════════════════════
+function toast(msg, type = 'success') {
+  const t = document.createElement('div');
+  t.className = `toast t-${type}`;
+  t.textContent = msg;
+  t.setAttribute('role', 'status');
+  document.getElementById('toastCont').appendChild(t);
+  t.addEventListener('click', () => t.remove());
+  setTimeout(() => t.remove(), 3500);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// PARSE PIPELINE
+// ══════════════════════════════════════════════════════════════════════
+parseBtn.addEventListener('click', runParse);
+
+async function runParse() {
+  if (!pdfBlob) return;
+  if (typeof pdfjsLib === 'undefined') {
+    toast('Biblioteka PDF.js jest niedostępna. Sprawdź połączenie z internetem.', 'error');
+    log('Błąd: PDF.js nie jest załadowany.', 'err');
+    return;
+  }
+
+  parseBtn.disabled = true;
+  document.getElementById('bIco').innerHTML = '<span class="spin"></span>';
+  document.getElementById('bTxt').textContent = 'Parsowanie…';
+
+  try {
+    log('Ekstrakcja warstwy tekstowej…', 'info');
+    const rawText = await extractPdfText(pdfBlob);
+    const text    = cleanPdfText(rawText);
+    log(`Wyodrębniono ${text.length} znaków (oczyszczono artefakty PDF).`, 'ok');
+
+    const parsed = parseInvoiceText(text);
+    log(
+      `Parser OK · ${parsed._meta.pojazdow} pojazdów · ` +
+      `VIN: ${parsed._meta.globalVin || '—'} · ` +
+      `Rej: ${parsed._meta.globalNrRej || '—'}`,
+      'ok'
+    );
+
+    if (!parsed.nr_faktury && !parsed._meta.globalNrRej && !parsed._meta.globalVin) {
+      log('⚠ Zero pól pojazdu. Fragment tekstu PDF:', 'warn');
+      log(text.replace(/\s+/g, ' ').trim().substring(0, 400), 'warn');
+    }
+
+    fillForm(parsed);
+    fillExt(parsed);
+    log('Formularz wypełniony ✓', 'ok');
+    toast('Formularz wypełniony pomyślnie', 'success');
+
+    // Na mobile — schowaj sidebar po imporcie
+    if (window.innerWidth <= 900 && !sbEl.classList.contains('hidden')) {
+      sbEl.classList.add('hidden');
+      sbBtn.classList.remove('active');
+    }
+
+    // Autofocus na pole marki
+    setTimeout(() => {
+      const markaInput = document.getElementById('f_marka');
+      if (markaInput) markaInput.focus();
+    }, 100);
+
+  } catch (err) {
+    log(`BŁĄD: ${err.message}`, 'err');
+    toast(err.message, 'error');
+    console.error(err);
+  } finally {
+    parseBtn.disabled = false;
+    document.getElementById('bIco').textContent = '🔄';
+    document.getElementById('bTxt').textContent = 'Parsuj ponownie';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// WYPEŁNIANIE FORMULARZA
+// ══════════════════════════════════════════════════════════════════════
+function sf(id, val) {
+  const el = document.getElementById(id);
+  if (!el || !val) return;
+  el.value = val;
+  el.classList.add('ok');
+  el.addEventListener('input', () => el.classList.remove('ok'), { once: true });
+}
+
+function fPLN(n) {
+  if (!n) return '';
+  return n.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function fillForm(d) {
+  sf('f_sale_date', d.data_sprzedazy);
+  const p = d.pozycje[0];
+  if (p) {
+    sf('f_typ',   p.typ);
+    sf('f_marka', p.marka);
+    sf('f_model', p.model);
+    sf('f_nrrej', p.nr_rej);
+    sf('f_vin',   p.nr_vin);
+    sf('f_rok',   p.rok);
+    sf('f_km',    p.przebieg);
+    // Zaktualizuj licznik VIN jeśli wypełniony
+    if (p.nr_vin) updateVinCounter(p.nr_vin);
+  }
+  sf('f_faktura', d.nr_faktury);
+  if (d.suma_brutto) sf('f_cena', fPLN(d.suma_brutto));
+
+  const k = d.kupujacy;
+  sf('f_naz',    k.nazwa);
+  sf('f_ulica',  k.ulica);
+  sf('f_miasto', k.kod_miasto);
+  sf('f_regon',  k.regon);
+
+  if (k.nip) {
+    sf('f_nip', k.nip);
+  } else if (k.pesel) {
+    sf('f_nip', k.pesel);
+    const lbl = document.getElementById('f_nip_label');
+    if (lbl) lbl.textContent = 'PESEL nabywcy';
+  }
+
+  renderDoc();
+  renderWypowiedzenie();
+}
+
+function fillExt(d) {
+  const p = d.pozycje[0];
+  const s = (id, val) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = val || '—';
+    val ? el.classList.add('ok') : el.classList.remove('ok');
+  };
+  s('e_nrfak',  d.nr_faktury);
+  s('e_data',   d.data_sprzedazy);
+  const pNaz = p ? [p.typ, p.marka, p.model].filter(Boolean).join(' ') : null;
+  s('e_pojazd', pNaz || null);
+  s('e_nrrej',  p?.nr_rej);
+  s('e_vin',    p?.nr_vin);
+  s('e_nab',    d.kupujacy.nazwa ? d.kupujacy.nazwa.substring(0, 28) + '…' : null);
+
+  // NIP lub PESEL — poprawna etykieta
+  const nipVal  = d.kupujacy.nip || d.kupujacy.pesel || null;
+  const nipType = d.kupujacy.nip ? 'NIP' : (d.kupujacy.pesel ? 'PESEL' : 'NIP');
+  s('e_nip', nipVal);
+  const kEl = document.querySelector('.ext-k[data-nip]');
+  if (kEl) kEl.textContent = nipType;
+
+  s('e_kwota', d.suma_brutto ? fPLN(d.suma_brutto) + ' PLN' : null);
+  document.getElementById('extCard').classList.add('on');
+  document.getElementById('extEmpty').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// LICZNIK I WALIDACJA VIN
+// ══════════════════════════════════════════════════════════════════════
+function updateVinCounter(val) {
+  const counter = document.getElementById('vinCounter');
+  const input   = document.getElementById('f_vin');
+  if (!counter || !input) return;
+
+  const len  = val.length;
+  const isOk = len === 0 || len === 17;
+  counter.textContent = `${len} / 17`;
+  counter.className   = 'vin-counter' + (len === 0 ? '' : isOk ? ' ok' : ' err');
+  input.classList.toggle('err', len > 0 && !isOk);
+}
+
+document.getElementById('f_vin').addEventListener('input', function () {
+  this.value = this.value.toUpperCase();
+  updateVinCounter(this.value);
+});
+
+// ══════════════════════════════════════════════════════════════════════
+// WALIDACJA PRZED DRUKIEM
+// ══════════════════════════════════════════════════════════════════════
+function validateForm() {
+  const errors = [];
+  const salD = document.getElementById('f_sale_date').value;
+  const marka = document.getElementById('f_marka').value.trim();
+  const nrrej = document.getElementById('f_nrrej').value.trim();
+  const naz   = document.getElementById('f_naz').value.trim();
+  const vin   = document.getElementById('f_vin').value.trim();
+
+  if (!salD)            errors.push('Data zbycia pojazdu');
+  if (!marka)           errors.push('Marka pojazdu');
+  if (!nrrej)           errors.push('Nr rejestracyjny');
+  if (!naz)             errors.push('Nazwa / imię i nazwisko nabywcy');
+  if (vin && vin.length !== 17) errors.push('VIN musi mieć dokładnie 17 znaków');
+
+  const banner  = document.getElementById('valBanner');
+  const valList = document.getElementById('valList');
+  if (errors.length > 0) {
+    valList.innerHTML = errors.map(e => `<li>${escapeHTML(e)}</li>`).join('');
+    banner.classList.add('on');
+    banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return false;
+  }
+  banner.classList.remove('on');
+  return true;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// LIVE RENDER — jeden debounced callback dla obu dokumentów
+// ══════════════════════════════════════════════════════════════════════
+const debouncedRenderBoth = debounce(() => {
+  renderDoc();
+  renderWypowiedzenie();
+}, 250);
+
+document.getElementById('f_typ')?.addEventListener('change', debouncedRenderBoth);
+
+[
+  'f_doc_date','f_sale_date','f_marka','f_model','f_nrrej',
+  'f_rok','f_km','f_faktura','f_cena',
+  'f_naz','f_ulica','f_miasto','f_nip','f_regon',
+  'f_polisa'
+].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', debouncedRenderBoth);
+});
+
+// VIN — osobny listener (renderuje + aktualizuje licznik)
+document.getElementById('f_vin').addEventListener('input', debouncedRenderBoth);
+
+// ══════════════════════════════════════════════════════════════════════
+// POMOCNICY RENDEROWANIA
+// ══════════════════════════════════════════════════════════════════════
+/** Pobiera wartość pola i zabezpiecza przed XSS */
+const fv = id => {
+  const el = document.getElementById(id);
   return escapeHTML(el ? el.value.trim() : '');
 };
 
-function fDate(iso){
-  if(!iso)return'<span class="empty-val">______________________</span>';
-  const d=new Date(iso);if(isNaN(d))return escapeHTML(iso);
-  return escapeHTML(d.toLocaleDateString('pl-PL',{day:'2-digit',month:'long',year:'numeric'}));
+function fDate(iso) {
+  if (!iso) return '<span class="empty-val">______________________</span>';
+  const d = new Date(iso);
+  if (isNaN(d)) return escapeHTML(iso);
+  return escapeHTML(d.toLocaleDateString('pl-PL', {
+    day: '2-digit', month: 'long', year: 'numeric'
+  }));
 }
 
-function renderDoc(){
-  const marka=fv('f_marka'),model=fv('f_model'),nrrej=fv('f_nrrej'),vin=fv('f_vin');
-  const rok=fv('f_rok'),km=fv('f_km'),nrfak=fv('f_faktura'),cena=fv('f_cena');
-  const docD=fv('f_doc_date'),salD=fv('f_sale_date');
-  const naz=fv('f_naz'),ulica=fv('f_ulica'),miasto=fv('f_miasto'),nip=fv('f_nip'),regon=fv('f_regon');
-  const vLine=[[marka,model].filter(Boolean).join(' '),nrrej?`nr rej. ${nrrej}`:'',vin?`VIN: ${vin}`:'',rok?`rok prod. ${rok}`:'',km?`przebieg: ${km}`:''].filter(Boolean).join(', ');
-  
-  document.getElementById('docOut').innerHTML=`
+function fDateShort(iso) {
+  if (!iso) return '<span class="empty-val">__-__-____</span>';
+  const d = new Date(iso);
+  if (isNaN(d)) return escapeHTML(iso);
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  return `${dd}-${mm}-${d.getFullYear()}`;
+}
+
+function addDays(iso, days) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (isNaN(d)) return null;
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split('T')[0];
+}
+
+function getUbezp() {
+  const sel = document.getElementById('f_ubezp_sel');
+  if (!sel) return '';
+  return sel.value === 'inne' ? fv('f_ubezp') : escapeHTML(sel.value);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// RENDER: ZAWIADOMIENIE O ZBYCIU
+// ══════════════════════════════════════════════════════════════════════
+function renderDoc() {
+  const typ   = escapeHTML((document.getElementById('f_typ') || {}).value || '');
+  const marka = fv('f_marka'), model  = fv('f_model'), nrrej = fv('f_nrrej');
+  const vin   = fv('f_vin'),   rok    = fv('f_rok'),   km    = fv('f_km');
+  const nrfak = fv('f_faktura'), cena = fv('f_cena');
+  const docD  = fv('f_doc_date'), salD = fv('f_sale_date');
+  const naz   = fv('f_naz'), ulica = fv('f_ulica'), miasto = fv('f_miasto');
+  const nip   = fv('f_nip'), regon = fv('f_regon');
+
+  const vTyp  = typ || (marka ? 'Samochód' : '');
+  const vLine = [
+    [vTyp, marka, model].filter(Boolean).join(' '),
+    nrrej ? `nr rej. ${nrrej}` : '',
+    vin   ? `VIN: ${vin}`       : '',
+    rok   ? `rok prod. ${rok}`  : '',
+    km    ? `przebieg: ${km}`   : ''
+  ].filter(Boolean).join(', ');
+
+  document.getElementById('docOut').innerHTML = `
 <div class="doc">
   <div class="doc-top">
     <div class="doc-date">Mogilno, dnia <strong>${fDate(docD)}</strong></div>
@@ -855,27 +1584,27 @@ function renderDoc(){
   </div>
   <p style="margin-bottom:6px;font-size:10pt">Zawiadamiam, że pojazd:</p>
   <div class="veh-box">
-    <strong>${vLine||'<span class="empty-val">Dane pojazdu — wypełnij formularz lub zaimportuj fakturę</span>'}</strong>
+    <strong>${vLine || '<span class="empty-val">Dane pojazdu — wypełnij formularz lub zaimportuj fakturę</span>'}</strong>
     <div class="veh-sub">marka / model / nr rejestracyjny / nr nadwozia (VIN) / rok produkcji / przebieg</div>
   </div>
   <div class="sale-grid">
     <div>
       <div class="sg-lbl">Został zbyty w dniu:</div>
       <div class="sg-val">${fDate(salD)}</div>
-      ${nrfak?`<div class="sg-sub">Faktura VAT nr ${nrfak}${cena?' · brutto: '+cena+' PLN':''}</div>`:''}
+      ${nrfak ? `<div class="sg-sub">Faktura VAT nr ${nrfak}${cena ? ' · brutto: ' + cena + ' PLN' : ''}</div>` : ''}
     </div>
     <div>
       <div class="sg-lbl">na rzecz:</div>
-      <div class="sg-val">${naz||'<span class="empty-val">______________________________</span>'}</div>
+      <div class="sg-val">${naz || '<span class="empty-val">______________________________</span>'}</div>
       <div class="sg-sub">(imię i nazwisko lub nazwa nabywcy)</div>
     </div>
     <div>
       <div class="sg-lbl">Adres nabywcy:</div>
-      <div class="sg-val">${[ulica,miasto].filter(Boolean).join(', ')||'&nbsp;'}</div>
+      <div class="sg-val">${[ulica, miasto].filter(Boolean).join(', ') || '&nbsp;'}</div>
     </div>
     <div>
-      <div class="sg-lbl">NIP / REGON nabywcy:</div>
-      <div class="sg-val">${nip||'&nbsp;'}${regon?`<span style="margin-left:20px">${regon}</span>`:''}</div>
+      <div class="sg-lbl">NIP / PESEL / REGON nabywcy:</div>
+      <div class="sg-val">${nip || '&nbsp;'}${regon ? `<span style="margin-left:20px">${regon}</span>` : ''}</div>
     </div>
   </div>
   <div class="rodo">
@@ -890,7 +1619,10 @@ function renderDoc(){
   </div>
   <div class="office-sec" style="margin-top:28px">
     <div class="od-title">Wypełnia Urząd</div>
-    <div class="od-line">Odnotowano w informatycznej bazie danych w dniu <span class="empty-val">_________________________</span></div>
+    <div class="od-line">
+      Odnotowano w informatycznej bazie danych w dniu
+      <span class="empty-val">_________________________</span>
+    </div>
     <div class="od-sig-row" style="margin-top:20px">
       <div class="sig-blk">
         <div class="sig-line"></div>
@@ -901,29 +1633,9 @@ function renderDoc(){
 </div>`;
 }
 
-// ══ WYPOWIEDZENIE OC ══════════════════════════════════════════════════
-function addDays(iso, days) {
-  if (!iso) return null;
-  const d = new Date(iso);
-  if (isNaN(d)) return null;
-  d.setDate(d.getDate() + days);
-  return d.toISOString().split('T')[0];
-}
-
-function fDateShort(iso){
-  if(!iso)return'<span class="empty-val">__-__-____</span>';
-  const d=new Date(iso);if(isNaN(d))return escapeHTML(iso);
-  const dd=String(d.getDate()).padStart(2,'0');
-  const mm=String(d.getMonth()+1).padStart(2,'0');
-  return `${dd}-${mm}-${d.getFullYear()}`;
-}
-
-function getUbezp(){
-  const sel=document.getElementById('f_ubezp_sel');
-  if(!sel)return'';
-  return sel.value==='inne' ? fv('f_ubezp') : escapeHTML(sel.value);
-}
-
+// ══════════════════════════════════════════════════════════════════════
+// RENDER: WYPOWIEDZENIE OC
+// ══════════════════════════════════════════════════════════════════════
 function renderWypowiedzenie() {
   const marka  = fv('f_marka'), model = fv('f_model'), nrrej = fv('f_nrrej');
   const salIso = document.getElementById('f_sale_date').value;
@@ -932,17 +1644,16 @@ function renderWypowiedzenie() {
   const ubezp  = getUbezp();
   const wypIso = addDays(salIso, 30);
 
-  const pojazd = [marka, model].filter(Boolean).join(' ') + (nrrej ? `, nr rej. ${nrrej}` : '');
-  const polisaLine = [polisa, ubezp].filter(Boolean).join(', ') || '<span class="empty-val">______________________________</span>';
-  const adres = [ulica, miasto].filter(Boolean).join(', ');
+  const pojazd      = [marka, model].filter(Boolean).join(' ') + (nrrej ? `, nr rej. ${nrrej}` : '');
+  const polisaLine  = [polisa, ubezp].filter(Boolean).join(', ') ||
+                      '<span class="empty-val">______________________________</span>';
+  const adres       = [ulica, miasto].filter(Boolean).join(', ');
   const E = s => s || '<span class="empty-val">______________________________</span>';
 
   document.getElementById('docOut2').innerHTML = `
 <div class="wyp-doc">
-
   <div class="wyp-title">Wypowiedzenie umowy ubezpieczenia OC<br>przez nabywcę pojazdu</div>
 
-  <!-- NABYWCA -->
   <div class="wyp-party">
     <div class="wyp-party-hd">Nabywca pojazdu</div>
     <div class="wyp-party-body">
@@ -957,7 +1668,6 @@ function renderWypowiedzenie() {
     </div>
   </div>
 
-  <!-- POJAZD / POLISA -->
   <div class="wyp-vehicle">
     <div class="wyp-vehicle-hd">Dane pojazdu i polisy</div>
     <div class="wyp-2col" style="gap:8px 16px">
@@ -976,7 +1686,6 @@ function renderWypowiedzenie() {
     </div>
   </div>
 
-  <!-- ZBYWCA -->
   <div class="wyp-party">
     <div class="wyp-party-hd">Zbywca pojazdu</div>
     <div class="wyp-party-body">
@@ -994,16 +1703,13 @@ function renderWypowiedzenie() {
   </div>
 
   <hr class="wyp-sep">
-
   <div class="wyp-section-hd">W Y P O W I E D Z E N I E</div>
-
   <p class="wyp-text">
     Niniejszym zgodnie z art.&nbsp;31 ust.&nbsp;1 ustawy z dnia 22 maja 2003&nbsp;r. o ubezpieczeniach
     obowiązkowych, Ubezpieczeniowym Funduszu Gwarancyjnym i Polskim Biurze Ubezpieczycieli
     Komunikacyjnych (Dz.U. z 2003&nbsp;r. nr&nbsp;124 poz.&nbsp;1152 z późn.&nbsp;zm.) wypowiadam
     z dniem <strong>${fDateShort(wypIso)}</strong> umowę ubezpieczenia OC o wskazanym powyżej numerze.
   </p>
-
   <div class="wyp-sigs">
     <div class="wyp-sig-blk">
       <div class="wyp-sig-line"></div>
@@ -1014,15 +1720,17 @@ function renderWypowiedzenie() {
       <div class="wyp-sig-lbl">podpis nabywcy pojazdu</div>
     </div>
   </div>
-
 </div>`;
 }
 
-// ══ PRINT ═════════════════════════════════════════════════════════════
-document.getElementById('printBtn').addEventListener('click',()=>{
-  const content=document.getElementById('docOut').innerHTML;
-  if(!content.includes('doc-title')){toast('Wypełnij formularz przed drukowaniem.','error');return;}
-  const w=window.open('','_blank','width=860,height=700');
+// ══════════════════════════════════════════════════════════════════════
+// DRUK: ZAWIADOMIENIE O ZBYCIU
+// ══════════════════════════════════════════════════════════════════════
+document.getElementById('printBtn').addEventListener('click', () => {
+  if (!validateForm()) return;
+
+  const content = document.getElementById('docOut').innerHTML;
+  const w = window.open('', '_blank', 'width=860,height=700');
   w.document.write(`<!DOCTYPE html><html lang="pl"><head>
 <meta charset="UTF-8">
 <title>Zawiadomienie o Zbyciu Pojazdu · Chemirol</title>
@@ -1056,32 +1764,18 @@ body{font-family:'Times New Roman',serif;font-size:9.5pt;color:#000;line-height:
 .od-title{font-weight:bold;margin-bottom:7px;font-size:9pt}
 .od-line{margin-bottom:16px}
 .od-sig-row{display:flex;justify-content:flex-end;margin-top:7px}
-.empty-val{color:#000;font-style:normal;} /* Reset na wydruku, by podłogi były czarne */
+.empty-val{color:#000;font-style:normal}
 </style></head><body>${content}</body></html>`);
-  w.document.close();w.onload=()=>{w.focus();w.print()};
+  w.document.close();
+  w.onload = () => { w.focus(); w.print(); };
 });
 
-// Init
-renderDoc();
-renderWypowiedzenie();
-
-// ══ UBEZP SELECT ══════════════════════════════════════════════════════
-document.getElementById('f_ubezp_sel').addEventListener('change', function(){
-  const customEl = document.getElementById('f_ubezp');
-  if(this.value === 'inne'){
-    customEl.style.display = '';
-    customEl.focus();
-  } else {
-    customEl.style.display = 'none';
-  }
-  renderWypowiedzenie();
-});
-document.getElementById('f_ubezp').addEventListener('input', renderWypowiedzenie);
-
-// ══ PRINT WYPOWIEDZENIE OC ════════════════════════════════════════════
-document.getElementById('printBtn2').addEventListener('click',()=>{
-  const content=document.getElementById('docOut2').innerHTML;
-  const w=window.open('','_blank','width=860,height=700');
+// ══════════════════════════════════════════════════════════════════════
+// DRUK: WYPOWIEDZENIE OC
+// ══════════════════════════════════════════════════════════════════════
+document.getElementById('printBtn2').addEventListener('click', () => {
+  const content = document.getElementById('docOut2').innerHTML;
+  const w = window.open('', '_blank', 'width=860,height=700');
   w.document.write(`<!DOCTYPE html><html lang="pl"><head>
 <meta charset="UTF-8">
 <title>Wypowiedzenie OC · Chemirol</title>
@@ -1109,8 +1803,30 @@ body{font-family:'Times New Roman',serif;font-size:10pt;color:#000;line-height:1
 .wyp-sig-lbl{font-size:7pt;color:#555;font-style:italic}
 .empty-val{color:#000;font-style:normal}
 </style></head><body>${content}</body></html>`);
-  w.document.close();w.onload=()=>{w.focus();w.print()};
+  w.document.close();
+  w.onload = () => { w.focus(); w.print(); };
 });
+
+// ══════════════════════════════════════════════════════════════════════
+// SELECT UBEZPIECZYCIELA
+// ══════════════════════════════════════════════════════════════════════
+document.getElementById('f_ubezp_sel').addEventListener('change', function () {
+  const customEl = document.getElementById('f_ubezp');
+  if (this.value === 'inne') {
+    customEl.style.display = '';
+    customEl.focus();
+  } else {
+    customEl.style.display = 'none';
+  }
+  debouncedRenderBoth();
+});
+document.getElementById('f_ubezp').addEventListener('input', debouncedRenderBoth);
+
+// ══════════════════════════════════════════════════════════════════════
+// INICJALIZACJA
+// ══════════════════════════════════════════════════════════════════════
+renderDoc();
+renderWypowiedzenie();
 </script>
 </body>
-  </html>
+</html>
