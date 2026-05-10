@@ -466,7 +466,11 @@
     .sum-empty i { font-size:2rem; opacity:.25; display:block; margin-bottom:.75rem; }
     .sum-empty p { margin:0; font-size:.82rem; }
     /* colour swatch in recipient stats table */
-    .rs-swatch { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px; vertical-align:middle; }
+    .rs-swatch {
+      display:inline-block; width:13px; height:13px; border-radius:3px;
+      margin-right:6px; vertical-align:middle;
+      box-shadow:0 1px 3px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.35);
+    }
     /* totals footer row in recipient table */
     #recipientStatsTable tfoot th { font-size:.68rem; font-weight:800; color:var(--p); background:#eef2ff; border-top:2px solid #c7d2fe; text-align:right; }
     #recipientStatsTable tfoot th:first-child { text-align:left; }
@@ -781,9 +785,14 @@
           <h2><i class="fas fa-microchip" style="margin-right:.5rem;opacity:.65"></i>Zarządzanie urządzeniami</h2>
           <p>Przeglądaj, dodawaj i edytuj urządzenia przypisane do odbiorców</p>
         </div>
-        <button class="btn btn-primary" onclick="openAddRecipientModal()">
-          <i class="fas fa-plus"></i> Nowy odbiorca
-        </button>
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+          <button class="btn btn-muted btn-sm" onclick="resetToDefaults()" title="Przywróć domyślną listę odbiorców">
+            <i class="fas fa-undo-alt"></i> Przywróć domyślne
+          </button>
+          <button class="btn btn-primary" onclick="openAddRecipientModal()">
+            <i class="fas fa-plus"></i> Nowy odbiorca
+          </button>
+        </div>
       </div>
       <div class="dev-stats" id="devStats"></div>
       <div class="r-grid" id="recipientsList"></div>
@@ -870,24 +879,44 @@
   </div>
 </div>
 
+<!-- Modal: Confirm (zastępuje confirm() zablokowane w iframe Google Sites) -->
+<div id="confirmModal" class="modal-overlay">
+  <div class="modal-box" style="max-width:340px">
+    <div class="modal-hd">
+      <h3 style="display:flex;align-items:center;gap:.5rem">
+        <i class="fas fa-exclamation-triangle" style="color:var(--amb)"></i>
+        <span id="confirmModalTitle">Potwierdzenie</span>
+      </h3>
+      <button class="modal-x" onclick="closeModal('confirmModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p id="confirmModalMsg" style="margin:0;font-size:.82rem;color:var(--txt);line-height:1.5"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-muted btn-sm" onclick="closeModal('confirmModal')">Anuluj</button>
+      <button class="btn btn-danger btn-sm" id="confirmModalOk"><i class="fas fa-check"></i> Tak, usuń</button>
+    </div>
+  </div>
+</div>
+
 <script>
 
 /* ═
    DATA & STATE
 ═ */
 const DEFAULT_DATA = {
-  '50293204':{ nazwa:'Mikoszów',   urzadzenia:['N4703012056','N4714017371'], kolor:'#b7adfb' },
-  '50293133':{ nazwa:'Sandomierz', urzadzenia:['N4710004175'],              kolor:'#f57d4e80' },
-  '50293154':{ nazwa:'Zambrów',    urzadzenia:['N4716004760'],              kolor:'#ff9c3f80' },
-  '50293116':{ nazwa:'Stargard',   urzadzenia:['N4714017189','N4724002482'],kolor:'#ffd75380' },
-  '50293205':{ nazwa:'Bochnia',    urzadzenia:['N4723002760','N4712001871'],kolor:'#fff93F80' },
-  '50293148':{ nazwa:'Siennica',   urzadzenia:['N4714020155','N4721009316'],kolor:'#beec5480' },
-  '50292973':{ nazwa:'Wągrowiec',  urzadzenia:['N4719016449','N4714015655'],kolor:'#7fe6d2' },
-  '50293127':{ nazwa:'Jarosław',   urzadzenia:['N4703010067','N4714018715'],kolor:'#3fd8bb80' },
-  '50293114':{ nazwa:'Gryfice',    urzadzenia:['N4712006810','N4714015012'],kolor:'#7fdcff' },
-  '50293647':{ nazwa:'Okaliniec',  urzadzenia:['N4719011583'],              kolor:'#9285f980' },
-  '50293110':{ nazwa:'Białogard',  urzadzenia:['N4703014403','N4711002590'],kolor:'#beec54' },
-  '50295574':{ nazwa:'Grudziądz',  urzadzenia:['N4703008947'],              kolor:'#db4fa280' }
+  '50293204':{ nazwa:'Mikoszów',   urzadzenia:['N4703012056','N4714017371'], kolor:'#8B5CF6' },
+  '50293133':{ nazwa:'Sandomierz', urzadzenia:['N4710004175'],              kolor:'#F43F5E' },
+  '50293154':{ nazwa:'Zambrów',    urzadzenia:['N4716004760'],              kolor:'#F97316' },
+  '50293116':{ nazwa:'Stargard',   urzadzenia:['N4714017189','N4724002482'],kolor:'#FBBF24' },
+  '50293205':{ nazwa:'Bochnia',    urzadzenia:['N4723002760','N4712001871'],kolor:'#A3E635' },
+  '50293148':{ nazwa:'Siennica',   urzadzenia:['N4714020155','N4721009316'],kolor:'#34D399' },
+  '50292973':{ nazwa:'Wągrowiec',  urzadzenia:['N4719016449','N4714015655'],kolor:'#22D3EE' },
+  '50293127':{ nazwa:'Jarosław',   urzadzenia:['N4703010067','N4714018715'],kolor:'#3B82F6' },
+  '50293114':{ nazwa:'Gryfice',    urzadzenia:['N4712006810','N4714015012'],kolor:'#6366F1' },
+  '50293647':{ nazwa:'Okaliniec',  urzadzenia:['N4719011583'],              kolor:'#D946EF' },
+  '50293110':{ nazwa:'Białogard',  urzadzenia:['N4703014403','N4711002590'],kolor:'#EC4899' },
+  '50295574':{ nazwa:'Grudziądz',  urzadzenia:['N4703008947'],              kolor:'#F472B6' }
 };
 
 let urzadzeniaOdbiorcow = (() => {
@@ -896,7 +925,10 @@ let urzadzeniaOdbiorcow = (() => {
     return s ? JSON.parse(s) : JSON.parse(JSON.stringify(DEFAULT_DATA));
   } catch(e) { return JSON.parse(JSON.stringify(DEFAULT_DATA)); }
 })();
-const saveData = () => localStorage.setItem('gsp_data', JSON.stringify(urzadzeniaOdbiorcow));
+const saveData = () => {
+  try { localStorage.setItem('gsp_data', JSON.stringify(urzadzeniaOdbiorcow)); }
+  catch(e) { /* localStorage niedostępne (np. iframe Google Sites) */ }
+};
 
 let editingRecipientNr = null, debugTimeout;
 let fileSessions = [];
@@ -923,28 +955,31 @@ const EDITABLE_COLS = [
 ═ */
 function getHistory() {
   try { return JSON.parse(localStorage.getItem(HIST_KEY)||'[]'); }
-  catch(e) { return []; }
+  catch(e) { return _historyFallback; }
 }
+let _historyFallback = [];
 function addToHistory(fileName, netTotal, vatTotal, grossTotal, rowCount) {
   const h = getHistory();
   if(h.length && h[0].fileName === fileName && h[0].date.slice(0,16) === new Date().toISOString().slice(0,16)) return;
   h.unshift({ id: Date.now(), fileName, date: new Date().toISOString(), netTotal, vatTotal, grossTotal, rowCount });
   if(h.length > 100) h.pop();
-  localStorage.setItem(HIST_KEY, JSON.stringify(h));
+  try { localStorage.setItem(HIST_KEY, JSON.stringify(h)); } catch(e) { _historyFallback = h; }
   updateHistBadge();
 }
 function deleteHistEntry(id) {
   const h = getHistory().filter(e => e.id !== id);
-  localStorage.setItem(HIST_KEY, JSON.stringify(h));
+  try { localStorage.setItem(HIST_KEY, JSON.stringify(h)); } catch(e) { _historyFallback = h; }
   updateHistBadge();
   renderHistoryPage();
 }
 function clearHistory() {
-  if(!confirm('Wyczyścić całą historię importów?')) return;
-  localStorage.removeItem(HIST_KEY);
-  updateHistBadge();
-  renderHistoryPage();
-  showToast('Historia wyczyszczona');
+  showConfirm('Wyczyścić całą historię importów?', () => {
+    try { localStorage.removeItem(HIST_KEY); } catch(e) {}
+    _historyFallback = [];
+    updateHistBadge();
+    renderHistoryPage();
+    showToast('Historia wyczyszczona');
+  }, 'Wyczyść historię');
 }
 function updateHistBadge() {
   const el = document.getElementById('histCountBadge');
@@ -1026,10 +1061,21 @@ function setProgress(pct, label) {
 }
 function lighten(hex) {
   try {
-    const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+    const h = hex.slice(0,7);
+    const r=parseInt(h.slice(1,3),16), g=parseInt(h.slice(3,5),16), b=parseInt(h.slice(5,7),16);
     return '#'+[Math.min(255,r+28),Math.min(255,g+28),Math.min(255,b+28)]
       .map(x => x.toString(16).padStart(2,'0')).join('');
   } catch(e) { return hex; }
+}
+function hexToRgba(hex, alpha) {
+  try {
+    const h = hex.slice(0,7);
+    const r=parseInt(h.slice(1,3),16), g=parseInt(h.slice(3,5),16), b=parseInt(h.slice(5,7),16);
+    return `rgba(${r},${g},${b},${alpha})`;
+  } catch(e) { return `rgba(180,180,180,${alpha})`; }
+}
+function rowGradient(hex) {
+  return `linear-gradient(135deg,${hexToRgba(hex,.42)} 0%,${hexToRgba(hex,.20)} 100%)`;
 }
 const toastCfg = {
   success:{ icon:'fa-check-circle',       cls:'',          title:'Sukces!' },
@@ -1062,8 +1108,20 @@ function logDebug(msg, color='#94a3b8') {
 }
 const openModal  = id => document.getElementById(id).classList.add('open');
 const closeModal = id => document.getElementById(id).classList.remove('open');
+
+/* showConfirm – zastępuje confirm() blokowane przez sandbox iframe Google Sites */
+function showConfirm(msg, onConfirm, title) {
+  document.getElementById('confirmModalMsg').textContent = msg;
+  document.getElementById('confirmModalTitle').textContent = title || 'Potwierdzenie';
+  const okBtn = document.getElementById('confirmModalOk');
+  const newBtn = okBtn.cloneNode(true); // usuń stare listenery
+  okBtn.parentNode.replaceChild(newBtn, okBtn);
+  newBtn.addEventListener('click', () => { closeModal('confirmModal'); onConfirm(); });
+  openModal('confirmModal');
+}
+
 document.addEventListener('keydown', e => {
-  if(e.key==='Escape') { closeModal('recipientModal'); closeModal('deviceModal'); }
+  if(e.key==='Escape') { closeModal('recipientModal'); closeModal('deviceModal'); closeModal('confirmModal'); }
 });
 document.querySelectorAll('.modal-overlay').forEach(o =>
   o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); })
@@ -1075,7 +1133,11 @@ function switchPage(id, btn) {
   btn.classList.add('active');
   if(id==='devices') renderDevicesPage();
   if(id==='history') renderHistoryPage();
-  if(id==='summary') renderSummaryPage();
+  if(id==='summary') { renderSummaryPage(); if(typeof summaryTable!=='undefined'&&summaryTable) summaryTable.columns.adjust().draw(false); }
+  fileSessions.forEach(s => {
+    try { if(s.invoiceTable) s.invoiceTable.columns.adjust(); } catch(e){}
+    try { if(s.splitTable)   s.splitTable.columns.adjust();   } catch(e){}
+  });
 }
 
 /* ═
@@ -1186,7 +1248,7 @@ function createSession(fileName) {
 
   session.invoiceTable = $(`#invoiceTable-${id}`).DataTable({
     dom:'Bfrtip', paging:false, info:false, searching:false,
-    autoWidth:false, responsive:true, scrollX:true,
+    autoWidth:true,
     buttons:[
       {extend:'copy',  exportOptions:{columns:expF(session.invHidden)}},
       {extend:'csv',   exportOptions:{columns:expF(session.invHidden)}},
@@ -1197,12 +1259,12 @@ function createSession(fileName) {
     columnDefs:[
       {targets:[4,5,6,8], visible:false},
       {targets:12, render:(data,type) => type==='display' ? genSelect(data) : data},
-      ...editableRenderers,
-      {width:'auto', targets:'_all'}
+      ...editableRenderers
     ],
+    drawCallback() { this.api().columns.adjust(); },
     createdRow(row, data) {
       const c = getColors()[data[12]];
-      if(c) $(row).css('background-color', c);
+      if(c) $(row).css('background', rowGradient(c));
     }
   });
   session.invoiceTable.columns().every(function() {
@@ -1211,7 +1273,7 @@ function createSession(fileName) {
 
   session.splitTable = $(`#splitTable-${id}`).DataTable({
     dom:'Bfrtip', paging:false, info:false, searching:false,
-    autoWidth:false, responsive:true, scrollX:true,
+    autoWidth:true,
     buttons:[
       {extend:'copy', exportOptions:{columns:expF(session.splitHidden)}},
       {
@@ -1237,9 +1299,10 @@ function createSession(fileName) {
       {extend:'print', exportOptions:{columns:expF(session.splitHidden)}}
     ],
     columnDefs:[{targets:[0,1,2,11], visible:false}],
+    drawCallback() { this.api().columns.adjust(); },
     createdRow(row, data) {
       const c = getColors()[data[0]];
-      if(c) $(row).css('background-color', c);
+      if(c) $(row).css('background', rowGradient(c));
     }
   });
   session.splitTable.columns().every(function() {
@@ -1673,6 +1736,8 @@ function podzielKoszty(session) {
     });
   });
 
+  session.splitTable.columns.adjust();
+  session.invoiceTable.columns.adjust();
   logDebug('Podział: '+session.fileName, '#4ade80');
   updateSessionTotals(session);
   updateSummaryTable();
@@ -1953,8 +2018,9 @@ function buildCard(nr, data) {
   card.className = 'r-card'; card.dataset.nr = nr;
   const col = data.kolor || '#e2e8f0';
   const dotCls = data.urzadzenia.length ? '' : 'empty';
+  card.style.setProperty('--card-accent', col);
   card.innerHTML = `
-    <div class="r-card-stripe" style="background:linear-gradient(90deg,${col},${lighten(col)})"></div>
+    <div class="r-card-stripe" style="background:linear-gradient(180deg,${col} 0%,${lighten(col)} 100%);box-shadow:2px 0 12px ${hexToRgba(col,.35)}"></div>
     <div class="r-card-head">
       <div class="r-head-top">
         <div class="r-id-block"><span class="r-nr-badge">${nr}</span><span class="r-name">${data.nazwa}</span></div>
@@ -2001,9 +2067,10 @@ function addDevice(nr) {
   toggleAddRow(nr); refreshCard(nr); rebuildAll(); showToast('Dodano '+val,'success');
 }
 function deleteDevice(nr, dev) {
-  if(!confirm('Usunąć '+dev+'?')) return;
-  urzadzeniaOdbiorcow[nr].urzadzenia = urzadzeniaOdbiorcow[nr].urzadzenia.filter(d => d!==dev);
-  saveData(); refreshCard(nr); rebuildAll(); showToast('Usunięto '+dev,'success');
+  showConfirm('Usunąć urządzenie '+dev+'?', () => {
+    urzadzeniaOdbiorcow[nr].urzadzenia = urzadzeniaOdbiorcow[nr].urzadzenia.filter(d => d!==dev);
+    saveData(); refreshCard(nr); rebuildAll(); showToast('Usunięto '+dev,'success');
+  });
 }
 function openEditDeviceModal(nr, dev) {
   document.getElementById('dModalValue').value = dev;
@@ -2045,7 +2112,7 @@ function openEditRecipientModal(nr) {
   document.getElementById('recipientModalTitle').textContent = 'Edytuj odbiorcę';
   document.getElementById('rModalNr').value = nr; document.getElementById('rModalNr').disabled = true;
   document.getElementById('rModalNazwa').value = d.nazwa;
-  document.getElementById('rModalKolor').value = d.kolor||'#E6EEF8';
+  document.getElementById('rModalKolor').value = d.kolor||'#8B5CF6';
   openModal('recipientModal');
 }
 function saveRecipient() {
@@ -2065,9 +2132,17 @@ function saveRecipient() {
   saveData(); closeModal('recipientModal'); renderDevicesPage(); rebuildAll();
 }
 function deleteRecipient(nr) {
-  if(!confirm('Usunąć odbiorcę '+nr+' – '+urzadzeniaOdbiorcow[nr].nazwa+'?')) return;
-  delete urzadzeniaOdbiorcow[nr]; saveData(); renderDevicesPage(); rebuildAll();
-  showToast('Usunięto odbiorcę '+nr,'success');
+  showConfirm('Usunąć odbiorcę '+nr+' – '+urzadzeniaOdbiorcow[nr].nazwa+'?', () => {
+    delete urzadzeniaOdbiorcow[nr]; saveData(); renderDevicesPage(); rebuildAll();
+    showToast('Usunięto odbiorcę '+nr,'success');
+  });
+}
+function resetToDefaults() {
+  showConfirm('Przywrócić domyślną listę odbiorców i urządzeń?\nWszystkie ręczne zmiany zostaną utracone.', () => {
+    urzadzeniaOdbiorcow = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    saveData(); renderDevicesPage(); rebuildAll();
+    showToast('Przywrócono ustawienia domyślne','success');
+  }, 'Przywróć domyślne');
 }
 function rebuildAll() {
   fileSessions.forEach(sess => {
@@ -2089,7 +2164,7 @@ $(document).ready(function() {
 
   summaryTable = $('#summaryTable').DataTable({
     dom:'Bfrtip', paging:false, info:false, searching:true,
-    autoWidth:false, responsive:true, scrollX:true,
+    autoWidth:true,
     buttons:[
       {extend:'copy'},
       {
@@ -2111,7 +2186,8 @@ $(document).ready(function() {
     columnDefs:[
       {targets:[1,2,3,12], visible:false},
       {targets:[13], className:'rs-rot', defaultContent:''}
-    ]
+    ],
+    drawCallback() { this.api().columns.adjust(); }
   });
 
   const dz = document.getElementById('dropZone');
@@ -2172,7 +2248,7 @@ $(document).ready(function() {
     sess.invoiceTable.cell(idx,12).data(v);
     sess.invoiceTable.cell(idx,13).data(lok);
     const c = getColors()[v];
-    row.css('background-color', c||'');
+    if(c) row.css('background', rowGradient(c)); else row.css('background','');
     logDebug('Odbiorca → '+v+'   Lokalizacja → '+lok, '#60a5fa');
     podzielKoszty(sess);
   });
