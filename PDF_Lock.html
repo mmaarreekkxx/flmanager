@@ -3,197 +3,308 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PDF LOCK</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <title>PDF_LOCK</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://files.pythonhosted.org">
+  <link rel="preload" href="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js" as="script">
+  <script defer src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700;900&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg:#080b10;--surface:#0e1420;--card:#131926;--border:#1e2a3a;--border2:#2a3a50;
-      --accent:#f59e0b;--accentDim:#92400e;--blue:#38bdf8;--green:#34d399;--red:#f87171;
-      --text:#e2e8f0;--muted:#64748b;--mono:'Share Tech Mono',monospace;--sans:'Exo 2',sans-serif;
+      --accent:#f59e0b;--accentDim:#92400e;--accentGlow:rgba(245,158,11,.12);
+      --blue:#38bdf8;--blueDim:#0c4a6e;
+      --green:#34d399;--red:#f87171;--purple:#a78bfa;
+      --text:#e2e8f0;--text2:#c5cdd8;--muted:#64748b;--muted2:#4a5a6e;
+      --mono:'Share Tech Mono',monospace;--sans:'Exo 2',sans-serif;
+      --r:10px;--r2:6px;--r3:4px;
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;min-height:100dvh;overflow-x:hidden}
-    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(245,158,11,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(245,158,11,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+    body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+    body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(245,158,11,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(245,158,11,.03) 1px,transparent 1px);background-size:40px 40px}
+
     @keyframes spin{to{transform:rotate(360deg)}}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-    @keyframes sUp{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
-    #loader{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .3s}
-    #loader.out{opacity:0;pointer-events:none}
+    /* ═══ DRAG OVERLAY ═══ */
+    #dragOverlay{position:fixed;inset:0;z-index:200;background:rgba(8,11,16,.92);display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;backdrop-filter:blur(8px)}
+    #dragOverlay.show{display:flex}
+    .dov-icon{font-size:48px;animation:pulse 1s infinite}
+    .dov-text{font-size:16px;font-weight:700;color:var(--accent);letter-spacing:2px;font-family:var(--mono)}
+    .dov-sub{font-size:10px;color:var(--muted);font-family:var(--mono)}
+
+    /* ═══ LOADER ═══ */
+    #loader{position:fixed;inset:0;z-index:150;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .3s,visibility .3s}
+    #loader.out{opacity:0;visibility:hidden;pointer-events:none}
     .l-ring{width:44px;height:44px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
     .l-t{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:4px;text-transform:uppercase}
     .l-bar{width:160px;height:2px;background:var(--border2);border-radius:2px;overflow:hidden}
     .l-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accentDim),var(--accent));border-radius:2px;transition:width .75s ease}
 
-    #app{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:16px 12px 50px;opacity:0;transform:translateY(6px);transition:opacity .3s,transform .3s}
+    /* ═══ HACKER OVERLAY ═══ */
+    #hackerOverlay{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.93);display:none;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+    #hackerOverlay.active{display:flex}
+    .hk-rain{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+    .hk-col{position:absolute;top:-100%;font-family:var(--mono);font-size:12px;color:rgba(52,211,153,.15);line-height:1.2;writing-mode:vertical-rl;animation:hkFall linear infinite;white-space:nowrap}
+    @keyframes hkFall{0%{transform:translateY(-100%)}100%{transform:translateY(calc(100vh + 100%))}}
+    .hk-center{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:12px;padding:30px;max-width:500px;width:90%}
+    .hk-lock{font-size:48px;animation:hkPulse 1s ease-in-out infinite}
+    @keyframes hkPulse{0%,100%{transform:scale(1);filter:drop-shadow(0 0 8px rgba(245,158,11,.4))}50%{transform:scale(1.1);filter:drop-shadow(0 0 20px rgba(245,158,11,.8))}}
+    .hk-title{font-family:var(--mono);font-size:14px;color:var(--accent);letter-spacing:4px;text-transform:uppercase;text-align:center}
+    .hk-file{font-family:var(--mono);font-size:10px;color:var(--green);text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .hk-progress{width:100%;max-width:300px;height:4px;background:var(--border2);border-radius:2px;overflow:hidden}
+    .hk-progress-fill{height:100%;background:linear-gradient(90deg,var(--accentDim),var(--accent),var(--green));border-radius:2px;transition:width .3s;width:0%;box-shadow:0 0 10px rgba(245,158,11,.5)}
+    .hk-terminal{width:100%;max-width:400px;background:rgba(0,0,0,.6);border:1px solid var(--border2);border-radius:6px;padding:10px;font-family:var(--mono);font-size:8px;color:var(--green);max-height:120px;overflow-y:auto;line-height:1.6}
+    .hk-terminal::-webkit-scrollbar{width:2px}.hk-terminal::-webkit-scrollbar-thumb{background:var(--border2)}
+    .hk-line{opacity:0;animation:hkType .3s ease forwards}
+    @keyframes hkType{to{opacity:1}}
+    .hk-line .hk-prompt{color:var(--accent)}.hk-line .hk-cmd{color:var(--green)}.hk-line .hk-val{color:var(--blue)}.hk-line .hk-ok{color:var(--green)}.hk-line .hk-warn{color:var(--red)}
+    .hk-hex{font-family:var(--mono);font-size:7px;color:rgba(52,211,153,.2);text-align:center;max-width:100%;overflow:hidden;word-break:break-all;line-height:1.4;max-height:30px}
+    .hk-stats{display:flex;gap:16px;font-family:var(--mono);font-size:9px}
+    .hk-stat{text-align:center}
+    .hk-stat-val{font-size:16px;font-weight:700;color:var(--accent);font-family:var(--mono)}
+    .hk-stat-lbl{font-size:7px;color:var(--muted);margin-top:2px;letter-spacing:1px}
+    .hk-status{font-family:var(--mono);font-size:10px;color:var(--accent);animation:hkBlink 1s step-end infinite}
+    @keyframes hkBlink{50%{opacity:0}}
+    #hackerOverlay.dm .hk-lock{animation-name:hkPulseB}
+    @keyframes hkPulseB{0%,100%{transform:scale(1);filter:drop-shadow(0 0 8px rgba(56,189,248,.4))}50%{transform:scale(1.1);filter:drop-shadow(0 0 20px rgba(56,189,248,.8))}}
+    #hackerOverlay.dm .hk-title{color:var(--blue)}
+    #hackerOverlay.dm .hk-progress-fill{background:linear-gradient(90deg,#0c4a6e,var(--blue),var(--green));box-shadow:0 0 10px rgba(56,189,248,.5)}
+    #hackerOverlay.dm .hk-stat-val{color:var(--blue)}
+    #hackerOverlay.dm .hk-status{color:var(--blue)}
+    #hackerOverlay.dm .hk-prompt{color:var(--blue)}
+
+    /* ═══ APP ═══ */
+    #app{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:52px 12px 50px;opacity:0;transform:translateY(6px);transition:opacity .3s,transform .3s}
     #app.vis{opacity:1;transform:none}
 
-    .hdr{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
-    .hdr-ico{width:28px;height:28px;background:linear-gradient(135deg,var(--accentDim),var(--accent));border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:0 0 8px rgba(245,158,11,.2);flex-shrink:0}
-    .hdr h1{font-size:13px;font-weight:900;letter-spacing:2px;text-transform:uppercase}
-    .hdr-s{font-size:8px;color:var(--muted);font-family:var(--mono);letter-spacing:1px}
-    .hdr-b{margin-left:auto;font-family:var(--mono);font-size:7px;color:var(--accent);border:1px solid var(--accentDim);padding:2px 5px;border-radius:3px;white-space:nowrap}
+    /* ═══ HEADER ═══ */
+    .hdr{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;gap:8px;padding:5px 16px;background:rgba(8,11,16,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(30,42,58,.6);box-shadow:0 1px 12px rgba(0,0,0,.3)}
+    .hdr-inner{display:flex;align-items:center;gap:8px;width:100%;max-width:960px;margin:0 auto}
+    .hdr-ico{width:22px;height:22px;background:linear-gradient(135deg,var(--accentDim),var(--accent));border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;box-shadow:0 0 6px rgba(245,158,11,.2);flex-shrink:0}
+    .hdr h1{font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase}
+    .hdr-s{font-size:7px;color:var(--muted);font-family:var(--mono);letter-spacing:1px}
+    .hdr-b{margin-left:auto;font-family:var(--mono);font-size:7px;color:var(--accent);border:1px solid var(--accentDim);padding:1px 5px;border-radius:3px;white-space:nowrap;opacity:.8}
+    .hdr-btn{background:none;border:1px solid var(--border2);color:var(--muted);font-size:15px;width:26px;height:26px;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;line-height:1}
+    .hdr-btn:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 6px rgba(245,158,11,.15)}
+    @keyframes hdrSpin{to{transform:rotate(360deg)}}
+    .hdr-btn.spin{animation:hdrSpin .55s ease}
 
-    .eng{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:5px;background:var(--surface);border:1px solid var(--border);font-size:8px;font-family:var(--mono);color:var(--muted);margin-bottom:10px;flex-wrap:wrap}
-    .ed{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-    .ed.ld{background:var(--accent);animation:pulse 1s infinite}
-    .ed.ok{background:var(--green);animation:none}
+    /* ═══ ENGINE ═══ */
+    .eng{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:5px;background:var(--surface);border:1px solid var(--border);font-size:9px;font-family:var(--mono);color:var(--muted);margin-bottom:10px;flex-wrap:wrap;transition:border-color .3s}
+    .ed{width:6px;height:6px;border-radius:50%;flex-shrink:0;transition:all .3s}
+    .ed.ld{background:var(--accent);animation:pulse 1s ease infinite}
+    .ed.ok{background:var(--green);box-shadow:0 0 6px rgba(52,211,153,.4);animation:none}
     .ed.er{background:var(--red);animation:none}
     .eb{flex:0 0 80px;height:2px;background:var(--border);border-radius:2px;overflow:hidden;margin-left:auto}
     .eb.h{display:none}
     .ef{height:100%;background:var(--accent);border-radius:2px;transition:width .3s;width:0%}
 
-    .aban{display:none;align-items:center;gap:6px;padding:5px 9px;border-radius:6px;margin-bottom:8px;font-family:var(--mono);font-size:9px;animation:sUp .3s}
+    /* ═══ BANNER ═══ */
+    .aban{display:none;align-items:center;gap:6px;padding:5px 10px;border-radius:6px;margin-bottom:8px;font-family:var(--mono);font-size:10px;animation:fadeUp .3s;letter-spacing:.3px}
     .aban.show{display:flex}
     .aban.be{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);color:var(--accent)}
     .aban.bd{background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.2);color:var(--blue)}
-    .aban.bmix{background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.2);color:#a78bfa}
+    .aban.bmix{background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.2);color:var(--purple)}
 
+    /* ═══ GRID / CARD ═══ */
     .main-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;position:relative;overflow:hidden}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;position:relative;overflow:hidden;transition:border-color .3s}
     .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:0;transition:opacity .3s}
+    .card:hover{border-color:var(--border2)}
     .card:hover::before{opacity:1}
-    .ct{font-size:8px;font-family:var(--mono);letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:5px}
-    .ct::before{content:'';width:2px;height:9px;background:var(--accent);border-radius:2px;flex-shrink:0}
+    .ct{font-size:9px;font-family:var(--mono);letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:5px;font-weight:600}
 
-    .dz{border:2px dashed var(--border2);border-radius:9px;padding:20px 10px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+    /* ═══ DROPZONE ═══ */
+    .dz{border:2px dashed var(--border2);border-radius:9px;padding:20px 10px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:transparent}
     .dz:hover,.dz.ov{border-color:var(--accent);background:rgba(245,158,11,.04)}
-    .dz input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer}
-    .dz-i{font-size:24px;margin-bottom:4px;display:block}
-    .dz-m{font-weight:600;font-size:11px;margin-bottom:2px}
-    .dz-s{font-size:8px;color:var(--muted);font-family:var(--mono)}
+    .dz:hover .dz-i,.dz.ov .dz-i{transform:scale(1.1)}
+    .dz-i{font-size:24px;margin-bottom:4px;display:block;transition:transform .2s}
+    .dz-m{font-weight:600;font-size:12px;margin-bottom:2px;color:var(--text2)}
+    .dz-s{font-size:9px;color:var(--muted);font-family:var(--mono)}
 
-    .flist{margin-top:10px;display:flex;flex-direction:column;gap:5px;max-height:240px;overflow-y:auto;padding-right:2px}
-    .fitem{display:flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:7px 9px;animation:sUp .2s}
-    .fitem.skipped{opacity:.45}
-    .fitem-ico{font-size:15px;flex-shrink:0}
+    /* ═══ FILE LIST ═══ */
+    .flist{margin-top:10px;display:flex;flex-direction:column;gap:5px;max-height:240px;overflow-y:auto;padding-right:2px;scroll-behavior:smooth}
+    .empty-state{text-align:center;padding:16px 8px;color:var(--muted2);font-size:10px;display:none;font-family:var(--mono)}
+    .empty-state.show{display:block}
+    .empty-state span{font-size:22px;display:block;margin-bottom:4px;opacity:.4}
+    .fitem{display:flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 10px;animation:fadeUp .2s;transition:border-color .2s}
+    .fitem:hover{border-color:var(--border2)}
+    .fitem.skipped{opacity:.35;filter:grayscale(.4)}
+    .fitem-ico{font-size:16px;flex-shrink:0;width:20px;text-align:center}
     .fitem-info{flex:1;min-width:0}
-    .fitem-name{font-size:9px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .fitem-meta{font-size:7px;color:var(--muted);font-family:var(--mono);margin-top:1px;display:flex;gap:5px;align-items:center;flex-wrap:wrap}
-    .fitem-badge{font-size:7px;padding:1px 4px;border-radius:3px;font-family:var(--mono);font-weight:600}
+    .fitem-name{font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.2px}
+    .fitem-meta{font-size:8px;color:var(--muted);font-family:var(--mono);margin-top:2px;display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+    .fitem-badge{font-size:8px;padding:1px 5px;border-radius:3px;font-family:var(--mono);font-weight:600}
     .fitem-badge.enc{background:rgba(245,158,11,.12);color:var(--accent)}
     .fitem-badge.opn{background:rgba(100,116,139,.1);color:var(--muted)}
-    .fitem-badge.skipb{background:rgba(167,139,250,.1);color:#a78bfa}
-    .fitem-status{font-size:7px;font-family:var(--mono);padding:1px 5px;border-radius:3px;flex-shrink:0;white-space:nowrap}
+    .fitem-badge.skipb{background:rgba(167,139,250,.1);color:var(--purple)}
+    .fitem-status{font-size:8px;font-family:var(--mono);padding:1px 6px;border-radius:3px;flex-shrink:0;white-space:nowrap;letter-spacing:.2px;transition:all .2s;font-weight:500}
     .fitem-status.wait{color:var(--muted);background:rgba(100,116,139,.08)}
-    .fitem-status.proc{color:var(--accent);background:rgba(245,158,11,.08)}
+    .fitem-status.proc{color:var(--accent);background:rgba(245,158,11,.08);animation:pulse 1s infinite}
     .fitem-status.done{color:var(--green);background:rgba(52,211,153,.08)}
     .fitem-status.fail{color:var(--red);background:rgba(248,113,113,.08)}
-    .fitem-status.skip{color:#a78bfa;background:rgba(167,139,250,.08)}
-    .fitem-rm{background:none;border:none;cursor:pointer;color:var(--muted);font-size:10px;padding:2px;flex-shrink:0;line-height:1}
+    .fitem-status.skip{color:var(--purple);background:rgba(167,139,250,.08)}
+    .fitem-rm{background:none;border:none;cursor:pointer;color:var(--muted);font-size:10px;padding:2px 4px;border-radius:3px;flex-shrink:0;line-height:1;transition:color .15s}
     .fitem-rm:hover{color:var(--red)}
 
-    .fcnt{font-size:7px;font-family:var(--mono);color:var(--muted);margin-top:6px;display:none;align-items:center;gap:5px;flex-wrap:wrap}
+    /* ═══ FILE COUNTER ═══ */
+    .fcnt{font-size:8px;font-family:var(--mono);color:var(--muted);margin-top:8px;display:none;align-items:center;gap:5px;flex-wrap:wrap;letter-spacing:.2px}
     .fcnt.show{display:flex}
     .fcnt .n{color:var(--accent);font-weight:700}
-    .clear-all{font-size:7px;font-family:var(--mono);color:var(--red);background:none;border:none;cursor:pointer;margin-left:auto;padding:2px 5px;border-radius:3px}
+    .clear-all{font-size:8px;font-family:var(--mono);color:var(--red);background:none;border:none;cursor:pointer;margin-left:auto;padding:2px 6px;border-radius:3px;transition:background .15s}
     .clear-all:hover{background:rgba(248,113,113,.1)}
 
+    /* ═══ FORM ═══ */
     .fg{margin-bottom:10px}
-    label{display:block;font-size:8px;font-family:var(--mono);letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+    label.fl{display:block;font-size:9px;font-family:var(--mono);letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
     .iw{position:relative}
-    input[type="text"],input[type="password"],select{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;font-size:11px;font-family:var(--mono);color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;appearance:none}
+    input[type="text"],input[type="password"],select{
+      width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:6px;
+      padding:9px 11px;font-size:12px;font-family:var(--mono);color:var(--text);outline:none;
+      transition:border-color .2s,box-shadow .2s;appearance:none;
+    }
+    input::placeholder{color:rgba(245,158,11,.35);opacity:1}
     input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(245,158,11,.1)}
-    input[type="password"]{padding-right:30px;letter-spacing:2px}
-    .eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:11px;padding:2px}
+    input.mismatch{border-color:var(--red)!important;box-shadow:0 0 0 2px rgba(248,113,113,.1)!important}
+    input[type="password"]{padding-right:32px;letter-spacing:2px}
+    .eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:12px;padding:2px;transition:color .15s}
     .eye:hover{color:var(--accent)}
 
+    /* ═══ STRENGTH ═══ */
     .str-b{height:2px;background:var(--border);border-radius:2px;margin-top:4px;overflow:hidden}
     .str-f{height:100%;border-radius:2px;transition:width .3s,background .3s;width:0%}
-    .str-l{font-size:7px;font-family:var(--mono);margin-top:2px;color:var(--muted)}
+    .str-l{font-size:8px;font-family:var(--mono);margin-top:2px;color:var(--muted);transition:color .3s;font-weight:500}
 
-    .abtn{font-size:8px;font-family:var(--mono);color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:4px;margin-bottom:8px;border:none;background:none;padding:2px 0}
-    .abtn:hover{color:var(--accent)}
-    .aarr{transition:transform .2s;display:inline-block}
-    .aarr.open{transform:rotate(90deg)}
-    .abox{display:none}
-    .abox.show{display:block}
-    select option{background:#131926}
+    /* ═══ OPT-ROW ═══ */
+    .opt-row{display:flex;align-items:center;gap:7px;padding:8px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;margin-bottom:7px;cursor:pointer;user-select:none;transition:all .2s}
+    .opt-row:hover{border-color:var(--accent)}
+    .opt-row input[type="checkbox"]{width:14px;height:14px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+    .opt-ico{font-size:14px;flex-shrink:0}
+    .opt-txt{flex:1}
+    .opt-title{font-size:10px;font-weight:600;color:var(--text)}
+    .opt-desc{font-size:8px;color:var(--muted);font-family:var(--mono);line-height:1.3;margin-top:1px}
+    .opt-body{display:none;margin-bottom:8px;padding:0 2px}
+    .opt-body.show{display:block;animation:fadeUp .2s}
+    .or-sep{font-size:8px;font-family:var(--mono);color:var(--border2);text-align:center;margin:0 0 7px;letter-spacing:3px}
 
-    .chk-row{display:flex;align-items:center;gap:6px;padding:5px 0;font-size:9px;font-family:var(--mono);color:var(--muted);cursor:pointer}
-    .chk-row input[type="checkbox"]{width:14px;height:14px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
-    .chk-row:hover{color:var(--text)}
+    select{cursor:pointer}
+    select option{background:var(--card);color:var(--text)}
 
-    .owner-slide{max-height:0;overflow:hidden;transition:max-height .3s ease,opacity .3s;opacity:0}
-    .owner-slide.show{max-height:200px;opacity:1}
-
-    .owner-info{font-size:7px;color:var(--muted);font-family:var(--mono);line-height:1.4;padding:5px 7px;background:rgba(245,158,11,.04);border:1px solid rgba(245,158,11,.1);border-radius:4px;margin-top:4px}
-    .owner-info b{color:var(--accent)}
-
-    .owner-mode{font-size:7px;font-family:var(--mono);padding:4px 8px;border-radius:4px;margin-top:6px;margin-bottom:6px}
-    .owner-mode.auto{background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.15);color:var(--green)}
-    .owner-mode.custom{background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.15);color:var(--blue)}
-    .owner-mode.admin{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);color:var(--accent)}
-
-    .btn{width:100%;border:none;border-radius:8px;padding:10px 14px;color:#000;font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:6px}
+    /* ═══ BUTTON ═══ */
+    .btn{width:100%;border:none;border-radius:8px;padding:11px 14px;color:#000;font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:6px}
     .btn:hover:not(:disabled){transform:translateY(-1px)}
-    .btn:disabled{background:var(--border2)!important;color:var(--muted);cursor:not-allowed;transform:none!important;box-shadow:none!important}
-    .bte{background:linear-gradient(135deg,#92400e,var(--accent))}
-    .bte:hover:not(:disabled){box-shadow:0 3px 14px rgba(245,158,11,.3)}
-    .btd{background:linear-gradient(135deg,#0c4a6e,var(--blue))}
-    .btd:hover:not(:disabled){box-shadow:0 3px 14px rgba(56,189,248,.3)}
-    .btm{background:linear-gradient(135deg,#5b21b6,#a78bfa)}
-    .btm:hover:not(:disabled){box-shadow:0 3px 14px rgba(167,139,250,.3)}
+    .btn:active:not(:disabled){transform:translateY(0)}
+    .btn:disabled{background:var(--border2)!important;color:var(--muted);cursor:not-allowed;transform:none!important;box-shadow:none!important;opacity:.6}
+    .bte{background:linear-gradient(135deg,var(--accentDim),var(--accent))}.bte:hover:not(:disabled){box-shadow:0 4px 16px rgba(245,158,11,.3)}
+    .btd{background:linear-gradient(135deg,var(--blueDim),var(--blue))}.btd:hover:not(:disabled){box-shadow:0 4px 16px rgba(56,189,248,.3)}
+    .btm{background:linear-gradient(135deg,#4c1d95,var(--purple))}.btm:hover:not(:disabled){box-shadow:0 4px 16px rgba(167,139,250,.3)}
 
-    .batch-prog{margin-top:8px;display:none}
+    /* ═══ BATCH PROGRESS ═══ */
+    .batch-prog{margin-top:8px;display:none;animation:fadeUp .2s}
     .batch-prog.show{display:block}
     .bp-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
-    .bp-fill{height:100%;background:var(--green);border-radius:2px;transition:width .2s;width:0%}
-    .bp-lbl{font-size:7px;font-family:var(--mono);color:var(--muted);margin-top:2px;text-align:center}
+    .bp-fill{height:100%;background:linear-gradient(90deg,var(--green),#6ee7b7);border-radius:2px;transition:width .3s;width:0%}
+    .bp-lbl{font-size:8px;font-family:var(--mono);color:var(--muted);margin-top:2px;text-align:center;letter-spacing:.5px}
 
-    .rc{margin-top:12px;display:none;animation:sUp .3s}
+    /* ═══ RESULTS ═══ */
+    .rc{margin-top:12px;display:none;animation:fadeUp .3s}
     .rc.show{display:block}
-    .ri{border-radius:9px;padding:12px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-    .rie{background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.3)}
-    .rid{background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.3)}
-    .rim{background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.3)}
-    .ri-i{font-size:22px}
-    .ri-t h3{font-size:11px;font-weight:700;margin-bottom:2px}
-    .rie .ri-t h3{color:var(--green)}
-    .rid .ri-t h3{color:var(--blue)}
-    .rim .ri-t h3{color:#a78bfa}
-    .ri-t p{font-size:8px;color:var(--muted);font-family:var(--mono);word-break:break-all}
-    .bdl{margin-left:auto;border:none;border-radius:6px;padding:7px 12px;color:#000;font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:3px;flex-shrink:0}
-    .dle{background:var(--green)}.dle:hover{background:#6ee7b7}
-    .dld{background:var(--blue)}.dld:hover{background:#7dd3fc}
-    .dlm{background:#a78bfa}.dlm:hover{background:#c4b5fd}
+    .ri{border-radius:9px;padding:12px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;transition:border-color .2s}
+    .rie{background:rgba(52,211,153,.05);border:1px solid rgba(52,211,153,.25)}
+    .rid{background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.25)}
+    .rim{background:rgba(167,139,250,.05);border:1px solid rgba(167,139,250,.25)}
+    .ri-i{font-size:22px;flex-shrink:0}
+    .ri-t{flex:1;min-width:0}
+    .ri-t h3{font-size:12px;font-weight:700;margin-bottom:2px;letter-spacing:.2px}
+    .rie .ri-t h3{color:var(--green)}.rid .ri-t h3{color:var(--blue)}.rim .ri-t h3{color:var(--purple)}
+    .ri-t p{font-size:8px;color:var(--muted);font-family:var(--mono);word-break:break-all;line-height:1.5}
+    .bdl{margin-left:auto;border:none;border-radius:6px;padding:7px 13px;color:#000;font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:3px;flex-shrink:0}
+    .dle{background:var(--green)}.dle:hover{background:#6ee7b7;box-shadow:0 2px 10px rgba(52,211,153,.3)}
+    .dld{background:var(--blue)}.dld:hover{background:#7dd3fc;box-shadow:0 2px 10px rgba(56,189,248,.3)}
+    .dlm{background:var(--purple)}.dlm:hover{background:#c4b5fd}
 
+    /* ═══ DOWNLOAD PULSE ═══ */
+    @keyframes dlPulseG{0%,100%{box-shadow:0 0 0 0 rgba(52,211,153,0);transform:scale(1)}50%{box-shadow:0 0 14px 3px rgba(52,211,153,.35);transform:scale(1.03)}}
+    @keyframes dlPulseB{0%,100%{box-shadow:0 0 0 0 rgba(56,189,248,0);transform:scale(1)}50%{box-shadow:0 0 14px 3px rgba(56,189,248,.35);transform:scale(1.03)}}
+    .bdl.pulse-e{animation:dlPulseG 1.8s ease-in-out infinite}
+    .bdl.pulse-d{animation:dlPulseB 1.8s ease-in-out infinite}
+
+    /* ═══ LOG ═══ */
     .lc{margin-top:10px}
-    .lb{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:7px;font-family:var(--mono);font-size:8px;min-height:28px;max-height:90px;overflow-y:auto;line-height:1.6}
-    .ll{display:flex;gap:5px}
+    .lb{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px;font-family:var(--mono);font-size:9px;min-height:28px;max-height:100px;overflow-y:auto;line-height:1.7}
+    .ll{display:flex;gap:6px}
     .lt{color:var(--border2);flex-shrink:0}
     .lok{color:var(--green)}.ler{color:var(--red)}.lin{color:var(--muted)}.lwa{color:var(--accent)}
-    .hint{font-size:8px;color:var(--muted);font-family:var(--mono);line-height:1.4;padding:6px 8px;background:var(--surface);border:1px solid var(--border);border-radius:5px;margin-top:6px}
+    .hint{font-size:9px;color:var(--muted);font-family:var(--mono);line-height:1.5;padding:8px 10px;background:var(--surface);border:1px solid var(--border);border-radius:5px;margin-top:6px;letter-spacing:.2px;transition:all .2s}
 
-    ::-webkit-scrollbar{width:3px}
-    ::-webkit-scrollbar-track{background:var(--surface)}
-    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+    /* ═══ SCROLLBAR ═══ */
+    ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:var(--surface)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 
+    /* ═══ RESPONSIVE ═══ */
     @media(max-width:700px){
-      #app{padding:10px 8px 40px}.main-grid{grid-template-columns:1fr}.hdr h1{font-size:12px}.hdr-s{display:none}.dz{padding:16px 8px}.dz-i{font-size:20px}.dz-m{font-size:10px}.flist{max-height:180px}.card{padding:12px}.btn{padding:9px 10px;font-size:10px}.ri{padding:10px;gap:8px;flex-direction:column;align-items:stretch}.bdl{margin-left:0;width:100%;justify-content:center}.lb{max-height:70px;font-size:7px}
+      #app{padding:46px 8px 40px}.main-grid{grid-template-columns:1fr}
+      .hdr h1{font-size:12px}.hdr-s{display:none}
+      .dz{padding:16px 8px}.dz-i{font-size:20px}
+      .flist{max-height:180px}.card{padding:12px}
+      .btn{padding:9px 10px;font-size:10px}
+      .ri{flex-direction:column;align-items:stretch}.bdl{margin-left:0;width:100%;justify-content:center}
+      .lb{max-height:70px;font-size:7px}
+      .hk-terminal{font-size:7px;max-height:90px}
+      .hk-stats{gap:10px}.hk-stat-val{font-size:13px}
     }
     @media(min-width:1100px){
-      #app{max-width:1060px;padding:24px 30px 60px}.main-grid{gap:18px}.card{padding:20px}.dz{padding:28px 14px}.flist{max-height:300px}
+      #app{max-width:1060px;padding:56px 30px 60px}
+      .hdr-inner{max-width:1060px}
+      .main-grid{gap:18px}.card{padding:20px}
+      .dz{padding:28px 14px}.flist{max-height:300px}
     }
   </style>
 </head>
 <body>
 
+<div id="dragOverlay">
+  <div class="dov-icon">📂</div>
+  <div class="dov-text">UPUŚĆ PLIKI PDF</div>
+  <div class="dov-sub">Zostaną automatycznie dodane do listy</div>
+</div>
+
 <div id="loader">
   <div class="l-ring"></div>
-  <div class="l-t">PDF LOCK</div>
+  <div class="l-t">PDF_LOCK</div>
   <div class="l-bar"><div class="l-fill" id="lFill"></div></div>
+</div>
+
+<div id="hackerOverlay">
+  <div class="hk-rain" id="hkRain"></div>
+  <div class="hk-center">
+    <div class="hk-lock" id="hkLock">🔒</div>
+    <div class="hk-title" id="hkTitle">SZYFROWANIE</div>
+    <div class="hk-file" id="hkFile">—</div>
+    <div class="hk-stats">
+      <div class="hk-stat"><div class="hk-stat-val" id="hkDone">0</div><div class="hk-stat-lbl">GOTOWE</div></div>
+      <div class="hk-stat"><div class="hk-stat-val" id="hkTotal">0</div><div class="hk-stat-lbl">RAZEM</div></div>
+      <div class="hk-stat"><div class="hk-stat-val" id="hkPct">0%</div><div class="hk-stat-lbl">POSTĘP</div></div>
+    </div>
+    <div class="hk-progress"><div class="hk-progress-fill" id="hkBar"></div></div>
+    <div class="hk-status" id="hkStatus">INICJALIZACJA...</div>
+    <div class="hk-terminal" id="hkTerm"></div>
+    <div class="hk-hex" id="hkHex"></div>
+  </div>
 </div>
 
 <div id="app">
   <div class="hdr">
-    <div class="hdr-ico">🔒</div>
-    <div>
-      <h1>PDF Lock</h1>
-      <div class="hdr-s">SZYFRUJ / ODSZYFRUJ PDF</div>
+    <div class="hdr-inner">
+      <div class="hdr-ico">🔒</div>
+      <div>
+        <h1>PDF_Lock</h1>
+        <div class="hdr-s">SZYFRUJ / ODSZYFRUJ PDF</div>
+      </div>
+      <button class="hdr-btn" id="hdrRefresh" title="Odśwież stronę">↻</button>
+      <div class="hdr-b">v4.0 · LOCAL</div>
     </div>
-    <div class="hdr-b">v3.3 · LOCAL</div>
   </div>
 
   <div class="eng">
@@ -202,19 +313,21 @@
     <div class="eb" id="eBar"><div class="ef" id="eFill"></div></div>
   </div>
 
-  <div class="aban" id="aBan">
-    <span id="aBIco"></span>
-    <span id="aBTxt"></span>
-  </div>
+  <div class="aban" id="aBan"><span id="aBIco"></span><span id="aBTxt"></span></div>
 
   <div class="main-grid">
     <div class="card">
       <div class="ct">01 — Pliki PDF</div>
+      <!-- input poza dz — programatyczny click bez opóźnienia -->
+      <input type="file" id="fi" accept=".pdf" multiple style="display:none">
       <div class="dz" id="dz">
-        <input type="file" id="fi" accept=".pdf" multiple>
         <span class="dz-i">📄</span>
         <div class="dz-m">Przeciągnij pliki PDF</div>
-        <div class="dz-s">lub kliknij · można wybrać wiele</div>
+        <div class="dz-s">lub kliknij · obsługa wielu plików</div>
+      </div>
+      <div class="empty-state show" id="emptyState">
+        <span>📭</span>
+        Brak plików. Dodaj pliki PDF powyżej.
       </div>
       <div class="flist" id="flist"></div>
       <div class="fcnt" id="fcnt">
@@ -229,9 +342,9 @@
       <div class="ct" id="stTitle">02 — Hasło</div>
 
       <div class="fg">
-        <label>Hasło użytkownika *</label>
+        <label class="fl">🔑 Hasło użytkownika *</label>
         <div class="iw">
-          <input type="password" id="uP" placeholder="Wpisz hasło…" autocomplete="new-password">
+          <input type="password" id="uP" placeholder="Wymagane" autocomplete="new-password">
           <button class="eye" id="eyU" type="button">👁</button>
         </div>
         <div class="str-b"><div class="str-f" id="sFill"></div></div>
@@ -239,7 +352,7 @@
       </div>
 
       <div class="fg" id="confirmRow">
-        <label>Potwierdź hasło *</label>
+        <label class="fl">Potwierdź hasło *</label>
         <div class="iw">
           <input type="password" id="cP" placeholder="Powtórz…" autocomplete="new-password">
           <button class="eye" id="eyC" type="button">👁</button>
@@ -247,49 +360,40 @@
         <div class="str-l" id="mLbl" style="margin-top:3px">—</div>
       </div>
 
-      <button class="abtn" id="aBtn" type="button">
-        <span class="aarr" id="aArr">▶</span> Zaawansowane
-      </button>
-
-      <div class="abox" id="aBox">
-        <div class="fg" id="algoRow">
-          <label>Algorytm szyfrowania</label>
-          <select id="algo">
-            <option value="AES-256-R5">AES-256 (zalecany)</option>
-            <option value="AES-128">AES-128</option>
-            <option value="RC4-128">RC4-128 (legacy)</option>
-          </select>
+      <label class="opt-row" id="ownerRow">
+        <input type="checkbox" id="ownerChk">
+        <span class="opt-ico">👤</span>
+        <div class="opt-txt">
+          <div class="opt-title">Hasło właściciela</div>
+          <div class="opt-desc">Opcjonalne — osobne hasło z pełnymi prawami</div>
         </div>
-
-        <label class="chk-row" id="ownerRow">
-          <input type="checkbox" id="ownerChk">
-          <span>Ustaw własne hasło właściciela</span>
-        </label>
-
-        <div class="owner-slide" id="ownerSlide">
-          <div class="fg" style="margin-bottom:0">
-            <label>Hasło właściciela</label>
-            <div class="iw">
-              <input type="password" id="oP" placeholder="Hasło właściciela…" autocomplete="new-password">
-              <button class="eye" id="eyO" type="button">👁</button>
-            </div>
+      </label>
+      <div class="opt-body" id="ownerBody">
+        <div class="fg" style="margin-bottom:0">
+          <div class="iw">
+            <input type="password" id="oP" placeholder="Hasło właściciela…" autocomplete="new-password">
+            <button class="eye" id="eyO" type="button">👁</button>
           </div>
         </div>
+      </div>
 
-        <label class="chk-row" id="adminRow">
-          <input type="checkbox" id="adminChk" checked>
-          <span>Użyj stałego hasła admina (owner)</span>
-        </label>
+      <div class="or-sep" id="orSep">— LUB —</div>
 
-        <div class="owner-mode admin" id="ownerMode">
-          🛡️ Owner = stałe hasło admina
+      <label class="opt-row" id="adminRow">
+        <input type="checkbox" id="adminChk" checked>
+        <span class="opt-ico">🛡️</span>
+        <div class="opt-txt">
+          <div class="opt-title">Hasło administratora</div>
+          <div class="opt-desc">Stałe hasło master — odblokuje każdy plik</div>
         </div>
+      </label>
 
-        <div class="owner-info">
-          <b>Hasło właściciela</b> daje pełne prawa do PDF (edycja, druk, kopiowanie).
-          Jeśli oba odznaczone — owner = hasło użytkownika.
-          „Hasło admina" ustawia stałe hasło administracyjne.
-        </div>
+      <div class="fg" id="algoRow">
+        <label class="fl">Algorytm szyfrowania</label>
+        <select id="algo">
+          <option value="AES-256-R5">AES-256 (zalecany)</option>
+          <option value="AES-128">AES-128</option>
+        </select>
       </div>
 
       <button class="btn bte" id="btnA" disabled>🔒 Zaszyfruj</button>
@@ -299,13 +403,15 @@
         <div class="bp-lbl" id="bpL">0 / 0</div>
       </div>
 
-      <div class="hint" id="hBox">ℹ️ Dodaj pliki PDF. Hasło zostanie użyte do wszystkich.</div>
+      <div class="hint" id="hBox">ℹ️ Dodaj pliki PDF, aby rozpocząć.</div>
     </div>
   </div>
 
   <div class="rc" id="rC">
     <div class="ri" id="rI">
-      <span class="ri-i" id="rIco">✅</span>
+      <span class="ri-i" id="rIco">
+        <svg id="rIcoSvg" width="26" height="26" viewBox="0 0 26 26" fill="none"></svg>
+      </span>
       <div class="ri-t">
         <h3 id="rTit">Gotowe!</h3>
         <p id="rMet">—</p>
@@ -315,9 +421,9 @@
   </div>
 
   <div class="card lc">
-    <div class="ct">Log</div>
+    <div class="ct">Log operacji</div>
     <div class="lb" id="logB">
-      <div class="ll"><span class="lt">--:--:--</span><span class="lin">Start…</span></div>
+      <div class="ll"><span class="lt">--:--:--</span><span class="lin">Inicjalizacja…</span></div>
     </div>
   </div>
 </div>
@@ -334,21 +440,28 @@ function _gop() { return String.fromCharCode.apply(null, _dp); }
 requestAnimationFrame(function(){ $('lFill').style.width = '100%'; });
 setTimeout(function(){ $('loader').classList.add('out'); $('app').classList.add('vis'); }, 1000);
 
+// ═══ GLOBAL DRAG & DROP ═══
+var dragCounter = 0;
+var dragOv = $('dragOverlay');
+document.addEventListener('dragenter', function(e){ e.preventDefault(); dragCounter++; dragOv.classList.add('show'); });
+document.addEventListener('dragleave', function(e){ e.preventDefault(); dragCounter--; if(dragCounter <= 0){ dragCounter = 0; dragOv.classList.remove('show'); } });
+document.addEventListener('dragover', function(e){ e.preventDefault(); });
+document.addEventListener('drop', function(e){ e.preventDefault(); dragCounter = 0; dragOv.classList.remove('show'); if(e.dataTransfer.files.length) handleNewFiles(e.dataTransfer.files); });
+
+// ═══ LOG ═══
 function log(msg, type) {
   type = type || 'in';
   var time = new Date().toTimeString().slice(0,8);
-  var el = $('logB');
-  var row = document.createElement('div');
+  var el = $('logB'), row = document.createElement('div');
   row.className = 'll';
   row.innerHTML = '<span class="lt">'+time+'</span><span class="l'+type+'">'+String(msg).replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</span>';
-  el.appendChild(row);
-  el.scrollTop = el.scrollHeight;
+  el.appendChild(row); el.scrollTop = el.scrollHeight;
 }
 
 function fB(bytes, dec) {
   dec = dec || 1;
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1048576) return (bytes/1024).toFixed(dec) + ' KB';
+  if(bytes < 1024) return bytes + ' B';
+  if(bytes < 1048576) return (bytes/1024).toFixed(dec) + ' KB';
   return (bytes/1048576).toFixed(dec) + ' MB';
 }
 
@@ -357,114 +470,71 @@ function fB(bytes, dec) {
   var p = pair.split(':');
   $(p[0]).onclick = function() {
     var inp = $(p[1]);
-    if (inp.type === 'password') { inp.type = 'text'; $(p[0]).textContent = '🙈'; }
+    if(inp.type === 'password'){ inp.type = 'text'; $(p[0]).textContent = '🙈'; }
     else { inp.type = 'password'; $(p[0]).textContent = '👁'; }
   };
 });
 
-// ═══ ADVANCED TOGGLE ═══
-$('aBtn').onclick = function() {
-  $('aBox').classList.toggle('show');
-  $('aArr').classList.toggle('open');
-};
-
-// ═══ OWNER / ADMIN CHECKBOX LOGIC ═══
+// ═══ OWNER / ADMIN CHECKBOX ═══
 $('ownerChk').onchange = function() {
-  if (this.checked) {
-    $('adminChk').checked = false;
-  } else {
-    $('adminChk').checked = true;
-    $('oP').value = '';
-  }
+  if(this.checked) $('adminChk').checked = false;
+  else { $('adminChk').checked = true; $('oP').value = ''; }
   syncOwner();
 };
-
 $('adminChk').onchange = function() {
-  if (this.checked) {
-    $('ownerChk').checked = false;
-    $('oP').value = '';
-  }
+  if(this.checked){ $('ownerChk').checked = false; $('oP').value = ''; }
   syncOwner();
 };
-
-$('oP').oninput = function() { updBtn(); };
+$('oP').oninput = function(){ updBtn(); };
 
 function syncOwner() {
-  var oc = $('ownerChk').checked;
-  var ac = $('adminChk').checked;
-  $('ownerSlide').classList.toggle('show', oc);
-
-  var mode = $('ownerMode');
-  if (oc) {
-    mode.className = 'owner-mode custom';
-    mode.textContent = '🔑 Owner = własne hasło (wpisz powyżej)';
-  } else if (ac) {
-    mode.className = 'owner-mode admin';
-    mode.textContent = '🛡️ Owner = stałe hasło admina';
-  } else {
-    mode.className = 'owner-mode auto';
-    mode.textContent = '🔑 Owner = hasło użytkownika (domyślnie)';
-  }
+  $('ownerBody').classList.toggle('show', $('ownerChk').checked);
   updBtn();
 }
 
-// ═══ STRENGTH ═══
+// ═══ PASSWORD STRENGTH ═══
 function calcStrength(pass) {
   var s = 0;
-  if (pass.length >= 8) s++;
-  if (pass.length >= 12) s++;
-  if (/[A-Z]/.test(pass)) s++;
-  if (/[0-9]/.test(pass)) s++;
-  if (/[^a-zA-Z0-9]/.test(pass)) s++;
+  if(pass.length >= 8) s++; if(pass.length >= 12) s++;
+  if(/[A-Z]/.test(pass)) s++; if(/[0-9]/.test(pass)) s++;
+  if(/[^a-zA-Z0-9]/.test(pass)) s++;
   return s;
 }
-
 var SC = ['#ef4444','#f97316','#f59e0b','#84cc16','#22c55e'];
 var SN = ['Bardzo słabe','Słabe','Średnie','Silne','Bardzo silne'];
 
 $('uP').oninput = function() {
   var pass = this.value, s = calcStrength(pass);
   var fill = $('sFill'), lbl = $('sLbl');
-  if (!pass) {
-    fill.style.width = '0%'; fill.style.background = 'transparent';
-    lbl.textContent = 'Siła: —'; lbl.style.color = '#64748b';
-  } else {
-    var idx = Math.max(0, s-1);
-    fill.style.width = (s/5*100)+'%';
-    fill.style.background = SC[idx];
-    lbl.textContent = 'Siła: ' + SN[idx];
-    lbl.style.color = SC[idx];
-  }
+  if(!pass){ fill.style.width='0%'; fill.style.background='transparent'; lbl.textContent='Siła: —'; lbl.style.color=''; }
+  else { var idx = Math.max(0, s-1); fill.style.width=(s/5*100)+'%'; fill.style.background=SC[idx]; lbl.textContent='Siła: '+SN[idx]; lbl.style.color=SC[idx]; }
   checkMatch(); updBtn();
 };
-
-$('cP').oninput = function() { checkMatch(); updBtn(); };
+$('cP').oninput = function(){ checkMatch(); updBtn(); };
 
 function checkMatch() {
-  var a = $('uP').value, b = $('cP').value, lbl = $('mLbl');
-  if (!b) { lbl.textContent = '—'; lbl.style.color = '#64748b'; }
-  else if (a === b) { lbl.textContent = '✓ Zgodne'; lbl.style.color = '#34d399'; }
-  else { lbl.textContent = '✗ Niezgodne'; lbl.style.color = '#f87171'; }
+  var a = $('uP').value, b = $('cP').value, lbl = $('mLbl'), inp = $('cP');
+  if(!b){ lbl.textContent='—'; lbl.style.color=''; inp.classList.remove('mismatch'); }
+  else if(a === b){ lbl.textContent='✓ Zgodne'; lbl.style.color='#34d399'; inp.classList.remove('mismatch'); }
+  else { lbl.textContent='✗ Niezgodne'; lbl.style.color='#f87171'; inp.classList.add('mismatch'); }
 }
 
-// ═══ MODE + ACTIVE/SKIPPED ═══
+// ═══ MODE ═══
 function getMode() {
   var hasEnc = files.some(function(f){return f.enc;});
   var hasOpen = files.some(function(f){return !f.enc;});
-  if (hasEnc && hasOpen) return 'mix';
-  if (hasEnc) return 'dec';
+  if(hasEnc && hasOpen) return 'mix';
+  if(hasEnc) return 'dec';
   return 'enc';
 }
-
 function getActiveFiles() {
   var mode = getMode();
-  if (mode === 'dec' || mode === 'mix') return files.filter(function(f){return f.enc;});
+  if(mode === 'dec' || mode === 'mix') return files.filter(function(f){return f.enc;});
   return files.filter(function(f){return !f.enc;});
 }
-
 function getSkippedFiles() {
   var mode = getMode();
-  if (mode === 'mix') return files.filter(function(f){return !f.enc;});
+  if(mode === 'mix') return files.filter(function(f){return !f.enc;});
   return [];
 }
 
@@ -472,43 +542,36 @@ function updUI() {
   var mode = getMode(), n = files.length;
   var encCnt = files.filter(function(f){return f.enc;}).length;
   var opnCnt = n - encCnt;
-  var active = getActiveFiles();
-  var skipped = getSkippedFiles();
+  var active = getActiveFiles(), skipped = getSkippedFiles();
 
-  if (n) {
-    $('fcnt').classList.add('show');
-    $('fcntN').textContent = n;
-    $('fcntE').textContent = encCnt + ' zaszyfr.';
-    $('fcntO').textContent = opnCnt + ' otwartych';
-  } else $('fcnt').classList.remove('show');
+  $('emptyState').classList.toggle('show', n === 0);
+
+  if(n){ $('fcnt').classList.add('show'); $('fcntN').textContent=n; $('fcntE').textContent=encCnt+' zaszyfr.'; $('fcntO').textContent=opnCnt+' otwartych'; }
+  else $('fcnt').classList.remove('show');
 
   var btn = $('btnA');
   var isDec = (mode === 'dec' || mode === 'mix');
-  var isEnc = (mode === 'enc');
 
-  if (isEnc) {
-    btn.className = 'btn bte';
-    btn.innerHTML = '🔒 Zaszyfruj' + (active.length>1?' ('+active.length+')':'');
-    $('stTitle').textContent = '02 — Hasło szyfrowania';
-    $('hBox').textContent = 'ℹ️ Jedno hasło do zaszyfrowania wszystkich plików.';
-  } else if (mode === 'dec') {
-    btn.className = 'btn btd';
-    btn.innerHTML = '🔓 Odszyfruj' + (active.length>1?' ('+active.length+')':'');
-    $('stTitle').textContent = '02 — Hasło odszyfrowania';
-    $('hBox').textContent = 'ℹ️ Jedno hasło do odszyfrowania wszystkich plików.';
+  if(mode === 'enc') {
+    btn.className='btn bte'; btn.innerHTML='🔒 Zaszyfruj'+(active.length>1?' ('+active.length+')':'');
+    $('stTitle').textContent='02 — Hasło szyfrowania';
+    $('hBox').textContent='ℹ️ Jedno hasło zaszyfruje wszystkie dodane pliki.';
+  } else if(mode === 'dec') {
+    btn.className='btn btd'; btn.innerHTML='🔓 Odszyfruj'+(active.length>1?' ('+active.length+')':'');
+    $('stTitle').textContent='02 — Hasło odszyfrowania';
+    $('hBox').textContent='ℹ️ Wpisz hasło aby odblokować pliki.';
   } else {
-    btn.className = 'btn btd';
-    btn.innerHTML = '🔓 Odszyfruj (' + active.length + ')';
-    $('stTitle').textContent = '02 — Hasło odszyfrowania';
-    $('hBox').textContent = '⚠️ Priorytet: odszyfrowanie ' + active.length + ' plików. ' + skipped.length + ' otwartych pominięto.';
+    btn.className='btn btd'; btn.innerHTML='🔓 Odszyfruj ('+active.length+')';
+    $('stTitle').textContent='02 — Hasło odszyfrowania';
+    $('hBox').textContent='⚠️ Tryb mieszany: odszyfrowanie '+active.length+' plików. '+skipped.length+' otwartych pominięto.';
   }
 
   $('confirmRow').style.display = isDec ? 'none' : '';
-  $('ownerRow').style.display = isDec ? 'none' : '';
-  $('adminRow').style.display = isDec ? 'none' : '';
-  $('algoRow').style.display = isDec ? 'none' : '';
-  $('ownerMode').style.display = isDec ? 'none' : '';
-  if (isDec) $('ownerSlide').classList.remove('show');
+  $('ownerRow').style.display   = isDec ? 'none' : '';
+  $('adminRow').style.display   = isDec ? 'none' : '';
+  $('algoRow').style.display    = isDec ? 'none' : '';
+  $('orSep').style.display      = isDec ? 'none' : '';
+  if(isDec) $('ownerBody').classList.remove('show');
 
   updBtn();
 }
@@ -518,269 +581,298 @@ function updBtn() {
   var active = getActiveFiles();
   var isDec = (mode === 'dec' || mode === 'mix');
   var ok = ready && active.length && pw && !busy;
-  if (!isDec) ok = ok && (pw === cp);
-  if ($('ownerChk').checked && !isDec) ok = ok && $('oP').value.length > 0;
+  if(!isDec) ok = ok && (pw === cp);
+  if($('ownerChk').checked && !isDec) ok = ok && $('oP').value.length > 0;
   $('btnA').disabled = !ok;
 }
 
 // ═══ DETECT ENCRYPTION ═══
 function detectEnc(bytes) {
-  var start = Math.max(0, bytes.length - 16384);
-  var text = new TextDecoder('latin1').decode(bytes.slice(start));
+  var text = new TextDecoder('latin1').decode(bytes.slice(Math.max(0, bytes.length - 16384)));
   return text.includes('/Encrypt');
 }
-
 async function detectEncPy(bytes) {
-  if (!ready) return null;
+  if(!ready) return null;
   try {
     pyodide.FS.writeFile('/tmp/_d.pdf', bytes);
-    var result = await pyodide.runPythonAsync(
-      'from pypdf import PdfReader; "1" if PdfReader("/tmp/_d.pdf").is_encrypted else "0"'
-    );
+    var r = await pyodide.runPythonAsync('from pypdf import PdfReader;"1" if PdfReader("/tmp/_d.pdf").is_encrypted else "0"');
     try { pyodide.FS.unlink('/tmp/_d.pdf'); } catch(_){}
-    return result === "1";
-  } catch(_) { return null; }
+    return r === "1";
+  } catch(_){ return null; }
 }
 
 // ═══ FILE HANDLING ═══
 var dz = $('dz'), fi = $('fi');
-dz.ondragover = function(e){ e.preventDefault(); dz.classList.add('ov'); };
+dz.onclick     = function(){ fi.click(); };  /* click natychmiastowy bez opóźnienia nakładki */
+dz.ondragover  = function(e){ e.preventDefault(); dz.classList.add('ov'); };
 dz.ondragleave = function(e){ e.preventDefault(); dz.classList.remove('ov'); };
-dz.ondrop = function(e){ e.preventDefault(); dz.classList.remove('ov'); handleNewFiles(e.dataTransfer.files); };
-fi.onchange = function(){ handleNewFiles(fi.files); };
+dz.ondrop      = function(e){ e.preventDefault(); dz.classList.remove('ov'); handleNewFiles(e.dataTransfer.files); };
+fi.onchange    = function(){ handleNewFiles(fi.files); };
 $('clearAll').onclick = clearAll;
 
 async function handleNewFiles(fileList) {
-  var arr = Array.from(fileList);
-  fi.value = '';
+  var arr = Array.from(fileList); fi.value = '';
   var reads = arr.map(async function(f) {
-    if (!f.name.toLowerCase().endsWith('.pdf')) { log(f.name+' — nie PDF','er'); return null; }
-    if (!f.size) { log(f.name+' — pusty','er'); return null; }
-    if (files.some(function(x){return x.file.name===f.name && x.file.size===f.size;})) {
-      log(f.name+' — już dodany','wa'); return null;
-    }
-    return { f: f, bytes: new Uint8Array(await f.arrayBuffer()) };
+    if(!f.name.toLowerCase().endsWith('.pdf')){ log(f.name+' — pominięto (nie PDF)','er'); return null; }
+    if(!f.size){ log(f.name+' — pusty plik','er'); return null; }
+    if(files.some(function(x){return x.file.name===f.name && x.file.size===f.size;})){ log(f.name+' — już na liście','wa'); return null; }
+    return {f:f, bytes:new Uint8Array(await f.arrayBuffer())};
   });
   var results = await Promise.all(reads);
-  for (var i = 0; i < results.length; i++) {
-    var r = results[i]; if (!r) continue;
+  for(var i=0; i<results.length; i++) {
+    var r = results[i]; if(!r) continue;
     var enc = detectEnc(r.bytes);
     files.push({id:++uid, file:r.f, bytes:r.bytes, enc:enc, status:'wait', result:null});
     log((enc?'🔐':'📄')+' '+r.f.name+' ('+fB(r.f.size)+')','ok');
   }
   renderFiles(); showBanner(); updUI();
-  if (ready) {
+  if(ready) {
     var changed = false;
-    for (var j = 0; j < files.length; j++) {
-      if (files[j].status !== 'wait' && files[j].status !== 'skip') continue;
+    for(var j=0; j<files.length; j++) {
+      if(files[j].status !== 'wait' && files[j].status !== 'skip') continue;
       var precise = await detectEncPy(files[j].bytes);
-      if (precise !== null && precise !== files[j].enc) { files[j].enc = precise; changed = true; }
+      if(precise !== null && precise !== files[j].enc){ files[j].enc = precise; changed = true; }
     }
-    if (changed) { renderFiles(); updUI(); }
+    if(changed){ renderFiles(); updUI(); }
   }
 }
 
 function showBanner() {
-  var b = $('aBan');
-  b.classList.remove('show','be','bd','bmix');
-  if (!files.length) return;
-  var mode = getMode();
-  var active = getActiveFiles();
-  var skipped = getSkippedFiles();
-  if (mode==='enc') {
-    b.classList.add('show','be');
-    $('aBIco').textContent='📄';
-    $('aBTxt').textContent=active.length+' plik(ów) do zaszyfrowania';
-  } else if (mode==='dec') {
-    b.classList.add('show','bd');
-    $('aBIco').textContent='🔐';
-    $('aBTxt').textContent=active.length+' plik(ów) do odszyfrowania';
-  } else {
-    b.classList.add('show','bmix');
-    $('aBIco').textContent='🔐';
-    $('aBTxt').textContent='Odszyfrowanie '+active.length+' plików · '+skipped.length+' otwartych pominięto';
-  }
+  var b = $('aBan'); b.classList.remove('show','be','bd','bmix');
+  if(!files.length) return;
+  var mode = getMode(), active = getActiveFiles(), skipped = getSkippedFiles();
+  if(mode==='enc'){ b.classList.add('show','be'); $('aBIco').textContent='📄'; $('aBTxt').textContent=active.length+' plik(ów) do zaszyfrowania'; }
+  else if(mode==='dec'){ b.classList.add('show','bd'); $('aBIco').textContent='🔐'; $('aBTxt').textContent=active.length+' plik(ów) do odszyfrowania'; }
+  else { b.classList.add('show','bmix'); $('aBIco').textContent='🔐'; $('aBTxt').textContent='Odszyfrowanie '+active.length+' plików · '+skipped.length+' pominięto'; }
   setTimeout(function(){ b.classList.remove('show'); }, 4000);
 }
 
 function renderFiles() {
   var list = $('flist'); list.innerHTML = '';
-  var skipIds = {};
-  getSkippedFiles().forEach(function(f){ skipIds[f.id] = true; });
-
+  var skipIds = {}; getSkippedFiles().forEach(function(f){ skipIds[f.id] = true; });
   files.forEach(function(f) {
     var el = document.createElement('div');
     var isSkip = !!skipIds[f.id];
     el.className = 'fitem' + (isSkip ? ' skipped' : '');
     el.id = 'fi_'+f.id;
-
-    var badge, statusText, statusClass;
-    if (isSkip) {
-      badge = '<span class="fitem-badge skipb">⏭️ POMINIĘTY</span>';
-      statusText = 'Pominięty';
-      statusClass = 'skip';
-      f.status = 'skip';
+    var badge, stTxt, stCls;
+    if(isSkip){
+      badge = '<span class="fitem-badge skipb">⏭ POMINIĘTY</span>';
+      stTxt = 'Pominięty'; stCls = 'skip'; f.status = 'skip';
     } else {
-      badge = f.enc
-        ? '<span class="fitem-badge enc">🔐 ZASZYFR.</span>'
-        : '<span class="fitem-badge opn">🔓 OTWARTY</span>';
+      badge = f.enc ? '<span class="fitem-badge enc">🔐 ZASZYFR.</span>' : '<span class="fitem-badge opn">🔓 OTWARTY</span>';
       var labels = {wait:'Oczekuje',proc:'Przetwarzanie…',done:'✓ Gotowe',fail:'✗ Błąd',skip:'Pominięty'};
-      statusText = labels[f.status] || 'Oczekuje';
-      statusClass = f.status;
+      stTxt = labels[f.status] || 'Oczekuje'; stCls = f.status;
     }
-
     el.innerHTML =
-      '<span class="fitem-ico">'+(isSkip?'⏭️':f.enc?'🔐':'📄')+'</span>'+
+      '<span class="fitem-ico">'+(isSkip?'⏭':f.enc?'🔐':'📄')+'</span>'+
       '<div class="fitem-info"><div class="fitem-name">'+f.file.name+'</div>'+
       '<div class="fitem-meta">'+fB(f.file.size)+' '+badge+'</div></div>'+
-      '<span class="fitem-status '+statusClass+'">'+statusText+'</span>'+
+      '<span class="fitem-status '+stCls+'">'+stTxt+'</span>'+
       '<button class="fitem-rm" data-id="'+f.id+'">✕</button>';
     list.appendChild(el);
   });
-
   list.querySelectorAll('.fitem-rm').forEach(function(btn) {
-    btn.onclick = function() {
-      files = files.filter(function(f){return f.id !== +btn.dataset.id;});
-      renderFiles(); updUI();
-    };
+    btn.onclick = function(){ files=files.filter(function(f){return f.id !== +btn.dataset.id;}); renderFiles(); updUI(); };
   });
 }
 
 function clearAll() {
-  files = [];
-  blobs.forEach(function(u){URL.revokeObjectURL(u);});
-  blobs = [];
-  renderFiles(); $('rC').classList.remove('show'); updUI();
-  log('Usunięto wszystkie.','in');
+  files=[]; blobs.forEach(function(u){URL.revokeObjectURL(u);}); blobs=[];
+  renderFiles(); $('rC').classList.remove('show'); $('aBan').classList.remove('show'); updUI(); log('Wyczyszczono listę.','in');
 }
 
 function setSt(id, status) {
   var f = files.find(function(x){return x.id===id;});
-  if (f) f.status = status;
+  if(f) f.status = status;
   var el = document.querySelector('#fi_'+id+' .fitem-status');
-  if (el) {
-    el.className = 'fitem-status ' + status;
-    el.textContent = {wait:'Oczekuje',proc:'Przetwarzanie…',done:'✓ Gotowe',fail:'✗ Błąd',skip:'Pominięty'}[status] || '';
-  }
+  if(el){ el.className='fitem-status '+status; el.textContent={wait:'Oczekuje',proc:'Przetwarzanie…',done:'✓ Gotowe',fail:'✗ Błąd',skip:'Pominięty'}[status]||''; }
 }
 
-// ═══ OWNER PASSWORD ═══
 function getOwnerPw() {
-  if ($('ownerChk').checked) return $('oP').value;
-  if ($('adminChk').checked) return _gop();
+  if($('ownerChk').checked) return $('oP').value;
+  if($('adminChk').checked) return _gop();
   return $('uP').value;
 }
+
+// ═══ HACKER OVERLAY ═══
+var hkChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%^&*(){}[]|;:<>,.?/~`';
+var hexIv = null;
+function rHex(n) { var s=''; for(var i=0;i<n;i++) s+='0123456789ABCDEF'[Math.floor(Math.random()*16)]; return s; }
+
+function hkShow(mode, total) {
+  var ov = $('hackerOverlay');
+  ov.classList.add('active');
+  ov.classList.toggle('dm', mode === 'dec');
+  $('hkLock').textContent    = mode === 'dec' ? '🔓' : '🔒';
+  $('hkTitle').textContent   = mode === 'dec' ? 'ODSZYFROWANIE' : 'SZYFROWANIE';
+  $('hkFile').textContent    = 'Inicjalizacja…';
+  $('hkDone').textContent    = '0';
+  $('hkTotal').textContent   = total;
+  $('hkPct').textContent     = '0%';
+  $('hkBar').style.width     = '0%';
+  $('hkStatus').textContent  = 'INICJALIZACJA...';
+  $('hkStatus').style.animation = '';
+  $('hkTerm').innerHTML      = '';
+  $('hkHex').textContent     = '';
+  var rain = $('hkRain'); rain.innerHTML = '';
+  for(var i=0; i<20; i++) {
+    var col = document.createElement('div'); col.className = 'hk-col';
+    col.style.left            = (i*5 + Math.random()*3)+'%';
+    col.style.animationDuration = (4 + Math.random()*8)+'s';
+    col.style.animationDelay  = (-Math.random()*5)+'s';
+    col.style.fontSize        = (8 + Math.random()*6)+'px';
+    var t=''; for(var j=0;j<40;j++) t+=hkChars[Math.floor(Math.random()*hkChars.length)]+'\n';
+    col.textContent = t; rain.appendChild(col);
+  }
+  hexIv = setInterval(function(){ $('hkHex').textContent = rHex(60); }, 80);
+}
+
+function hkUpd(fn, done, total, st) {
+  $('hkFile').textContent  = fn;
+  $('hkDone').textContent  = done;
+  var p = Math.round(done/total*100);
+  $('hkPct').textContent   = p+'%';
+  $('hkBar').style.width   = p+'%';
+  $('hkStatus').textContent = st;
+}
+
+function hkLog(text, type) {
+  type = type || 'cmd';
+  var term = $('hkTerm'), line = document.createElement('div');
+  line.className = 'hk-line';
+  var ts = new Date().toTimeString().slice(0,8);
+  if(type === 'ok')   line.innerHTML = '<span class="hk-prompt">['+ts+']</span> <span class="hk-ok">✓ '+text+'</span>';
+  else if(type === 'val')  line.innerHTML = '<span class="hk-prompt">['+ts+']</span> <span class="hk-val">'+text+'</span>';
+  else if(type === 'warn') line.innerHTML = '<span class="hk-prompt">['+ts+']</span> <span class="hk-warn">⚠ '+text+'</span>';
+  else                line.innerHTML = '<span class="hk-prompt">['+ts+']</span> <span class="hk-cmd">'+text+'</span>';
+  term.appendChild(line); term.scrollTop = term.scrollHeight;
+}
+
+function hkHide() { clearInterval(hexIv); $('hackerOverlay').classList.remove('active','dm'); $('hkRain').innerHTML=''; }
+function hkDelay(ms) { return new Promise(function(r){ setTimeout(r, ms); }); }
 
 // ═══ PROCESS ═══
 $('btnA').onclick = processAll;
 
 async function processAll() {
-  if (!files.length || !ready || busy) return;
-
+  if(!files.length || !ready || busy) return;
   busy = true;
-  var pw = $('uP').value;
-  var op = getOwnerPw();
-  var al = $('algo').value;
-  var btn = $('btnA');
-  var active = getActiveFiles();
-  var skipped = getSkippedFiles();
+  var pw = $('uP').value, op = getOwnerPw(), al = $('algo').value, btn = $('btnA');
+  var active = getActiveFiles(), skipped = getSkippedFiles();
+  var m = (getMode() === 'enc') ? 'enc' : 'dec';
 
-  btn.disabled = true;
-  btn.innerHTML = '⏳ Przetwarzanie…';
+  btn.disabled = true; btn.innerHTML = '⏳ Przetwarzanie…';
   $('rC').classList.remove('show');
   blobs.forEach(function(u){URL.revokeObjectURL(u);}); blobs = [];
-
-  active.forEach(function(f){f.status='wait';f.result=null;});
-  skipped.forEach(function(f){f.status='skip';f.result=null;});
+  active.forEach(function(f){f.status='wait'; f.result=null;});
+  skipped.forEach(function(f){f.status='skip'; f.result=null;});
   renderFiles();
 
-  if (skipped.length) {
-    log('⏭️ Pominięto '+skipped.length+' otwartych plików (priorytet: odszyfrowanie)','wa');
-  }
+  if(skipped.length) log('⏭ Pominięto '+skipped.length+' otwartych plików (priorytet: odszyfrowanie)','wa');
 
   $('bProg').classList.add('show');
   var done = 0, okCnt = 0, total = active.length;
 
-  for (var i = 0; i < active.length; i++) {
+  hkShow(m, total);
+  await hkDelay(300);
+  hkLog('Inicjalizacja silnika kryptograficznego…'); await hkDelay(200);
+  hkLog('Algorytm: '+al, 'val'); await hkDelay(150);
+  hkLog('Tryb: '+(m==='enc'?'ENCRYPT AES':'DECRYPT'), 'val'); await hkDelay(200);
+  hkLog('Plików do przetworzenia: '+total, 'val'); await hkDelay(300);
+
+  for(var i=0; i<active.length; i++) {
     var cur = active[i];
     setSt(cur.id, 'proc');
     $('bpF').style.width = ((done/total)*100)+'%';
     $('bpL').textContent = (done+1)+' / '+total;
 
+    hkUpd(cur.file.name, done, total, m==='enc' ? 'SZYFROWANIE...' : 'ŁAMANIE SZYFRU...');
+    hkLog('Wczytywanie: '+cur.file.name); await hkDelay(150);
+    hkLog('Rozmiar: '+fB(cur.file.size)+' | Bloki: '+Math.ceil(cur.file.size/16), 'val'); await hkDelay(100);
+    hkLog(m==='enc' ? 'Generowanie klucza...' : 'Próba odszyfrowania...');
+    hkLog('Salt: 0x'+rHex(16), 'val'); await hkDelay(100);
+    hkLog('IV: 0x'+rHex(32), 'val');
+
     try {
       pyodide.FS.writeFile('/tmp/_p.pdf', cur.bytes);
       pyodide.globals.set('_pw', pw);
-      pyodide.globals.set('_u', pw);
-      pyodide.globals.set('_o', op);
-      pyodide.globals.set('_a', al);
+      pyodide.globals.set('_u',  pw);
+      pyodide.globals.set('_o',  op);
+      pyodide.globals.set('_a',  al);
       pyodide.globals.set('_is_enc', cur.enc ? 1 : 0);
 
       await pyodide.runPythonAsync(
-        'from pypdf import PdfReader, PdfWriter\n' +
-        '\n' +
-        'reader = PdfReader("/tmp/_p.pdf")\n' +
-        'writer = PdfWriter()\n' +
-        '\n' +
-        'if int(_is_enc) == 1:\n' +
-        '    if not reader.is_encrypted:\n' +
-        '        raise RuntimeError("NOT_ENCRYPTED")\n' +
-        '    dec = reader.decrypt(str(_pw))\n' +
-        '    bad = False\n' +
-        '    if hasattr(dec, "name"):\n' +
-        '        bad = (dec.name == "NOT_DECRYPTED")\n' +
-        '    elif hasattr(dec, "value"):\n' +
-        '        bad = (dec.value == 0)\n' +
-        '    elif isinstance(dec, int):\n' +
-        '        bad = (dec == 0)\n' +
-        '    if bad:\n' +
-        '        raise RuntimeError("BAD_PASSWORD")\n' +
-        '    for page in reader.pages:\n' +
-        '        writer.add_page(page)\n' +
-        '    try:\n' +
-        '        if reader.metadata:\n' +
-        '            writer.add_metadata(reader.metadata)\n' +
-        '    except Exception:\n' +
-        '        pass\n' +
-        'else:\n' +
-        '    if reader.is_encrypted:\n' +
-        '        raise RuntimeError("ALREADY_ENCRYPTED")\n' +
-        '    for page in reader.pages:\n' +
-        '        writer.add_page(page)\n' +
-        '    try:\n' +
-        '        if reader.metadata:\n' +
-        '            writer.add_metadata(reader.metadata)\n' +
-        '    except Exception:\n' +
-        '        pass\n' +
-        '    writer.encrypt(\n' +
-        '        user_password=str(_u),\n' +
-        '        owner_password=str(_o),\n' +
-        '        algorithm=str(_a)\n' +
-        '    )\n' +
-        '\n' +
-        'with open("/tmp/_o.pdf", "wb") as wf:\n' +
+        'from pypdf import PdfReader, PdfWriter\n'+
+        '\n'+
+        'reader = PdfReader("/tmp/_p.pdf")\n'+
+        'writer = PdfWriter()\n'+
+        '\n'+
+        'if int(_is_enc) == 1:\n'+
+        '    if not reader.is_encrypted:\n'+
+        '        raise RuntimeError("NOT_ENCRYPTED")\n'+
+        '    dec = reader.decrypt(str(_pw))\n'+
+        '    bad = False\n'+
+        '    if hasattr(dec, "name"):\n'+
+        '        bad = (dec.name == "NOT_DECRYPTED")\n'+
+        '    elif hasattr(dec, "value"):\n'+
+        '        bad = (dec.value == 0)\n'+
+        '    elif isinstance(dec, int):\n'+
+        '        bad = (dec == 0)\n'+
+        '    if bad:\n'+
+        '        raise RuntimeError("BAD_PASSWORD")\n'+
+        '    for page in reader.pages:\n'+
+        '        writer.add_page(page)\n'+
+        '    try:\n'+
+        '        if reader.metadata:\n'+
+        '            writer.add_metadata(reader.metadata)\n'+
+        '    except Exception:\n'+
+        '        pass\n'+
+        'else:\n'+
+        '    if reader.is_encrypted:\n'+
+        '        raise RuntimeError("ALREADY_ENCRYPTED")\n'+
+        '    for page in reader.pages:\n'+
+        '        writer.add_page(page)\n'+
+        '    try:\n'+
+        '        if reader.metadata:\n'+
+        '            writer.add_metadata(reader.metadata)\n'+
+        '    except Exception:\n'+
+        '        pass\n'+
+        '    writer.encrypt(\n'+
+        '        user_password=str(_u),\n'+
+        '        owner_password=str(_o),\n'+
+        '        algorithm=str(_a)\n'+
+        '    )\n'+
+        '\n'+
+        'with open("/tmp/_o.pdf", "wb") as wf:\n'+
         '    writer.write(wf)\n'
       );
 
       var out = pyodide.FS.readFile('/tmp/_o.pdf');
-      var suffix = cur.enc ? '_unlocked' : '_locked';
-      var name = cur.file.name.replace(/\.pdf$/i, suffix+'.pdf');
+/* ── Nazwa pliku: usuń WSZYSTKIE istniejące sufiksy, dodaj właściwy ── */
+var suffix = cur.enc? '_unlocked' : '_locked';
+var baseName = cur.file.name
+   .replace(/\.pdf$/i, '')
+   .replace(/([_\-\s]+(unlocked|locked)|\s*\(\d+\)\s*)+$/gi, '') // usuwa _locked, _unlocked, (1), (2) itd. w dowolnej kolejności na końcu
+   .replace(/[_\-\s]+$/,'') // posprzątaj wiszący myślnik/spację
+   .trim();
+var name = baseName + suffix + '.pdf';
       var blob = new Blob([out], {type:'application/pdf'});
-      var url = URL.createObjectURL(blob);
-      blobs.push(url);
-      cur.result = {name:name, url:url, size:out.length};
-      setSt(cur.id, 'done');
-      okCnt++;
-      log('✅ '+name+' ('+fB(out.length)+')','ok');
+      var url  = URL.createObjectURL(blob);
+      blobs.push(url); cur.result = {name:name, url:url, size:out.length};
+      setSt(cur.id, 'done'); okCnt++;
+      hkLog('Zapisano: '+name+' ('+fB(out.length)+')', 'ok');
+      log('[OK] '+name+' ('+fB(out.length)+')','ok');
 
     } catch(e) {
       setSt(cur.id, 'fail');
-      var msg = String(e.message || e);
-      var disp = msg;
-      if (msg.indexOf('BAD_PASSWORD') !== -1) disp = 'Złe hasło!';
-      else if (msg.indexOf('NOT_ENCRYPTED') !== -1) disp = 'Plik nie jest zaszyfrowany!';
-      else if (msg.indexOf('ALREADY_ENCRYPTED') !== -1) disp = 'Plik jest już zaszyfrowany!';
-      else if (msg.indexOf('password') !== -1 || msg.indexOf('decrypt') !== -1) disp = 'Złe hasło lub błąd odczytu';
-      log('❌ '+cur.file.name+': '+disp,'er');
+      var msg  = String(e.message || e), disp = msg;
+      if(msg.indexOf('BAD_PASSWORD')      !== -1) disp = 'Złe hasło!';
+      else if(msg.indexOf('NOT_ENCRYPTED')  !== -1) disp = 'Plik nie jest zaszyfrowany!';
+      else if(msg.indexOf('ALREADY_ENCRYPTED') !== -1) disp = 'Plik już zaszyfrowany!';
+      else if(msg.indexOf('password') !== -1 || msg.indexOf('decrypt') !== -1) disp = 'Złe hasło lub błąd odczytu';
+      hkLog('BŁĄD: '+disp, 'warn');
+      log('[ERR] '+cur.file.name+': '+disp,'er');
       console.error('PDF Lock error:', cur.file.name, e);
     }
 
@@ -789,109 +881,167 @@ async function processAll() {
     done++;
     $('bpF').style.width = ((done/total)*100)+'%';
     $('bpL').textContent = done+' / '+total;
+    hkUpd(cur.file.name, done, total, done===total ? 'ZAKOŃCZONO' : 'PRZETWARZANIE...');
+    await hkDelay(200);
   }
 
-  if (okCnt) {
-    var rMode = getActiveFiles().length && getActiveFiles()[0].enc ? 'dec' : 'enc';
-    $('rI').className = 'ri '+(rMode==='enc'?'rie':'rid');
-    $('dlAll').className = 'bdl '+(rMode==='enc'?'dle':'dld');
-    $('rIco').textContent = okCnt===total ? '✅' : '⚠️';
-    $('rTit').textContent = okCnt+'/'+total+' przetworzono' + (skipped.length ? ' ('+skipped.length+' pominięto)' : '');
+  hkLog('═══════════════════════════════');
+  hkLog('Operacja: '+okCnt+'/'+total+' sukces', 'ok');
+  hkUpd('ZAKOŃCZONO', done, total, 'GOTOWE ✓');
+  $('hkStatus').textContent  = 'ZAKOŃCZONO ✓';
+  $('hkStatus').style.animation = 'none';
+  await hkDelay(1500);
+  hkHide();
+
+  if(okCnt) {
+    var rMode = active.length && active[0].enc ? 'dec' : 'enc';
+    $('rI').className    = 'ri '+(rMode==='enc'?'rie':'rid');
+    $('dlAll').className = 'bdl '+(rMode==='enc'?'dle pulse-e':'dld pulse-d');
+    /* SVG ikona zgodna z designem */
+    var svgOk = '<circle cx="13" cy="13" r="11" stroke="var(--green)" stroke-width="1.5" fill="rgba(52,211,153,.08)"/><path d="M8.5 13l3.5 3.5 5.5-6" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+    var svgWarn = '<path d="M13 3.5L23 22H3L13 3.5Z" stroke="var(--accent)" stroke-width="1.5" fill="rgba(245,158,11,.08)" stroke-linejoin="round"/><line x1="13" y1="10" x2="13" y2="16" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/><circle cx="13" cy="19" r="1" fill="var(--accent)"/>';
+    $('rIcoSvg').innerHTML = okCnt===total ? svgOk : svgWarn;
+    $('rTit').textContent = okCnt+'/'+total+' przetworzono'+(skipped.length?' ('+skipped.length+' pominięto)':'');
     $('rMet').textContent = files.filter(function(x){return x.result;}).map(function(x){return x.result.name;}).join(', ');
     $('rC').classList.add('show');
   }
 
   setTimeout(function(){ $('bProg').classList.remove('show'); }, 1200);
   busy = false;
-  var m2 = getMode();
-  var ac2 = getActiveFiles();
-  btn.innerHTML =
-    m2==='enc' ? '🔒 Zaszyfruj'+(ac2.length>1?' ('+ac2.length+')':'') :
-    '🔓 Odszyfruj'+(ac2.length>1?' ('+ac2.length+')':'');
+  var m2 = getMode(), ac2 = getActiveFiles();
+  btn.innerHTML = m2==='enc' ? '🔒 Zaszyfruj'+(ac2.length>1?' ('+ac2.length+')':'') : '🔓 Odszyfruj'+(ac2.length>1?' ('+ac2.length+')':'');
   updBtn();
 }
 
-// ═══ DOWNLOAD ═══
+// ═══ REFRESH ═══
+$('hdrRefresh').onclick = function() {
+  var btn = this;
+  btn.classList.add('spin');
+  setTimeout(function(){ location.reload(); }, 560);
+};
+
+
 $('dlAll').onclick = function() {
+  this.classList.remove('pulse-e','pulse-d'); /* zatrzymaj puls po kliknięciu */
   files.filter(function(f){return f.result;}).forEach(function(f,i) {
-    setTimeout(function() {
-      var a = document.createElement('a');
-      a.href = f.result.url; a.download = f.result.name;
+    setTimeout(function(){
+      var a = document.createElement('a'); a.href=f.result.url; a.download=f.result.name;
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }, i*400);
   });
 };
 
-// ═══ INIT PYODIDE ═══
-function eP(pct, text) {
-  $('eFill').style.width = pct+'%';
-  $('eLbl').textContent = text;
-}
+// ═══ PYODIDE INIT ═══
+function eP(pct, text) { $('eFill').style.width = pct+'%'; $('eLbl').textContent = text; }
+
+var _pypdfVer = '?';  /* wersja wykryta z nazwy .whl — bez importu Pythona */
+
+/* ── IndexedDB cache dla kółek PyPI — tylko .whl, nie indeks ── */
+(function(){
+  var _db = null;
+  function openDB(){
+    if(_db) return Promise.resolve(_db);
+    return new Promise(function(res){
+      var r = indexedDB.open('pdflock-whl-v2',1);
+      r.onupgradeneeded = function(e){ e.target.result.createObjectStore('w'); };
+      r.onsuccess = function(e){ _db = e.target.result; res(_db); };
+      r.onerror   = function(){ res(null); };
+    });
+  }
+  function iGet(u){
+    return openDB().then(function(db){
+      if(!db) return null;
+      return new Promise(function(res){
+        var q = db.transaction('w','readonly').objectStore('w').get(u);
+        q.onsuccess = function(){ res(q.result||null); };
+        q.onerror   = function(){ res(null); };
+      });
+    });
+  }
+  function iSet(u,d){
+    openDB().then(function(db){
+      if(!db) return;
+      db.transaction('w','readwrite').objectStore('w').put(d,u);
+    });
+  }
+  var orig = globalThis.fetch.bind(globalThis);
+  globalThis.fetch = function(url, opts){
+    var u = typeof url==='string' ? url : (url&&(url.href||url.url))||String(url);
+    if(/\.whl(\?|$)/.test(u)){  /* tylko pliki wheel, nie zapytania indeksu PyPI */
+      /* przechwytuj wersję pypdf z nazwy pliku */
+      var vm = u.match(/pypdf[_-](\d+\.\d+[.\d]*)/i);
+      if(vm) _pypdfVer = vm[1];
+      return iGet(u).then(function(hit){
+        if(hit){
+          log('\u26A1 cache: '+u.split('/').pop().split('?')[0],'ok');
+          return new Response(hit,{status:200,headers:{'Content-Type':'application/octet-stream','Content-Length':String(hit.byteLength)}});
+        }
+        return orig(url,opts).then(function(r){
+          if(r.ok) r.clone().arrayBuffer().then(function(b){ iSet(u,b); });
+          return r;
+        });
+      });
+    }
+    return orig(url,opts);
+  };
+})();
 
 (async function() {
   var dot = $('eDot');
   try {
-    eP(5, 'Pobieranie Pyodide…');
-    log('Pobieranie Pyodide…','in');
-
-    if (typeof loadPyodide === 'undefined') {
-      await new Promise(function(resolve, reject) {
-        var script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js';
-        script.onload = resolve;
-        script.onerror = function(){ reject(new Error('Nie pobrano Pyodide')); };
-        document.head.appendChild(script);
+    eP(5, 'Pobieranie Pyodide…'); log('Pobieranie Pyodide…','in');
+    /* pyodide.js ładowany przez <script defer> w <head> — czekamy na gotowość */
+    if(typeof loadPyodide === 'undefined') {
+      await new Promise(function(resolve) {
+        var t = setInterval(function(){ if(typeof loadPyodide !== 'undefined'){ clearInterval(t); resolve(); } }, 50);
       });
     }
+    eP(15, 'Inicjalizacja + micropip…');
+    /* micropip ładowany razem z runtime — jeden round-trip mniej */
+    pyodide = await loadPyodide({
+      indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/',
+      packages: ['micropip']
+    });
+    log('Pyodide + micropip OK','ok');
 
-    eP(15, 'Inicjalizacja…');
-    pyodide = await loadPyodide({indexURL:'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/'});
-    log('Pyodide OK','ok');
-
-    eP(35, 'micropip…');
-    await pyodide.loadPackage('micropip');
     var mp = pyodide.pyimport('micropip');
+    eP(40, 'cryptography + pypdf… (równolegle)');
+    log('cryptography + pypdf…','in');
 
-    eP(50, 'cryptography…');
-    log('cryptography…','in');
-    await mp.install('cryptography');
-    log('cryptography ✓','ok');
+    /* ── Równoległe ładowanie ── */
+    await Promise.all([
+      pyodide.loadPackage('cryptography').then(function(){ log('cryptography \u2713','ok'); }),
+      mp.install('pypdf').then(function(){ log('pypdf \u2713','ok'); })
+    ]);
 
-    eP(75, 'pypdf…');
-    log('pypdf…','in');
-    await mp.install('pypdf');
-    log('pypdf ✓','ok');
-
-    eP(92, 'Weryfikacja…');
-    await pyodide.runPythonAsync('from pypdf import PdfReader, PdfWriter');
     try { pyodide.FS.mkdir('/tmp'); } catch(_){}
 
     var pyVer = pyodide.runPython('import sys; sys.version.split()[0]');
-    var pdfVer = '?';
-    try { pdfVer = pyodide.runPython('import pypdf; pypdf.__version__'); } catch(_){}
+    /* wersja pypdf z nazwy .whl — bez blokującego importu Pythona */
+    if(_pypdfVer === '?') {
+      try { _pypdfVer = pyodide.runPython('import importlib.metadata; importlib.metadata.version("pypdf")'); } catch(_){}
+    }
 
-    ready = true;
-    dot.className = 'ed ok';
-    eP(100, 'Gotowy · Python '+pyVer+' · pypdf '+pdfVer+' · AES ✓');
+    ready = true; dot.className = 'ed ok';
+    eP(100, 'Gotowy \u00B7 Python '+pyVer+' \u00B7 pypdf '+_pypdfVer+' \u00B7 AES \u2713');
     $('eBar').classList.add('h');
-    log('Silnik ✓ (pypdf '+pdfVer+')','ok');
-    updBtn();
+    log('Silnik \u2713 (pypdf '+_pypdfVer+')','ok'); updBtn();
 
-    if (files.length) {
+    /* Warm-up w tle */
+    pyodide.runPythonAsync('from pypdf import PdfReader, PdfWriter').catch(function(){});
+
+    if(files.length) {
       var changed = false;
-      for (var j = 0; j < files.length; j++) {
+      for(var j=0; j<files.length; j++) {
         var precise = await detectEncPy(files[j].bytes);
-        if (precise !== null && precise !== files[j].enc) { files[j].enc = precise; changed = true; }
+        if(precise !== null && precise !== files[j].enc){ files[j].enc = precise; changed = true; }
       }
-      if (changed) { renderFiles(); updUI(); }
+      if(changed){ renderFiles(); updUI(); }
     }
   } catch(e) {
-    var msg = e.message || String(e);
-    dot.className = 'ed er';
-    $('eLbl').textContent = 'Błąd: '+msg;
-    $('eBar').classList.add('h');
-    log('INIT: '+msg,'er');
-    console.error(e);
+    var msg = e.message || String(e); dot.className = 'ed er';
+    $('eLbl').textContent = 'Błąd: '+msg; $('eBar').classList.add('h');
+    log('INIT: '+msg,'er'); console.error(e);
   }
 })();
 </script>
