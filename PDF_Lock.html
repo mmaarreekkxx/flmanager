@@ -2,13 +2,73 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>PDF_LOCK</title>
-  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://unpkg.com">
   <link rel="preconnect" href="https://files.pythonhosted.org">
-  <link rel="preload" href="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js" as="script">
-  <script defer src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+  <!-- ═══ DYNAMIC CDN LOADER — auto-fallback jeśli CDN zablokowany ═══ -->
+  <script>
+  (function(){
+    /* ── Pyodide: kolejność prób ── */
+    var PY_CDNS = [
+      'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/',
+      'https://unpkg.com/pyodide@0.25.0/',
+      'https://pyodide-cdn2.iodide.io/v0.25.0/full/'
+    ];
+    window._pyodideCDN   = null;
+    window._pyodideFail  = false;
+    window._pyodideIndex = 0;
+
+    function tryPyodide(idx) {
+      if (idx >= PY_CDNS.length) {
+        window._pyodideFail = true;
+        window.dispatchEvent(new CustomEvent('pyCDNFail'));
+        return;
+      }
+      var base = PY_CDNS[idx];
+      var s    = document.createElement('script');
+      var tim  = setTimeout(function(){
+        /* timeout 5s → CDN prawdopodobnie blokowany */
+        s.onload = s.onerror = null;
+        if (s.parentNode) s.parentNode.removeChild(s);
+        tryPyodide(idx + 1);
+      }, 5000);
+
+      s.onload = function(){
+        clearTimeout(tim);
+        window._pyodideCDN   = base;
+        window._pyodideIndex = idx;
+        window.dispatchEvent(new CustomEvent('pyCDNReady'));
+        console.info('[PDF_LOCK] Pyodide CDN OK: ' + base);
+      };
+      s.onerror = function(){
+        clearTimeout(tim);
+        if (s.parentNode) s.parentNode.removeChild(s);
+        console.warn('[PDF_LOCK] CDN niedostępny: ' + base + ' → próba ' + (idx+1));
+        tryPyodide(idx + 1);
+      };
+      s.src = base + 'pyodide.js';
+      document.head.appendChild(s);
+    }
+    tryPyodide(0);
+
+    /* ── Fonty: googleapis → bunny.net ── */
+    var FONT_FAMILY = 'css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700;900&display=swap';
+    var FONT_CDNS   = [
+      'https://fonts.googleapis.com/' + FONT_FAMILY,
+      'https://fonts.bunny.net/'      + FONT_FAMILY
+    ];
+    function tryFont(idx){
+      if (idx >= FONT_CDNS.length) return;
+      var l  = document.createElement('link');
+      l.rel  = 'stylesheet';
+      l.href = FONT_CDNS[idx];
+      l.onerror = function(){ tryFont(idx + 1); };
+      document.head.appendChild(l);
+    }
+    tryFont(0);
+  })();
+  </script>
   <style>
     :root {
       --bg:#080b10;--surface:#0e1420;--card:#131926;--border:#1e2a3a;--border2:#2a3a50;
@@ -20,7 +80,7 @@
       --r:10px;--r2:6px;--r3:4px;
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+    body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;text-size-adjust:100%;-webkit-text-size-adjust:100%}
     body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(245,158,11,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(245,158,11,.025) 1px,transparent 1px);background-size:40px 40px}
 
     @keyframes spin{to{transform:rotate(360deg)}}
@@ -76,7 +136,7 @@
     #hackerOverlay.dm .hk-prompt{color:var(--blue)}
 
     /* ═══ APP ═══ */
-    #app{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:58px 14px 56px;opacity:0;transform:translateY(6px);transition:opacity .3s,transform .3s}
+    #app{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:58px 24px 56px;opacity:0;transform:translateY(6px);transition:opacity .3s,transform .3s}
     #app.vis{opacity:1;transform:none}
 
     /* ═══ HEADER ═══ */
@@ -267,23 +327,97 @@
     /* ═══ SCROLLBAR ═══ */
     ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:var(--surface)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 
-    /* ═══ RESPONSIVE ═══ */
-    @media(max-width:700px){
-      #app{padding:50px 10px 44px}.main-grid{grid-template-columns:1fr}
-      .hdr h1{font-size:13px}.hdr-s{display:none}
-      .dz{padding:18px 10px}.dz-i{font-size:22px}
-      .flist{max-height:180px}.card{padding:13px}
-      .btn{padding:11px 12px;font-size:11px}
-      .ri{flex-direction:column;align-items:stretch}.bdl{margin-left:0;width:100%;justify-content:center}
-      .lb{max-height:80px;font-size:9px}
+    /* ═══ RESPONSIVE — 4 TIERS ═══ */
+
+    /* ── TIER 1: MOBILE (< 640px) ── */
+    @media(max-width:639px){
+      /* layout */
+      #app{padding:52px 12px 56px}
+      .main-grid{grid-template-columns:1fr;gap:10px}
+
+      /* header */
+      .hdr{height:48px;padding:0 14px}
+      .hdr h1{font-size:13px}
+      .hdr-s{display:none}
+      .hdr-btn{width:38px;height:38px;font-size:18px} /* touch target ≥44px via padding */
+
+      /* cards */
+      .card{padding:13px}
+
+      /* dropzone */
+      .dz{padding:20px 10px;min-height:76px}
+      .dz-i{font-size:22px}
+
+      /* file list */
+      .flist{max-height:190px}
+      .fitem{padding:10px 11px;min-height:44px} /* touch target */
+      .fitem-rm{padding:6px 8px;min-width:32px;min-height:32px}
+
+      /* inputs — font-size:16px zapobiega zoom na iOS */
+      input[type="text"],input[type="password"],select{
+        font-size:16px;padding:12px 13px;
+      }
+      input[type="password"]{padding-right:42px}
+      .eye{right:11px;padding:6px;min-width:32px;min-height:32px}
+
+      /* options / checkboxes — powiększone touch targets */
+      .opt-row{padding:12px 14px;min-height:52px}
+      .opt-row input[type="checkbox"]{width:18px;height:18px}
+
+      /* button */
+      .btn{padding:14px 12px;font-size:11px;min-height:50px}
+
+      /* results */
+      .ri{flex-direction:column;align-items:stretch}
+      .bdl{margin-left:0;width:100%;justify-content:center;min-height:48px}
+
+      /* log */
+      .lb{max-height:85px;font-size:9px}
+
+      /* hacker overlay */
+      .hk-center{padding:24px 18px}
       .hk-terminal{font-size:9px;max-height:100px}
-      .hk-stats{gap:12px}.hk-stat-val{font-size:16px}
+      .hk-stats{gap:12px}
+      .hk-stat-val{font-size:16px}
+
+      /* prevent overscroll bounce trapping header */
+      body{overscroll-behavior-y:contain}
     }
-    @media(min-width:1100px){
-      #app{max-width:1060px;padding:60px 32px 64px}
-      .hdr-inner{max-width:1060px}
-      .main-grid{gap:20px}.card{padding:22px}
-      .dz{padding:30px 16px}.flist{max-height:310px}
+
+    /* ── TIER 2: TABLET / SMALL LAPTOP (640px – 1023px) ── */
+    @media(min-width:640px) and (max-width:1023px){
+      #app{padding:56px 28px 52px}
+      .main-grid{gap:16px}
+      .card{padding:18px}
+      .dz{padding:26px 14px}
+      .flist{max-height:260px}
+      .btn{font-size:12px}
+    }
+
+    /* ── TIER 3: DESKTOP (1024px – 1399px) ── */
+    @media(min-width:1024px){
+      #app{max-width:1080px;padding:64px 40px 64px}
+      .hdr-inner{max-width:1080px}
+      .main-grid{gap:22px}
+      .card{padding:22px}
+      .dz{padding:32px 18px}
+      .flist{max-height:320px}
+      .btn{font-size:13px;padding:13px 16px}
+      /* engine bar pełna szerokość wygląda lepiej */
+      .eng{padding:8px 16px}
+    }
+
+    /* ── TIER 4: WIDE SCREEN (≥ 1400px) ── */
+    @media(min-width:1400px){
+      #app{max-width:1280px;padding:68px 48px 68px}
+      .hdr-inner{max-width:1280px}
+      .main-grid{gap:28px;grid-template-columns:1.1fr 0.9fr}
+      .card{padding:28px}
+      .dz{padding:40px 20px}
+      .flist{max-height:380px}
+      .lb{max-height:140px}
+      .hk-center{max-width:560px}
+      .hk-terminal{max-width:480px;max-height:160px}
     }
   </style>
 </head>
@@ -464,6 +598,53 @@ function _gop() { return String.fromCharCode.apply(null, _dp); }
 
 requestAnimationFrame(function(){ $('lFill').style.width = '100%'; });
 setTimeout(function(){ $('loader').classList.add('out'); $('app').classList.add('vis'); }, 1000);
+
+// ═══ CYKL ŻYCIA STRONY ═══
+
+/* ── beforeunload: ostrzeżenie przy F5 / Ctrl+R / zamknięciu ── */
+window.addEventListener('beforeunload', function(e) {
+  if(!files.length && !busy) return; /* nic do ochrony — pozwól odejść */
+  var msg = busy
+    ? 'Operacja w toku! Odświeżenie przerwie przetwarzanie i utraci wyniki.'
+    : 'Masz załadowane pliki. Odświeżenie wyczyści stan aplikacji.';
+  e.preventDefault();
+  e.returnValue = msg; /* legacy Chrome/Edge */
+  return msg;          /* Firefox / Safari */
+});
+
+/* ── pagehide: zwolnij blobsy przy odejściu (GC nie zawsze zdąży) ── */
+window.addEventListener('pagehide', function() {
+  blobs.forEach(function(u){ try{ URL.revokeObjectURL(u); }catch(_){} });
+});
+
+/* ── pageshow persisted: powrót z bfcache (back/forward) ──
+   WASM Pyodide nie jest serializowalny — wymaga weryfikacji.        ── */
+window.addEventListener('pageshow', function(e) {
+  if(!e.persisted) return; /* normalne ładowanie — pomijamy */
+
+  /* Szybki test silnika */
+  var engineOk = false;
+  if(ready && pyodide) {
+    try { pyodide.runPython('1'); engineOk = true; }
+    catch(_) { engineOk = false; }
+  }
+
+  if(!engineOk) {
+    /* WASM zawieszony po bfcache — konieczny pełny reload */
+    ready = false;
+    /* Wyświetl ostrzeżenie w logu zanim strona się przeładuje */
+    try {
+      $('eLbl').textContent = '⚠ Powrót z cache — reinicjalizacja silnika…';
+      $('eDot').className   = 'ed ld';
+    } catch(_) {}
+    /* Krótka pauza żeby użytkownik zobaczył komunikat, potem reload */
+    setTimeout(function(){ location.reload(); }, 600);
+  } else {
+    /* Silnik działa — resynchronizuj tylko UI */
+    updBtn(); updUI();
+    log('Powrót z cache — silnik OK.','ok');
+  }
+});
 
 // ═══ GLOBAL DRAG & DROP ═══
 var dragCounter = 0;
@@ -655,6 +836,7 @@ async function handleNewFiles(fileList) {
     log((enc?'🔐':'📄')+' '+r.f.name+' ('+fB(r.f.size)+')','ok');
   }
   renderFiles(); showBanner(); updUI();
+  if(files.length) window._setSessionMark && window._setSessionMark(); /* sesja aktywna */
   if(ready) {
     var changed = false;
     for(var j=0; j<files.length; j++) {
@@ -724,7 +906,7 @@ function getOwnerPw() {
   return $('uP').value;
 }
 
-// ═══ HACKER OVERLAY ═══
+// ══ OVERLAY ══
 var hkChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%^&*(){}[]|;:<>,.?/~`';
 var hexIv = null;
 function rHex(n) { var s=''; for(var i=0;i<n;i++) s+='0123456789ABCDEF'[Math.floor(Math.random()*16)]; return s; }
@@ -952,11 +1134,63 @@ var name = baseName + suffix + '.pdf';
   updBtn();
 }
 
-// ═══ REFRESH ═══
+// ═══ GUARD: jeśli processAll rzuci niespodziewany błąd — odblokuj UI ═══
+var _processAllOrig = processAll;
+processAll = async function() {
+  try { await _processAllOrig(); }
+  catch(e) {
+    hkHide();
+    busy = false;
+    $('bProg').classList.remove('show');
+    $('btnA').disabled = false;
+    updBtn();
+    log('[FATAL] '+String(e.message||e),'er');
+    console.error('[PDF_LOCK processAll]', e);
+  }
+};
+
+// ═══ SOFT RESET (bez przeładowania — silnik Pyodide zostaje) ═══
+function softReset() {
+  /* 1. Zabroń nowej operacji na czas resetu */
+  if(busy) { log('Operacja w toku — poczekaj…','wa'); return; }
+
+  /* 2. Zwolnij wszystkie blob URL */
+  blobs.forEach(function(u){ try{ URL.revokeObjectURL(u); }catch(_){} });
+  blobs = []; files = []; uid = 0;
+
+  /* 3. Ukryj nakładki (obrona przed zawieszeniem) */
+  hkHide();
+  $('dragOverlay').classList.remove('show');
+
+  /* 4. Reset formularza */
+  ['uP','cP','oP'].forEach(function(id){ $(id).value = ''; $(id).type = 'password'; });
+  ['eyU','eyC','eyO'].forEach(function(id){ $(id).textContent = '👁'; });
+  $('ownerChk').checked = false;
+  $('adminChk').checked = true;
+  $('ownerBody').classList.remove('show');
+  $('sFill').style.width = '0%'; $('sFill').style.background = 'transparent';
+  $('sLbl').textContent = 'Siła hasła: —'; $('sLbl').style.color = '';
+  $('mLbl').textContent = '—';
+  ['uP','cP'].forEach(function(id){ $(id).classList.remove('mismatch'); });
+
+  /* 5. Reset paneli UI */
+  $('rC').classList.remove('show');
+  $('aBan').classList.remove('show');
+  $('bProg').classList.remove('show');
+  $('bpF').style.width = '0%';
+  $('bpL').textContent = '0 / 0';
+
+  /* 6. Wyrenderuj pusty stan */
+  window._clearSessionMark && window._clearSessionMark(); /* sesja zakończona */
+  renderFiles(); updUI(); updBtn();
+  log('Reset — silnik gotowy.','ok');
+}
+
 $('hdrRefresh').onclick = function() {
   var btn = this;
   btn.classList.add('spin');
-  setTimeout(function(){ location.reload(); }, 560);
+  setTimeout(function(){ btn.classList.remove('spin'); }, 560);
+  softReset();
 };
 
 
@@ -975,14 +1209,27 @@ function eP(pct, text) { $('eFill').style.width = pct+'%'; $('eLbl').textContent
 
 var _pypdfVer = '?';  /* wersja wykryta z nazwy .whl — bez importu Pythona */
 
-/* ── IndexedDB cache dla kółek PyPI — tylko .whl, nie indeks ── */
+/* ══════════════════════════════════════════════════════════════
+   IndexedDB cache — .whl + pyodide.asm.wasm + pyodide.asm.data
+   Klucz: pełny URL → ArrayBuffer
+   Przy reload (też "wersja komputerowa") duże binaria serwowane
+   lokalnie zamiast ponownie ściągane (~27MB z CDN → kilka ms z IDB)
+   ══════════════════════════════════════════════════════════════ */
 (function(){
   var _db = null;
+
+  /* Wzorzec plików do cachowania:
+     .whl  — pakiety PyPI (pypdf, cryptography)
+     .wasm — pyodide.asm.wasm  (~20 MB, główny bottleneck)
+     .data — pyodide.asm.data  (~7 MB, stdlib Pythona)           */
+  var CACHE_RE = /\.whl(\?|$)|pyodide\.asm\.(wasm|data)$/;
+
   function openDB(){
     if(_db) return Promise.resolve(_db);
     return new Promise(function(res){
-      var r = indexedDB.open('pdflock-whl-v2',1);
-      r.onupgradeneeded = function(e){ e.target.result.createObjectStore('w'); };
+      /* Nowa nazwa bazy — rozszerzona o wasm/data (v3) */
+      var r = indexedDB.open('pdflock-assets-v3', 1);
+      r.onupgradeneeded = function(e){ e.target.result.createObjectStore('a'); };
       r.onsuccess = function(e){ _db = e.target.result; res(_db); };
       r.onerror   = function(){ res(null); };
     });
@@ -991,54 +1238,106 @@ var _pypdfVer = '?';  /* wersja wykryta z nazwy .whl — bez importu Pythona */
     return openDB().then(function(db){
       if(!db) return null;
       return new Promise(function(res){
-        var q = db.transaction('w','readonly').objectStore('w').get(u);
+        var q = db.transaction('a','readonly').objectStore('a').get(u);
         q.onsuccess = function(){ res(q.result||null); };
         q.onerror   = function(){ res(null); };
       });
     });
   }
-  function iSet(u,d){
+  function iSet(u, d){
     openDB().then(function(db){
       if(!db) return;
-      db.transaction('w','readwrite').objectStore('w').put(d,u);
+      db.transaction('a','readwrite').objectStore('a').put(d, u);
     });
   }
+
   var orig = globalThis.fetch.bind(globalThis);
   globalThis.fetch = function(url, opts){
     var u = typeof url==='string' ? url : (url&&(url.href||url.url))||String(url);
-    if(/\.whl(\?|$)/.test(u)){  /* tylko pliki wheel, nie zapytania indeksu PyPI */
-      /* przechwytuj wersję pypdf z nazwy pliku */
+    if(CACHE_RE.test(u)){
+      /* Wydobądź wersję pypdf z nazwy .whl */
       var vm = u.match(/pypdf[_-](\d+\.\d+[.\d]*)/i);
       if(vm) _pypdfVer = vm[1];
+
       return iGet(u).then(function(hit){
         if(hit){
-          log('\u26A1 cache: '+u.split('/').pop().split('?')[0],'ok');
-          return new Response(hit,{status:200,headers:{'Content-Type':'application/octet-stream','Content-Length':String(hit.byteLength)}});
+          var label = u.split('/').pop().split('?')[0];
+          var mb    = (hit.byteLength > 500000) ? ' ('+Math.round(hit.byteLength/1048576)+'MB)' : '';
+          var ct    = /\.wasm$/.test(u) ? 'application/wasm' : 'application/octet-stream';
+          log('\u26A1 IDB: '+label+mb, 'ok');
+          return new Response(hit, {
+            status: 200,
+            headers: { 'Content-Type': ct, 'Content-Length': String(hit.byteLength) }
+          });
         }
-        return orig(url,opts).then(function(r){
-          if(r.ok) r.clone().arrayBuffer().then(function(b){ iSet(u,b); });
+        /* Nie ma w cache — pobierz i zapisz */
+        return orig(url, opts).then(function(r){
+          if(r.ok) r.clone().arrayBuffer().then(function(b){ iSet(u, b); });
           return r;
         });
       });
     }
-    return orig(url,opts);
+    return orig(url, opts);
   };
+})();
+
+/* ── sessionStorage breadcrumb — wykryj przerwaną sesję ──────────
+   Ustawiany gdy użytkownik doda pliki, kasowany przy softReset.
+   Przy reloaderze (F5, "wersja komputerowa", back/forward)
+   strona pokazuje dyskretne powiadomienie w bannerze.             */
+(function(){
+  var KEY = 'pdflock_session';
+  /* Sprawdź po wyrenderowaniu UI */
+  window.addEventListener('load', function(){
+    if(sessionStorage.getItem(KEY)){
+      sessionStorage.removeItem(KEY);
+      /* Pokaż banner z informacją o przerwanej sesji */
+      var ban = document.getElementById('aBan');
+      var ico = document.getElementById('aBIco');
+      var txt = document.getElementById('aBTxt');
+      if(ban && ico && txt){
+        ico.textContent = '⚠️ ';
+        txt.textContent = 'Poprzednia sesja przerwana — dodaj pliki ponownie. Silnik startuje…';
+        ban.className = 'aban show be';
+        setTimeout(function(){ ban.classList.remove('show'); }, 6000);
+      }
+    }
+  });
+
+  /* Podepnij markery do istniejących funkcji po ich definicji */
+  window._setSessionMark = function(){ try{ sessionStorage.setItem(KEY,'1'); }catch(_){} };
+  window._clearSessionMark = function(){ try{ sessionStorage.removeItem(KEY); }catch(_){} };
 })();
 
 (async function() {
   var dot = $('eDot');
   try {
-    eP(5, 'Pobieranie Pyodide…'); log('Pobieranie Pyodide…','in');
-    /* pyodide.js ładowany przez <script defer> w <head> — czekamy na gotowość */
-    if(typeof loadPyodide === 'undefined') {
-      await new Promise(function(resolve) {
+    eP(5, 'Szukanie CDN Pyodide…'); log('Szukanie CDN Pyodide…','in');
+
+    /* ── Czekaj aż CDN loader znajdzie działające źródło ── */
+    if (!window._pyodideCDN) {
+      await new Promise(function(resolve, reject){
+        if (window._pyodideFail) { reject(new Error('CDN_FAIL')); return; }
+        window.addEventListener('pyCDNReady', function(){ resolve(); }, { once: true });
+        window.addEventListener('pyCDNFail',  function(){ reject(new Error('CDN_FAIL')); }, { once: true });
+      });
+    }
+
+    var CDN_NAMES = ['jsDelivr','unpkg','iodide'];
+    var cdnLabel  = CDN_NAMES[window._pyodideIndex] || window._pyodideCDN;
+    eP(12, 'CDN: ' + cdnLabel + ' — inicjalizacja…');
+    log('Pyodide CDN: ' + cdnLabel,'ok');
+
+    /* typeof loadPyodide może być gotowe od razu (szybki CDN) lub potrzebuje chwili */
+    if (typeof loadPyodide === 'undefined') {
+      await new Promise(function(resolve){
         var t = setInterval(function(){ if(typeof loadPyodide !== 'undefined'){ clearInterval(t); resolve(); } }, 50);
       });
     }
-    eP(15, 'Inicjalizacja + micropip…');
-    /* micropip ładowany razem z runtime — jeden round-trip mniej */
+
+    eP(18, 'Inicjalizacja + micropip…');
     pyodide = await loadPyodide({
-      indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/',
+      indexURL: window._pyodideCDN,
       packages: ['micropip']
     });
     log('Pyodide + micropip OK','ok');
@@ -1080,8 +1379,15 @@ var _pypdfVer = '?';  /* wersja wykryta z nazwy .whl — bez importu Pythona */
     }
   } catch(e) {
     var msg = e.message || String(e); dot.className = 'ed er';
-    $('eLbl').textContent = 'Błąd: '+msg; $('eBar').classList.add('h');
-    log('INIT: '+msg,'er'); console.error(e);
+    if (msg === 'CDN_FAIL') {
+      var cdnErr = 'Wszystkie CDN niedostępne (jsDelivr, unpkg, iodide). Sprawdź połączenie lub reguły firewall.';
+      $('eLbl').textContent = '❌ ' + cdnErr;
+      log('INIT: '+cdnErr,'er');
+    } else {
+      $('eLbl').textContent = 'Błąd: '+msg;
+      log('INIT: '+msg,'er');
+    }
+    $('eBar').classList.add('h'); console.error(e);
   }
 })();
 </script>
