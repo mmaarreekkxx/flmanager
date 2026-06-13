@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pl" data-theme="dark">
 <head>
@@ -1883,7 +1882,8 @@ function showRL(res){const rem=parseInt(res.headers.get('X-RateLimit-Remaining')
   /* Reveal: threshold 0 + rootMargin 0 — każdy pixel widoczności wystarczy.
      unobserve() gwarantuje że raz pokazana karta nigdy nie znika. */
   const reveal = el => { el.classList.add('revealed'); };
-  if(matchMedia('(prefers-reduced-motion:reduce)').matche    document.querySelectorAll('[data-reveal]').forEach(reveal); return;
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches){
+    document.querySelectorAll('[data-reveal]').forEach(reveal); return;
   }
   const obs = new IntersectionObserver(entries => {
     entries.forEach(e => { if(e.isIntersecting){ reveal(e.target); obs.unobserve(e.target); } });
