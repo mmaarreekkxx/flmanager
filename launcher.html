@@ -74,7 +74,7 @@ input{font:inherit;color:inherit;border:none;background:none;outline:none}
   --glass:rgba(255,255,255,0.04);--glass2:rgba(255,255,255,0.08);
   --border:rgba(255,255,255,0.07);--border2:rgba(255,178,36,0.28);--border3:rgba(255,178,36,0.5);
   --line:rgba(255,178,36,0.08);
-  --text:#e9ecf3;--text2:#a4adc2;--text3:#6d7693;--text4:#4a5270;
+  --text:#e9ecf3;--text2:#a4adc2;--text3:#828cab;--text4:#4a5270;
   --accent:#ffb224;--accent2:#ff8a00;--accent3:#ffd166;
   --amber:#ffb224;--amber2:#ff8a00;
   --aglow:rgba(255,178,36,0.38);--aglow2:rgba(255,178,36,0.16);
@@ -88,7 +88,7 @@ input{font:inherit;color:inherit;border:none;background:none;outline:none}
   --hdr-bg:rgba(10,14,26,0.94);
   --hdr-bg-scrolled:rgba(10,14,26,0.98);
   --hdr-shadow-scrolled:0 2px 16px rgba(0,0,0,0.5);
-  --hdr-blur:blur(12px);
+  --hdr-blur:blur(8px);
   --hdr-line:linear-gradient(90deg,transparent,rgba(255,178,36,0.18),transparent);
 
   --main-bg:var(--bg2);--main-border:var(--border);
@@ -126,7 +126,7 @@ input{font:inherit;color:inherit;border:none;background:none;outline:none}
   --grid-line:rgba(255,178,36,0.08);
   --noise-opacity:0.03;--grid-opacity:0.2;--glow-opacity:0.55;
 
-  --mobile-bg:rgba(10,14,26,0.98);--mobile-blur:blur(16px);
+  --mobile-bg:rgba(10,14,26,0.98);--mobile-blur:blur(10px);
 
   --ft-bg:linear-gradient(135deg,rgba(255,178,36,0.04),var(--bg3));
   --ft-border:rgba(255,178,36,0.25);--ft-shadow:0 0 40px rgba(255,178,36,0.06);
@@ -205,7 +205,7 @@ input{font:inherit;color:inherit;border:none;background:none;outline:none}
   --hdr-bg:rgba(250,250,249,0.95);
   --hdr-bg-scrolled:rgba(250,250,249,0.99);
   --hdr-shadow-scrolled:0 2px 8px rgba(0,0,0,0.08);
-  --hdr-blur:blur(12px);
+  --hdr-blur:blur(8px);
   --hdr-line:linear-gradient(90deg,transparent,rgba(217,119,87,0.1),transparent);
 
   --main-bg:var(--bg2);--main-border:var(--border);
@@ -243,7 +243,7 @@ input{font:inherit;color:inherit;border:none;background:none;outline:none}
   --grid-line:rgba(0,0,0,0.03);
   --noise-opacity:0;--grid-opacity:0.3;--glow-opacity:0.3;
 
-  --mobile-bg:rgba(250,250,249,0.98);--mobile-blur:blur(12px);
+  --mobile-bg:rgba(250,250,249,0.98);--mobile-blur:blur(8px);
 
   --ft-bg:rgba(217,119,87,0.02);--ft-border:rgba(217,119,87,0.2);--ft-shadow:none;
   --footer-bg:var(--bg);
@@ -353,7 +353,7 @@ body.tab-hidden *{animation-play-state:paused!important}
 }
 .bg-orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;contain:strict}
 .bg-orb{
-  position:absolute;border-radius:50%;filter:blur(100px);
+  position:absolute;border-radius:50%;filter:blur(60px);
   will-change:transform;
   transition:none;
 }
@@ -765,6 +765,7 @@ h1 span{display:block}
 .section{
   padding:80px 0;position:relative;
   transition:none;
+  content-visibility:auto;contain-intrinsic-size:1px 800px;
 }
 .section:nth-of-type(odd){
   background:var(--sec-odd-bg);
@@ -822,7 +823,7 @@ h2{
 .feature{
   padding:32px 28px;background:var(--card);border:1px solid var(--border);border-radius:14px;
   display:flex;flex-direction:column;gap:16px;position:relative;
-  transition:all .35s var(--ease);contain:content;overflow:hidden;
+  transition:background-color .35s var(--ease),border-color .35s var(--ease);contain:content;overflow:hidden;
 }
 .feature::before{
   content:"";position:absolute;top:0;left:0;width:100%;height:2px;
@@ -864,7 +865,7 @@ h2{
 .qa{
   background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;
   position:relative;overflow:hidden;
-  transition:all .35s var(--ease);contain:layout style;
+  transition:transform .35s var(--ease),border-color .35s var(--ease),box-shadow .35s var(--ease);contain:layout style;
   box-shadow:var(--qa-shadow);
 }
 .qa::before{
@@ -1021,7 +1022,7 @@ h2{
 .lp-card{
   background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;
   display:flex;flex-direction:column;position:relative;cursor:pointer;overflow:hidden;
-  transition:all .35s var(--ease);contain:content;
+  transition:transform .35s var(--ease),border-color .35s var(--ease),box-shadow .35s var(--ease),background-color .35s var(--ease);contain:content;
   box-shadow:var(--qa-shadow);touch-action:manipulation;
 }
 .lp-card::before{
@@ -1472,6 +1473,10 @@ footer::before{
   .bg-orbs,.bg-glow{opacity:0.3}
 }
 
+@media(max-width:768px){
+  .bg-orb-1,.bg-orb-2,.bg-orb-3{animation:none}
+  .bg-orb{filter:blur(40px);opacity:.6}
+}
 @media(hover:none){
   .lp-card:hover,.feature:hover,.qa:hover{transform:none}
   .btn-p:hover,.btn-g:hover,.qb:hover{transform:none}
@@ -1494,6 +1499,12 @@ footer::before{
   .main-container{border:none;box-shadow:none}
   header{position:static;background:#fff;border-bottom:2px solid #000}
 }
+
+/* ── Podczas aktywnego scrolla: wyłącz najdroższe efekty (backdrop-filter, blur tła) ── */
+body.is-scrolling header{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+body.is-scrolling .mobile-nav{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+body.is-scrolling .bg-orb-1,body.is-scrolling .bg-orb-2,body.is-scrolling .bg-orb-3{animation-play-state:paused}
+body.is-scrolling .mouse-glow{opacity:0!important}
 
 /* ── Inline SVG icons (zastępują Font Awesome CDN) ── */
 .fi{display:inline-flex;align-items:center;justify-content:center;width:1em;height:1em;vertical-align:-0.125em;fill:currentColor;flex-shrink:0}
@@ -1739,6 +1750,7 @@ const FA={
   'fa-folder':'<span class="fi"><svg viewBox="0 0 512 512"><path d="M64 480H448c35.3 0 64-28.7 64-64V160c0-35.3-28.7-64-64-64H288c-10.1 0-19.6-4.7-25.6-12.8L243.2 57.6C231.1 41.5 212.1 32 192 32H64C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64z"/></svg></span>',
   'fa-lock':'<span class="fi"><svg viewBox="0 0 448 512"><path d="M144 144v48H304V144c0-44.2-35.8-80-80-80s-80 35.8-80 80zM80 192V144C80 64.5 144.5 0 224 0s144 64.5 144 144v48h16c35.3 0 64 28.7 64 64V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V256c0-35.3 28.7-64 64-64H80z"/></svg></span>',
   'fa-truck':'<span class="fi"><svg viewBox="0 0 640 512"><path d="M48 0C21.5 0 0 21.5 0 48V368c0 26.5 21.5 48 48 48H64c0 53 43 96 96 96s96-43 96-96H384c0 53 43 96 96 96s96-43 96-96h32c17.7 0 32-14.3 32-32V288 256 237.3c0-17-6.7-33.3-18.7-45.3L512 114.7c-12-12-28.3-18.7-45.3-18.7H416V48c0-26.5-21.5-48-48-48H48zM416 160h50.7L544 237.3V256H416V160zM112 416a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zm368-48a48 48 0 1 1 0 96 48 48 0 1 1 0-96z"/></svg></span>',
+  'fa-chart-line':'<span class="fi"><svg viewBox="0 0 512 512"><path d="M64 64c0-17.7-14.3-32-32-32S0 46.3 0 64V400c0 44.2 35.8 80 80 80H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H80c-8.8 0-16-7.2-16-16V64zM505 183c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-84.7 84.7-59-59c-9.4-9.4-24.6-9.4-33.9 0l-112 112c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0L320 215.6l59 59c9.4 9.4 24.6 9.4 33.9 0L505 183z"/></svg></span>',
 };
 /* Zastąp <i class="fas fa-X"> → FA['fa-X'] lub użyj faI(x) */
 function faI(n){return FA[n]||FA['fa-circle']||''}
@@ -1748,7 +1760,7 @@ const TI={s:'<svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14
 
 const PAGES='https://mmaarreekkxx.github.io/flmanager',GH_USER='mmaarreekkxx',GH_API='https://api.github.com',GITHACK='https://raw.githack.com/'+GH_USER+'/flmanager/main',FETCH_TIMEOUT=15000;
 
-const D=[{key:'flmanager',title:'FLMANAGER',desc:'Fleet Analytics — MCE, DualFuel, CPK, rankingi.',file:'flmanager.html',icon:'fa-truck',color:'amber',ver:'v4.73',ft:1},{key:'psf',title:'PSF Import',desc:'Importer danych serwisowych PSF.',file:'PSFimport.html',icon:'fa-file-alt',color:'cyan',ver:'stable',ft:0},{key:'gsp',title:'GSP Import',desc:'Importer faktur GSP / paliwo.',file:'GSPimport.html',icon:'fa-download',color:'cyan',ver:'stable',ft:0},{key:'zbycie',title:'Zbycie',desc:'Zbywanie pojazdów z floty.',file:'Zbycie.html',icon:'fa-file-alt',color:'red',ver:'stable',ft:0},{key:'index',title:'Index',desc:'Strona główna repozytorium.',file:'index.html',icon:'fa-folder',color:'purple',ver:'stable',ft:0},{key:'pdf_lock',title:'PDF_Lock',desc:'Chroń hasłem pliki PDF',file:'PDF_Lock.html',icon:'fa-lock',color:'purple',ver:'stable',ft:0},{key:'konwenter',title:'Konwenter',desc:'Przelicz Netto, brutto, vat, jednostki',file:'konwenter.html',icon:'fa-calculator',color:'purple',ver:'stable',ft:0},{key:'opony',title:'Opony 2026',desc:'Zarządzanie oponami i sezonami.',file:'opony2026.html',icon:'fa-circle',color:'green',ver:'2026',ft:1},{key:'xlscale',title:'XL Scale 8.3',desc:'Skalowanie i normalizacja arkuszy Excel.',file:'xlscale8.3.html',icon:'fa-calculator',color:'purple',ver:'v8.3',ft:1},{key:'Menu',title:'Launcher',desc:'Wybierz aplikację.',file:'launcher.html',icon:'fa-car',color:'green',ver:'stable',ft:0}];
+const D=[{key:'flmanager',title:'FLMANAGER',desc:'Fleet Analytics — MCE, DualFuel, CPK, rankingi.',file:'flmanager.html',icon:'fa-truck',color:'amber',ver:'v4.73',ft:1},{key:'psf',title:'PSF Import',desc:'Importer danych serwisowych PSF.',file:'PSFimport.html',icon:'fa-file-alt',color:'cyan',ver:'stable',ft:0},{key:'gsp',title:'GSP Import',desc:'Importer faktur GSP / paliwo.',file:'GSPimport.html',icon:'fa-download',color:'cyan',ver:'stable',ft:0},{key:'zbycie',title:'Zbycie',desc:'Zbywanie pojazdów z floty.',file:'Zbycie.html',icon:'fa-file-alt',color:'red',ver:'stable',ft:0},{key:'index',title:'Index',desc:'Strona główna repozytorium.',file:'index.html',icon:'fa-folder',color:'purple',ver:'stable',ft:0},{key:'pdf_lock',title:'PDF_Lock',desc:'Chroń hasłem pliki PDF',file:'PDF_Lock.html',icon:'fa-lock',color:'purple',ver:'stable',ft:0},{key:'konwenter',title:'Konwenter',desc:'Przelicz Netto, brutto, vat, jednostki',file:'konwenter.html',icon:'fa-calculator',color:'purple',ver:'stable',ft:0},{key:'opony',title:'Opony 2026',desc:'Zarządzanie oponami i sezonami.',file:'opony2026.html',icon:'fa-circle',color:'green',ver:'2026',ft:1},{key:'xlscale',title:'XL Scale 8.3',desc:'Skalowanie i normalizacja arkuszy Excel.',file:'xlscale8.3.html',icon:'fa-calculator',color:'purple',ver:'v8.3',ft:1},{key:'sales_analytics',title:'Analiza Sprzedaży Pojazdów',desc:'Dashboard analityczny sprzedaży floty — trendy, rankingi, oddziały.',file:'vehicle-sales-analytics.html',icon:'fa-chart-line',color:'cyan',ver:'stable',ft:1},{key:'pojazdy_pk',title:'Pojazdy P&K',desc:'Zarządzanie pojazdami — transfery, historia własności, analityka oddziałów.',file:'PojazdyP&K.html',icon:'fa-car',color:'green',ver:'v4',ft:1},{key:'Menu',title:'Launcher',desc:'Wybierz aplikację.',file:'launcher.html',icon:'fa-car',color:'green',ver:'stable',ft:0}];
 D.forEach(a=>{a.pages=PAGES+'/'+a.file;a.raw='https://raw.githubusercontent.com/'+GH_USER+'/flmanager/main/'+a.file;a.gh='https://github.com/'+GH_USER+'/flmanager/blob/main/'+a.file;a.githack=GITHACK+'/'+a.file});
 
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
@@ -1879,6 +1891,11 @@ function showRL(res){const rem=parseInt(res.headers.get('X-RateLimit-Remaining')
 
 /* ══ SCROLL REVEAL ══ */
 (function(){
+  document.addEventListener('visibilitychange',function(){
+    const orbs=document.querySelector('.bg-orbs');
+    if(orbs)orbs.style.animationPlayState=document.hidden?'paused':'running';
+    document.querySelectorAll('.bg-orb').forEach(el=>{el.style.animationPlayState=document.hidden?'paused':'running'});
+  });
   /* Reveal: threshold 0 + rootMargin 0 — każdy pixel widoczności wystarczy.
      unobserve() gwarantuje że raz pokazana karta nigdy nie znika. */
   const reveal = el => { el.classList.add('revealed'); };
@@ -1896,7 +1913,23 @@ document.addEventListener('keydown',function(e){const tag=(e.target.tagName||'')
 
 /* ══ INIT ══ */
 document.addEventListener('DOMContentLoaded',()=>{renderQA();loadApps();document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',function(e){const href=this.getAttribute('href'),target=document.querySelector(href);if(target){e.preventDefault();window.scrollTo({top:target.getBoundingClientRect().top+window.scrollY-64,behavior:'smooth'})}})})});
-(function(){const hdr=document.querySelector('header');if(!hdr)return;window.addEventListener('scroll',()=>{hdr.classList.toggle('scrolled',window.scrollY>10)},{passive:true})})();
+(function(){
+  const hdr=document.querySelector('header');if(!hdr)return;
+  let ticking=false,scrollEndT=null;
+  function onScroll(){
+    if(!ticking){
+      requestAnimationFrame(()=>{
+        hdr.classList.toggle('scrolled',window.scrollY>10);
+        document.body.classList.add('is-scrolling');
+        ticking=false;
+      });
+      ticking=true;
+    }
+    clearTimeout(scrollEndT);
+    scrollEndT=setTimeout(()=>document.body.classList.remove('is-scrolling'),200);
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+})();
 document.addEventListener('click',function(e){const bg=e.target.closest('[data-modal-close]');if(bg&&bg===e.target){const fn=bg.dataset.modalClose;if(fn==='closeM')closeM();else if(fn==='closeHelp')closeHelp()}});
 </script>
 </body>
