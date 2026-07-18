@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#0a0e1a">
+  <meta name="theme-color" content="#13161d">
   <title>PDF_LOCK</title>
   <link rel="preconnect" href="https://unpkg.com">
   <link rel="preconnect" href="https://files.pythonhosted.org">
@@ -73,11 +73,11 @@
   <style>
     :root {
       /* neutrale — chłodny grafit, więcej stopni dla czytelnej hierarchii */
-      --bg:#090b0f;--surface:#0f131b;--surface2:#131826;--card:#131826;--border:#1c2432;--border2:#293244;--border3:#3a4457;
+      --bg:#13161d;--surface:#1b202b;--surface2:#212838;--card:#212838;--border:#2c3648;--border2:#3d485d;--border3:#505c73;
       --accent:#f0a441;--accentDim:#8a5a1e;--accentGlow:rgba(240,164,65,.14);
       --blue:#4fc3f7;--blueDim:#0d4f6e;
       --green:#3ddc97;--red:#f77a83;--purple:#b39dfb;
-      --text:#eef1f5;--text2:#c7d0dc;--muted:#7c8aa0;--muted2:#4f5c70;
+      --text:#f3f5f8;--text2:#d3dae5;--muted:#94a2b8;--muted2:#67748a;
       --mono:'Share Tech Mono',ui-monospace,'SF Mono',monospace;--sans:'Exo 2',system-ui,sans-serif;
       --r:11px;--r2:7px;--r3:5px;
       /* skala odstępów — jedna siatka 4px dla spójnego rytmu */
@@ -297,6 +297,11 @@
     .bte{background:linear-gradient(135deg,#b45309,var(--accent))}.bte:hover:not(:disabled){box-shadow:0 5px 20px rgba(240,164,65,.35)}
     .btd{background:linear-gradient(135deg,var(--blueDim),var(--blue))}.btd:hover:not(:disabled){box-shadow:0 5px 20px rgba(79,195,247,.35)}
     .btm{background:linear-gradient(135deg,#4c1d95,var(--purple))}.btm:hover:not(:disabled){box-shadow:0 5px 20px rgba(179,157,251,.35)}
+    .btz{background:linear-gradient(135deg,#4c1d95,var(--purple))}.btz:hover:not(:disabled){box-shadow:0 5px 20px rgba(179,157,251,.35)}
+
+    /* ═══ WIERSZ AKCJI: Zaszyfruj/Odszyfruj + Spakuj ZIP ═══ */
+    .action-row{display:flex;gap:9px;align-items:stretch;flex-wrap:wrap}
+    .action-row .btn{width:auto;flex:1 1 0;min-width:120px}
 
     /* ═══ BATCH PROGRESS ═══ */
     .batch-prog{margin-top:var(--sp-2);display:none;animation:fadeUp .2s var(--ease)}
@@ -321,6 +326,17 @@
     .dle{background:var(--green)}.dle:hover{background:#6ee7b7;box-shadow:0 3px 14px rgba(61,220,151,.35)}
     .dld{background:var(--blue)}.dld:hover{background:#7dd3fc;box-shadow:0 3px 14px rgba(79,195,247,.35)}
     .dlm{background:var(--purple)}.dlm:hover{background:#c4b5fd}
+
+    /* ═══ ZIP PANEL ═══ */
+    .zip-panel{width:100%;margin-top:12px;padding-top:14px;border-top:1px dashed var(--border2);display:none}
+    .zip-panel.show{display:block;animation:fadeUp .25s var(--ease)}
+    .zip-panel .zp-hint{font-size:9px;color:var(--muted);font-family:var(--mono);line-height:1.6;margin-bottom:10px}
+    .zip-panel .opt-row{margin-bottom:10px}
+    .zip-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+    .zip-fields.hide{display:none}
+    .zip-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .zp-err{font-size:9px;color:var(--red);font-family:var(--mono);margin-top:6px;display:none}
+    .zp-err.show{display:block}
 
     /* ═══ DOWNLOAD PULSE ═══ */
     @keyframes dlPulseG{0%,100%{box-shadow:0 0 0 0 rgba(61,220,151,0);transform:scale(1)}50%{box-shadow:0 0 16px 4px rgba(61,220,151,.35);transform:scale(1.03)}}
@@ -582,7 +598,19 @@
         </select>
       </div>
 
-      <button class="btn bte" id="btnA" disabled>🔒 Zaszyfruj</button>
+      <div class="action-row">
+        <button class="btn bte" id="btnA" disabled>🔒 Zaszyfruj</button>
+        <button class="btn btz" id="btnZipDirect" type="button" disabled>📦 Spakuj ZIP</button>
+      </div>
+
+      <div class="zip-panel" id="zipdPanel">
+        <div class="zp-hint">ℹ️ Pakuje wszystkie dodane pliki do jednego archiwum <b>.zip</b> zaszyfrowanego AES‑256 (WinZip AE‑2 — otwiera 7‑Zip/WinRAR/PeaZip). Działa od razu, bez konieczności wcześniejszego szyfrowania PDF-ów. Jeśli plik został w tej sesji zaszyfrowany/odszyfrowany, do ZIP-a trafia jego aktualny wynik — zawsze z jednym hasłem, bez dublowania.</div>
+
+        <div class="zip-actions">
+          <button class="bdl dle" id="zipdGo" style="margin-left:0">📦 Utwórz i pobierz ZIP</button>
+        </div>
+        <div class="zp-err" id="zpdErr"></div>
+      </div>
 
       <div class="batch-prog" id="bProg">
         <div class="bp-bar"><div class="bp-fill" id="bpF"></div></div>
@@ -618,6 +646,7 @@
 'use strict';
 
 var pyodide = null, ready = false, busy = false, files = [], blobs = [], uid = 0;
+var zipEngineReady = false, zipBusy = false, zipBlobUrl = null;
 var $ = function(id) { return document.getElementById(id); };
 
 var _dp = [70,108,111,116,97,50,48,50,54];
@@ -781,6 +810,10 @@ function updUI() {
 
   if(n){ $('fcnt').classList.add('show'); $('fcntN').textContent=n; $('fcntE').textContent=encCnt+' zaszyfr.'; $('fcntO').textContent=opnCnt+' otwartych'; }
   else $('fcnt').classList.remove('show');
+
+  $('btnZipDirect').disabled = !zipEngineReady || n === 0;
+  $('btnZipDirect').title = !zipEngineReady ? 'Silnik ZIP AES niedostępny w tej sesji' : (n === 0 ? 'Najpierw dodaj pliki' : '');
+  if(n === 0) resetZipdPanel();
 
   var btn = $('btnA');
   var isDec = (mode === 'dec' || mode === 'mix');
@@ -1105,7 +1138,7 @@ var baseName = cur.file.name
 var name = baseName + suffix + '.pdf';
       var blob = new Blob([out], {type:'application/pdf'});
       var url  = URL.createObjectURL(blob);
-      blobs.push(url); cur.result = {name:name, url:url, size:out.length};
+      blobs.push(url); cur.result = {name:name, url:url, size:out.length, opType:m};
       setSt(cur.id, 'done'); okCnt++;
       hkLog('Zapisano: '+name+' ('+fB(out.length)+')', 'ok');
       log('[OK] '+name+' ('+fB(out.length)+')','ok');
@@ -1184,6 +1217,8 @@ function softReset() {
   /* 2. Zwolnij wszystkie blob URL */
   blobs.forEach(function(u){ try{ URL.revokeObjectURL(u); }catch(_){} });
   blobs = []; files = []; uid = 0;
+  if(zipBlobUrl){ try{ URL.revokeObjectURL(zipBlobUrl); }catch(_){} zipBlobUrl = null; }
+  resetZipdPanel();
 
   /* 3. Ukryj nakładki (obrona przed zawieszeniem) */
   hkHide();
@@ -1229,6 +1264,165 @@ $('dlAll').onclick = function() {
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }, i*400);
   });
+};
+
+// ═══ ZIP Z HASŁEM (AES-256, format WinZip AE-2 — 7-Zip / WinRAR / PeaZip) ═══
+// Zero zależności sieciowych: korzysta wyłącznie z biblioteki 'cryptography',
+// którą silnik i tak już ładuje na potrzeby AES w PDF-ach.
+var PY_ZIP_SRC =
+'import struct, os, hmac, hashlib, time, json\n'+
+'from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes\n'+
+'from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC\n'+
+'from cryptography.hazmat.primitives import hashes as _c_hashes\n'+
+'from cryptography.hazmat.backends import default_backend as _c_backend\n'+
+'\n'+
+'_WZ_AES_VENDOR = b\'AE\'\n'+
+'_EXTRA_WZ_AES = 0x9901\n'+
+'\n'+
+'def _pdflock_pbkdf2(pwd, salt, dklen):\n'+
+'    kdf = PBKDF2HMAC(algorithm=_c_hashes.SHA1(), length=dklen, salt=salt, iterations=1000, backend=_c_backend())\n'+
+'    return kdf.derive(pwd)\n'+
+'\n'+
+'def _pdflock_aes_ctr_le(key, data):\n'+
+'    enc = Cipher(algorithms.AES(key), modes.ECB(), backend=_c_backend()).encryptor()\n'+
+'    out = bytearray()\n'+
+'    counter = 1\n'+
+'    for off in range(0, len(data), 16):\n'+
+'        chunk = data[off:off+16]\n'+
+'        ks = enc.update(counter.to_bytes(16, "little"))\n'+
+'        out.extend(bytes(a ^ b for a, b in zip(chunk, ks)))\n'+
+'        counter += 1\n'+
+'    return bytes(out)\n'+
+'\n'+
+'def _pdflock_dostime():\n'+
+'    t = time.localtime()\n'+
+'    dt = ((t.tm_hour & 0x1F) << 11) | ((t.tm_min & 0x3F) << 5) | ((t.tm_sec // 2) & 0x1F)\n'+
+'    dd = (((t.tm_year - 1980) & 0x7F) << 9) | ((t.tm_mon & 0xF) << 5) | (t.tm_mday & 0x1F)\n'+
+'    return dt, dd\n'+
+'\n'+
+'def pdflock_build_zip(entries_json, password, out_path):\n'+
+'    entries = json.loads(entries_json)\n'+
+'    pwd_bytes = password.encode("utf-8")\n'+
+'    out = bytearray()\n'+
+'    central_entries = []\n'+
+'    dt, dd = _pdflock_dostime()\n'+
+'    for e in entries:\n'+
+'        name_b = e["name"].encode("utf-8")\n'+
+'        with open(e["path"], "rb") as fh:\n'+
+'            data = fh.read()\n'+
+'        salt = os.urandom(16)\n'+
+'        keymat = _pdflock_pbkdf2(pwd_bytes, salt, 66)\n'+
+'        enckey, hmac_key, pwd_verify = keymat[:32], keymat[32:64], keymat[64:66]\n'+
+'        cipher = _pdflock_aes_ctr_le(enckey, data)\n'+
+'        mac = hmac.new(hmac_key, cipher, hashlib.sha1).digest()[:10]\n'+
+'        file_data = salt + pwd_verify + cipher + mac\n'+
+'        extra = struct.pack("<HHH2sBH", _EXTRA_WZ_AES, 7, 2, _WZ_AES_VENDOR, 3, 0)\n'+
+'        gp_flag = 0x0001 | 0x0800\n'+
+'        comp_method = 99\n'+
+'        crc = 0\n'+
+'        comp_size = len(file_data)\n'+
+'        uncomp_size = len(data)\n'+
+'        local_off = len(out)\n'+
+'        local_hdr = struct.pack("<IHHHHHIIIHH", 0x04034b50, 51, gp_flag, comp_method, dt, dd, crc, comp_size, uncomp_size, len(name_b), len(extra))\n'+
+'        out += local_hdr + name_b + extra + file_data\n'+
+'        central_hdr = struct.pack("<IHHHHHHIIIHHHHHII", 0x02014b50, 51, 51, gp_flag, comp_method, dt, dd, crc, comp_size, uncomp_size, len(name_b), len(extra), 0, 0, 0, 0, local_off)\n'+
+'        central_entries.append(central_hdr + name_b + extra)\n'+
+'    cd_start = len(out)\n'+
+'    for c in central_entries:\n'+
+'        out += c\n'+
+'    cd_size = len(out) - cd_start\n'+
+'    eocd = struct.pack("<IHHHHIIH", 0x06054b50, 0, 0, len(entries), len(entries), cd_size, cd_start, 0)\n'+
+'    out += eocd\n'+
+'    with open(out_path, "wb") as f:\n'+
+'        f.write(bytes(out))\n'+
+'    return len(out)\n';
+
+function resetZipdPanel() {
+  $('zipdPanel').classList.remove('show');
+  $('zpdErr').classList.remove('show'); $('zpdErr').textContent = '';
+  $('zipdGo').disabled = false; $('zipdGo').innerHTML = '📦 Utwórz i pobierz ZIP';
+}
+
+$('btnZipDirect').onclick = function() {
+  if(!zipEngineReady) { log('Silnik ZIP AES niedostępny w tej sesji.','er'); return; }
+  if(!files.length) return;
+  $('zipdPanel').classList.toggle('show');
+};
+
+function zpdFail(msg) {
+  $('zpdErr').textContent = '⚠️ ' + msg;
+  $('zpdErr').classList.add('show');
+}
+
+$('zipdGo').onclick = async function() {
+  if(zipBusy || !zipEngineReady) return;
+  $('zpdErr').classList.remove('show');
+
+  var pw = $('uP').value;
+  if(!pw) { zpdFail('Pole „Hasło użytkownika” jest puste — wpisz je, aby spakować ZIP.'); return; }
+
+  if(!files.length) { zpdFail('Brak dodanych plików do spakowania.'); return; }
+
+  zipBusy = true;
+  var btn = $('zipdGo'); btn.disabled = true; btn.innerHTML = '⏳ Pakowanie…';
+
+  var tmpPaths = [];
+  try {
+    var entries = [];
+    for(var i=0; i<files.length; i++) {
+      var f = files[i];
+      var buf, zname;
+      if(f.result && f.result.opType === 'enc') {
+        /* Plik zaszyfrowany w tej sesji -> do ZIP-a trafia oryginał
+           (bez hasła PDF), żeby jedynym zabezpieczeniem było hasło archiwum. */
+        buf = f.bytes;
+        zname = f.file.name;
+      } else if(f.result && f.result.opType === 'dec') {
+        /* Plik odszyfrowany w tej sesji -> wynik jest już bez hasła PDF. */
+        var resp = await fetch(f.result.url);
+        buf = new Uint8Array(await resp.arrayBuffer());
+        zname = f.result.name;
+      } else {
+        /* Plik jeszcze nieprzetworzony -> pakujemy dokładnie to, co dodano. */
+        buf = f.bytes;
+        zname = f.file.name;
+      }
+      var p = '/tmp/_zsrc_' + i + '.bin';
+      pyodide.FS.writeFile(p, buf);
+      tmpPaths.push(p);
+      entries.push({name: zname, path: p});
+    }
+
+    var outPath = '/tmp/_zpack.zip';
+    pyodide.globals.set('_zip_entries_json', JSON.stringify(entries));
+    pyodide.globals.set('_zip_pw', pw);
+    pyodide.globals.set('_zip_out', outPath);
+    var zsize = await pyodide.runPythonAsync('pdflock_build_zip(_zip_entries_json, _zip_pw, _zip_out)');
+
+    var zbytes = pyodide.FS.readFile(outPath);
+    if(zipBlobUrl) { try{ URL.revokeObjectURL(zipBlobUrl); }catch(_){} }
+    var blob = new Blob([zbytes], {type:'application/zip'});
+    zipBlobUrl = URL.createObjectURL(blob);
+
+    var d = new Date(), pad = function(n){return String(n).padStart(2,'0');};
+    var zname2 = 'PDF_Lock_' + d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'_'+pad(d.getHours())+pad(d.getMinutes()) + '.zip';
+
+    var a = document.createElement('a'); a.href = zipBlobUrl; a.download = zname2;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+
+    log('[OK] ZIP AES-256: ' + zname2 + ' (' + fB(Number(zsize)) + ', ' + entries.length + ' plik(ów))', 'ok');
+    btn.innerHTML = '✅ Pobrano ZIP';
+  } catch(e) {
+    console.error('[PDF_LOCK] zip build error', e);
+    zpdFail('Błąd tworzenia ZIP: ' + String(e.message || e));
+    btn.innerHTML = '📦 Utwórz i pobierz ZIP';
+  } finally {
+    tmpPaths.forEach(function(p){ try{ pyodide.FS.unlink(p); }catch(_){} });
+    try{ pyodide.FS.unlink('/tmp/_zpack.zip'); }catch(_){}
+    zipBusy = false;
+    btn.disabled = false;
+    setTimeout(function(){ if(btn.innerHTML.indexOf('Pobrano')!==-1) btn.innerHTML = '📦 Utwórz i pobierz ZIP'; }, 2200);
+  }
 };
 
 // ═══ PYODIDE INIT ═══
@@ -1451,11 +1645,22 @@ var _pypdfVer = '?';  /* wersja wykryta z nazwy .whl — bez importu Pythona */
       try { _pypdfVer = pyodide.runPython('import importlib.metadata; importlib.metadata.version("pypdf")'); } catch(_){}
     }
 
+    /* Silnik ZIP AES-256 (WinZip AE-2) — czysty Python + 'cryptography', zero dodatkowych pobrań */
+    try {
+      await pyodide.runPythonAsync(PY_ZIP_SRC);
+      zipEngineReady = true;
+      log('ZIP AES-256 \u2713','ok');
+    } catch(zerr) {
+      zipEngineReady = false;
+      log('ZIP AES: niedostępny w tej sesji','wa');
+      console.warn('[PDF_LOCK] zip engine init failed', zerr);
+    }
+
     ready = true; dot.className = 'ed ok';
     eP(100, 'Gotowy · Python '+pyVer+' · pypdf '+_pypdfVer+' · AES ✓');
     $('eBar').classList.add('h');
     $('logB').closest ? document.querySelector('.eng').classList.add('ok-state') : null;
-    log('Silnik ✓ (pypdf '+_pypdfVer+')','ok'); updBtn();
+    log('Silnik ✓ (pypdf '+_pypdfVer+')','ok'); updBtn(); updUI();
 
     /* Warm-up w tle */
     pyodide.runPythonAsync('from pypdf import PdfReader, PdfWriter').catch(function(){});
