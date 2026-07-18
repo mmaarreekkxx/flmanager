@@ -154,7 +154,8 @@
     /* ═══ HEADER ═══ */
     .hdr{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;gap:8px;padding:0 18px;height:48px;background:rgba(9,11,15,.82);backdrop-filter:blur(18px) saturate(1.1);-webkit-backdrop-filter:blur(18px) saturate(1.1);border-bottom:1px solid var(--border);box-shadow:0 1px 0 rgba(240,164,65,.06),0 12px 24px -8px rgba(0,0,0,.4)}
     .hdr-inner{display:flex;align-items:center;gap:11px;width:100%;max-width:960px;margin:0 auto}
-    .hdr-ico{width:27px;height:27px;background:linear-gradient(135deg,var(--accentDim),var(--accent));border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:0 0 10px rgba(240,164,65,.3),inset 0 1px 0 rgba(255,255,255,.15);flex-shrink:0}
+    .hdr-ico{width:27px;height:27px;background:linear-gradient(135deg,var(--accentDim),var(--accent));border-radius:6px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px rgba(240,164,65,.3),inset 0 1px 0 rgba(255,255,255,.15);flex-shrink:0}
+    .hdr-ico svg{display:block}
     .hdr-titles{display:flex;flex-direction:column;gap:2px}
     .hdr h1{font-size:13px;font-weight:900;letter-spacing:2.6px;text-transform:uppercase;line-height:1;color:var(--text)}
     .hdr-s{font-size:9px;color:var(--muted);font-family:var(--mono);letter-spacing:1px;text-transform:uppercase}
@@ -499,7 +500,14 @@
 <div id="app">
   <div class="hdr">
     <div class="hdr-inner">
-      <div class="hdr-ico">🔒</div>
+      <div class="hdr-ico">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="5" y="11" width="14" height="10" rx="2.4" stroke="#0e0b06" stroke-width="1.8"/>
+          <path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="#0e0b06" stroke-width="1.8" stroke-linecap="round"/>
+          <circle cx="12" cy="15.4" r="1.35" fill="#0e0b06"/>
+          <path d="M12 16.7v1.6" stroke="#0e0b06" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </div>
       <div class="hdr-titles">
         <h1>PDF_Lock</h1>
         <div class="hdr-s">SZYFRUJ / ODSZYFRUJ PDF</div>
@@ -811,8 +819,6 @@ function updUI() {
   if(n){ $('fcnt').classList.add('show'); $('fcntN').textContent=n; $('fcntE').textContent=encCnt+' zaszyfr.'; $('fcntO').textContent=opnCnt+' otwartych'; }
   else $('fcnt').classList.remove('show');
 
-  $('btnZipDirect').disabled = !zipEngineReady || n === 0;
-  $('btnZipDirect').title = !zipEngineReady ? 'Silnik ZIP AES niedostępny w tej sesji' : (n === 0 ? 'Najpierw dodaj pliki' : '');
   if(n === 0) resetZipdPanel();
 
   var btn = $('btnA');
@@ -854,6 +860,10 @@ function updBtn() {
   if(!isDec) ok = ok && (pw === cp);
   if($('ownerChk').checked && !isDec) ok = ok && $('oP').value.length > 0;
   $('btnA').disabled = !ok;
+
+  var n = files.length;
+  $('btnZipDirect').disabled = !zipEngineReady || n === 0 || !pw;
+  $('btnZipDirect').title = !zipEngineReady ? 'Silnik ZIP AES niedostępny w tej sesji' : (n === 0 ? 'Najpierw dodaj pliki' : (!pw ? 'Wpisz hasło, aby spakować ZIP' : ''));
 }
 
 // ═══ DETECT ENCRYPTION ═══
