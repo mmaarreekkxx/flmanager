@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XLSX SAFE COMPRESS · Dark Ops</title>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+    <style>
+        :root{--bg:#060b14;--bg2:#0a1220;--bg3:#0e1829;--card:#0d1826;--card-border:rgba(37,210,255,.12);--primary:#25d2ff;--primary-dim:rgba(37,210,255,.15);--primary-glow:rgba(37,210,255,.35);--emerald:#34d399;--amber:#fbbf24;--rose:#fb7185;--sky:#7dd3fc;--violet:#a78bfa;--muted:rgba(148,163,184,.55);--text:#d1e8f0;--font-ui:'Exo 2',sans-serif;--font-mono:'Space Mono',monospace;--r:8px;--sidebar-w:256px;--header-h:54px;--bottombar-h:42px}
+        *{margin:0;padding:0;box-sizing:border-box}
+        html,body{overflow:hidden;height:100%}
+        body{font-family:var(--font-ui);background:var(--bg);color:var(--text)}
+        ::-webkit-scrollbar{width:5px;height:5px}
+        ::-webkit-scrollbar-track{background:transparent}
+        ::-webkit-scrollbar-thumb{background:rgba(37,210,255,.25);border-radius:4px}
+
+        #app{display:grid;grid-template-columns:var(--sidebar-w) 1fr;grid-template-rows:var(--header-h) 1fr;height:100vh;overflow:hidden}
+        @media(max-width:1100px){#app{grid-template-columns:1fr}#sidebar{display:none}#topbar,#main{grid-column:1}#bottombar{left:0}}
+
+        /* SIDEBAR */
+        #sidebar{grid-column:1;grid-row:1/3;background:var(--bg2);border-right:1px solid var(--card-border);display:flex;flex-direction:column;overflow-y:auto}
+        .sidebar-logo{padding:22px 20px 18px;border-bottom:1px solid var(--card-border)}
+        .sidebar-logo h2{font-size:17px;font-weight:700;letter-spacing:.06em;color:var(--primary);display:flex;align-items:center;gap:10px}
+        .sidebar-logo h2 svg{width:20px;height:20px;flex-shrink:0}
+        .sidebar-logo .logo-sub{font-size:10px;color:var(--muted);margin-top:4px;letter-spacing:.04em}
+        .nav-section{padding:14px 12px 8px}
+        .nav-section-label{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 10px 8px}
+        .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r);cursor:pointer;transition:background .15s,color .15s;font-size:13px;color:var(--muted);margin-bottom:2px;position:relative}
+        .nav-item:hover{background:var(--primary-dim);color:var(--text)}
+        .nav-item.active{background:var(--primary-dim);color:var(--primary);font-weight:600}
+        .nav-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:18px;background:var(--primary);border-radius:0 3px 3px 0}
+        .nav-item svg{width:15px;height:15px;flex-shrink:0}
+        .nav-item .nav-badge{margin-left:auto;font-family:var(--font-mono);font-size:9px;padding:1px 6px;border-radius:4px;background:rgba(37,210,255,.1);color:var(--primary);border:1px solid rgba(37,210,255,.2)}
+        .sidebar-divider{height:1px;background:var(--card-border);margin:8px 12px}
+        .sidebar-footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--card-border)}
+        .sidebar-footer-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+        .sidebar-footer-label{font-size:10px;color:var(--muted)}
+        .sidebar-footer .version{font-family:var(--font-mono);font-size:10px;color:var(--primary);opacity:.7}
+        .sidebar-footer .engine{font-size:9px;color:var(--muted);opacity:.6;margin-top:4px}
+        .switch{position:relative;width:36px;height:20px;cursor:pointer;display:inline-block}
+        .switch input{display:none}
+        .switch-track{position:absolute;inset:0;background:rgba(148,163,184,.3);border-radius:10px;transition:background .2s}
+        .switch input:checked+.switch-track{background:var(--primary)}
+        .switch-thumb{position:absolute;top:3px;left:3px;width:14px;height:14px;background:#fff;border-radius:50%;transition:transform .2s}
+        .switch input:checked~.switch-thumb{transform:translateX(16px)}
+
+        /* TOPBAR */
+        #topbar{grid-column:2;grid-row:1;background:rgba(6,11,20,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--card-border);padding:0 20px;display:flex;align-items:center;justify-content:space-between}
+        .topbar-left{display:flex;align-items:center;gap:14px}
+        .topbar-title{font-size:14px;font-weight:600;color:var(--text);letter-spacing:.03em}
+        .topbar-breadcrumb{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px}
+        .topbar-breadcrumb svg{width:12px;height:12px;opacity:.5}
+        .topbar-right{display:flex;align-items:center;gap:14px;font-family:var(--font-mono);font-size:12px;color:var(--muted)}
+        .topbar-sep{width:1px;height:18px;background:var(--card-border)}
+        .badge-live{border:1px solid rgba(52,211,153,.4);color:var(--emerald);background:rgba(52,211,153,.08);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:5px}
+        .dot-online{width:7px;height:7px;border-radius:50%;background:var(--emerald);animation:pulse 2s infinite}
+        .topbar-icon-btn{width:32px;height:32px;border-radius:6px;border:1px solid var(--card-border);background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+        .topbar-icon-btn:hover{background:var(--primary-dim);color:var(--primary);border-color:rgba(37,210,255,.25)}
+        .topbar-icon-btn svg{width:14px;height:14px}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+        /* MAIN — padding-bottom dla bottombar */
+        #main{grid-column:2;grid-row:2;overflow-y:auto;padding:18px 20px calc(var(--bottombar-h) + 20px) 20px;background:radial-gradient(ellipse at 50% 0%,rgba(37,210,255,.03),transparent 60%)}
+        .grid-12{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+        .col-12{grid-column:span 12}.col-8{grid-column:span 8}.col-7{grid-column:span 7}
+        .col-6{grid-column:span 6}.col-5{grid-column:span 5}.col-4{grid-column:span 4}
+        @media(max-width:900px){.col-8,.col-7,.col-6,.col-5,.col-4{grid-column:span 12}}
+
+        /* CARDS */
+        .card{background:var(--card);border:1px solid var(--card-border);border-radius:10px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.3);transition:box-shadow .3s}
+        .card:hover{box-shadow:0 4px 24px rgba(0,0,0,.4),0 0 30px rgba(37,210,255,.03)}
+        .card-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--card-border)}
+        .card-title{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+        .card-title svg{width:14px;height:14px;color:var(--primary);flex-shrink:0}
+        .card-header-right{display:flex;align-items:center;gap:8px}
+        .card-header-tag{font-family:var(--font-mono);font-size:9px;padding:2px 8px;border-radius:4px;border:1px solid rgba(37,210,255,.2);color:var(--primary);background:rgba(37,210,255,.06)}
+        .card-body{padding:16px}
+
+        /* DROP */
+        .drop{border:2px dashed rgba(37,210,255,.18);border-radius:12px;padding:48px 24px;text-align:center;cursor:pointer;transition:all .3s;background:rgba(37,210,255,.02);position:relative;overflow:hidden}
+        .drop::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(37,210,255,.04),transparent 70%);opacity:0;transition:opacity .3s}
+        .drop:hover::before,.drop.over::before{opacity:1}
+        .drop:hover,.drop.over{border-color:var(--primary);background:var(--primary-dim);box-shadow:0 0 40px rgba(37,210,255,.08)}
+        .drop.hidden{display:none}
+        .drop-icon{color:var(--primary);opacity:.6;margin-bottom:16px;position:relative}
+        .drop-icon-glow{position:absolute;inset:-20px;background:radial-gradient(circle,rgba(37,210,255,.15),transparent 70%);pointer-events:none}
+        .drop h3{font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px}
+        .drop p{font-size:12px;color:var(--muted)}
+        .drop .drop-hint{font-size:10px;color:var(--muted);opacity:.6;margin-top:4px}
+        input[type=file]{display:none}
+
+        /* BUTTONS */
+        .btn-primary{background:var(--primary);color:var(--bg);padding:8px 18px;border-radius:6px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:6px;transition:all .15s;border:none;cursor:pointer;font-family:var(--font-ui);position:relative;overflow:hidden}
+        .btn-primary::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);opacity:0;transition:opacity .15s}
+        .btn-primary:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 4px 16px rgba(37,210,255,.25)}
+        .btn-primary:hover::after{opacity:1}
+        .btn-primary:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+        .btn-primary.full{width:100%;justify-content:center;padding:12px 18px;margin-top:14px;font-size:13px}
+        .btn-download{display:none;width:100%;padding:14px;background:linear-gradient(135deg,#1e40af,#2563eb);color:#fff;border:none;border-radius:var(--r);font-family:var(--font-ui);font-size:13px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;transition:all .15s;margin-top:14px;position:relative;overflow:hidden}
+        .btn-download::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.1),transparent);opacity:0;transition:opacity .15s}
+        .btn-download:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 4px 16px rgba(37,99,235,.35)}
+        .btn-download:hover::after{opacity:1}
+        .btn-reset{display:none;width:100%;padding:10px;background:transparent;border:1px solid var(--card-border);color:var(--muted);border-radius:var(--r);font-family:var(--font-ui);font-size:12px;cursor:pointer;transition:all .15s;margin-top:8px}
+        .btn-reset:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-dim)}
+
+        /* FILE META */
+        .file-meta{display:none;align-items:center;gap:12px;padding:12px 14px;background:var(--bg3);border:1px solid var(--card-border);border-radius:var(--r);margin-bottom:14px}
+        .file-meta.show{display:flex;animation:fadeIn .3s ease}
+        .file-meta-icon{width:40px;height:40px;background:linear-gradient(135deg,rgba(37,210,255,.15),rgba(37,210,255,.05));border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--primary);flex-shrink:0;border:1px solid rgba(37,210,255,.1)}
+        .file-meta-icon svg{width:18px;height:18px}
+        .file-meta-info{flex:1;min-width:0}
+        .file-meta-name{font-size:13px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .file-meta-detail{display:flex;align-items:center;gap:8px;margin-top:3px}
+        .file-meta-size{font-family:var(--font-mono);font-size:11px;color:var(--primary)}
+        .file-meta-type{font-size:10px;color:var(--muted);padding:1px 6px;background:rgba(37,210,255,.06);border:1px solid rgba(37,210,255,.12);border-radius:3px}
+        .file-meta-remove{width:28px;height:28px;border-radius:6px;border:1px solid rgba(251,113,133,.2);background:rgba(251,113,133,.06);color:var(--rose);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;flex-shrink:0}
+        .file-meta-remove:hover{background:rgba(251,113,133,.15);border-color:rgba(251,113,133,.4)}
+        .file-meta-remove svg{width:12px;height:12px}
+
+        /* STATS */
+        .stat-row{display:none;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+        .stat-row.show{display:grid;animation:fadeIn .35s ease}
+        @media(max-width:700px){.stat-row.show{grid-template-columns:repeat(2,1fr)}}
+        .stat-box{background:var(--bg3);border:1px solid var(--card-border);border-radius:var(--r);padding:12px 14px;position:relative;overflow:hidden;transition:border-color .15s}
+        .stat-box:hover{border-color:rgba(37,210,255,.2)}
+        .stat-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:2px 2px 0 0}
+        .stat-box:nth-child(1)::before{background:var(--primary)}
+        .stat-box:nth-child(2)::before{background:var(--amber)}
+        .stat-box:nth-child(3)::before{background:var(--emerald)}
+        .stat-box:nth-child(4)::before{background:var(--sky)}
+        .stat-box .s-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+        .stat-box .s-value{font-family:var(--font-mono);font-size:18px;font-weight:700}
+        .stat-box .s-sub{font-size:9px;color:var(--muted);margin-top:3px}
+
+        /* PHASE + PROGRESS */
+        .phase{display:none;align-items:center;gap:10px;margin-bottom:12px;padding:10px 14px;background:var(--bg3);border:1px solid var(--card-border);border-radius:var(--r)}
+        .phase.show{display:flex;animation:fadeIn .2s ease}
+        .phase-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;box-shadow:0 0 8px currentColor}
+        .phase-dot.active{animation:blink 1s infinite}
+        @keyframes blink{0%,100%{opacity:1;box-shadow:0 0 8px currentColor}50%{opacity:.2;box-shadow:none}}
+        .phase-label{font-size:12px;color:var(--text);flex:1}
+        .phase-label span{font-family:var(--font-mono);font-size:11px;color:var(--primary);margin-left:6px}
+        .phase-time{font-family:var(--font-mono);font-size:10px;color:var(--muted)}
+
+        .prog-wrap{display:none;margin-top:14px}
+        .prog-wrap.show{display:block;animation:fadeIn .2s ease}
+        .prog-track{width:100%;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;position:relative}
+        .prog-track::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.05),transparent);animation:shimmer 2s infinite}
+        @keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+        .prog-fill{height:100%;width:0%;border-radius:3px;transition:width .12s;position:relative;z-index:1}
+        .prog-fill.reading{background:linear-gradient(90deg,var(--sky),var(--primary))}
+        .prog-fill.compressing{background:linear-gradient(90deg,var(--primary),var(--emerald))}
+        .prog-label{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:8px}
+        .prog-label span:last-child{font-family:var(--font-mono);color:var(--primary);opacity:.8}
+
+        #status{margin-top:16px;font-size:13px;color:var(--muted);line-height:1.7;min-height:20px}
+        #status b.ok{color:var(--emerald)}#status b.warn{color:var(--amber)}#status b.err{color:var(--rose)}
+
+        /* BARS */
+        .bars{display:none;margin-top:16px;padding:14px;background:var(--bg3);border:1px solid var(--card-border);border-radius:var(--r)}
+        .bars.show{display:block;animation:fadeIn .4s ease}
+        .bars-title{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;text-align:center}
+        .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+        .bar-row:last-of-type{margin-bottom:0}
+        .bar-lbl{width:70px;font-size:11px;color:var(--muted);text-align:right;flex-shrink:0}
+        .bar-track{flex:1;background:rgba(255,255,255,.03);border-radius:6px;height:28px;overflow:hidden;border:1px solid rgba(255,255,255,.04)}
+        .bar-fill{height:100%;border-radius:5px;display:flex;align-items:center;padding:0 12px;font-family:var(--font-mono);font-size:10px;font-weight:700;color:#fff;white-space:nowrap;transition:width .8s cubic-bezier(.22,1,.36,1)}
+        .bar-orig{background:linear-gradient(90deg,#1e3a5f,#3b82f6)}
+        .bar-comp{background:linear-gradient(90deg,#134e38,var(--emerald))}
+        .bar-diff{display:flex;justify-content:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--card-border)}
+        .bar-diff-inner{text-align:center}
+        .bar-diff-val{font-family:var(--font-mono);font-size:22px;font-weight:700}
+        .bar-diff-desc{font-size:10px;color:var(--muted);margin-top:2px}
+
+        /* DETAILS */
+        .details-toggle{display:none;background:none;border:1px solid var(--card-border);color:var(--muted);padding:7px 14px;border-radius:6px;cursor:pointer;font-size:11px;font-family:var(--font-ui);transition:all .15s;margin:14px auto 0;width:100%;text-align:center}
+        .details-toggle:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-dim)}
+        .details-wrap{display:none;max-height:400px;overflow-y:auto;margin-top:10px;border:1px solid var(--card-border);border-radius:var(--r);background:var(--bg3)}
+        .details-wrap.show{display:block;animation:fadeIn .3s ease}
+        .details-summary{text-align:center;padding:10px 14px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--card-border);background:rgba(14,24,41,.5)}
+        .details-summary strong{color:var(--emerald)}
+        .dtable{width:100%;border-collapse:collapse}
+        .dtable thead{background:rgba(14,24,41,.9);position:sticky;top:0;z-index:2}
+        .dtable th{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:10px 12px;text-align:left;border-bottom:1px solid var(--card-border)}
+        .dtable td{padding:8px 12px;border-bottom:1px solid rgba(37,210,255,.06);color:var(--text);font-size:12px}
+        .dtable tbody tr{transition:background .1s}
+        .dtable tbody tr:hover td{background:var(--primary-dim)}
+        .dtable tbody tr:nth-child(even) td{background:rgba(255,255,255,.01)}
+        .mono{font-family:var(--font-mono);font-weight:700;font-size:11px}
+        .pos{color:var(--emerald)}.neg{color:var(--rose)}.neu{color:var(--muted)}
+        .mini-bar{display:inline-block;height:3px;border-radius:2px;vertical-align:middle;margin-left:5px}
+        .method-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600}
+        .method-deflate{border:1px solid rgba(52,211,153,.35);color:var(--emerald);background:rgba(52,211,153,.08)}
+        .method-stored{border:1px solid rgba(251,191,36,.35);color:var(--amber);background:rgba(251,191,36,.08)}
+        .ft{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:6px;flex-shrink:0}
+        .ft-xml{background:var(--primary)}.ft-rels{background:var(--violet)}.ft-bin{background:var(--amber)}.ft-other{background:var(--muted)}
+
+        /* ALERTS */
+        .alert-item{display:flex;align-items:flex-start;gap:12px;padding:12px;border-radius:var(--r);border:1px solid var(--card-border);margin-bottom:8px;font-size:12px;line-height:1.6}
+        .alert-item:last-child{margin-bottom:0}
+        .alert-item svg{width:16px;height:16px;flex-shrink:0;margin-top:1px}
+        .alert-item.ok{border-left:3px solid var(--emerald);background:rgba(52,211,153,.03)}
+        .alert-item.warn{border-left:3px solid var(--amber);background:rgba(251,191,36,.03)}
+        .alert-item.info{border-left:3px solid var(--sky);background:rgba(125,211,252,.03)}
+        .alert-item strong{color:var(--text)}
+
+        /* TECH LIST */
+        .tech-list{list-style:none;padding:0}
+        .tech-list li{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:11px;color:var(--muted);border-bottom:1px solid rgba(37,210,255,.06)}
+        .tech-list li:last-child{border-bottom:none}
+        .tech-list li svg{width:12px;height:12px;color:var(--primary);flex-shrink:0}
+        .tech-list .tech-val{margin-left:auto;font-family:var(--font-mono);font-size:10px;color:var(--text)}
+
+        /* ANIMATIONS */
+        .reveal{opacity:0;transform:translateY(22px);transition:opacity .45s cubic-bezier(.22,1,.36,1),transform .45s cubic-bezier(.22,1,.36,1)}
+        .reveal.visible{opacity:1;transform:none}
+        .reveal:nth-child(1){transition-delay:0s}.reveal:nth-child(2){transition-delay:.08s}.reveal:nth-child(3){transition-delay:.16s}.reveal:nth-child(4){transition-delay:.24s}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+        /* BOTTOM BAR */
+        #bottombar{position:fixed;bottom:0;right:0;left:var(--sidebar-w);height:var(--bottombar-h);z-index:100;background:rgba(6,11,20,.96);backdrop-filter:blur(18px);border-top:1px solid rgba(37,210,255,.1);box-shadow:0 -4px 24px rgba(0,0,0,.3);padding:0 18px;display:flex;align-items:center;gap:16px;font-size:10px;color:var(--muted)}
+        @media(max-width:1100px){#bottombar{left:0}}
+        .bb-item{display:flex;align-items:center;gap:5px}
+        .bb-item svg{width:11px;height:11px;color:var(--primary);opacity:.6}
+        .bb-sep{width:1px;height:14px;background:var(--card-border)}
+        .bb-val{font-family:var(--font-mono);color:var(--primary);opacity:.7}
+    </style>
+</head>
+<body>
+<div id="app">
+
+    <aside id="sidebar">
+        <div class="sidebar-logo">
+            <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>XLSX COMPRESS</h2>
+            <div class="logo-sub">Safe Recompression Engine</div>
+        </div>
+        <nav class="nav-section">
+            <div class="nav-section-label">Operations</div>
+            <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Kompresor<span class="nav-badge">ACTIVE</span></div>
+            <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Analiza struktury</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Batch Processing</div>
+        </nav>
+        <div class="sidebar-divider"></div>
+        <nav class="nav-section">
+            <div class="nav-section-label">System</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Ustawienia</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>O narzędziu</div>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="sidebar-footer-row"><span class="sidebar-footer-label">Dark Mode</span><label class="switch"><input type="checkbox" checked><span class="switch-track"></span><span class="switch-thumb"></span></label></div>
+            <div class="version">v7.2 · pako Deflate 9</div>
+            <div class="engine">Engine: pako 2.1.0 · ZipWriter native</div>
+        </div>
+    </aside>
+
+    <header id="topbar">
+        <div class="topbar-left">
+            <span class="topbar-title">Safe Compress</span>
+            <div class="topbar-breadcrumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg><span>Kompresor XLSX</span></div>
+        </div>
+        <div class="topbar-right">
+            <span class="badge-live"><span class="dot-online"></span>OFFLINE</span>
+            <div class="topbar-sep"></div>
+            <button class="topbar-icon-btn" title="Reset / Nowy plik" onclick="resetAll()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            </button>
+            <div class="topbar-sep"></div>
+            <span id="clock">--:--:--</span>
+        </div>
+    </header>
+
+    <main id="main">
+        <div class="grid-12">
+            <div class="col-8 reveal">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Kompresor</div>
+                        <div class="card-header-right"><span class="card-header-tag">DEFLATE-9</span><span class="card-header-tag">SAFE</span></div>
+                    </div>
+                    <div class="card-body">
+                        <div class="drop" id="dropZone">
+                            <div class="drop-icon" style="position:relative"><div class="drop-icon-glow"></div><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg></div>
+                            <h3>Przeciągnij plik .xlsx tutaj</h3>
+                            <p>lub kliknij aby wybrać z dysku</p>
+                            <div class="drop-hint">Obsługiwane: .xlsx (Open XML Spreadsheet)</div>
+                            <button class="btn-primary" style="margin-top:16px" onclick="event.stopPropagation();document.getElementById('fi').click()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Wybierz plik</button>
+                            <input type="file" id="fi" accept=".xlsx">
+                        </div>
+
+                        <div class="file-meta" id="fileMeta">
+                            <div class="file-meta-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+                            <div class="file-meta-info"><div class="file-meta-name" id="fName"></div><div class="file-meta-detail"><span class="file-meta-size" id="fSize"></span><span class="file-meta-type">XLSX</span></div></div>
+                            <button class="file-meta-remove" onclick="resetAll()" title="Usuń"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                        </div>
+
+                        <div class="stat-row" id="statsRow">
+                            <div class="stat-box"><p class="s-label">Rozmiar ZIP</p><p class="s-value" style="color:var(--primary)" id="sZip">—</p></div>
+                            <div class="stat-box"><p class="s-label">Rozpakowany</p><p class="s-value" style="color:var(--amber)" id="sRaw">—</p></div>
+                            <div class="stat-box"><p class="s-label">Kompresja</p><p class="s-value" style="color:var(--emerald)" id="sRat">—</p></div>
+                            <div class="stat-box"><p class="s-label">Elementy</p><p class="s-value" style="color:var(--sky)" id="sCnt">—</p><p class="s-sub" id="sMet">—</p></div>
+                        </div>
+
+                        <button class="details-toggle" id="structBtn" onclick="toggle('structWrap','structBtn','strukturę XLSX')">📋 Pokaż strukturę XLSX</button>
+                        <div class="details-wrap" id="structWrap"></div>
+
+                        <div class="phase" id="phase"><div class="phase-dot" id="pDot" style="background:var(--sky);color:var(--sky)"></div><div class="phase-label" id="pLabel"></div><div class="phase-time" id="pTime"></div></div>
+                        <div class="prog-wrap" id="progWrap"><div class="prog-track"><div class="prog-fill reading" id="progFill"></div></div><div class="prog-label"><span id="progText">—</span><span id="progPct">0%</span></div></div>
+
+                        <div id="status"></div>
+
+                        <div class="bars" id="bars">
+                            <div class="bars-title">Porównanie rozmiarów</div>
+                            <div class="bar-row"><span class="bar-lbl">Oryginał</span><div class="bar-track"><div class="bar-fill bar-orig" id="bOrig"></div></div></div>
+                            <div class="bar-row"><span class="bar-lbl">Nowy</span><div class="bar-track"><div class="bar-fill bar-comp" id="bComp"></div></div></div>
+                            <div class="bar-diff" id="barDiff"></div>
+                        </div>
+
+                        <button class="details-toggle" id="resBtn" onclick="toggle('resWrap','resBtn','porównanie elementów')">📋 Pokaż porównanie elementów</button>
+                        <div class="details-wrap" id="resWrap"></div>
+
+                        <a class="btn-download" id="dlBtn">⬇ Pobierz</a>
+                        <button class="btn-reset" id="rstBtn" onclick="resetAll()">Kompresuj kolejny plik</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-4">
+                <div class="card reveal" style="margin-bottom:16px">
+                    <div class="card-header"><div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Bezpieczeństwo</div></div>
+                    <div class="card-body">
+                        <div class="alert-item ok"><svg viewBox="0 0 24 24" fill="none" stroke="var(--emerald)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><div><strong>Zachowane:</strong> connections.xml, queryTables, externalLinks, customXml, Power Query, relacje .rels</div></div>
+                        <div class="alert-item info"><svg viewBox="0 0 24 24" fill="none" stroke="var(--sky)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><div>Narzędzie nie parsuje Excela. Nie edytuje XML. Tylko bezpieczna rekompresja archiwum ZIP.</div></div>
+                    </div>
+                </div>
+                <div class="card reveal" style="margin-bottom:16px">
+                    <div class="card-header"><div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Specyfikacja</div></div>
+                    <div class="card-body" style="padding:12px 16px">
+                        <ul class="tech-list">
+                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Algorytm<span class="tech-val">Deflate</span></li>
+                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>Poziom<span class="tech-val">9 (MAX)</span></li>
+                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Silnik<span class="tech-val">pako 2.1.0</span></li>
+                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Tryb<span class="tech-val">SAFE</span></li>
+                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Prywatność<span class="tech-val">OFFLINE</span></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card reveal">
+                    <div class="card-header"><div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Uwagi</div></div>
+                    <div class="card-body"><div class="alert-item warn"><svg viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><div>Jeśli plik jest już optymalnie spakowany — wynik będzie taki sam. To <strong>normalne</strong>. Zachowaj kopię oryginału.</div></div></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="bottombar">
+        <div class="bb-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>Safe Mode</span></div>
+        <div class="bb-sep"></div>
+        <div class="bb-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Deflate</span><span class="bb-val">LVL 9</span></div>
+        <div class="bb-sep"></div>
+        <div class="bb-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Offline</span></div>
+        <div class="bb-sep"></div>
+        <div class="bb-item" style="margin-left:auto"><span>Przetworzono:</span><span class="bb-val" id="bbCount">0</span></div>
+    </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const dropZone=$('dropZone'),fi=$('fi'),fileMeta=$('fileMeta'),fName=$('fName'),fSize=$('fSize'),statsRow=$('statsRow'),
+phase=$('phase'),pDot=$('pDot'),pLabel=$('pLabel'),pTime=$('pTime'),
+progWrap=$('progWrap'),progFill=$('progFill'),progText=$('progText'),progPct=$('progPct'),
+status=$('status'),bars=$('bars'),dlBtn=$('dlBtn'),rstBtn=$('rstBtn'),
+structBtn=$('structBtn'),structWrap=$('structWrap'),resBtn=$('resBtn'),resWrap=$('resWrap');
+
+let _file=null,_entries=null,_cnt=0,_t0=0;
+
+setInterval(()=>{$('clock').textContent=new Date().toLocaleTimeString('pl-PL',{hour12:false})},1000);
+
+const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')})},{threshold:.08,rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('over')});
+dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('over'));
+dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('over');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0])});
+dropZone.addEventListener('click',e=>{if(e.target.tagName!=='BUTTON')fi.click()});
+fi.onchange=e=>{if(e.target.files[0])handleFile(e.target.files[0])};
+
+function showPhase(t,c){phase.classList.add('show');pDot.style.background=c;pDot.style.color=c;pDot.classList.add('active');pLabel.innerHTML=t}
+function showProg(p,t){progWrap.classList.add('show');progFill.style.width=p+'%';progPct.textContent=p+'%';if(t)progText.textContent=t}
+function hideProg(){phase.classList.remove('show');pDot.classList.remove('active');progWrap.classList.remove('show');progFill.style.width='0%';pTime.textContent=''}
+function tick(){return new Promise(r=>setTimeout(r,8))}
+function readFileProg(f){return new Promise((res,rej)=>{const r=new FileReader();r.onprogress=e=>{if(e.lengthComputable)showProg(Math.round(e.loaded/e.total*100),`Wczytywanie: ${fmt(e.loaded)} / ${fmt(e.total)}`)};r.onload=()=>res(r.result);r.onerror=()=>rej(new Error('Błąd odczytu'));r.readAsArrayBuffer(f)})}
+function toggle(wId,bId,label){const w=$(wId),b=$(bId);w.classList.toggle('show');b.textContent=w.classList.contains('show')?`📋 Ukryj ${label}`:`📋 Pokaż ${label}`}
+function ftc(n){if(n.endsWith('.xml'))return'ft-xml';if(n.endsWith('.rels'))return'ft-rels';if(n.includes('.bin')||n.includes('.png')||n.includes('.jpeg')||n.includes('.emf'))return'ft-bin';return'ft-other'}
+
+function buildStructTable(entries){
+    const items=entries.map(e=>({name:e.name,u:e.uncompressedSize||e.data.length,c:e.compressedSize||e.data.length,m:e.method})).sort((a,b)=>b.u-a.u);
+    let tU=0,tC=0;items.forEach(e=>{tU+=e.u;tC+=e.c});
+    let h=`<div class="details-summary">Łącznie: <strong>${fmt(tC)}</strong> ZIP z <strong>${fmt(tU)}</strong> rozpakowane · ${items.length} elementów</div>`;
+    h+=`<table class="dtable"><thead><tr><th>Element</th><th>Rozpakowany</th><th>ZIP</th><th>Kompresja</th><th>Metoda</th></tr></thead><tbody>`;
+    items.forEach(e=>{const r=e.u>0?((1-e.c/e.u)*100):0,bW=Math.min(50,r*.5);const badge=e.m===8?'<span class="method-badge method-deflate">DEFLATE</span>':'<span class="method-badge method-stored">STORED</span>';h+=`<tr><td><span class="ft ${ftc(e.name)}"></span>${esc(e.name)}</td><td class="mono">${fmt(e.u)}</td><td class="mono">${fmt(e.c)}</td><td class="mono pos">${r.toFixed(1)}%<span class="mini-bar" style="width:${bW}px;background:var(--emerald)"></span></td><td>${badge}</td></tr>`});
+    h+='</tbody></table>';structWrap.innerHTML=h;
+}
+
+function buildResultTable(cd){
+    const sorted=[...cd].sort((a,b)=>(b.oc-b.nc)-(a.oc-a.nc));let tS=0;sorted.forEach(e=>tS+=(e.oc-e.nc));
+    let sm=Math.abs(tS)>50?`<div class="details-summary">Łączna oszczędność: <strong>−${fmt(tS)}</strong> w ${sorted.length} elementach</div>`:`<div class="details-summary">Brak dodatkowej oszczędności — plik już optymalnie skompresowany</div>`;
+    let h=sm+`<table class="dtable"><thead><tr><th>Element</th><th>Rozpakowany</th><th>Oryg. ZIP</th><th>Nowy ZIP</th><th>Różnica</th></tr></thead><tbody>`;
+    sorted.forEach(e=>{const d=e.oc-e.nc,dp=e.oc>0?(d/e.oc*100):0;const cls=Math.abs(d)<16?'neu':d>0?'pos':'neg';const sign=Math.abs(d)<16?'':d>0?'−':'+';const bW=Math.min(40,Math.abs(dp)*.4),bC=d>0?'var(--emerald)':'var(--rose)';h+=`<tr><td><span class="ft ${ftc(e.name)}"></span>${esc(e.name)}</td><td class="mono">${fmt(e.u)}</td><td class="mono">${fmt(e.oc)}</td><td class="mono">${fmt(e.nc)}</td><td class="mono ${cls}">${Math.abs(d)<16?'—':sign+fmt(Math.abs(d))+' ('+sign+Math.abs(dp).toFixed(1)+'%)'}${Math.abs(d)>=16?`<span class="mini-bar" style="width:${bW}px;background:${bC}"></span>`:''}</td></tr>`});
+    h+='</tbody></table>';resWrap.innerHTML=h;
+}
+
+async function handleFile(file){
+    resetAll();
+    if(!file.name.toLowerCase().endsWith('.xlsx')){status.innerHTML='<b class="err">Tylko pliki .xlsx</b>';return}
+    dropZone.classList.add('hidden');fName.textContent=file.name;fSize.textContent=fmt(file.size);fileMeta.classList.add('show');
+    try{
+        progFill.className='prog-fill reading';showPhase('Wczytywanie pliku<span>'+fmt(file.size)+'</span>','var(--sky)');showProg(0,'Wczytywanie...');
+        const buffer=await readFileProg(file);_file=file;showProg(100,'Wczytano!');await tick();
+        showPhase('Parsowanie archiwum ZIP','var(--primary)');showProg(0,'Rozpakowywanie...');await tick();
+        const entries=readZip(buffer);_entries=entries;
+        const items=entries.filter(e=>!e.isDir);let tU=0,dc=0,sc=0;items.forEach(e=>{tU+=e.data.length;if(e.method===8)dc++;else sc++});
+        const ratio=tU>0?((1-file.size/tU)*100).toFixed(1):'0';
+        $('sZip').textContent=fmt(file.size);$('sRaw').textContent=fmt(tU);$('sRat').textContent=ratio+'%';$('sCnt').textContent=items.length;$('sMet').textContent=dc+' Deflate · '+sc+' Stored';
+        statsRow.classList.add('show');buildStructTable(items);structBtn.style.display='block';
+        showProg(100,items.length+' elementów');await tick();hideProg();
+        status.innerHTML='Plik gotowy do kompresji.';
+        const cb=document.createElement('button');cb.className='btn-primary full';cb.id='compBtn';
+        cb.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Kompresuj bezpiecznie (Deflate 9)';
+        cb.onclick=()=>compress(cb);status.after(cb);
+    }catch(err){hideProg();status.innerHTML=`<b class="err">Błąd:</b> ${esc(err.message)}`;rstBtn.style.display='block'}
+}
+
+async function compress(btn){
+    if(!_file||!_entries)return;btn.disabled=true;status.innerHTML='';_t0=performance.now();
+    const entries=_entries,N=entries.length,cd=[];
+    progFill.className='prog-fill compressing';progFill.style.width='0%';progWrap.classList.add('show');
+    showPhase('Kompresja Deflate Level 9<span>0 / '+N+'</span>','var(--emerald)');showProg(0,'Startowanie...');await tick();await tick();
+    try{
+        const out=[];let offset=0;
+        for(let i=0;i<N;i++){const e=entries[i],ne=new TextEncoder().encode(e.name),comp=pako.deflateRaw(e.data,{level:9}),crc=crc32(e.data);out.push({ne,comp,crc,os:e.data.length,offset});offset+=30+ne.length+comp.length;cd.push({name:e.name,u:e.data.length,oc:e.compressedSize||e.data.length,nc:comp.length});const pct=Math.round(((i+1)/N)*100),sn=e.name.length>32?'...'+e.name.slice(-29):e.name;progFill.style.width=pct+'%';progPct.textContent=pct+'%';progText.textContent=sn;pLabel.innerHTML='Kompresja Deflate Level 9<span>'+(i+1)+' / '+N+'</span>';const el=((performance.now()-_t0)/1000).toFixed(1);pTime.textContent=el+'s';if(i%2===0)await tick()}
+        showPhase('Budowanie archiwum','var(--emerald)');showProg(100,'Finalizowanie...');await tick();
+        const cdOff=offset;let cdSz=0;const parts=[];
+        out.forEach(f=>{const lh=new Uint8Array(30+f.ne.length);const v=new DataView(lh.buffer);v.setUint32(0,0x04034b50,true);v.setUint16(8,8,true);v.setUint32(14,f.crc,true);v.setUint32(18,f.comp.length,true);v.setUint32(22,f.os,true);v.setUint16(26,f.ne.length,true);lh.set(f.ne,30);parts.push(lh,f.comp)});
+        out.forEach(f=>{const c=new Uint8Array(46+f.ne.length);const v=new DataView(c.buffer);v.setUint32(0,0x02014b50,true);v.setUint16(10,8,true);v.setUint32(16,f.crc,true);v.setUint32(20,f.comp.length,true);v.setUint32(24,f.os,true);v.setUint16(28,f.ne.length,true);v.setUint32(42,f.offset,true);c.set(f.ne,46);parts.push(c);cdSz+=c.length});
+        const eocd=new Uint8Array(22);const ev=new DataView(eocd.buffer);ev.setUint32(0,0x06054b50,true);ev.setUint16(8,out.length,true);ev.setUint16(10,out.length,true);ev.setUint32(12,cdSz,true);ev.setUint32(16,cdOff,true);parts.push(eocd);
+        const res=new Uint8Array(parts.reduce((a,b)=>a+b.length,0));let p=0;parts.forEach(pt=>{res.set(pt,p);p+=pt.length});
+        const tt=((performance.now()-_t0)/1000).toFixed(2);hideProg();btn.remove();
+        const diff=_file.size-res.length,ps=(_file.size>0?(diff/_file.size*100):0).toFixed(1);
+        buildResultTable(cd);resBtn.style.display='block';_cnt++;$('bbCount').textContent=_cnt;
+        if(diff>0){
+            const blob=new Blob([res],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),nn=_file.name.replace(/\.xlsx$/i,'_compressed.xlsx');
+            dlBtn.href=URL.createObjectURL(blob);dlBtn.download=nn;dlBtn.textContent=`⬇  ${nn}  (${fmt(res.length)})`;dlBtn.style.display='block';
+            status.innerHTML=`<b class="ok">Sukces!</b> Zmniejszono o <b>${fmt(diff)}</b> (${ps}%)<br>Oryginał: ${fmt(_file.size)} → Nowy: ${fmt(res.length)}<br>Deflate Level 9 · dane identyczne · czas: ${tt}s`;
+            const mx=Math.max(_file.size,res.length);$('bOrig').style.width=(_file.size/mx*100)+'%';$('bOrig').textContent=fmt(_file.size);$('bComp').style.width=(res.length/mx*100)+'%';$('bComp').textContent=fmt(res.length);
+            $('barDiff').innerHTML=`<div class="bar-diff-inner"><div class="bar-diff-val" style="color:var(--emerald)">−${fmt(diff)}</div><div class="bar-diff-desc">oszczędność ${ps}% · ${tt}s</div></div>`;bars.classList.add('show');
+        }else{status.innerHTML=`<b class="warn">Brak zysku.</b><br>Plik jest już optymalnie spakowany.<br>Dalsze zmniejszenie wymagałoby usunięcia danych.<br>Czas: ${tt}s`}
+        rstBtn.style.display='block';
+    }catch(err){hideProg();status.innerHTML=`<b class="err">Błąd:</b> ${esc(err.message)}`;btn.disabled=false}
+}
+
+function resetAll(){
+    _file=null;_entries=null;fi.value='';dropZone.classList.remove('hidden');fileMeta.classList.remove('show');statsRow.classList.remove('show');
+    hideProg();status.innerHTML='';bars.classList.remove('show');dlBtn.style.display='none';rstBtn.style.display='none';
+    structBtn.style.display='none';structWrap.classList.remove('show');structWrap.innerHTML='';
+    resBtn.style.display='none';resWrap.classList.remove('show');resWrap.innerHTML='';
+    const cb=$('compBtn');if(cb)cb.remove();
+}
+
+function readZip(buffer){
+    const bytes=new Uint8Array(buffer),view=new DataView(buffer);let eocd=-1;
+    for(let i=bytes.length-22;i>=0;i--){if(view.getUint32(i,true)===0x06054b50){eocd=i;break}}
+    const cdOff=view.getUint32(eocd+16,true),cdCnt=view.getUint16(eocd+10,true),entries=[];let pos=cdOff;
+    for(let i=0;i<cdCnt;i++){const method=view.getUint16(pos+10,true),compSize=view.getUint32(pos+20,true),nameLen=view.getUint16(pos+28,true),localOff=view.getUint32(pos+42,true),name=new TextDecoder().decode(bytes.slice(pos+46,pos+46+nameLen)),lnNL=view.getUint16(localOff+26,true),lnEL=view.getUint16(localOff+28,true),data=bytes.slice(localOff+30+lnNL+lnEL,localOff+30+lnNL+lnEL+compSize),raw=method===8?pako.inflateRaw(data):data;entries.push({name,data:raw,method,compressedSize:compSize,uncompressedSize:raw.length,isDir:name.endsWith('/')});pos+=46+nameLen+view.getUint16(pos+30,true)+view.getUint16(pos+32,true)}return entries;
+}
+function crc32(d){let c=0xFFFFFFFF;const t=window._ct||(window._ct=(()=>{const tb=new Uint32Array(256);for(let i=0;i<256;i++){let r=i;for(let j=0;j<8;j++)r=(r&1)?(0xEDB88320^(r>>>1)):(r>>>1);tb[i]=r}return tb})());for(let i=0;i<d.length;i++)c=t[(c^d[i])&0xFF]^(c>>>8);return(c^0xFFFFFFFF)>>>0}
+function fmt(b){if(!b)return'0 B';const u=['B','KB','MB','GB'];let i=0,n=b;while(n>=1024&&i<u.length-1){n/=1024;i++}return n.toFixed(n>=100||i===0?0:2)+' '+u[i]}
+function esc(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML}
+</script>
+</body>
+</html>
+ok
