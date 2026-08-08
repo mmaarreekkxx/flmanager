@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>XLSX SAFE COMPRESS · Dark Ops · Single File</title>
+<title>XLSX/CSV SAFE COMPRESS · Dark Ops · Single File</title>
 <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
 <style>
@@ -327,8 +327,8 @@ body{overflow:hidden;font-family:var(--font-ui);background:var(--bg);color:var(-
     </nav>
     <div class="sidebar-footer">
       <div class="sidebar-footer-row"><span class="sidebar-footer-label">Dark Mode</span><label class="switch"><input type="checkbox" id="swTheme"><span class="switch-track"></span><span class="switch-thumb"></span></label></div>
-      <div class="version" id="verLine">v7.2 · pako Deflate 9</div>
-      <div class="engine">Engine: pako 2.1.0 · ZipWriter native</div>
+      <div class="version" id="verLine">v7.3 · pako Deflate 9</div>
+      <div class="engine">Engine: pako 2.1.0 · ZipWriter + GZIP native</div>
     </div>
   </aside>
 
@@ -337,7 +337,7 @@ body{overflow:hidden;font-family:var(--font-ui);background:var(--bg);color:var(-
     <header class="topbar">
       <div class="topbar-left">
         <span class="topbar-title">Safe Compress</span>
-        <div class="topbar-breadcrumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg><span id="crumb">Kompresor XLSX</span></div>
+        <div class="topbar-breadcrumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg><span id="crumb">Kompresor XLSX/CSV</span></div>
       </div>
       <div class="topbar-right">
         <span class="badge-live"><span class="dot-online"></span>OFFLINE</span>
@@ -373,41 +373,43 @@ body{overflow:hidden;font-family:var(--font-ui);background:var(--bg);color:var(-
                 <div class="card-header-right"><span class="card-header-tag" id="tagLevel">DEFLATE-9</span><span class="card-header-tag">SAFE</span></div>
               </div>
               <div class="card-body">
-                <div class="drop" id="dropZone" role="button" tabindex="0" aria-label="Wgraj plik .xlsx">
+                <div class="drop" id="dropZone" role="button" tabindex="0" aria-label="Wgraj plik .xlsx lub .csv">
                   <div class="drop-icon"><div class="drop-icon-glow"></div><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg></div>
-                  <h3 id="dropTitle">Przeciągnij plik .xlsx tutaj</h3>
+                  <h3 id="dropTitle">Przeciągnij plik .xlsx lub .csv tutaj</h3>
                   <p>lub kliknij aby wybrać z dysku</p>
-                  <p class="drop-hint">Obsługiwane: .xlsx (Open XML Spreadsheet)</p>
+                  <p class="drop-hint">Obsługiwane: .xlsx (Open XML Spreadsheet) · .csv (Deflate ZIP / GZIP)</p>
                   <button class="btn-primary" id="pickBtn" style="margin-top:16px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Wybierz plik</button>
-                  <input type="file" id="fi" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none">
+                  <input type="file" id="fi" accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" style="display:none">
                 </div>
 
                 <div class="file-meta" id="fileMeta">
                   <div class="file-meta-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
                   <div class="file-meta-info">
                     <div class="file-meta-name" id="fName"></div>
-                    <div class="file-meta-detail"><span class="file-meta-size" id="fSize"></span><span class="file-meta-type">XLSX</span></div>
+                    <div class="file-meta-detail"><span class="file-meta-size" id="fSize"></span><span class="file-meta-type" id="fType">XLSX</span></div>
                   </div>
                   <span class="file-meta-state" id="fState">AKTYWNY</span>
                   <button class="file-meta-remove" id="rmBtn" title="Usuń plik" aria-label="Usuń plik"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
                 </div>
 
                 <div class="stat-row" id="statsRow">
-                  <div class="stat-box"><p class="s-label">Rozmiar ZIP</p><p class="s-value" style="color:var(--primary)" id="sZip">—</p></div>
-                  <div class="stat-box"><p class="s-label">Rozpakowany</p><p class="s-value" style="color:var(--amber)" id="sRaw">—</p></div>
+                  <div class="stat-box"><p class="s-label" id="sZipLbl">Rozmiar ZIP</p><p class="s-value" style="color:var(--primary)" id="sZip">—</p></div>
+                  <div class="stat-box"><p class="s-label" id="sRawLbl">Rozpakowany</p><p class="s-value" style="color:var(--amber)" id="sRaw">—</p></div>
                   <div class="stat-box"><p class="s-label">Kompresja</p><p class="s-value" style="color:var(--emerald)" id="sRat">—</p></div>
-                  <div class="stat-box"><p class="s-label">Elementy</p><p class="s-value" style="color:var(--sky)" id="sCnt">—</p><p class="s-sub" id="sMet">—</p></div>
+                  <div class="stat-box"><p class="s-label" id="sCntLbl">Elementy</p><p class="s-value" style="color:var(--sky)" id="sCnt">—</p><p class="s-sub" id="sMet">—</p></div>
                 </div>
 
                 <button class="details-toggle" id="structBtn"></button>
                 <div class="details-wrap" id="structWrap"></div>
+
+                <div id="ssRecommend" style="display:none;margin-bottom:14px"></div>
 
                 <div class="phase" id="phase"><div class="phase-dot" id="pDot"></div><div class="phase-label" id="pLabel"></div><div class="phase-time" id="pTime"></div></div>
                 <div class="prog-wrap" id="progWrap"><div class="prog-track"><div class="prog-fill reading" id="progFill"></div></div><div class="prog-label"><span id="progText">—</span><span id="progPct">0%</span></div></div>
 
                 <div class="status" id="status"></div>
 
-                <button class="btn-primary full" id="compBtn" style="display:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Kompresuj bezpiecznie (Deflate 9)</button>
+                <button class="btn-primary full" id="compBtn" style="display:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span id="compBtnLabel">Kompresuj bezpiecznie (Deflate 9)</span></button>
 
                 <div class="bars" id="bars">
                   <div class="bars-title">Porównanie rozmiarów</div>
@@ -432,14 +434,18 @@ body{overflow:hidden;font-family:var(--font-ui);background:var(--bg);color:var(-
                 <div class="card-header"><div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Bezpieczeństwo</div></div>
                 <div class="card-body">
                   <div class="alert-item ok"><svg viewBox="0 0 24 24" fill="none" stroke="var(--emerald)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><div><strong>Zachowane:</strong> <span id="preservedList">connections.xml, queryTables, externalLinks, customXml, Power Query, relacje .rels</span></div></div>
-                  <div class="alert-item info"><svg viewBox="0 0 24 24" fill="none" stroke="var(--sky)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><div>Narzędzie nie parsuje Excela. Nie edytuje XML. Tylko bezpieczna rekompresja archiwum ZIP.</div></div>
+                  <div class="alert-item info"><svg viewBox="0 0 24 24" fill="none" stroke="var(--sky)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><div id="modeNote">Narzędzie nie parsuje Excela. Nie edytuje XML. Tylko bezpieczna rekompresja archiwum ZIP.</div></div>
                 </div>
+              </section>
+              <section class="card" id="profileCard" style="display:none">
+                <div class="card-header"><div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><path d="M12 2v4"/></svg>Nauczony profil</div></div>
+                <div class="card-body" id="profileBody" style="padding:12px 16px"></div>
               </section>
               <section class="card">
                 <div class="card-header"><div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Specyfikacja</div></div>
                 <div class="card-body" style="padding:12px 16px">
                   <ul class="tech-list">
-                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Algorytm<span class="tech-val">Deflate</span></li>
+                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Algorytm<span class="tech-val" id="specAlgo">Deflate</span></li>
                     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>Poziom<span class="tech-val" id="specLevel">9 (MAX)</span></li>
                     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Silnik<span class="tech-val">pako 2.1.0</span></li>
                     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Tryb<span class="tech-val">SAFE</span></li>
@@ -513,10 +519,11 @@ body{overflow:hidden;font-family:var(--font-ui);background:var(--bg);color:var(-
                 <div class="card-header"><div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Jak to działa</div></div>
                 <div class="card-body">
                   <ol class="steps">
-                    <li><span><strong>Wczytanie</strong> — plik trafia do pamięci, weryfikowana jest sygnatura archiwum ZIP.</span></li>
-                    <li><span><strong>Dekompresja</strong> — każdy element pakietu OOXML jest rozpakowywany (Deflate / Stored).</span></li>
-                    <li><span><strong>Rekompresja</strong> — dane trafiają z powrotem do archiwum z Deflate poziomu <span id="stepLvl">9</span> i sumą CRC-32.</span></li>
-                    <li><span><strong>Zapis</strong> — nowe nagłówki ZIP, katalog centralny i EOCD. Bajty danych pozostają identyczne.</span></li>
+                    <li><span><strong>Analiza struktury</strong> — narzędzie skanuje arkusze pod kątem powtórzeń tekstu zapisanych bez tabeli Shared Strings i rozpoznaje "odcisk" struktury pliku (uczy się z poprzednich importów, zapisując statystyki lokalnie w przeglądarce).</span></li>
+                    <li><span><strong>Wczytanie</strong> — plik trafia do pamięci; dla .xlsx weryfikowana jest sygnatura archiwum ZIP, dla .csv liczone są wiersze.</span></li>
+                    <li><span><strong>Dekompresja</strong> — każdy element pakietu OOXML jest rozpakowywany (Deflate / Stored). Krok pominięty dla CSV — to zwykły tekst.</span></li>
+                    <li><span><strong>Rekompresja</strong> — .xlsx wraca do archiwum ZIP z Deflate poziomu <span id="stepLvl">9</span> i sumą CRC-32 (każdy element osobno — STORED tylko jeśli daje mniejszy wynik niż DEFLATE); .csv jest kompresowany bezpośrednio do strumienia GZIP tym samym poziomem.</span></li>
+                    <li><span><strong>Zapis</strong> — nowe nagłówki ZIP / GZIP. Bajty danych pozostają identyczne po dekompresji.</span></li>
                   </ol>
                 </div>
               </section>
@@ -540,7 +547,7 @@ body{overflow:hidden;font-family:var(--font-ui);background:var(--bg);color:var(-
                   <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Kompresja<span class="tech-val">pako 2.1.0</span></li>
                   <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>Poziom<span class="tech-val" id="aboutLevel">9 (MAX)</span></li>
                   <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Integralność<span class="tech-val">CRC-32 / element</span></li>
-                  <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Format<span class="tech-val">OOXML · ZIP</span></li>
+                  <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Format<span class="tech-val">OOXML/ZIP · CSV/GZIP</span></li>
                 </ul>
               </div>
             </section>
@@ -596,7 +603,59 @@ const IC={
 let _ct=null;
 function crc32(d){if(!_ct){_ct=new Uint32Array(256);for(let i=0;i<256;i++){let r=i;for(let j=0;j<8;j++)r=(r&1)?(0xEDB88320^(r>>>1)):(r>>>1);_ct[i]=r;}}let c=0xFFFFFFFF;for(let i=0;i<d.length;i++)c=_ct[(c^d[i])&0xFF]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
 
-function readZip(buffer){
+/* Strumieniowa (chunked) kompresja/dekompresja — dla dużych elementów (kilkadziesiąt/kilkaset MB)
+   pojedyncze wywołanie pako.deflateRaw/inflateRaw blokuje wątek UI na wiele sekund, co wygląda
+   jak zawieszenie karty. Dzieląc dane na kawałki i oddając sterowanie przeglądarce między nimi
+   (await tick()), interfejs pozostaje responsywny, a pasek postępu pokazuje realny procent. */
+const CHUNK_SZ=4*1024*1024;
+function chunkedDeflate(data,level,onFrac){
+  return new Promise((resolve,reject)=>{
+    const parts=[];let total=0;
+    const inst=new pako.Deflate({level:level,raw:true});
+    inst.onData=c=>{parts.push(c);total+=c.length;};
+    inst.onEnd=status=>{
+      if(status!==0){reject(new Error('Błąd kompresji ('+status+')'));return;}
+      const res=new Uint8Array(total);let off=0;for(const c of parts){res.set(c,off);off+=c.length;}
+      resolve(res);
+    };
+    (async()=>{
+      if(data.length===0){inst.push(new Uint8Array(0),true);return;}
+      let pos=0;
+      while(pos<data.length){
+        const end=Math.min(pos+CHUNK_SZ,data.length),isLast=end>=data.length;
+        inst.push(data.subarray(pos,end),isLast);
+        pos=end;
+        if(onFrac)onFrac(pos/data.length);
+        if(!isLast)await tick();
+      }
+    })().catch(reject);
+  });
+}
+function chunkedInflateRaw(raw,onFrac){
+  return new Promise((resolve,reject)=>{
+    const parts=[];let total=0;
+    const inst=new pako.Inflate({raw:true});
+    inst.onData=c=>{parts.push(c);total+=c.length;};
+    inst.onEnd=status=>{
+      if(status!==0){reject(new Error('Błąd dekompresji ('+status+')'));return;}
+      const res=new Uint8Array(total);let off=0;for(const c of parts){res.set(c,off);off+=c.length;}
+      resolve(res);
+    };
+    (async()=>{
+      if(raw.length===0){inst.push(new Uint8Array(0),true);return;}
+      let pos=0;
+      while(pos<raw.length){
+        const end=Math.min(pos+CHUNK_SZ,raw.length),isLast=end>=raw.length;
+        inst.push(raw.subarray(pos,end),isLast);
+        pos=end;
+        if(onFrac)onFrac(pos/raw.length);
+        if(!isLast)await tick();
+      }
+    })().catch(reject);
+  });
+}
+
+async function readZip(buffer,onProgress){
   const bytes=new Uint8Array(buffer),view=new DataView(buffer);
   let eocd=-1;const floor=Math.max(0,bytes.length-22-65535);
   for(let i=bytes.length-22;i>=floor;i--){if(view.getUint32(i,true)===0x06054b50){eocd=i;break;}}
@@ -620,12 +679,18 @@ function readZip(buffer){
       if(localOff+30>bytes.length||view.getUint32(localOff,true)!==0x04034b50)throw new Error('Uszkodzony nagłówek lokalny elementu: '+name);
       const lNL=view.getUint16(localOff+26,true),lEL=view.getUint16(localOff+28,true);
       const start=localOff+30+lNL+lEL,raw=bytes.slice(start,start+compSize);
-      if(method===8){try{data=pako.inflateRaw(raw);}catch(e){throw new Error('Nie można zdekompresować elementu: '+name);}}
+      if(method===8){
+        try{
+          if(raw.length>CHUNK_SZ)data=await chunkedInflateRaw(raw,f=>onProgress&&onProgress(name,f));
+          else data=pako.inflateRaw(raw);
+        }catch(e){throw new Error('Nie można zdekompresować elementu: '+name);}
+      }
       else if(method===0){data=raw;}
       else throw new Error('Nieobsługiwana metoda kompresji ('+method+') w elemencie: '+name);
     }
     entries.push({name,data,method,compressedSize:compSize,uncompressedSize:uncompSize||data.length,isDir,dosTime,dosDate});
     pos+=46+nameLen+extraLen+cmtLen;
+    if(i%15===0)await tick();
   }
   return entries;
 }
@@ -636,7 +701,15 @@ async function buildZip(entries,level,onProgress){
     const e=entries[i],ne=enc.encode(e.name);
     let method=8,comp;
     if(e.data.length===0){method=0;comp=new Uint8Array(0);}
-    else comp=pako.deflateRaw(e.data,{level:level});
+    else{
+      const d=e.data.length>CHUNK_SZ
+        ?await chunkedDeflate(e.data,level,f=>{if(onProgress)onProgress(i,entries.length,e.name,f);})
+        :pako.deflateRaw(e.data,{level:level});
+      /* strukturalna optymalizacja: dla danych nieściśliwych (np. już skompresowane media, .bin)
+         DEFLATE potrafi dać wynik WIĘKSZY niż oryginał — zawsze wybieramy mniejszy wariant */
+      if(d.length<e.data.length){method=8;comp=d;}
+      else{method=0;comp=e.data;}
+    }
     const crc=e.data.length===0?0:crc32(e.data);
     out.push({ne,comp,crc,os:e.data.length,offset,method,dosTime:e.dosTime,dosDate:e.dosDate});
     offset+=30+ne.length+comp.length;
@@ -671,6 +744,229 @@ async function buildZip(entries,level,onProgress){
 function fileTypeColor(name){const n=name.toLowerCase();if(n.endsWith('.xml'))return'var(--primary)';if(n.endsWith('.rels'))return'var(--violet)';if(/\.bin|\.png|\.jpe?g|\.emf/.test(n))return'var(--amber)';return'var(--muted)';}
 function fileKind(name){const n=name.toLowerCase();if(n.endsWith('.rels'))return'RELS';if(n.endsWith('.xml'))return'XML';if(/\.bin|\.png|\.jpe?g|\.emf/.test(n))return'MEDIA';return'INNE';}
 
+/* ================= analiza wzorca danych + preprocessing (Shared Strings) ================= */
+const SS_RE=/<c r="[A-Z]+\d+"(?: s="\d+")? t="str"><v(?: xml:space="preserve")?>([^<]+)<\/v><\/c>/g;
+/* Szybkie sprawdzenie bez pełnego dekodowania UTF-8 — dla arkuszy które NIE zawierają
+   wzorca t="str" (np. duże pliki z prawidłową tabelą Shared Strings) unika kosztownego
+   dekodowania dziesiątek/setek MB tekstu tylko po to, by stwierdzić "nic do zrobienia". */
+function hasBytePattern(bytes,pat){
+  const p=_te.encode(pat),pl=p.length,n=bytes.length;
+  outer: for(let i=0;i<=n-pl;i++){
+    if(bytes[i]!==p[0])continue;
+    for(let j=1;j<pl;j++){if(bytes[i+j]!==p[j])continue outer;}
+    return true;
+  }
+  return false;
+}
+const _te=new TextEncoder();
+function utf8Len(s){return _te.encode(s).length;}
+
+/* Skanuje arkusze pod kątem powtarzających się tekstów zapisanych „na sztywno” (t="str")
+   zamiast przez tabelę Shared Strings. Duże arkusze (>10MB) są próbkowane, a wynik ekstrapolowany. */
+function analyzeInlineStrings(items){
+  const sheets=items.filter(e=>/^xl\/worksheets\/sheet\d+\.xml$/i.test(e.name));
+  let matches=0,totalBytes=0,uniqueBytes=0,sampled=false;
+  const seen=new Set();
+  for(const e of sheets){
+    const cap=10*1024*1024;
+    let bytes=e.data,scale=1;
+    if(bytes.length>cap){
+      /* próbka: pierwsze `cap` bajtów, przycięte do granicy pełnego wiersza XML */
+      let end=cap;const tag=bytes.subarray(0,cap);
+      /* szukamy pojedynczego '>' (koniec dowolnego znacznika) blisko granicy próbki,
+         żeby nie przeciąć XML-a w połowie wartości — dwa '>' pod rząd praktycznie
+         nie występują w tym formacie, więc taki warunek nigdy by nie zadziałał */
+      for(let i=cap-1;i>cap-4096&&i>0;i--){if(tag[i]===62){end=i+1;break;}}
+      bytes=e.data.subarray(0,end);scale=e.data.length/end;sampled=true;
+    }
+    let text;try{text=new TextDecoder('utf-8').decode(bytes);}catch(err){continue;}
+    if(text.indexOf(' t="str"')===-1)continue;
+    SS_RE.lastIndex=0;let m,localMatches=0,localBytes=0;
+    while((m=SS_RE.exec(text))){
+      localMatches++;const v=m[1];localBytes+=utf8Len(v);
+      if(!seen.has(v)){seen.add(v);uniqueBytes+=utf8Len(v);}
+    }
+    matches+=Math.round(localMatches*scale);
+    totalBytes+=Math.round(localBytes*scale);
+  }
+  const savingsBytes=Math.max(0,totalBytes-uniqueBytes);
+  return {matches,uniqueCount:seen.size,totalBytes,uniqueBytes,savingsBytes,sampled,
+    worthwhile: matches>200 && savingsBytes>2048 && uniqueBytes<totalBytes*0.6};
+}
+
+/* Konwertuje literały t="str" (bez pustych wartości i bez komórek z formułami — te regex
+   celowo pomija, bo wymaga bezpośredniego sąsiedztwa t="str"><v>) na odwołania do wspólnej
+   tabeli Shared Strings. W 100% zgodne z formatem OOXML — Excel otwiera wynik bez zmian. */
+function applySharedStringsConversion(entries){
+  const out=entries.map(e=>({...e}));
+  const sheets=out.filter(e=>/^xl\/worksheets\/sheet\d+\.xml$/i.test(e.name));
+  /* KRYTYCZNE: policz istniejące wpisy PRZED przepisaniem komórek. Jeśli plik ma już
+     tabelę Shared Strings (np. 500 wpisów) i dopiero doliczylibyśmy nowe indeksy od 0
+     PO fakcie, nowo dodane komórki wskazywałyby na cudze, istniejące teksty — cichy
+     błąd danych bez żadnego wyjątku. Dlatego offset jest znany zanim ruszy zamiana. */
+  const existingSST=out.find(e=>e.name==='xl/sharedStrings.xml');
+  let baseCount=0,body='';
+  if(existingSST){
+    const t=new TextDecoder('utf-8').decode(existingSST.data);
+    const cm=t.match(/uniqueCount="(\d+)"/);baseCount=cm?parseInt(cm[1],10):0;
+    body=t.replace(/^[\s\S]*?<sst[^>]*>/,'').replace(/<\/sst>\s*$/,'');
+  }
+  const order=[],seen=new Map();
+  let anyChange=false;
+  for(const e of sheets){
+    if(!hasBytePattern(e.data,' t="str"'))continue;
+    let text;try{text=new TextDecoder('utf-8').decode(e.data);}catch(err){continue;}
+    if(text.indexOf(' t="str"')===-1)continue;
+    const newText=text.replace(SS_RE,(full,val)=>{
+      let localIdx=seen.get(val);
+      if(localIdx===undefined){localIdx=order.length;seen.set(val,localIdx);order.push(val);}
+      anyChange=true;
+      const cTag=full.slice(0,full.indexOf('><v')+1).replace(' t="str"',' t="s"');
+      return cTag+'<v>'+(baseCount+localIdx)+'</v></c>';
+    });
+    if(newText!==text)e.data=new TextEncoder().encode(newText);
+  }
+  if(!anyChange)return entries;
+  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  let addBody='';
+  for(const v of order){
+    const pre=(v!==v.trim())?' xml:space="preserve"':'';
+    addBody+='<si><t'+pre+'>'+v+'</t></si>';
+  }
+  const total=baseCount+order.length;
+  const sstXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="'+total+'" uniqueCount="'+total+'">'+body+addBody+'</sst>';
+  const sstData=new TextEncoder().encode(sstXml);
+  if(existingSST){existingSST.data=sstData;}
+  else{
+    out.push({name:'xl/sharedStrings.xml',data:sstData,method:8,compressedSize:0,uncompressedSize:sstData.length,isDir:false,dosTime:sheets[0]?.dosTime||0,dosDate:sheets[0]?.dosDate||0});
+    const ct=out.find(e=>e.name==='[Content_Types].xml');
+    if(ct){
+      let ctText=new TextDecoder('utf-8').decode(ct.data);
+      if(ctText.indexOf('sharedStrings')===-1){
+        ctText=ctText.replace('</Types>','<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/></Types>');
+        ct.data=new TextEncoder().encode(ctText);
+      }
+    }
+    const rel=out.find(e=>e.name==='xl/_rels/workbook.xml.rels');
+    if(rel){
+      let relText=new TextDecoder('utf-8').decode(rel.data);
+      if(relText.indexOf('sharedStrings')===-1){
+        const ids=[...relText.matchAll(/Id="rId(\d+)"/g)].map(m=>parseInt(m[1],10));
+        const nid='rId'+((ids.length?Math.max(...ids):0)+1);
+        relText=relText.replace('</Relationships>','<Relationship Id="'+nid+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/></Relationships>');
+        rel.data=new TextEncoder().encode(relText);
+      }
+    }
+  }
+  return out;
+}
+
+/* ================= profil strukturalny (uczenie się na zaimportowanych plikach) =================
+   Poprzednia wersja hashowała pełną listę nazw części archiwum — działała tylko dla plików
+   BAJT-W-BAJT tej samej struktury (np. taka sama liczba arkuszy/tabel), więc różne eksporty
+   z tego samego systemu często nie były rozpoznawane jako "ten sam typ". Nowa wersja grupuje
+   po generatorze pliku (pole <Application> w docProps/app.xml — np. "SheetJS" dla eksportów
+   programistycznych, "Microsoft Excel" dla plików zapisanych/wyeksportowanych przez Excel/
+   Comarch-Insert GT) połączonym z grubszymi flagami strukturalnymi. To znacznie stabilniejszy
+   i bardziej znaczący sygnał niż dokładny odcisk nazw plików. */
+function fingerprintWorkbook(items){
+  let app='unknown';
+  const appEntry=items.find(e=>e.name==='docProps/app.xml');
+  if(appEntry){
+    try{
+      const t=new TextDecoder('utf-8').decode(appEntry.data);
+      const m=t.match(/<Application>([^<]*)<\/Application>/);
+      if(m&&m[1])app=m[1].trim();
+    }catch(err){}
+  }
+  const appKey=(app.toLowerCase().replace(/[^a-z0-9]+/g,'')||'unknown');
+  const flags=[
+    items.some(e=>e.name==='xl/sharedStrings.xml')?'SST':'',
+    items.some(e=>/^customXml\//.test(e.name))?'CXML':'',
+    items.some(e=>/^xl\/queryTables\//.test(e.name))?'QT':'',
+    items.some(e=>e.name==='xl/connections.xml')?'CONN':'',
+    items.some(e=>/^xl\/tables\//.test(e.name))?'TBL':''
+  ].filter(Boolean).join('+')||'BASIC';
+  return appKey+'|'+flags;
+}
+function friendlyAppName(appKey){
+  const map={
+    sheetjs:'eksport programistyczny (SheetJS)',
+    microsoftexcel:'Microsoft Excel / eksport ERP (np. Comarch Insert GT)',
+    wpsoffice:'WPS Office',
+    libreofficecalc:'LibreOffice Calc',
+    openofficecalc:'OpenOffice Calc',
+    googlesheets:'Arkusze Google (eksport .xlsx)',
+    phpspreadsheet:'eksport programistyczny (PhpSpreadsheet)',
+    openpyxl:'eksport programistyczny (openpyxl / Python)',
+    applenumbers:'Apple Numbers',
+    apachepoi:'eksport programistyczny (Apache POI / Java)',
+    closedxml:'eksport programistyczny (ClosedXML / .NET)',
+    unknown:'nierozpoznany generator'
+  };
+  return map[appKey]||('generator: '+appKey);
+}
+/* Wbudowane, wstępnie wyuczone profile — wynik analizy realnych plików floty przesłanych
+   podczas rozwoju narzędzia (Dane_2026: eksport SheetJS bez Shared Strings, STORED;
+   FLOTA_KOSZTY/FLOTA_POJAZDY: eksport Comarch Insert GT przez Excel; PP: podobny, mniejszy
+   zestaw części). Działają od razu, nawet w nowej przeglądarce — realne użycie tylko je uzupełnia. */
+const DEFAULT_PROFILES={
+  'sheetjs|BASIC':{seen:1,totalOrig:46459817,totalComp:4762541,inlineStrHits:1,lastAt:null,seeded:true},
+  'microsoftexcel|SST+CXML+QT+CONN+TBL':{seen:2,totalOrig:48060666,totalComp:36513063,inlineStrHits:0,lastAt:null,seeded:true},
+  'microsoftexcel|SST+CXML':{seen:1,totalOrig:663124,totalComp:657706,inlineStrHits:0,lastAt:null,seeded:true}
+};
+function saveJSON(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
+function loadProfiles(){return Object.assign({},DEFAULT_PROFILES,loadJSON(PROF_KEY,{}));}
+function updateProfile(fp,origSize,compSize,ilAnalysis){
+  if(!fp)return;
+  const profiles=loadProfiles();
+  const p=profiles[fp]||{seen:0,totalOrig:0,totalComp:0,inlineStrHits:0,lastAt:null};
+  const {seeded,...clean}=p;
+  clean.seen++;clean.totalOrig+=origSize;clean.totalComp+=compSize;
+  if(ilAnalysis&&ilAnalysis.worthwhile)clean.inlineStrHits++;
+  clean.lastAt=new Date().toISOString();
+  const stored=loadJSON(PROF_KEY,{});
+  stored[fp]=clean;saveJSON(PROF_KEY,stored);
+  return clean;
+}
+function renderProfileCard(){
+  const card=$('profileCard'),body=$('profileBody');
+  if(!_fp){card.style.display='none';return;}
+  const profiles=loadProfiles(),p=profiles[_fp];
+  if(!p||p.seen<1){card.style.display='none';return;}
+  const avgPct=p.totalOrig>0?(1-p.totalComp/p.totalOrig)*100:0;
+  const [appKey,flags]=_fp.split('|');
+  const isPureSeed=!!(p.seeded&&!loadJSON(PROF_KEY,{})[_fp]);
+  card.style.display='block';
+  body.innerHTML=
+    '<div class="alert-item info"><svg viewBox="0 0 24 24" fill="none" stroke="var(--sky)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>'
+    +'<div>Rozpoznano: <strong>'+esc(friendlyAppName(appKey))+'</strong>'+(flags&&flags!=='BASIC'?' <code style="font-size:10px">('+esc(flags)+')</code>':'')+'.<br>'
+    +(isPureSeed?'Na podstawie wbudowanego wzorca (jeszcze bez Twoich realnych importów w tej przeglądarce): ':'Rozpoznano z <strong>'+p.seen+'</strong> '+(p.seen===1?'importu':'importów')+' w tej przeglądarce: ')
+    +'średnia oszczędność <strong style="color:var(--emerald)">'+fmtPct(avgPct)+'</strong>.'
+    +(p.inlineStrHits>0?' W '+p.inlineStrHits+'/'+p.seen+' przypadkach opłacał się preprocessing Shared Strings.':' Ten typ pliku zwykle już używa Shared Strings — preprocessing raczej nie pomoże.')
+    +'</div></div>';
+}
+
+/* Renderuje kartę rekomendacji preprocessingu na podstawie analizy inline-strings */
+function renderSSRecommend(){
+  const el=$('ssRecommend');
+  if(!_ilAnalysis||!_ilAnalysis.worthwhile){el.style.display='none';_useSS=false;return;}
+  const a=_ilAnalysis;
+  el.style.display='block';
+  el.innerHTML=
+    '<div class="alert-item warn" style="align-items:flex-start">'
+    +'<svg viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><path d="M12 2l9 4v6c0 5-3.8 9.7-9 11-5.2-1.3-9-6-9-11V6z"/></svg>'
+    +'<div style="flex:1">'
+    +'<strong>Wykryto strukturę bez tabeli Shared Strings.</strong><br>'
+    +'Ten arkusz zapisuje '+a.matches.toLocaleString('pl-PL')+' komórek tekstowych wprost (tylko '+a.uniqueCount.toLocaleString('pl-PL')+' unikalnych wartości). '
+    +'Konwersja do standardowej tabeli Shared Strings przed kompresją może dodatkowo zmniejszyć plik o ok. '+fmtBytes(a.savingsBytes)+' surowych danych'+(a.sampled?' (szacunek na próbce)':'')+', w 100% zgodnie z formatem .xlsx.'
+    +'<label style="display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer;font-weight:500">'
+    +'<input type="checkbox" id="ssCheck" checked style="width:16px;height:16px;accent-color:var(--primary)">Zastosuj preprocessing Shared Strings przed kompresją</label>'
+    +'</div></div>';
+  _useSS=true;
+  $('ssCheck').addEventListener('change',e=>{_useSS=e.target.checked;});
+}
+
 /* ================= stan + zapis ================= */
 const SKEY='xsc-settings-v1',TKEY='xsc-total-v1',HKEY='prasa-xlsx-history-v1';
 const DEF={level:9,keepHistory:true,reduceMotion:false,theme:'dark'};
@@ -687,6 +983,9 @@ function saveT(){try{localStorage.setItem(TKEY,String(TOTAL));}catch(e){}}
 
 let view='compressor';
 let _file=null,_entries=null,_items=null,_stats=null,_busy=false,_dlUrl=null;
+let _fileKind='xlsx',_csvBytes=null,_csvRows=0;
+let _ilAnalysis=null,_useSS=false,_fp=null;
+const PROF_KEY='xsc-profiles-v1';
 
 /* ================= toasty ================= */
 function toast(tone,title,msg){
@@ -717,8 +1016,9 @@ function updateLevelLabels(){
   $('aboutLevel').textContent=lbl;
   $('stepLvl').textContent=String(L);
   $('bbLevel').textContent='LVL '+L;
-  $('verLine').textContent='v7.2 · pako Deflate '+L;
-  $('compBtn').innerHTML=IC.zap+'Kompresuj bezpiecznie (Deflate '+L+')';
+  $('verLine').textContent='v7.3 · pako Deflate '+L;
+  const cbl=$('compBtnLabel');
+  if(cbl)cbl.textContent=(_fileKind==='csv')?('Kompresuj do GZIP (poziom '+L+')'):('Kompresuj bezpiecznie (Deflate '+L+')');
 }
 function updateBadges(){
   const bs=$('badgeStruct');
@@ -737,7 +1037,7 @@ function updateBadges(){
 }
 
 /* ================= nawigacja ================= */
-const CRUMB={compressor:'Kompresor XLSX',structure:'Analiza struktury',xml:'Podgląd XML',batch:'Batch Processing',settings:'Ustawienia',about:'O narzędziu'};
+const CRUMB={compressor:'Kompresor XLSX/CSV',structure:'Analiza struktury',xml:'Podgląd XML',batch:'Batch Processing',settings:'Ustawienia',about:'O narzędziu'};
 function go(v){
   view=v;
   document.querySelectorAll('.view').forEach(s=>s.classList.toggle('active',s.id==='view-'+v));
@@ -822,6 +1122,14 @@ function setStateChip(mode){
 
 function renderStats(){
   $('statsRow').style.display='grid';
+  if(_fileKind==='csv'){
+    $('sZip').textContent=fmtBytes(_stats.zip);
+    $('sRaw').textContent=_stats.raw;
+    $('sRat').textContent=_stats.ratio?fmtPct(_stats.ratio):'—';
+    $('sCnt').textContent=String(_stats.count);
+    $('sMet').textContent='przed kompresją';
+    return;
+  }
   $('sZip').textContent=fmtBytes(_stats.zip);
   $('sRaw').textContent=fmtBytes(_stats.raw);
   $('sRat').textContent=fmtPct(_stats.ratio);
@@ -851,7 +1159,7 @@ dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remov
 dropZone.addEventListener('click',()=>{if(!_busy)fi.click();});
 dropZone.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&!_busy){e.preventDefault();fi.click();}});
 dropZone.addEventListener('dragenter',e=>{e.preventDefault();$('dropTitle').textContent='Upuść, aby wczytać';});
-dropZone.addEventListener('dragleave',()=>{$('dropTitle').textContent='Przeciągnij plik .xlsx tutaj';});
+dropZone.addEventListener('dragleave',()=>{$('dropTitle').textContent='Przeciągnij plik .xlsx lub .csv tutaj';});
 $('pickBtn').addEventListener('click',e=>{e.stopPropagation();if(!_busy)fi.click();});
 fi.addEventListener('change',e=>{const f=e.target.files[0];if(f)handleFile(f,e.target.files.length);e.target.value='';});
 
@@ -871,21 +1179,33 @@ async function handleFile(file,allCount){
   resetFlow();
   if(allCount>1)toast('info','Wiele plików','Przetwarzam tylko pierwszy z upuszczonych plików.');
   const lower=file.name.toLowerCase();
+  if(lower.endsWith('.csv')){
+    _fileKind='csv';
+    return handleCsvFile(file);
+  }
   if(lower.endsWith('.xls')&&!lower.endsWith('.xlsx')){
     toast('err','Format .xls','Binarny format BIFF/OLE2 nie zawiera plików XML.');
     $('status').innerHTML='<b class="err">Błąd:</b> Format .xls (BIFF/OLE2) jest binarny i nie zawiera plików XML. Zapisz arkusz jako .xlsx (Plik → Zapisz jako) i spróbuj ponownie.';
     return;
   }
   if(!lower.endsWith('.xlsx')){
-    toast('err','Nieobsługiwany format','„'+file.name+'” nie jest plikiem .xlsx.');
-    $('status').innerHTML='<b class="err">Błąd:</b> Tylko pliki .xlsx. Wybrany plik ma nieobsługiwane rozszerzenie.';
+    toast('err','Nieobsługiwany format','„'+file.name+'” nie jest plikiem .xlsx ani .csv.');
+    $('status').innerHTML='<b class="err">Błąd:</b> Tylko pliki .xlsx lub .csv. Wybrany plik ma nieobsługiwane rozszerzenie.';
     return;
   }
+  _fileKind='xlsx';
   _file=file;
   dropZone.style.display='none';
   $('fileMeta').style.display='flex';
   $('fName').textContent=file.name;
   $('fSize').textContent=fmtBytes(file.size);
+  $('fType').textContent='XLSX';
+  $('modeNote').textContent='Narzędzie nie parsuje Excela. Nie edytuje XML. Tylko bezpieczna rekompresja archiwum ZIP.';
+  $('specAlgo').textContent='Deflate';
+  $('compBtnLabel').textContent='Kompresuj bezpiecznie (Deflate '+S.level+')';
+  $('sZipLbl').textContent='Rozmiar ZIP';
+  $('sRawLbl').textContent='Rozpakowany';
+  $('sCntLbl').textContent='Elementy';
   setStateChip('busy');
   _busy=true;
   try{
@@ -898,7 +1218,10 @@ async function handleFile(file,allCount){
     showPhase('Parsowanie archiwum ZIP','','var(--violet)');
     showProg(14,'Rozpakowywanie struktury...','parsing');
     await tick();
-    const entries=readZip(buffer);
+    const entries=await readZip(buffer,(name,f)=>{
+      const short=name.length>36?'…'+name.slice(-33):name;
+      showProg(Math.round(f*100),'Rozpakowywanie: '+short,'parsing');
+    });
     _entries=entries;
     const items=entries.filter(e=>!e.isDir);
     _items=items;
@@ -908,6 +1231,17 @@ async function handleFile(file,allCount){
     renderStats();
     renderPreserved();
     updateBadges();
+    if(raw>60*1024*1024){
+      const estSec=Math.max(5,Math.round(raw/1024/1024/4));
+      toast('info','Duży plik','Rozpakowane dane: '+fmtBytes(raw)+'. Kompresja może potrwać ok. '+estSec+' s — przetwarzanie w częściach, karta pozostanie responsywna.');
+    }
+    showPhase('Analiza wzorca danych','','var(--amber)');
+    showProg(50,'Wyszukiwanie powtórzeń tekstu...','parsing');
+    await tick();
+    _ilAnalysis=analyzeInlineStrings(items);
+    renderSSRecommend();
+    _fp=fingerprintWorkbook(items);
+    renderProfileCard();
     const sb=$('structBtn');
     sb.style.display='inline-flex';
     sb.innerHTML=IC.clipboard+'Ukryj strukturę XLSX';
@@ -925,7 +1259,57 @@ async function handleFile(file,allCount){
   }catch(err){fail(err);}
 }
 
+async function handleCsvFile(file){
+  _file=file;
+  dropZone.style.display='none';
+  $('fileMeta').style.display='flex';
+  $('fName').textContent=file.name;
+  $('fSize').textContent=fmtBytes(file.size);
+  $('fType').textContent='CSV';
+  $('modeNote').textContent='Narzędzie nie parsuje ani nie zmienia zawartości CSV. Plik jest kompresowany bezstratnie do formatu GZIP (.csv.gz).';
+  $('preservedList').textContent='wszystkie bajty pliku CSV — bez zmian, tylko kontener GZIP';
+  $('specAlgo').textContent='GZIP (Deflate)';
+  $('compBtnLabel').textContent='Kompresuj do GZIP (poziom '+S.level+')';
+  $('sZipLbl').textContent='Rozmiar CSV';
+  $('sRawLbl').textContent='Kodowanie';
+  $('sCntLbl').textContent='Wiersze';
+  const sb=$('structBtn');sb.style.display='none';
+  const sw=$('structWrap');sw.style.display='none';sw.innerHTML='';
+  setStateChip('busy');
+  _busy=true;
+  try{
+    showPhase('Wczytywanie pliku',fmtBytes(file.size),'var(--sky)');
+    showProg(0,'Wczytywanie...','reading');
+    const buffer=await readFileProg(file,(p,t)=>showProg(p,t,'reading'));
+    showProg(100,'Wczytano','reading');
+    await tick();
+    const bytes=new Uint8Array(buffer);
+    _csvBytes=bytes;
+    showPhase('Analiza pliku CSV','','var(--violet)');
+    showProg(30,'Liczenie wierszy...','parsing');
+    await tick();
+    let rows=bytes.length?1:0;
+    for(let i=0;i<bytes.length;i++){if(bytes[i]===10)rows++;}
+    if(bytes.length&&bytes[bytes.length-1]===10)rows--;
+    _csvRows=rows;
+    let enc='UTF-8';
+    if(bytes.length>=3&&bytes[0]===0xEF&&bytes[1]===0xBB&&bytes[2]===0xBF)enc='UTF-8 (BOM)';
+    _stats={zip:file.size,raw:enc,ratio:0,count:rows,deflate:0,stored:0};
+    renderStats();
+    updateBadges();
+    showProg(100,rows+' wierszy','parsing');
+    await tick();
+    hidePhaseProg();
+    setStateChip('ready');
+    _busy=false;
+    $('status').innerHTML='Plik CSV gotowy do kompresji GZIP.';
+    $('compBtn').style.display='inline-flex';
+    $('compBtn').disabled=false;
+  }catch(err){fail(err);}
+}
+
 async function compress(){
+  if(_fileKind==='csv')return compressCsv();
   if(!_file||!_entries||_busy)return;
   _busy=true;
   const level=S.level,N=_entries.length;
@@ -935,12 +1319,29 @@ async function compress(){
   $('dlBtn').style.display='none';$('rstBtn').style.display='none';
   $('bars').style.display='none';$('resBtn').style.display='none';$('resWrap').style.display='none';
   const t0=performance.now();
+  let zEntries=_entries,ssApplied=false;
+  if(_useSS&&_ilAnalysis&&_ilAnalysis.worthwhile){
+    showPhase('Preprocessing: Shared Strings','scalanie powtórzeń tekstu','var(--amber)');
+    showProg(30,'Przebudowa arkusza...','parsing');
+    await tick();
+    zEntries=applySharedStringsConversion(_entries);
+    ssApplied=zEntries!==_entries;
+    showProg(100,ssApplied?'Zastosowano':'Bez zmian','parsing');
+    await tick(40);
+  }
   showPhase('Kompresja Deflate '+level,'0 / '+N,'var(--emerald)');
   showProg(0,'Startowanie...','compressing');
   try{
-    const {bytes,rows}=await buildZip(_entries,level,async(i,n,name)=>{
-      const pct=Math.round(((i+1)/n)*100);
+    const {bytes,rows}=await buildZip(zEntries,level,(i,n,name,frac)=>{
       const short=name.length>36?'…'+name.slice(-33):name;
+      if(frac!==undefined){
+        const pct=Math.round(frac*100);
+        showProg(pct,short+' — duży element, chunkowanie...','compressing');
+        $('pLabel').innerHTML='Kompresja Deflate '+level+'<span>'+(i+1)+' / '+n+' · '+pct+'% elementu</span>';
+        $('pTime').textContent=((performance.now()-t0)/1000).toFixed(1).replace('.',',')+'s';
+        return;
+      }
+      const pct=Math.round(((i+1)/n)*100);
       showProg(pct,short,'compressing');
       $('pLabel').innerHTML='Kompresja Deflate '+level+'<span>'+(i+1)+' / '+N+'</span>';
       $('pTime').textContent=((performance.now()-t0)/1000).toFixed(1).replace('.',',')+'s';
@@ -964,6 +1365,9 @@ async function compress(){
     }
     updateBadges();
     setStateChip('done');
+    updateProfile(_fp,_file.size,bytes.length,_ilAnalysis);
+    renderProfileCard();
+    const ssNote=ssApplied?' Zastosowano preprocessing Shared Strings.':'';
     if(diff>0){
       const nn=_file.name.replace(/\.xlsx$/i,'_compressed.xlsx');
       const blob=new Blob([bytes.buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
@@ -973,11 +1377,60 @@ async function compress(){
       a.innerHTML=IC.download+esc(nn)+' ('+fmtBytes(bytes.length)+')';
       a.style.display='inline-flex';
       renderBars(_file.size,bytes.length,diff,ps,time);
-      $('status').innerHTML='<b class="ok">Sukces!</b> Zmniejszono o '+fmtBytes(diff)+' ('+fmtPct(ps)+').<br>Oryginał: '+fmtBytes(_file.size)+' → Nowy: '+fmtBytes(bytes.length)+'<br>Deflate Level '+level+' · dane identyczne · czas: '+fmtSec(time);
+      $('status').innerHTML='<b class="ok">Sukces!</b> Zmniejszono o '+fmtBytes(diff)+' ('+fmtPct(ps)+').<br>Oryginał: '+fmtBytes(_file.size)+' → Nowy: '+fmtBytes(bytes.length)+'<br>Deflate Level '+level+' · dane identyczne po otwarciu w Excelu · czas: '+fmtSec(time)+ssNote;
       toast('ok','Kompresja zakończona','Zaoszczędzono '+fmtBytes(diff)+' ('+fmtPct(ps)+').');
     }else{
       $('status').innerHTML='<b class="warn">Brak zysku.</b> Plik jest już optymalnie spakowany.<br>Dalsze zmniejszenie wymagałoby usunięcia danych.<br>Czas: '+fmtSec(time);
       toast('info','Brak zysku','Plik był już optymalnie skompresowany.');
+    }
+    $('rstBtn').style.display='inline-flex';
+    _busy=false;
+  }catch(err){fail(err);}
+}
+async function compressCsv(){
+  if(!_file||!_csvBytes||_busy)return;
+  _busy=true;
+  const level=S.level;
+  $('compBtn').style.display='none';
+  $('status').innerHTML='';
+  if(_dlUrl){URL.revokeObjectURL(_dlUrl);_dlUrl=null;}
+  $('dlBtn').style.display='none';$('rstBtn').style.display='none';
+  $('bars').style.display='none';$('resBtn').style.display='none';$('resWrap').style.display='none';
+  const t0=performance.now();
+  showPhase('Kompresja GZIP '+level,'','var(--emerald)');
+  showProg(10,'Kompresowanie...','compressing');
+  try{
+    await tick();
+    const comp=pako.gzip(_csvBytes,{level:level});
+    showProg(100,'Finalizowanie...','compressing');
+    await tick(60);
+    const time=(performance.now()-t0)/1000;
+    const diff=_file.size-comp.length;
+    const ps=_file.size>0?(diff/_file.size*100):0;
+    hidePhaseProg();
+    $('resBtn').style.display='none';
+    $('resWrap').style.display='none';$('resWrap').innerHTML='';
+    TOTAL++;saveT();
+    if(S.keepHistory){
+      HIST.unshift({id:makeId(),name:_file.name,before:_file.size,after:comp.length,saved:diff,pct:ps,timeSec:time,at:new Date().toISOString()});
+      HIST=HIST.slice(0,30);saveH();
+    }
+    updateBadges();
+    setStateChip('done');
+    if(diff>0){
+      const nn=_file.name.replace(/\.csv$/i,'')+'_compressed.csv.gz';
+      const blob=new Blob([comp.buffer],{type:'application/gzip'});
+      _dlUrl=URL.createObjectURL(blob);
+      const a=$('dlBtn');
+      a.href=_dlUrl;a.download=nn;
+      a.innerHTML=IC.download+esc(nn)+' ('+fmtBytes(comp.length)+')';
+      a.style.display='inline-flex';
+      renderBars(_file.size,comp.length,diff,ps,time);
+      $('status').innerHTML='<b class="ok">Sukces!</b> Zmniejszono o '+fmtBytes(diff)+' ('+fmtPct(ps)+').<br>Oryginał: '+fmtBytes(_file.size)+' → GZIP: '+fmtBytes(comp.length)+'<br>Poziom '+level+' · dane identyczne po dekompresji · czas: '+fmtSec(time);
+      toast('ok','Kompresja GZIP zakończona','Zaoszczędzono '+fmtBytes(diff)+' ('+fmtPct(ps)+').');
+    }else{
+      $('status').innerHTML='<b class="warn">Brak zysku.</b> Plik CSV jest bardzo mały lub już nieściśliwy.<br>Czas: '+fmtSec(time);
+      toast('info','Brak zysku','Plik był już praktycznie nieściśliwy.');
     }
     $('rstBtn').style.display='inline-flex';
     _busy=false;
@@ -995,6 +1448,8 @@ function renderBars(orig,comp,diff,pct,time){
 
 function resetFlow(){
   _file=null;_entries=null;_items=null;_stats=null;
+  _csvBytes=null;_csvRows=0;
+  _ilAnalysis=null;_useSS=false;_fp=null;
   _xmlSel=null;_xmlFilter='';_xmlMode='pretty';
   if(_dlUrl){URL.revokeObjectURL(_dlUrl);_dlUrl=null;}
   dropZone.style.display='';
@@ -1002,6 +1457,8 @@ function resetFlow(){
   $('statsRow').style.display='none';
   $('structBtn').style.display='none';
   const sw=$('structWrap');sw.style.display='none';sw.innerHTML='';
+  const ssr=$('ssRecommend');ssr.style.display='none';ssr.innerHTML='';
+  $('profileCard').style.display='none';
   hidePhaseProg();
   $('status').innerHTML='';
   $('compBtn').style.display='none';
@@ -1043,6 +1500,11 @@ $('resBtn').addEventListener('click',()=>{
 /* ================= widok: struktura ================= */
 function renderStructure(){
   const root=$('structureRoot');
+  if(_fileKind==='csv'&&_csvBytes){
+    root.innerHTML='<div class="grid-12"><div class="col-12"><section class="card"><div class="empty"><div class="empty-icon">'+IC.info+'</div><h3>Nie dotyczy plików CSV</h3><p>CSV to zwykły plik tekstowy — nie jest archiwum ZIP, więc nie ma tu wewnętrznej struktury elementów. Plik jest kompresowany bezpośrednio metodą GZIP w widoku Kompresora.</p><button class="btn-primary" style="margin-top:14px" id="goComp1">Przejdź do kompresora</button></div></section></div></div>';
+    $('goComp1').addEventListener('click',()=>go('compressor'));
+    return;
+  }
   if(!_items||!_items.length){
     root.innerHTML='<div class="grid-12"><div class="col-12"><section class="card"><div class="empty"><div class="empty-icon">'+IC.file+'</div><h3>Brak wczytanego pakietu</h3><p>Wgraj plik .xlsx w kompresorze, aby przeanalizować strukturę archiwum — elementy, rozmiary i metody kompresji.</p><button class="btn-primary" style="margin-top:14px" id="goComp1">Przejdź do kompresora</button></div></section></div></div>';
     $('goComp1').addEventListener('click',()=>go('compressor'));
@@ -1224,6 +1686,11 @@ function currentXmlEntry(){return _items?(_items.find(e=>e.name===_xmlSel)||null
 
 function renderXml(){
   const root=$('xmlRoot');
+  if(_fileKind==='csv'&&_csvBytes){
+    root.innerHTML='<div class="grid-12"><div class="col-12"><section class="card"><div class="empty"><div class="empty-icon">'+IC.info+'</div><h3>Nie dotyczy plików CSV</h3><p>Plik CSV nie zawiera części XML do podglądu — jest jednym, płaskim strumieniem tekstu skompresowanym metodą GZIP.</p><button class="btn-primary" style="margin-top:14px" id="goComp3">Przejdź do kompresora</button></div></section></div></div>';
+    $('goComp3').addEventListener('click',()=>go('compressor'));
+    return;
+  }
   if(!_items||!_items.length){
     root.innerHTML='<div class="grid-12"><div class="col-12"><section class="card"><div class="empty"><div class="empty-icon">'+IC.code+'</div><h3>Brak wczytanego pakietu</h3><p>Wgraj plik .xlsx w kompresorze, aby przeglądać zawarte w nim pliki XML — z formatowaniem, podświetlaniem składni i numerami linii.</p><button class="btn-primary" style="margin-top:14px" id="goComp3">Przejdź do kompresora</button></div></section></div></div>';
     $('goComp3').addEventListener('click',()=>go('compressor'));
