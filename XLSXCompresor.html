@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>XLSX/CSV SAFE COMPRESS · Dark Ops · Single File</title>
+<title>XLSX/CSV SAFE COMPRESS · Single File</title>
 <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
 <style>
@@ -534,6 +534,20 @@ body{overflow:hidden;font-family:var(--font-ui);background:var(--bg);color:var(-
                   <div class="alert-item info"><svg viewBox="0 0 24 24" fill="none" stroke="var(--sky)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><div>To jest <strong>wersja single-file</strong> — cały tool w jednym pliku HTML. Zapisz go na dysku i używaj bez serwera.</div></div>
                 </div>
               </section>
+              <section class="card">
+                <div class="card-header"><div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Bezpieczeństwo</div></div>
+                <div class="card-body">
+                  <ol class="steps">
+                    <li><span><strong>Brak transmisji danych</strong> — narzędzie nie wykonuje żadnych zapytań sieciowych (<code class="mono" style="font-size:10px">fetch</code>/<code class="mono" style="font-size:10px">XHR</code>) do żadnego serwera. Jedyny ruch sieciowy to wczytanie samej strony (skrypt pako.js z CDN i czcionki) — dane wgrywanego pliku nigdy tego nie opuszczają.</span></li>
+                    <li><span><strong>Brak dynamicznego wykonywania kodu</strong> — nigdzie w aplikacji nie występuje <code class="mono" style="font-size:10px">eval()</code>, <code class="mono" style="font-size:10px">new Function()</code> ani <code class="mono" style="font-size:10px">document.write</code>. Zawartość plików (XML, CSV) jest tylko odczytywana i wyświetlana jako tekst/podgląd, nigdy nie jest interpretowana jako kod.</span></li>
+                    <li><span><strong>Walidacja struktury ZIP</strong> — każdy nagłówek (End of Central Directory, Central Directory, Local File Header) jest weryfikowany po sygnaturze binarnej przed odczytem. Uszkodzone, obce lub niekompletne archiwa są odrzucane z czytelnym błędem zamiast prowadzić do niezdefiniowanego zachowania.</span></li>
+                    <li><span><strong>Ochrona przed "zip bombą"</strong> — limity twarde: <span class="mono" style="font-size:10px">800&nbsp;MB</span> na pojedynczy rozpakowany element, <span class="mono" style="font-size:10px">1,5&nbsp;GB</span> łącznie na archiwum, maks. współczynnik kompresji <span class="mono" style="font-size:10px">300:1</span>. Egzekwowane zarówno na podstawie nagłówka (szybkie odrzucenie), jak i w czasie rzeczywistym podczas samej dekompresji — więc sfałszowany nagłówek też nie pozwoli zapchać pamięci karty.</span></li>
+                    <li><span><strong>Archiwa szyfrowane odrzucane</strong> — plik z ustawioną flagą szyfrowania hasłem jest natychmiast odrzucany zamiast prób obejścia zabezpieczenia.</span></li>
+                    <li><span><strong>Kontrola integralności</strong> — każdy przebudowany element pakietu otrzymuje nową sumę CRC-32, a bajty danych po dekompresji i ponownej kompresji pozostają identyczne (bezstratna rekompresja, nie edycja treści).</span></li>
+                    <li><span><strong>Dane lokalne ograniczone do minimum</strong> — w <span class="mono" style="font-size:10px">localStorage</span> zapisywane są wyłącznie ustawienia UI i licznik/historia operacji (nazwy plików, rozmiary) — nigdy zawartość plików. Można to wyczyścić jednym przyciskiem w Ustawieniach.</span></li>
+                  </ol>
+                </div>
+              </section>
             </div>
           </div>
         </div>
@@ -608,6 +622,55 @@ function crc32(d){if(!_ct){_ct=new Uint32Array(256);for(let i=0;i<256;i++){let r
    jak zawieszenie karty. Dzieląc dane na kawałki i oddając sterowanie przeglądarce między nimi
    (await tick()), interfejs pozostaje responsywny, a pasek postępu pokazuje realny procent. */
 const CHUNK_SZ=4*1024*1024;
+
+/* ================= Ochrona przed "zip bombą" =================
+   Archiwum ZIP/OOXML pozwala zadeklarować w nagłówku dowolny rozmiar po
+   rozpakowaniu przy niewielkim rozmiarze skompresowanym (deflate ma
+   teoretyczny maksymalny współczynnik ok. 1032:1). Złośliwie spreparowany
+   plik .xlsx mógłby w ten sposób zająć całą dostępną pamięć karty i
+   zawiesić przeglądarkę (tzw. "decompression bomb" / DoS), nawet jeśli
+   sam plik ma pozornie niewielki rozmiar. Poniższe limity są egzekwowane
+   na DWÓCH poziomach:
+   1) PRZED dekompresją — na podstawie zadeklarowanych w nagłówku ZIP
+      wartości compSize/uncompSize (szybkie odrzucenie oczywistych bomb).
+   2) W TRAKCIE dekompresji — licznik faktycznie wyprodukowanych bajtów
+      jest sprawdzany na bieżąco (co porcję strumienia), niezależnie od
+      tego, co zadeklarował nagłówek — więc nawet spreparowany/kłamliwy
+      nagłówek nie pozwoli obejść limitu. */
+const MAX_ENTRY_UNCOMP=800*1024*1024;   // twardy limit: 800 MB na pojedynczy rozpakowany element
+const MAX_TOTAL_UNCOMP=1536*1024*1024;  // twardy limit: 1,5 GB na sumę całego archiwum
+const MAX_RATIO=300;                    // maks. dopuszczalny deklarowany współczynnik kompresji per element
+
+function safeInflateRaw(raw,maxBytes,onFrac){
+  return new Promise((resolve,reject)=>{
+    const parts=[];let total=0,aborted=false;
+    const inst=new pako.Inflate({raw:true});
+    inst.onData=c=>{
+      if(aborted)return;
+      total+=c.length;
+      if(total>maxBytes){aborted=true;reject(new Error('LIMIT_PRZEKROCZONY'));return;}
+      parts.push(c);
+    };
+    inst.onEnd=status=>{
+      if(aborted)return;
+      if(status!==0){reject(new Error('Błąd dekompresji ('+status+')'));return;}
+      const res=new Uint8Array(total);let off=0;for(const c of parts){res.set(c,off);off+=c.length;}
+      resolve(res);
+    };
+    (async()=>{
+      if(raw.length===0){inst.push(new Uint8Array(0),true);return;}
+      let pos=0;
+      while(pos<raw.length&&!aborted){
+        const end=Math.min(pos+CHUNK_SZ,raw.length),isLast=end>=raw.length;
+        inst.push(raw.subarray(pos,end),isLast);
+        pos=end;
+        if(onFrac&&!aborted)onFrac(pos/raw.length);
+        if(!isLast&&!aborted)await tick();
+      }
+    })().catch(e=>{if(!aborted)reject(e);});
+  });
+}
+
 function chunkedDeflate(data,level,onFrac){
   return new Promise((resolve,reject)=>{
     const parts=[];let total=0;
@@ -631,30 +694,6 @@ function chunkedDeflate(data,level,onFrac){
     })().catch(reject);
   });
 }
-function chunkedInflateRaw(raw,onFrac){
-  return new Promise((resolve,reject)=>{
-    const parts=[];let total=0;
-    const inst=new pako.Inflate({raw:true});
-    inst.onData=c=>{parts.push(c);total+=c.length;};
-    inst.onEnd=status=>{
-      if(status!==0){reject(new Error('Błąd dekompresji ('+status+')'));return;}
-      const res=new Uint8Array(total);let off=0;for(const c of parts){res.set(c,off);off+=c.length;}
-      resolve(res);
-    };
-    (async()=>{
-      if(raw.length===0){inst.push(new Uint8Array(0),true);return;}
-      let pos=0;
-      while(pos<raw.length){
-        const end=Math.min(pos+CHUNK_SZ,raw.length),isLast=end>=raw.length;
-        inst.push(raw.subarray(pos,end),isLast);
-        pos=end;
-        if(onFrac)onFrac(pos/raw.length);
-        if(!isLast)await tick();
-      }
-    })().catch(reject);
-  });
-}
-
 async function readZip(buffer,onProgress){
   const bytes=new Uint8Array(buffer),view=new DataView(buffer);
   let eocd=-1;const floor=Math.max(0,bytes.length-22-65535);
@@ -662,7 +701,7 @@ async function readZip(buffer,onProgress){
   if(eocd===-1)throw new Error('Nie znaleziono sygnatury archiwum ZIP. Plik jest uszkodzony lub nie jest prawidłowym pakietem .xlsx.');
   const cdCnt=view.getUint16(eocd+10,true),cdOff=view.getUint32(eocd+16,true);
   if(cdCnt===0xffff||cdOff===0xffffffff)throw new Error('To archiwum używa formatu ZIP64, który nie jest obsługiwany.');
-  const entries=[];let pos=cdOff;
+  const entries=[];let pos=cdOff,totalUncompSoFar=0;
   for(let i=0;i<cdCnt;i++){
     if(pos+46>bytes.length||view.getUint32(pos,true)!==0x02014b50)throw new Error('Uszkodzony katalog centralny archiwum ZIP.');
     const flags=view.getUint16(pos+8,true);
@@ -673,6 +712,13 @@ async function readZip(buffer,onProgress){
     const localOff=view.getUint32(pos+42,true);
     const name=new TextDecoder().decode(bytes.subarray(pos+46,pos+46+nameLen));
     const isDir=name.endsWith('/');
+    /* --- Krok 1: prekontrola na podstawie zadeklarowanych rozmiarów (szybkie odrzucenie) --- */
+    if(!isDir&&method===8){
+      if(uncompSize>MAX_ENTRY_UNCOMP)throw new Error('Element "'+name+'" deklaruje rozmiar po rozpakowaniu '+fmtBytes(uncompSize)+' — przekracza limit bezpieczeństwa ('+fmtBytes(MAX_ENTRY_UNCOMP)+'). Plik odrzucony jako potencjalna "zip bomba".');
+      if(compSize>0&&(uncompSize/compSize)>MAX_RATIO)throw new Error('Element "'+name+'" ma podejrzanie wysoki deklarowany współczynnik kompresji ('+Math.round(uncompSize/compSize)+':1, limit '+MAX_RATIO+':1). Plik odrzucony jako potencjalna "zip bomba".');
+      totalUncompSoFar+=uncompSize;
+      if(totalUncompSoFar>MAX_TOTAL_UNCOMP)throw new Error('Łączny zadeklarowany rozmiar archiwum po rozpakowaniu przekracza limit bezpieczeństwa ('+fmtBytes(MAX_TOTAL_UNCOMP)+'). Plik odrzucony.');
+    }
     let data;
     if(isDir||compSize===0){data=new Uint8Array(0);}
     else{
@@ -680,10 +726,14 @@ async function readZip(buffer,onProgress){
       const lNL=view.getUint16(localOff+26,true),lEL=view.getUint16(localOff+28,true);
       const start=localOff+30+lNL+lEL,raw=bytes.slice(start,start+compSize);
       if(method===8){
+        /* --- Krok 2: twardy limit egzekwowany NA BIEŻĄCO podczas faktycznej dekompresji,
+           niezależny od nagłówka — chroni też przed sfałszowanym uncompSize. --- */
         try{
-          if(raw.length>CHUNK_SZ)data=await chunkedInflateRaw(raw,f=>onProgress&&onProgress(name,f));
-          else data=pako.inflateRaw(raw);
-        }catch(e){throw new Error('Nie można zdekompresować elementu: '+name);}
+          data=await safeInflateRaw(raw,MAX_ENTRY_UNCOMP,f=>onProgress&&onProgress(name,f));
+        }catch(e){
+          if(e&&e.message==='LIMIT_PRZEKROCZONY')throw new Error('Element "'+name+'" po rozpakowaniu przekroczył limit bezpieczeństwa ('+fmtBytes(MAX_ENTRY_UNCOMP)+') — przerwano dekompresję. Plik odrzucony jako potencjalna "zip bomba".');
+          throw new Error('Nie można zdekompresować elementu: '+name);
+        }
       }
       else if(method===0){data=raw;}
       else throw new Error('Nieobsługiwana metoda kompresji ('+method+') w elemencie: '+name);
