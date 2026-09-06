@@ -1453,7 +1453,10 @@ tbody tr:hover { background: var(--shadow-inset-light); }
             <div id="alerts" style="padding: 15px 15px 0;"></div>
 
             <div class="section">
-                <div class="title">Import</div>
+                <div class="section-header">
+                    <div class="title" style="margin-bottom:0;">Import</div>
+                    <button id="showColsInfo" class="btn neu-raised" title="Wymagane kolumny w pliku Excel">ℹ Kolumny</button>
+                </div>
                 <div class="upload neu-inset">
                     <label for="fileInput" class="btn neu-raised">⬆ Wybierz plik</label>
                     <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
@@ -1718,6 +1721,158 @@ tbody tr:hover { background: var(--shadow-inset-light); }
                     <input type="file" id="backupFileInput" accept=".json" style="display:none;">
                     <button class="btn neu-raised" id="importBackup">📥 Importuj backup</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="colsModal" class="modal">
+        <div class="modal-content" style="max-width:700px;">
+            <div class="modal-header">
+                <h3>ℹ Wymagane kolumny w pliku Excel</h3>
+                <button class="modal-close" onclick="$('#colsModal').removeClass('on')">×</button>
+            </div>
+            <div class="modal-body">
+
+                <p style="font-size:9px;color:var(--text-secondary);margin-bottom:14px;">
+                    Narzędzie rozpoznaje kolumny automatycznie po nazwie nagłówka — <strong>kolejność kolumn nie ma znaczenia</strong>.<br>
+                    Wystarczy, że nagłówek zawiera słowo kluczowe (wielkość liter nieistotna).
+                </p>
+
+                <p style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--title-color);letter-spacing:1px;margin-bottom:8px;">
+                    📄 Plik danych (główny import)
+                </p>
+
+                <div class="table-wrap neu-inset" style="margin-bottom:18px;">
+                    <table class="compact" style="width:100%;">
+                        <thead>
+                            <tr>
+                                <th style="width:22%;">Kolumna</th>
+                                <th style="width:38%;">Nagłówek musi zawierać…</th>
+                                <th style="width:20%;">Przykłady</th>
+                                <th>Uwagi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Rozmiar opony</strong> <span style="color:#dc2626;font-weight:700;" title="Kluczowa — uruchamia wyliczanie cen">★</span></td>
+                                <td><code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">rozmiar</code> lub <code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">size</code></td>
+                                <td class="note">Rozmiar, Size</td>
+                                <td class="note">Kluczowa ★ — aktywuje wycenę z cennika</td>
+                            </tr>
+                            <tr>
+                                <td>Nr rejestracyjny</td>
+                                <td><code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">nr rej</code> lub <code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">rejestr</code></td>
+                                <td class="note">Nr rej, Rejestracja</td>
+                                <td class="note"></td>
+                            </tr>
+                            <tr>
+                                <td>Nazwa lub nr (łączony)</td>
+                                <td><code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">nazwa lub nr</code></td>
+                                <td class="note">Nazwa lub Nr</td>
+                                <td class="note">Wyciąga nr rej i nazwę z jednej kolumny</td>
+                            </tr>
+                            <tr>
+                                <td>Nazwa użytkownika</td>
+                                <td><code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">nazwa użytkownik</code></td>
+                                <td class="note">Nazwa użytkownika</td>
+                                <td class="note"></td>
+                            </tr>
+                            <tr>
+                                <td>Oddział</td>
+                                <td><code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">oddział</code></td>
+                                <td class="note">Oddział, Oddzial</td>
+                                <td class="note">Filtr i grupowanie</td>
+                            </tr>
+                            <tr>
+                                <td>Typ pojazdu</td>
+                                <td><code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">typ</code> lub <code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">type</code></td>
+                                <td class="note">Typ, Type</td>
+                                <td class="note">Filtr</td>
+                            </tr>
+                            <tr>
+                                <td>Zakup</td>
+                                <td><code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">zakup</code></td>
+                                <td class="note">Zakup</td>
+                                <td class="note">Wartości: <strong>TAK</strong> / <strong>NIE</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Ilość opon</td>
+                                <td><code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">ilość</code>, <code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">ilosc</code> lub <code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">szt</code></td>
+                                <td class="note">Ilość, Ilosc, Szt</td>
+                                <td class="note">Liczba sztuk — wpływa na wartość</td>
+                            </tr>
+                            <tr>
+                                <td>Adres</td>
+                                <td><code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">adres</code></td>
+                                <td class="note">Adres</td>
+                                <td class="note">Grupowanie wg adresu</td>
+                            </tr>
+                            <tr>
+                                <td>Uwagi</td>
+                                <td><code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">uwagi</code> lub <code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">uwaga</code></td>
+                                <td class="note">Uwagi, Uwaga</td>
+                                <td class="note"></td>
+                            </tr>
+                            <tr>
+                                <td>Zamawiający</td>
+                                <td><code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">zamawiaj</code> lub <code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">osoba kontakt</code></td>
+                                <td class="note">Zamawiający, Osoba kontakt</td>
+                                <td class="note">Filtr i grupowanie</td>
+                            </tr>
+                            <tr>
+                                <td>Marka pojazdu</td>
+                                <td><code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">marka</code>, <code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">brand</code> lub <code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">producent pojazdu</code></td>
+                                <td class="note">Marka, Brand</td>
+                                <td class="note">Grupowanie wg marki</td>
+                            </tr>
+                            <tr>
+                                <td>Model pojazdu</td>
+                                <td><code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">model</code> (nie „Model opony")</td>
+                                <td class="note">Model</td>
+                                <td class="note"></td>
+                            </tr>
+                            <tr>
+                                <td>Rok produkcji</td>
+                                <td><code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">rok prod</code>, <code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">rocznik</code> lub <code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">rok wyp</code></td>
+                                <td class="note">Rok produkcji, Rocznik</td>
+                                <td class="note"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p style="font-size:8px;color:var(--text-muted);margin-bottom:14px;">
+                    <span style="color:#dc2626;font-weight:700;">★</span> Kolumna <strong>Rozmiar</strong> jest kluczowa — jej obecność aktywuje automatyczne pobieranie cen z cennika i obliczanie wartości zamówienia. Pozostałe kolumny są opcjonalne.
+                </p>
+
+                <p style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--title-color);letter-spacing:1px;margin-bottom:8px;">
+                    📊 Plik cennika (Import Excel w sekcji Cennik) — stała kolejność kolumn
+                </p>
+
+                <div class="table-wrap neu-inset">
+                    <table class="compact" style="width:100%;">
+                        <thead>
+                            <tr>
+                                <th style="width:80px;">Kolumna nr</th>
+                                <th>Nazwa</th>
+                                <th>Przykład</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="num">1</td><td><strong>Rozmiar</strong></td><td class="note">205 55 R16</td></tr>
+                            <tr><td class="num">2</td><td><strong>Producent</strong></td><td class="note">Dębica</td></tr>
+                            <tr><td class="num">3</td><td><strong>Bieżnik</strong></td><td class="note">Frigo2 HP2</td></tr>
+                            <tr><td class="num">4</td><td><strong>Cena netto</strong></td><td class="note">189.40</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p style="font-size:8px;color:var(--text-muted);margin-top:8px;">
+                    ⚠ W pliku cennika kolejność kolumn <strong>ma znaczenie</strong> — nagłówki są ignorowane, dane czytane są po pozycji.
+                </p>
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn neu-raised" onclick="$('#colsModal').removeClass('on')">Zamknij</button>
             </div>
         </div>
     </div>
@@ -2416,6 +2571,7 @@ const init = () => {
     initTheme();
     
     $('#fileInput').on('change', handleFile);
+    $('#showColsInfo').on('click', () => $('#colsModal').addClass('on'));
     $('#zakup').on('change', () => { S.table?.draw(); updateCount(); });
     $('input[name="group"]').on('change', e => { S.group = e.target.value; showDetail(getFiltered()); });
     
