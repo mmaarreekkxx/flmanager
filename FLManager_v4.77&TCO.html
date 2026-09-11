@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#1f2937">
 <meta name="description" content="FLMANAGER - Zaawansowany system zarządzania flotą pojazdów z MCE, analizą kosztów i raportowaniem">
-<title>FLMANAGER v4.76G_IDB</title>
+<title>FLMANAGER v4.77G_IDB</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Roboto+Condensed:wght@400;600;700&family=Roboto+Mono:wght@400;500;600&family=Orbitron:wght@900&family=Chakra+Petch:wght@600&family=Inter:wght@400;500;600;700&display=swap">
@@ -113,10 +113,10 @@ table.tco-t tr.tco-hl td{background:rgba(124,58,237,.07)!important;font-weight:7
 .tco-legend .p{color:var(--tx-m);width:38px;text-align:right;font-family:var(--font-mono)}
 .tco-legend b{flex:0 0 auto;font-family:var(--font-mono);width:72px;text-align:right}
 .tco-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:var(--sp)}
-.tco-st{background:var(--bg-s);border:1px solid var(--bd);border-radius:var(--rmd);padding:8px 10px;overflow:hidden}
-.tco-st .l{font-size:.55rem;color:var(--tx-m);text-transform:uppercase;letter-spacing:.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tco-st .v{font-size:.95rem;font-weight:800;margin-top:2px;font-family:var(--font-mono);letter-spacing:-.4px;white-space:nowrap}
-.tco-st .x{font-size:.58rem;color:var(--tx-m);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tco-st{background:var(--bg-card);border:1px solid var(--bd);border-top:3px solid var(--act);border-radius:var(--rmd);padding:9px 11px;box-shadow:var(--neu-s);overflow:hidden}
+.tco-st .l{font-size:.58rem;color:var(--tx-m);text-transform:uppercase;letter-spacing:.7px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tco-st .v{font-size:1.05rem;font-weight:800;margin-top:3px;font-family:var(--font-mono);letter-spacing:-.4px;white-space:nowrap;color:var(--tx-p)}
+.tco-st .x{font-size:.6rem;color:var(--tx-m);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tco-al{padding:8px 10px;border-radius:6px;font-size:.68rem;margin-top:8px;line-height:1.5;border-left:4px solid}
 .tco-al.w{background:rgba(217,119,6,.08);border-color:var(--warn);color:#92400e}
 .tco-al.e{background:rgba(220,38,38,.08);border-color:var(--dang);color:#7f1d1d}
@@ -125,12 +125,55 @@ table.tco-t tr.tco-hl td{background:rgba(124,58,237,.07)!important;font-weight:7
 [data-theme=dark] .tco-al.w{color:#fde68a}[data-theme=dark] .tco-al.e{color:#fecaca}[data-theme=dark] .tco-al.s{color:#a7f3d0}[data-theme=dark] .tco-al.i{color:#bfdbfe}
 .tco-two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--sp)}
 @media(max-width:800px){.tco-two{grid-template-columns:1fr}}
+/* ── RAPORT TCO — restyle w stylu infografiki (nagłówek/kafelki/callout na ciemnym tle) ── */
+.tco-rep-hdr{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#14161a;color:#fff;margin:-12px -14px 14px;padding:11px 14px;border-radius:var(--rmd) var(--rmd) 0 0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.tco-rep-hdr-brand{display:flex;align-items:center;gap:8px;font-family:var(--font-brand);font-weight:900;letter-spacing:.5px;font-size:.78rem}
+.tco-rep-hdr-brand i{font-size:.85rem;opacity:.9}
+.tco-rep-hdr-meta{font-size:.6rem;color:rgba(255,255,255,.65);text-align:right;font-family:var(--font-text)}
+.tco-rep-title{font-size:1.15rem;font-weight:900;letter-spacing:-.3px;color:var(--tx-p);line-height:1.2;margin-bottom:6px}
+.tco-rep-sub{display:flex;align-items:center;gap:10px;font-size:.65rem;color:var(--tx-m);font-weight:700;margin-bottom:10px}
+.tco-rep-sub::after{content:'';flex:1;height:1px;background:var(--bd)}
+.tco-rep-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:0 0 14px}
+.tco-rep-kpi{padding:9px 8px;border-radius:6px;background:#14161a;color:#fff;text-align:left;-webkit-print-color-adjust:exact;print-color-adjust:exact;box-shadow:var(--neu-s)}
+.tco-rep-kpi .ic{width:22px;height:22px;border-radius:50%;border:1.5px solid rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center;font-size:.6rem;margin-bottom:6px;color:#fff}
+.tco-rep-kpi .l{font-size:.5rem;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.5px;font-weight:700;line-height:1.35;margin-bottom:5px;min-height:1.9em}
+.tco-rep-kpi .v{font-family:var(--font-mono);font-weight:800;font-size:.92rem;color:#fff;letter-spacing:-.3px;line-height:1.15}
+.tco-rep-kpi .cmp{border-top:1px solid rgba(255,255,255,.18);margin-top:6px;padding-top:5px;display:flex;justify-content:space-between;align-items:baseline;gap:4px}
+.tco-rep-kpi .cmp .cl{font-size:.48rem;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.4px}
+.tco-rep-kpi .cmp .cv{font-size:.6rem;font-weight:700;color:#fff;font-family:var(--font-mono);white-space:nowrap}
+.tco-rep-body{border:1px solid var(--bd);border-radius:6px;padding:12px;background:var(--bg-card);margin-bottom:14px}
+.tco-rep-callout{display:flex;align-items:center;gap:12px;background:#14161a;color:#fff;border-radius:6px;padding:11px 14px;margin-bottom:14px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.tco-rep-callout .ic{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
+.tco-rep-callout .lbl{font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:rgba(255,255,255,.65);margin-bottom:2px}
+.tco-rep-callout .txt{font-size:.72rem;line-height:1.5;color:#fff}
+.tco-rep-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#14161a;color:rgba(255,255,255,.7);border-radius:6px;padding:8px 14px;font-size:.58rem;margin-top:2px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+[data-theme=dark] .tco-rep-hdr,[data-theme=dark] .tco-rep-kpi,[data-theme=dark] .tco-rep-callout,[data-theme=dark] .tco-rep-footer{background:#0a0b0d}
 .tco-rep h5{font-size:.82rem;color:var(--tx-p);margin:14px 0 6px;padding-bottom:5px;border-bottom:1.5px solid var(--bd);font-family:var(--font-text)}
 .tco-rep p{font-size:.72rem;color:var(--tx-s);margin-bottom:7px;line-height:1.55}
 .tco-rep ul{margin:0 0 10px 16px;font-size:.72rem;color:var(--tx-s)}
 .tco-rep li{margin-bottom:4px}
-.tco-sig{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:28px;font-size:.65rem;color:var(--tx-m)}
+.tco-sig{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:14px;font-size:.65rem;color:var(--tx-m)}
 .tco-sig div{border-top:1px solid var(--bd);padding-top:5px;text-align:center}
+/* ── RAPORT TCO — układ 2-kolumnowy ─────────────────────────────────────── */
+.tco-rep-grid{display:grid;grid-template-columns:58% 1fr;gap:12px;margin:0}
+.tco-rep-sect{font-size:.52rem;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:var(--tx-m);margin:9px 0 3px;border-bottom:1px solid var(--bd);padding-bottom:2px}
+.tco-rep-sect:first-child{margin-top:0}
+/* Kompaktowa tabelka danych — przyległa do zawartości, nie rozciągana */
+/* Ujednolicone typograficznie z .tco-t (patrz wyżej) — te same rozmiary czcionek,
+   ten sam font mono dla wartości, ten sam styl nagłówka (wersaliki, letter-spacing,
+   padding, border-bottom, kolor). Struktura zostaje inna (para etykieta:wartość
+   zamiast siatki wielokolumnowej), ale wygląda spójnie z resztą tabel w zakładce TCO. */
+.tco-rep-dt{width:100%;border-collapse:collapse;font-size:.7rem}
+.tco-rep-dt td{padding:5px 6px;border-bottom:1px solid var(--bg-s);vertical-align:middle;font-family:var(--font-text)}
+.tco-rep-dt td:first-child{text-align:left;white-space:nowrap;color:var(--tx-m);font-size:.68rem}
+.tco-rep-dt td:last-child{text-align:right;font-family:var(--font-mono);font-weight:600;color:var(--tx-p);font-size:.68rem;white-space:nowrap;padding-left:12px}
+.tco-rep-dt tr:last-child>td{border-bottom:none}
+.tco-rep-dt thead th{text-align:right;padding:6px 6px;font-size:.58rem;text-transform:uppercase;letter-spacing:.5px;color:var(--tx-m);border-bottom:2px solid var(--bd);font-weight:700;white-space:nowrap;background:var(--bg-card)}
+.tco-rep-dt thead th:first-child{text-align:left}
+.tco-rep-dt tfoot td{font-weight:800;border-top:2px solid var(--act);border-bottom:none;background:var(--bg-t);font-size:.72rem}
+@media(max-width:640px){.tco-rep-grid{grid-template-columns:1fr}.tco-rep-kpis{grid-template-columns:repeat(2,1fr)}.tco-rep-hdr{flex-direction:column;align-items:flex-start;gap:4px}.tco-rep-hdr-meta{text-align:left}}
+@media(max-width:640px){#tco-rep .tco-dep-exp-grid{grid-template-columns:1fr!important}#tco-rep .mce-section{margin-bottom:var(--sp)!important}}
+
 .tco-csvmodal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9000;align-items:center;justify-content:center;padding:20px}
 .tco-csvmodal.on{display:flex}
 .tco-csvbox{background:var(--bg-card);border-radius:var(--rmd);padding:18px;max-width:720px;width:100%;max-height:86vh;overflow:auto;border:1px solid var(--bd);box-shadow:0 20px 60px rgba(0,0,0,.5)}
@@ -171,19 +214,19 @@ table.tco-t tr.tco-hl td{background:rgba(124,58,237,.07)!important;font-weight:7
      w kolorze --act) wjeżdża na wydrukowaną stronę jako cienka fioletowa pionowa linia.
      Ukrywamy go jawnie, niezależnie od stanu otwarcia. */
   #va-panel,#va-overlay{display:none!important}
-  .app-container{padding:0!important;min-height:0!important;width:186mm!important;max-width:186mm!important}
+  .app-container{padding:0!important;min-height:0!important;width:190mm!important;max-width:190mm!important}
   /* Telefon drukuje przy szerokości viewportu ekranu (nie fizycznej szerokości strony A4),
      więc bez wymuszenia treść zostaje wąska jak na komórce, a połowa kartki A4 zostaje pusta.
      Jednostki mm są liczone względem fizycznej strony niezależnie od viewportu, więc to
      realnie poszerza układ (siatki KPI/kart same przeliczą liczbę kolumn na szerszą stronę).
-     UWAGA: @page{margin:16mm 12mm} → obszar zadruku = 210mm − 12mm − 12mm = 186mm.
-     Ustawiamy 186mm (nie 210mm), żeby body nie przekraczało obszaru zadruku i nie
+     UWAGA: @page{margin:12mm 10mm} → obszar zadruku = 210mm − 10mm − 10mm = 190mm.
+     Ustawiamy 190mm (nie 210mm), żeby body nie przekraczało obszaru zadruku i nie
      powodowało asymetrycznej pustej przestrzeni po prawej stronie wydruku. */
-  html,body{width:186mm!important}
-  #tab-tco{width:186mm!important;max-width:186mm!important;padding-top:0!important}
+  html,body{width:190mm!important}
+  #tab-tco{width:190mm!important;max-width:190mm!important;padding-top:0!important}
   #tab-tco .tco-aside,#tab-tco .tco-subtabs,#tab-tco .tco-bar-btn,#tab-tco .tco-sel-bar{display:none!important}
-  #tab-tco .tco-layout{grid-template-columns:1fr;width:186mm!important}
-  #tab-tco .tco-pane{display:block!important;margin-bottom:12px;width:186mm!important}
+  #tab-tco .tco-layout{grid-template-columns:1fr;width:190mm!important}
+  #tab-tco .tco-pane{display:block!important;margin-bottom:12px;width:190mm!important}
   /* Rozbij strony na sensownych granicach zamiast ciąć w środku treści.
      "page-break-inside:avoid" na całej .tco-pane (poprzednio) nie miało sensu — pane bywa
      wyższe niż jedna strona, więc przeglądarka i tak musiała ją przeciąć, często w złym
@@ -195,7 +238,15 @@ table.tco-t tr.tco-hl td{background:rgba(124,58,237,.07)!important;font-weight:7
   #tab-tco .tco-card,#tab-tco .tco-kpi,#tab-tco .tco-cbox,#tab-tco .tco-sig,#tab-tco li{
     break-inside:avoid-page;page-break-inside:avoid
   }
-  #tab-tco .tco-kpis{break-inside:avoid-page;page-break-inside:avoid}
+  #tab-tco .tco-rep-hdr,#tab-tco .tco-rep-kpi,#tab-tco .tco-rep-callout,#tab-tco .tco-rep-footer{
+    break-inside:avoid-page;page-break-inside:avoid
+  }
+  /* UWAGA: nie ustawiać break-inside:avoid na .tco-kpis (kontener-siatka) — tylko na
+     pojedynczych .tco-kpi (patrz reguła wyżej). Wymuszenie "avoid" na całej siatce,
+     jeśli urośnie wyżej niż jedna strona, to dokładnie warunek, przy którym silniki
+     drukowania Chromium potrafią duplikować albo gubić fragment strony zamiast go
+     po prostu złamać między wierszami — nie da się "uniknąć" złamania czegoś większego
+     niż strona, więc lepiej w ogóle o to nie prosić. */
   #tco-rep{break-inside:auto} /* cała treść raportu MOŻE się dzielić na strony — tylko jej elementy nie są cięte w pół */
   /* Profesjonalny wygląd wydruku: nagłówki tabel powtarzają się na każdej nowej stronie
      (inaczej przy złamaniu tabeli w połowie traci się opis kolumn), separator załącznika
@@ -219,8 +270,57 @@ table.tco-t tr.tco-hl td{background:rgba(124,58,237,.07)!important;font-weight:7
   #tco-fleetTable th:first-child,#tco-fleetTable td:first-child{white-space:normal;min-width:0}
   #tab-tco .tco-t{font-size:.6rem}
   #tab-tco .tco-t th,#tab-tco .tco-t td{padding:3px 4px}
+  /* Raport — na wydruku układ 2-kolumnowy (CSS Grid) zamieniamy na zwykły blok
+     (kolumny jedna pod drugą). CSS Grid nie ma niezawodnej obsługi łamania na strony
+     w silnikach druku — gdy zawartość siatki jest wyższa niż jedna strona, Chromium
+     potrafi treść zdublować na dwóch stronach albo w ogóle ją urwać, zamiast po prostu
+     przenieść dalszy fragment na kolejną stronę. Zwykły blok łamie się przewidywalnie. */
+  #tab-tco .tco-rep-grid{display:block!important}
+  #tab-tco .tco-rep-grid>div+div{margin-top:10px}
+  #tab-tco .tco-rep-kpis{grid-template-columns:repeat(4,1fr)!important}
+  #tab-tco .tco-rep-kpi{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  #tab-tco .tco-rep-dt tfoot td{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  /* Zachowaj border-top akcent na wydruku dla obu typów kart KPI */
+  #tab-tco .tco-st,#tab-tco .tco-kpi,#tab-tco .tco-rep-kpi{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;box-shadow:none!important}
+  /* ── RAPORT — PIERWSZA STRONA ────────────────────────────────────────────
+     #tco-p5 wypełnia całą stronę A4 (obszar zadruku 265mm = 297mm − 32mm marż.)
+     i wymusza złamanie strony po sobie, żeby Załącznik zawsze zaczynał od nowej.
+     Flex-kolumna + flex:1 na karcie raportu → podpisy spychane na dół (margin-top:auto).
+     ──────────────────────────────────────────────────────────────────────── */
+  /* UWAGA: nie dubluj złamania strony tutaj (np. "break-after:page") — separator
+     Załącznika (#tco-print-apx-divider, patrz wyżej) już samodzielnie wymusza
+     "break-before:page" przed sobą. Dwa wymuszone złamania z rzędu (jedno na końcu
+     #tco-p5, drugie na początku divider-a) tworzą pustą, całkowicie białą stronę
+     pomiędzy nimi — to był realny błąd na wydruku, nie literówka w komentarzu.
+     Druga, subtelniejsza przyczyna tej samej pustej strony: "min-height" liczony
+     dokładnie na wysokość strony (297mm − 32mm marginesów) potrafi w praktyce (przy
+     zaokrągleniach px/mm i realnej wysokości treści) wystawać poza stronę o kilka
+     pikseli — ten mikroskopijny "ogonek" ląduje sam, naturalnie, na kolejnej stronie,
+     a zaraz po nim i tak wymuszony "break-before" separatora przenosi wszystko o
+     JESZCZE JEDNĄ stronę dalej, zostawiając tę pierwszą prawie pustą. Odjęcie kilku
+     mm zapasu od min-height eliminuje ten "ogonek" z marginesem bezpieczeństwa.
+     (Marginesy @page to teraz 12mm górą/dołem, więc obszar zadruku = 297 − 24mm.) */
+  #tco-p5{display:flex!important;flex-direction:column;min-height:calc(297mm - 24mm - 6mm);margin-bottom:0}
+  /* ── RAPORT — WERSJA KOMPAKTOWA ──────────────────────────────────────────
+     Mniejsze odstępy/czcionki tylko na wydruku (na ekranie bez zmian), żeby
+     cały raport (KPI + struktura kosztów + deprecjacja/eksploatacja + cykl
+     życia + rekomendacje + podpisy) miał realną szansę zmieścić się na
+     jednej stronie A4 nawet przy większej liczbie kategorii kosztów. */
+  #tco-p5 .tco-card{padding:7px 9px!important}
+  #tco-p5 .tco-card>h4{padding-bottom:4px!important;margin-bottom:5px!important}
+  #tco-p5 p{margin-bottom:2px!important}
+  #tco-p5 .tco-rep-kpis{gap:3px!important;margin:5px 0!important}
+  #tco-p5 .tco-rep-kpi{padding:3px 4px!important}
+  #tco-p5 .tco-rep-kpi .v{font-size:.74rem!important}
+  #tco-p5 .tco-rep-sect{margin:5px 0 2px!important;padding-bottom:1px!important}
+  #tco-p5 .tco-rep-dt{font-size:.6rem!important}
+  #tco-p5 .tco-rep-dt td,#tco-p5 .tco-rep-dt thead th{padding:1px 4px!important}
+  #tco-p5 .tco-rep-grid>div+div{margin-top:6px!important}
+  #tco-p5 .tco-sig{gap:20px!important;padding-top:8px!important}
+  #tco-rep{flex:1 1 auto!important;display:flex!important;flex-direction:column}
+  #tab-tco .tco-sig{margin-top:auto!important;padding-top:20px}
 }
-@page{size:A4;margin:16mm 12mm}
+@page{size:A4;margin:12mm 10mm;@bottom-right{content:"Strona " counter(page) " z " counter(pages);font-size:7pt;color:#999;font-family:'Courier New',Courier,monospace;letter-spacing:.3px}}
 /* ══════════════ END TCO CSS ══════════════ */
 </style>
 </head>
@@ -228,10 +328,14 @@ table.tco-t tr.tco-hl td{background:rgba(124,58,237,.07)!important;font-weight:7
 <div class="loader" id="loader"><i class="fa-solid fa-circle-notch fa-spin fa-2x"></i><div class="loader-title">PRZETWARZANIE ASYNC</div><div class="progress-bar"><div class="progress-fill" id="loaderProgress"></div></div><div id="loaderText" class="loader-text">Inicjalizacja...</div><div id="loaderStats" class="loader-stats"></div></div>
 <div class="toast" id="toast">Operacja zakończona</div>
 
+<div id="meterHistModal" class="modal"><div class="modal-content" style="max-width:640px;width:92vw;max-height:80vh"><div class="modal-header"><i class="fas fa-tachometer-alt" style="font-size:.85rem;opacity:.9;flex-shrink:0"></i><h3 class="modal-title">Historia liczników</h3><button onclick="closeMeterHistModal()" style="margin-left:auto;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:5px;width:26px;height:26px;cursor:pointer;flex-shrink:0"><i class="fas fa-times"></i></button></div><div class="modal-body" id="meterHistModalBody"></div></div></div>
+
+<div id="datasetModal" class="modal"><div class="modal-content" style="max-width:640px;width:92vw;max-height:80vh"><div class="modal-header"><i class="fas fa-layer-group" style="font-size:.85rem;opacity:.9;flex-shrink:0"></i><h3 class="modal-title">Zapisane bazy danych</h3><button onclick="closeDatasetModal()" style="margin-left:auto;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:5px;width:26px;height:26px;cursor:pointer;flex-shrink:0"><i class="fas fa-times"></i></button></div><div class="modal-body" id="datasetModalBody"></div></div></div>
+
 <div id="vehicleModal" class="modal"><div class="modal-content modal-content-wide"><div class="modal-header"><i class="fas fa-car" style="font-size:.85rem;opacity:.9;flex-shrink:0"></i><h3 id="vehicleModalTitle" class="modal-title"><span id="vehicleModalReg" onclick="closeVehicleModal()" title="Kliknij aby zamknąć" style="font-family:var(--font-mono);background:rgba(255,255,255,.18);padding:1px 8px;border-radius:5px;letter-spacing:1px;cursor:pointer;transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.32)'" onmouseout="this.style.background='rgba(255,255,255,.18)'">—</span><span id="vehicleModalMeta" style="font-size:.6rem;font-weight:400;opacity:.8;font-family:var(--font-text);margin-left:4px"></span><div id="customLegend" style="display:flex;gap:8px;overflow-x:auto;white-space:nowrap;margin-left:10px;scrollbar-width:none;flex-shrink:1;min-width:0"></div></h3><div style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto"><button id="vehicleModalPDF" onclick="exportVehicleModalPDF()" title="Eksport PDF" style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:5px;padding:3px 10px;font-size:.65rem;font-family:var(--font-text);font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:background .15s"><i class="fas fa-file-pdf"></i> PDF</button></div></div><div class="modal-body"><div class="chart-container"><canvas id="vehicleChart"></canvas></div><div id="vehicleSummary" style="padding:0 8px 12px"></div></div></div></div>
 <div class="app-container">
-<div class="header neu-card" style="padding:2px 12px;min-height:auto"><div class="app-title" style="gap:8px"><i class="fa-solid fa-truck-fast"></i><div style="display:flex;flex-direction:column;justify-content:center;line-height:1"><span style="font-size:.85rem;letter-spacing:.5px">FLMANAGER</span><span class="app-version" style="font-size:.55rem;font-weight:400;opacity:.7">v4.76G_IDB</span></div></div><button id="densityBtn" onclick="cycleDensity()" class="theme-toggle-btn" title="Gęstość wierszy tabeli" style="margin-left:6px;flex-shrink:0"><i class="fas fa-grip-lines" id="densityIcon"></i></button><div class="flex items-center gap-2"><span id="datasetName" class="dataset-name">Brak danych</span><div class="control-group mce-toggle-group"><label class="switch"><input type="checkbox" id="aiCorrectionToggle" checked onchange="recalcAll()"><span class="slider"></span></label><span class="mce-label">MCE</span></div><button class="neu-btn async-status async-status-btn" id="asyncStatus" onclick="testAsync()" title="Test animacji async"><span class="async-dot"></span> Async</button><input type="checkbox" id="themeToggle" style="display:none"><label for="themeToggle" class="theme-toggle-btn" title="Zmień motyw"><i id="themeIcon" class="fas fa-sun"></i></label><button id="ai-open-btn" class="theme-toggle-btn" title="Gemini AI — Analiza floty" style="border:1px solid rgba(124,58,237,.4);border-radius:6px;width:auto;height:28px;padding:0 10px;gap:5px;font-size:.7rem;font-weight:700;color:var(--act);font-family:var(--font-text);letter-spacing:.3px;background:rgba(124,58,237,.14);margin-left:12px"><i class="fas fa-robot" style="font-size:.85rem"></i><span id="ai-btn-label">AI</span></button></div></div>
-<div class="neu-card upload-card"><div class="flex items-center gap-2 upload-controls"><input type="file" id="fileInput" multiple style="display:none" onchange="loadFiles()"><div id="dropZone" class="drop-zone" onclick="$('fileInput').click()"><i class="fa-solid fa-cloud-arrow-up upload-icon"></i><div class="upload-text-wrapper"><span>Wgraj pliki</span><span class="upload-subtext">Upuść lub kliknij</span></div></div><button class="neu-btn" id="fileListToggle" onclick="(function(){var c=$('fileListContainer');var v=c.style.display==='flex';c.style.display=v?'none':'flex';$('fileListToggle').classList.toggle('active',!v)})()" title="Lista plików" style="display:none"><i class="fas fa-folder-open"></i></button><div class="flex-spacer"></div><button class="neu-btn btn-demo" onclick="loadSampleData()"><i class="fas fa-database"></i> Demo</button><button class="neu-btn btn-danger" onclick="clearData()"><i class="fas fa-trash"></i></button></div><div id="fileListContainer" class="file-list-container" style="display:none"></div></div>
+<div class="header neu-card" style="padding:2px 12px;min-height:auto"><div class="app-title" style="gap:8px"><i class="fa-solid fa-truck-fast"></i><div style="display:flex;flex-direction:column;justify-content:center;line-height:1"><span style="font-size:.85rem;letter-spacing:.5px">FLMANAGER</span><span class="app-version" style="font-size:.55rem;font-weight:400;opacity:.7">v4.77G_IDB_TCO_METER</span></div></div><button id="densityBtn" onclick="cycleDensity()" class="theme-toggle-btn" title="Gęstość wierszy tabeli" style="margin-left:6px;flex-shrink:0"><i class="fas fa-grip-lines" id="densityIcon"></i></button><div class="flex items-center gap-2"><span id="datasetName" class="dataset-name">Brak danych</span><div class="control-group mce-toggle-group"><label class="switch"><input type="checkbox" id="aiCorrectionToggle" checked onchange="recalcAll()"><span class="slider"></span></label><span class="mce-label">MCE</span></div><button class="neu-btn async-status async-status-btn" id="asyncStatus" onclick="testAsync()" title="Test animacji async"><span class="async-dot"></span> Async</button><input type="checkbox" id="themeToggle" style="display:none"><label for="themeToggle" class="theme-toggle-btn" title="Zmień motyw"><i id="themeIcon" class="fas fa-sun"></i></label><button id="ai-open-btn" class="theme-toggle-btn" title="Gemini AI — Analiza floty" style="border:1px solid rgba(124,58,237,.4);border-radius:6px;width:auto;height:28px;padding:0 10px;gap:5px;font-size:.7rem;font-weight:700;color:var(--act);font-family:var(--font-text);letter-spacing:.3px;background:rgba(124,58,237,.14);margin-left:12px"><i class="fas fa-robot" style="font-size:.85rem"></i><span id="ai-btn-label">AI</span></button></div></div>
+<div class="neu-card upload-card"><div class="flex items-center gap-2 upload-controls"><input type="file" id="fileInput" multiple style="display:none" onchange="loadFiles()"><div id="dropZone" class="drop-zone" onclick="$('fileInput').click()"><i class="fa-solid fa-cloud-arrow-up upload-icon"></i><div class="upload-text-wrapper"><span>Wgraj pliki</span><span class="upload-subtext">Upuść lub kliknij</span></div></div><button class="neu-btn" id="fileListToggle" onclick="(function(){var c=$('fileListContainer');var v=c.style.display==='flex';c.style.display=v?'none':'flex';$('fileListToggle').classList.toggle('active',!v)})()" title="Lista plików" style="display:none"><i class="fas fa-folder-open"></i></button><div class="flex-spacer"></div><button class="neu-btn btn-demo" onclick="loadSampleData()"><i class="fas fa-database"></i> Demo</button><button class="neu-btn" onclick="openMeterHistModal()" title="Narzędzie: historia liczników (zapis / uzupełnianie / podgląd / kasowanie)"><i class="fas fa-tachometer-alt"></i> Liczniki</button><button class="neu-btn" onclick="openDatasetModal()" title="Narzędzie: zapisane bazy danych (przywracanie, wiele baz)"><i class="fas fa-layer-group"></i> Bazy</button><button class="neu-btn btn-danger" onclick="clearData()"><i class="fas fa-trash"></i></button></div><div id="fileListContainer" class="file-list-container" style="display:none"></div></div>
 <div class="tabs-nav">
   <button class="tab-btn active" onclick="switchTab('main', this)"><i class="fa-solid fa-table"></i> Dane</button>
   <button class="tab-btn" onclick="switchTab('summaries', this)"><i class="fa-solid fa-chart-pie"></i> Podsumowanie</button>
@@ -674,7 +778,6 @@ table.tco-t tr.tco-hl td{background:rgba(124,58,237,.07)!important;font-weight:7
     </div>
     <div class="tco-g2">
       <div><label class="tco-label">Stopa kapitału <span class="tco-u">%/rok</span></label><input type="number" class="tco-inp" id="tco-wacc" step="0.1"></div>
-      <div><label class="tco-label">Benchmark <span class="tco-u">zł/km</span></label><input type="number" class="tco-inp" id="tco-bench" step="0.01"></div>
       <div><label class="tco-label">Wykładnik napraw</label><input type="number" class="tco-inp" id="tco-expM" step="0.1"></div>
       <div><label class="tco-label">Horyzont <span class="tco-u">lat</span></label><input type="number" class="tco-inp" id="tco-hor" step="1"></div>
       <div><label class="tco-label">Dep. ≈ oszacuj <span class="tco-u">%/rok</span></label><input type="number" class="tco-inp" id="tco-rflRate" step="0.1" min="1" max="50" title="Roczna stopa deprecjacji używana wyłącznie przez przycisk ≈ oszacuj. Wyższa wartość → niższy szacunek wartości końcowej. Ref. z rzeczywistej sprzedaży CMG13N9: ≈12,8 %/rok (XI 2024, rynek podwyższony). Typowo dla floty dostawczej: 13–18 %/rok."></div>
@@ -701,7 +804,6 @@ table.tco-t tr.tco-hl td{background:rgba(124,58,237,.07)!important;font-weight:7
       <div class="tco-kpi tco-hero"><div class="tco-kl">TCO na kilometr</div><div class="tco-kv" id="tco-k1">–</div><div class="tco-ks" id="tco-k1s">–</div></div>
       <div class="tco-kpi"><div class="tco-kl">TCO całkowite</div><div class="tco-kv" id="tco-k2">–</div><div class="tco-ks" id="tco-k2s">–</div><div id="tco-k2t"></div></div>
       <div class="tco-kpi"><div class="tco-kl">Koszt miesięczny</div><div class="tco-kv" id="tco-k3">–</div><div class="tco-ks" id="tco-k3s">–</div></div>
-      <div class="tco-kpi"><div class="tco-kl">Vs. benchmark</div><div class="tco-kv" id="tco-k4">–</div><div class="tco-ks" id="tco-k4s">–</div><div id="tco-k4t"></div></div>
     </div>
     <div class="tco-charts">
       <div class="tco-card"><h4><i>◑</i>Struktura kosztów <span id="tco-chTot" style="margin-left:auto;text-transform:none;letter-spacing:0;font-size:.7rem;color:var(--tx-m)"></span></h4>
@@ -772,6 +874,7 @@ table.tco-t tr.tco-hl td{background:rgba(124,58,237,.07)!important;font-weight:7
 
   <!-- PANE 5: REPORT -->
   <div class="tco-pane" id="tco-p5"><div class="tco-card tco-rep" id="tco-rep"></div></div>
+
 
 </main>
 </div>
@@ -894,6 +997,58 @@ for(let k=1;k<tr.length;k++){
   }
 }
 for(const r of tr)if(r._opt.meter===r._opt.origMeter)r._opt.isFixed=false;}
+/* KROK 12 (nowy) — baza zwalidowanych przebiegów (z transakcji paliwowych,
+   już przetworzonych przez MCE powyżej) i dowiązanie ich do POZOSTAŁYCH
+   wierszy tego pojazdu (np. z innych zestawień kosztów floty — serwis,
+   ubezpieczenie, rata leasingu itp.), które mogły mieć WŁASNY, zawodny
+   odczyt licznika. Zamiast ufać temu odczytowi, dociągamy przebieg z
+   najbliższych w czasie, zwalidowanych wpisów paliwowych (interpolacja
+   liniowa między dwoma najbliższymi znanymi punktami; poza zakresem dat —
+   najbliższa znana wartość brzegowa, bez ekstrapolacji na ślepo).
+   Wiersze paliwowe (tr) — bez zmian, to one są źródłem prawdy. */
+{
+  const trSet=new Set(tr);
+  const trusted=tr.filter(r=>r._opt.meter>0&&r._opt.date)
+    .map(r=>({t:r._opt.date.getTime(),m:r._opt.meter}))
+    .sort((a,b)=>a.t-b.t);
+  /* Uwaga: "other" to WYŁĄCZNIE wiersze spoza paliw/AdBlue — czyli faktycznie
+     inne zestawienia kosztów floty (serwis, ubezpieczenie, leasing...). Wiersze
+     paliwowe pominięte z tr (np. tankowania prywatne, albo bez odczytu licznika)
+     zostają przy swoim własnym odczycie — to nadal dane "z dystrybutora", nie
+     zawodny ręczny wpis z arkusza kosztów, więc nie ma powodu ich nadpisywać. */
+  const other=gr[reg].filter(r=>!trSet.has(r)&&!r._opt.isFuel&&!r._opt.isAdBlue);
+  if(trusted.length>=2){
+    for(const r of other){
+      if(!r._opt.date){continue}
+      const t=r._opt.date.getTime();
+      let lo=null,hi=null;
+      for(let i=0;i<trusted.length;i++){
+        if(trusted[i].t<=t)lo=trusted[i];
+        if(trusted[i].t>=t&&hi===null)hi=trusted[i];
+      }
+      let est=null;
+      if(lo&&hi)est=lo.t===hi.t?lo.m:lo.m+(hi.m-lo.m)*((t-lo.t)/(hi.t-lo.t));
+      else if(lo)est=lo.m;
+      else if(hi)est=hi.m;
+      if(est!=null){
+        r._opt.meterFleetRaw=r._opt.rawMeter>0?r._opt.rawMeter:null; /* własny (niepewny) odczyt — zachowany do wglądu */
+        r._opt.meter=Math.round(est);
+        r._opt.meterEstimated=true; /* przebieg dociągnięty z MCE/paliw, nie z własnego odczytu tego wiersza */
+        r._opt.isFixed=r._opt.rawMeter>0&&Math.round(est)!==r._opt.rawMeter;
+      }else{
+        r._opt.meter=0;
+      }
+    }
+  }else{
+    /* za mało zwalidowanych odczytów paliwowych dla tego pojazdu (0-1) —
+       nie ma z czym porównać, więc NIE ufamy własnym odczytom licznika
+       z innych zestawień: zerujemy, żeby nie zniekształcały dystansu/CPK. */
+    for(const r of other){
+      if(r._opt.rawMeter>0)r._opt.meterFleetRaw=r._opt.rawMeter;
+      r._opt.meter=0;
+    }
+  }
+}
 if(++processed%20===0){if(onProgress)onProgress(40+Math.round((processed/totalRegs)*50),`Korekta: ${reg} (${processed}/${totalRegs})`);await nextFrame()}}return data}
 async function recalcAllAsync(fl){if(isProcessing)return;isProcessing=true;setAsyncStatus(true);const l=$('loader');if(l)l.classList.add('active');const startTime=performance.now();try{if(S.rep)S.rep._lpgAll=[];S.upd={st:1,mil:1,cpk:1,sum:1};buildColMap();S.hasKontrahent=!!(colMap['IdKontrahenta']||colMap['NazwaKontrahenta']||colMap['Nazwa kontrahenta']||colMap['Id kontrahenta']);S.hasVehType=!!(colMap['RodzajPojazdu']||colMap['Rodzaj pojazdu']);S.hasMarka=!!colMap['Marka'];const incremental=Array.isArray(fl)&&fl.length>0;showProg('Przetwarzanie danych...',5,`${S.data.length} wierszy`);await delay(10);await processDataAsync(S.data,(p,t)=>showProg(t,p,`${S.data.length} wierszy`),incremental);if($('aiCorrectionToggle')?.checked){showProg('Korekta liczników AI...',45);let onlyRegs=null;if(incremental){onlyRegs=new Set();for(const r of fl){if(r._opt?.reg)onlyRegs.add(r._opt.reg)}}await runMileageCorrectionAsync(S.data,(p,t)=>showProg(t,p),onlyRegs)}showProg('Finalizacja...',92);await nextFrame();buildRegIdx();calcWeekendTransactions();updFiltDrop();renColVis();renGrps();const ys=new Set();for(const i of S.data)if(i._opt?.year)ys.add(i._opt.year);S.summaryYears=Array.from(ys).sort((a,b)=>b-a);const dY=S.summaryYears.length?[S.summaryYears[0]]:[];for(const k of['sum','st','mil','cpk','ranking']){S.selY[k]=S.selY[k].filter(y=>S.summaryYears.includes(y));if(!S.selY[k].length)S.selY[k]=[...dY]}updCtrls();const dn=$('datasetName');if(dn)dn.textContent=S.data.length>0?`${S.data.length} wierszy`:'Brak danych';showProg('Renderowanie...',96);await nextFrame();filtTab(true);refTab();if(S.data.length>0&&S.summaryYears.length>0){calcCPKData();renRanking()}updateDashboard();const elapsed=((performance.now()-startTime)/1000).toFixed(2);showProg('Zakończono!',100,`${elapsed}s`);await delay(300);saveSettings();saveDatasetToDB()}catch(err){console.error('Async processing error:',err);showToast('Błąd: '+err.message)}finally{if(l)l.classList.remove('active');isProcessing=false;setAsyncStatus(false)}}
 const buildRegIdx=()=>{S.regIdx.clear();for(const r of S.data){const reg=r._opt?.reg;if(!reg)continue;let arr=S.regIdx.get(reg);if(!arr){arr=[];S.regIdx.set(reg,arr)}arr.push(r)}};const recalcAll=()=>recalcAllAsync();const calcWeekendTransactions=()=>{S.rep.weekend=S.data.filter(r=>r._opt?.isWeekend&&r._opt.date).sort((a,b)=>b._opt.date-a._opt.date)};let _importBusy=false;const loadFiles=async d=>{if(_importBusy)return;try{const f=d||$('fileInput')?.files;if(!f?.length)return;const n=Array.from(f).filter(x=>!S.files.has(x.name));if(!n.length)return;_importBusy=true;const l=$('loader');if(l)l.classList.add('active');showProg('Wczytywanie...',2);const rs=await Promise.all(n.map(x=>new Promise(res=>{const reader=new FileReader();reader.onload=e=>{try{let d;const v=e.target.result;if(x.name.endsWith('.csv')){const dl=(v.split('\n')[0].match(/;/g)||[]).length>(v.split('\n')[0].match(/,/g)||[]).length?';':',';d=Papa.parse(v,{header:true,skipEmptyLines:'greedy',delimiter:dl}).data}else{const w=XLSX.read(v,{type:'binary',cellDates:true});d=XLSX.utils.sheet_to_json(w.Sheets[w.SheetNames[0]],{defval:''})}res(d.map(i=>{const o={};for(const k in i)if(!/^_+EMPTY/i.test(k))o[k]=i[k];o._source=x.name;return o}))}catch{res([])}};x.name.endsWith('.csv')?reader.readAsText(x,'UTF-8'):reader.readAsBinaryString(x)})));const fl=rs.flat().filter(r=>Object.values(r).some(v=>v));if(fl.length){n.forEach(x=>S.files.add(x.name));updFileUI();S.data=[...S.data,...fl];buildColMap();for(const k of Object.keys(S.data[0]||{}))if(k!=='_source'&&HIDDEN.includes(applyMap(k,'header')))S.hide.add(k);await recalcAllAsync(fl)}else if(l)l.classList.remove('active');const fi=$('fileInput');if(fi)fi.value=''}catch(e){console.error(e);const l=$('loader');if(l)l.classList.remove('active')}finally{_importBusy=false}};const updFileUI=()=>{const c=$('fileListContainer'),tog=$('fileListToggle');if(!c)return;c.textContent='';const hasFiles=S.files.size>0;if(tog){tog.style.display=hasFiles?'':'none';if(!hasFiles){tog.classList.remove('active');c.style.display='none'}}for(const n of S.files){const s=document.createElement('span');s.className='file-tag';const i=document.createElement('i');i.className='fas fa-file-csv';i.style.color='var(--succ)';s.append(i,` ${n} `);const b=document.createElement('button');b.textContent='✕';b.style.cssText='background:none;border:none;cursor:pointer;color:var(--tx-m);font-weight:bold;margin-left:5px';b.onclick=()=>rmFile(n);s.appendChild(b);c.appendChild(s)}};const rmFile=n=>{if(confirm(`Usunąć ${n}?`)){S.files.delete(n);updFileUI();S.data=S.data.filter(r=>r._source!==n);recalcAll()}};window.toggleQuickFilter=(t,b)=>{$$('.filter-btn').forEach(x=>x.classList.remove('active'));if(activeQuickFilter===t){activeQuickFilter=null;showToast('Filtr wyłączony')}else{activeQuickFilter=t;b.classList.add('active');showToast('Transakcje weekendowe')}S.selGr.clear();renGrps();S.upd={st:1,mil:1,cpk:1,sum:1};filtTab(true);refTab();updateDashboard()};window.clearAllFilters=()=>{activeQuickFilter=null;S.selGr.clear();S.regFilter=new Set();const rli=document.getElementById('regListInput');if(rli)rli.value='';if(typeof _updRegUI==='function')_updRegUI();colFilterVals.clear();_mdpAllVals=[];const cb=$('mdpClearBtn');if(cb)cb.classList.remove('visible');$$('.filter-btn').forEach(b=>b.classList.remove('active'));const fc=$('filterColumn');if(fc)fc.value='all';updateSearchMode();mfS=[];_mfRebuild();_mfRefreshMainSelect();_mfUpdBadge();renGrps();S.upd={st:1,mil:1,cpk:1,sum:1};filtTab(true);refTab();updateDashboard()};const _dropPositionEl=(btnEl,panelEl,maxWidthPx)=>{if(!btnEl||!panelEl)return;const r=btnEl.getBoundingClientRect(),spaceBelow=window.innerHeight-r.bottom-8;panelEl.style.left=r.left+'px';if(maxWidthPx)panelEl.style.maxWidth=maxWidthPx+'px';if(spaceBelow>180){panelEl.style.top=(r.bottom+3)+'px';panelEl.style.bottom='';panelEl.style.maxHeight=Math.min(300,spaceBelow-8)+'px'}else{panelEl.style.bottom=(window.innerHeight-r.top+3)+'px';panelEl.style.top='';panelEl.style.maxHeight=Math.min(300,r.top-8)+'px'}};const _renderDropList=(listEl,filterBtnEl,query,allVals,isSelected,inResultsSet)=>{if(!listEl)return;const q=(query||'').toLowerCase();const items=q?allVals.filter(v=>v===_MDP_EMPTY?'(puste)'.includes(q):v.toLowerCase().includes(q)):allVals;if(filterBtnEl)filterBtnEl.style.display=q&&items.length?'flex':'none';if(!items.length){listEl.innerHTML='<div class="mdp-empty">Brak wyników</div>';return}const frag=document.createDocumentFragment();let ghostSepAdded=false;items.forEach(v=>{const empty=v===_MDP_EMPTY;const chk=isSelected(v);const ghost=!!inResultsSet&&!empty&&chk&&!inResultsSet.has(v);if(ghost&&!ghostSepAdded&&items.some(x=>x!==_MDP_EMPTY&&inResultsSet.has(x))){ghostSepAdded=true;const gsep=document.createElement('div');gsep.style.cssText='border-top:1px dashed var(--bd);margin:3px 0;text-align:center';gsep.innerHTML='<span style="font-size:.52rem;color:var(--tx-m);background:var(--bg-card);padding:0 4px">zaznaczone / brak wyników</span>';frag.appendChild(gsep)}const d=document.createElement('div');d.className='mdp-item'+(chk?' checked':'')+(empty?' mdp-item-empty':'')+(ghost?' mf-ghost':'');d.dataset.val=v;const cb=document.createElement('input');cb.type='checkbox';cb.checked=chk;const sp=document.createElement('span');sp.textContent=empty?'(Puste)':v;sp.title=empty?'Wiersze bez wartości w tej kolumnie':v;if(ghost){const badge=document.createElement('sup');badge.style.cssText='font-size:.55rem;color:#f59e0b;font-weight:700;margin-left:3px';badge.textContent='0';sp.appendChild(badge)}d.appendChild(cb);d.appendChild(sp);frag.appendChild(d);if(empty&&items.length>1){const sep=document.createElement('div');sep.className='mdp-sep';frag.appendChild(sep)}});listEl.innerHTML='';listEl.appendChild(frag)};let _mdpJustOpened=false;const _mdpClose=()=>{const p=$('multiDropPanel'),b=$('multiDropBtn');if(p)p.classList.remove('open');if(b)b.classList.remove('open')};const _mdpPosition=()=>_dropPositionEl($('multiDropBtn'),$('multiDropPanel'),320);window.toggleMultiDrop=e=>{e.preventDefault();e.stopPropagation();const p=$('multiDropPanel'),b=$('multiDropBtn');if(!p)return;if(p.classList.contains('open')){_mdpClose()}else{_mdpJustOpened=true;_mdpPosition();p.classList.add('open');b.classList.add('open');const s=$('mdpSearch');if(s){s.value='';const fb=$('mdpSelectFilteredBtn');if(fb)fb.style.display='none';renderMdpItems();s.focus()}}};document.addEventListener('mousedown',e=>{if(_mdpJustOpened){_mdpJustOpened=false;return}const p=$('multiDropPanel');if(p&&p.classList.contains('open')&&!p.contains(e.target)&&e.target.id!=='multiDropBtn'&&!e.target.closest('#multiDropBtn'))_mdpClose()});window.addEventListener('resize',()=>{const p=$('multiDropPanel');if(p&&p.classList.contains('open'))_mdpPosition()});const _getMdpLabel=()=>{if(!colFilterVals.size)return'Wybierz...';if(colFilterVals.size===_mdpAllVals.length)return'Wszystkie ('+_mdpAllVals.length+')';const labels=[...colFilterVals].map(v=>v===_MDP_EMPTY?'(Puste)':v);if(labels.length<=2)return labels.join(', ');return'Zaznaczone: '+colFilterVals.size};const _updMdpBtn=()=>{const b=$('multiDropBtn');if(!b)return;const lbl=b.querySelector('.mdb-label'),badge=b.querySelector('.mdb-count-badge');if(lbl)lbl.textContent=_getMdpLabel();if(badge)badge.remove();const partial=colFilterVals.size>0&&colFilterVals.size<_mdpAllVals.length;if(partial){const sp=document.createElement('span');sp.className='mdp-count-badge mdb-count-badge';sp.textContent=colFilterVals.size;b.insertBefore(sp,b.querySelector('.mdb-chevron'))}b.classList.toggle('has-sel',partial);const cb=$('mdpClearBtn');if(cb)cb.classList.toggle('visible',colFilterVals.size>0)};window.renderMdpItems=()=>{_renderDropList($('mdpList'),$('mdpSelectFilteredBtn'),$('mdpSearch')?.value,_mdpAllVals,v=>colFilterVals.has(v),null)};window.mdpSelectFiltered=()=>{const q=($('mdpSearch')?.value||'').toLowerCase();if(!q)return;const filtered=_mdpAllVals.filter(v=>v===_MDP_EMPTY?'(puste)'.includes(q):v.toLowerCase().includes(q));filtered.forEach(v=>colFilterVals.add(v));_updMdpBtn();renderMdpItems();filtTab(true)};const _initMdpListener=()=>{const l=$('mdpList');if(l)l.addEventListener('click',e=>{const item=e.target.closest('.mdp-item');if(!item)return;const v=item.dataset.val;if(v===undefined)return;const chk=colFilterVals.has(v);if(chk)colFilterVals.delete(v);else colFilterVals.add(v);_updMdpBtn();renderMdpItems();filtTab(true)})};window.mdpSelectAll=()=>{colFilterVals=new Set(_mdpAllVals);_updMdpBtn();renderMdpItems();filtTab(true)};window.mdpClearAll=()=>{colFilterVals.clear();_updMdpBtn();renderMdpItems();filtTab(true)};window.mdpClearFilter=()=>{colFilterVals.clear();_updMdpBtn();renderMdpItems();filtTab(true)};const MF_MAX=2;let mfS=[];let _mfNextId=0;let _mfOpen=-1,_mfJust=false;const _mfNewRow=()=>({id:_mfNextId++,col:'',vals:new Set(),all:[],dateFrom:'',dateTo:''});const _mfVal=(row,col)=>{if(!col)return'';const h=applyMap(col,'header');if(h==='Grupa prod')return row._opt?.group||'';if(h==='Nr rejestracyjny')return row._opt?.reg||'';if(h==='Nr karty')return row._opt?.card||'';return String(row[col]??'').trim()};const _mfIsDate=(col)=>{if(!col)return false;const h=applyMap(col,'header');return h.includes('Data')||h.includes('data')};const _mfLoad=(id)=>{const st=mfS.find(s=>s.id===id);if(!st||!st.col)return;const c=$('filterColumn')?.value||'all';const cn=applyMap(c,'header');const isD=cn.includes('Data')||cn.includes('data');const t=($('searchInput')?.value||'').toLowerCase();const hasColF=colFilterVals.size>0&&colFilterVals.size<_mdpAllVals.length&&_mdpAllVals.length>0;const others=mfS.filter(s=>s.id!==id&&s.col&&s.vals.size>0&&s.vals.size<s.all.length);const source=S.data.filter(x=>{if(!x._opt)return false;if(c!=='all'&&!isD){let v,mh=applyMap(c,'header');if(mh==='Grupa prod')v=x._opt.group;else if(mh==='Nr rejestracyjny')v=x._opt.reg;else if(mh==='Nr karty')v=x._opt.card;else v=x[c];const val=String(v||'').trim();if(hasColF&&!(val===''?colFilterVals.has(_MDP_EMPTY):colFilterVals.has(val)))return false;if(t&&!val.toLowerCase().includes(t))return false}else if(t){if(!x._opt.flatSearch.includes(t))return false}
@@ -1633,9 +1788,125 @@ const saveSettings=()=>{try{localStorage.setItem('flotaSettings',JSON.stringify(
 const IDB_DATASET_KEY='flotaDataset';
 const saveDatasetToDB=async()=>{try{if(typeof idbKeyval==='undefined')return;if(!S.data.length){await idbKeyval.del(IDB_DATASET_KEY);return}const slim=S.data.map(r=>{const o={};for(const k in r)if(k!=='_opt'&&k!=='_proc')o[k]=r[k];return o});await idbKeyval.set(IDB_DATASET_KEY,{files:[...S.files],rows:slim,savedAt:Date.now()})}catch(e){console.error('Zapis IndexedDB nie powiódł się:',e)}};
 const applyRestoredDataset=async(saved)=>{S.data=saved.rows;S.files=new Set(saved.files||[]);updFileUI();buildColMap();for(const k of Object.keys(S.data[0]||{}))if(k!=='_source'&&HIDDEN.includes(applyMap(k,'header')))S.hide.add(k);await recalcAllAsync();showToast('📦 Dane przywrócone')};
-const showRestorePrompt=(saved)=>{const cnt=saved.rows.length,dt=saved.savedAt?new Date(saved.savedAt).toLocaleString('pl-PL'):'',nFiles=(saved.files||[]).length;const overlay=document.createElement('div');overlay.id='restorePromptOverlay';overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px)';overlay.innerHTML=`<div style="background:var(--bg-card);border:1px solid var(--bd);border-radius:var(--rmd);box-shadow:0 20px 60px rgba(0,0,0,.4);max-width:360px;width:90vw;padding:18px;font-family:var(--font-text)"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><i class="fas fa-database" style="color:var(--act);font-size:1.1rem"></i><div style="font-family:var(--font-brand);font-size:.9rem;font-weight:700;color:var(--tx-p)">Znaleziono zapisane dane</div></div><div style="font-size:.75rem;color:var(--tx-s);line-height:1.5;margin-bottom:14px">Z poprzedniej sesji: <strong>${cnt}</strong> wierszy${nFiles?` z ${nFiles} plik${nFiles===1?'u':'ów'}`:''}${dt?`<br>Zapisano: ${dt}`:''}<br><br>Przywrócić je teraz?</div><div style="display:flex;gap:8px;justify-content:flex-end"><button id="restoreDismissBtn" class="neu-btn" style="border:1px solid var(--bd);height:30px;padding:0 12px">Nie, zacznij od nowa</button><button id="restoreConfirmBtn" class="neu-btn" style="background:var(--act);color:#fff;height:30px;padding:0 12px">Przywróć dane</button></div></div>`;document.body.appendChild(overlay);document.getElementById('restoreConfirmBtn').onclick=async()=>{overlay.remove();await applyRestoredDataset(saved)};document.getElementById('restoreDismissBtn').onclick=()=>{overlay.remove();if(typeof idbKeyval!=='undefined')idbKeyval.del(IDB_DATASET_KEY).catch(()=>{})}};
+const showRestorePrompt=(saved)=>{const cnt=saved.rows.length,dt=saved.savedAt?new Date(saved.savedAt).toLocaleString('pl-PL'):'',nFiles=(saved.files||[]).length;const overlay=document.createElement('div');overlay.id='restorePromptOverlay';overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px)';overlay.innerHTML=`<div style="background:var(--bg-card);border:1px solid var(--bd);border-radius:var(--rmd);box-shadow:0 20px 60px rgba(0,0,0,.4);max-width:360px;width:90vw;padding:18px;font-family:var(--font-text)"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><i class="fas fa-database" style="color:var(--act);font-size:1.1rem"></i><div style="font-family:var(--font-brand);font-size:.9rem;font-weight:700;color:var(--tx-p)">Znaleziono zapisane dane</div></div><div style="font-size:.75rem;color:var(--tx-s);line-height:1.5;margin-bottom:14px">Z poprzedniej sesji: <strong>${cnt}</strong> wierszy${nFiles?` z ${nFiles} plik${nFiles===1?'u':'ów'}`:''}${dt?`<br>Zapisano: ${dt}`:''}<br><br>Przywrócić je teraz?</div><div style="display:flex;flex-direction:column;gap:6px"><button id="restoreConfirmBtn" class="neu-btn" style="background:var(--act);color:#fff;height:32px;width:100%">Przywróć dane</button><button id="restoreSkipBtn" class="neu-btn" style="border:1px solid var(--bd);height:32px;width:100%" title="Nie przywracaj teraz — dane zostają zapisane, możesz je przywrócić później z przycisku „Bazy”">Pomiń (zapytaj przy następnym starcie)</button><button id="restoreDismissBtn" style="background:none;border:none;color:var(--dang);font-size:.65rem;text-decoration:underline;cursor:pointer;padding:4px 0">Usuń zapisane dane</button></div></div>`;document.body.appendChild(overlay);document.getElementById('restoreConfirmBtn').onclick=async()=>{overlay.remove();await applyRestoredDataset(saved)};document.getElementById('restoreSkipBtn').onclick=()=>{overlay.remove()};document.getElementById('restoreDismissBtn').onclick=()=>{overlay.remove();if(typeof idbKeyval!=='undefined')idbKeyval.del(IDB_DATASET_KEY).catch(()=>{})}};
 const restoreDatasetFromDB=async()=>{try{if(typeof idbKeyval==='undefined')return;const saved=await idbKeyval.get(IDB_DATASET_KEY);if(!saved||!Array.isArray(saved.rows)||!saved.rows.length)return;showRestorePrompt(saved)}catch(e){console.error('Odczyt IndexedDB nie powiódł się:',e)}};
+
+/* ── Wiele zapisanych baz — nazwane migawki niezależne od automatycznego,
+   ciągłego zapisu sesji (flotaDataset). Zapisywane WYŁĄCZNIE na żądanie
+   (przycisk „Zapisz jako nową bazę”), każda pod osobnym kluczem IDB, żeby
+   przywrócenie było możliwe w dowolnym momencie, nie tylko przy starcie. ── */
+const IDB_SNAPSHOTS_INDEX_KEY='flotaSnapshotsIndex';
+const _snapPayloadKey=id=>'flotaSnapshot_'+id;
+const listSnapshotsIndex=async()=>{try{if(typeof idbKeyval==='undefined')return[];const idx=await idbKeyval.get(IDB_SNAPSHOTS_INDEX_KEY);return Array.isArray(idx)?idx:[]}catch(e){console.error('Odczyt listy baz nie powiódł się:',e);return[]}};
+const saveSnapshot=async()=>{
+  if(!S.data.length){showToast('Brak danych do zapisania');return}
+  const def='Baza '+new Date().toLocaleString('pl-PL');
+  const name=(prompt('Nazwa nowej bazy:',def)||'').trim();
+  if(!name)return;
+  try{
+    if(typeof idbKeyval==='undefined'){showToast('IndexedDB niedostępne','warning');return}
+    const slim=S.data.map(r=>{const o={};for(const k in r)if(k!=='_opt'&&k!=='_proc')o[k]=r[k];return o});
+    const id='s'+Date.now()+Math.random().toString(36).slice(2,7);
+    await idbKeyval.set(_snapPayloadKey(id),{files:[...S.files],rows:slim,savedAt:Date.now()});
+    const idx=await listSnapshotsIndex();
+    idx.push({id,name,savedAt:Date.now(),count:slim.length,files:[...S.files].length});
+    await idbKeyval.set(IDB_SNAPSHOTS_INDEX_KEY,idx);
+    showToast('💾 Zapisano bazę „'+name+'”');
+    renderDatasetModal();
+  }catch(e){console.error('Zapis bazy nie powiódł się:',e);showToast('⚠️ Błąd zapisu bazy','warning')}
+};
+const restoreSnapshot=async(id,name)=>{
+  if(!confirm('Przywrócić bazę „'+name+'”? Zastąpi to aktualnie wczytane dane w tabeli (bieżąca sesja zostaje osobno zapisana i nie jest usuwana).'))return;
+  try{
+    if(typeof idbKeyval==='undefined')return;
+    const payload=await idbKeyval.get(_snapPayloadKey(id));
+    if(!payload||!Array.isArray(payload.rows)){showToast('Nie znaleziono danych tej bazy','warning');return}
+    closeDatasetModal();
+    await applyRestoredDataset(payload);
+  }catch(e){console.error('Przywracanie bazy nie powiodło się:',e);showToast('⚠️ Błąd przywracania bazy','warning')}
+};
+const deleteSnapshot=async(id,name)=>{
+  if(!confirm('Usunąć zapisaną bazę „'+name+'”? Tej operacji nie można cofnąć.'))return;
+  try{
+    if(typeof idbKeyval==='undefined')return;
+    await idbKeyval.del(_snapPayloadKey(id));
+    const idx=await listSnapshotsIndex();
+    await idbKeyval.set(IDB_SNAPSHOTS_INDEX_KEY,idx.filter(s=>s.id!==id));
+    showToast('🗑️ Baza usunięta');
+    renderDatasetModal();
+  }catch(e){console.error('Usuwanie bazy nie powiodło się:',e);showToast('⚠️ Błąd usuwania bazy','warning')}
+};
+function openDatasetModal(){renderDatasetModal();const m=document.getElementById('datasetModal');if(m)m.style.display='flex'}
+function closeDatasetModal(){const m=document.getElementById('datasetModal');if(m)m.style.display='none'}
+let _autoSnapshotCache=null;
+const restoreAutoSnapshot=async()=>{if(!_autoSnapshotCache)return;if(!confirm('Przywrócić automatyczny zapis bieżącej sesji? Zastąpi to aktualnie wczytane dane w tabeli.'))return;closeDatasetModal();await applyRestoredDataset(_autoSnapshotCache)};
+async function renderDatasetModal(){
+  const body=document.getElementById('datasetModalBody');if(!body)return;
+  body.innerHTML='<div style="padding:20px;text-align:center;color:var(--tx-m)">Wczytywanie…</div>';
+  let auto=null;
+  try{if(typeof idbKeyval!=='undefined')auto=await idbKeyval.get(IDB_DATASET_KEY)}catch(e){}
+  _autoSnapshotCache=auto;
+  const idx=(await listSnapshotsIndex()).slice().sort((a,b)=>b.savedAt-a.savedAt);
+  const fmtD=t=>t?new Date(t).toLocaleString('pl-PL'):'–';
+  const autoRow=auto&&Array.isArray(auto.rows)&&auto.rows.length
+    ?`<div class="map-table-container" style="margin:0 0 12px"><table><thead><tr><th>Automatyczny zapis bieżącej sesji</th><th style="text-align:right">Wierszy</th><th style="text-align:right">Zapisano</th><th></th></tr></thead><tbody><tr><td>Ostatni stan tabeli (aktualizowany na bieżąco)</td><td style="text-align:right;font-family:var(--font-mono)">${auto.rows.length}</td><td style="text-align:right;white-space:nowrap">${fmtD(auto.savedAt)}</td><td style="text-align:right"><button class="neu-btn" style="height:24px;padding:0 8px;font-size:.62rem" onclick="restoreAutoSnapshot()"><i class="fas fa-undo"></i> Przywróć</button></td></tr></tbody></table></div>`
+    :'';
+  const snapRows=idx.map(s=>`<tr><td style="font-weight:600">${esc(s.name)}</td><td style="text-align:right;font-family:var(--font-mono)">${s.count}</td><td style="text-align:right;white-space:nowrap">${fmtD(s.savedAt)}</td><td style="text-align:right;white-space:nowrap"><button class="neu-btn" style="height:24px;padding:0 8px;font-size:.62rem" onclick="restoreSnapshot('${s.id}','${esc(s.name).replace(/'/g,"\\'")}')"><i class="fas fa-undo"></i></button> <button class="neu-btn btn-danger" style="height:24px;padding:0 8px;font-size:.62rem" onclick="deleteSnapshot('${s.id}','${esc(s.name).replace(/'/g,"\\'")}')"><i class="fas fa-trash"></i></button></td></tr>`).join('');
+  body.innerHTML=`
+    <div style="padding:12px 14px 4px;font-size:.68rem;color:var(--tx-s);line-height:1.5">
+      Oprócz automatycznego zapisu bieżącej sesji (aktualizowanego na bieżąco po każdym imporcie), możesz zapisywać
+      dowolną liczbę nazwanych baz i przywracać dowolną z nich w dowolnym momencie.
+    </div>
+    <div style="padding:8px 14px"><button class="neu-btn" onclick="saveSnapshot()"><i class="fas fa-plus"></i> Zapisz bieżące dane jako nową bazę</button></div>
+    <div style="padding:0 14px">${autoRow}</div>
+    <div style="padding:0 14px 4px;font-size:.68rem;font-weight:600;color:var(--tx-m)">Zapisane bazy (${idx.length})</div>
+    <div class="map-table-container" style="margin:0 14px 14px">
+      <table><thead><tr><th>Nazwa</th><th style="text-align:right">Wierszy</th><th style="text-align:right">Zapisano</th><th></th></tr></thead>
+      <tbody>${snapRows||'<tr><td colspan="4" style="text-align:center;color:var(--tx-m);padding:16px">Brak zapisanych baz.</td></tr>'}</tbody></table>
+    </div>`;
+}
+
+/* ── Historia liczników — trwały indeks (reg -> [{t,m,f}]) niezależny od S.data.
+   Zapisywany/kasowany WYŁĄCZNIE na żądanie użytkownika (przyciski), nigdy automatycznie
+   przy imporcie/usuwaniu plików, więc przeżywa usunięcie pliku źródłowego z S.data. ── */
+const IDB_METER_HISTORY_KEY='meterHistory';
+let S_meterHistory={};
+const loadMeterHistoryFromDB=async()=>{try{if(typeof idbKeyval==='undefined')return;const saved=await idbKeyval.get(IDB_METER_HISTORY_KEY);if(saved&&typeof saved==='object')S_meterHistory=saved}catch(e){console.error('Odczyt historii liczników nie powiódł się:',e)}};
+const _meterHistCount=()=>{let regs=0,pts=0;for(const k in S_meterHistory){const a=S_meterHistory[k];if(Array.isArray(a)&&a.length){regs++;pts+=a.length}}return{regs,pts}};
+const saveMeterHistory=async()=>{if(!S.data.length){showToast('Brak danych do zapisania');return}let added=0,updated=0;for(const r of S.data){const o=r._opt;if(!o||!o.reg||!o.date||!(o.meter>0))continue;if(!(o.isFuel||o.isAdBlue))continue;const reg=o.reg,t=o.date.getTime();if(!S_meterHistory[reg])S_meterHistory[reg]=[];const arr=S_meterHistory[reg];const idx=arr.findIndex(e=>e.t===t);const entry={t,m:Math.round(o.meter),f:!!o.isFixed};if(idx===-1){arr.push(entry);added++}else{arr[idx]=entry;updated++}}for(const reg in S_meterHistory)S_meterHistory[reg].sort((a,b)=>a.t-b.t);try{if(typeof idbKeyval==='undefined'){showToast('IndexedDB niedostępne','warning');return}await idbKeyval.set(IDB_METER_HISTORY_KEY,S_meterHistory);const c=_meterHistCount();showToast(`💾 Historia liczników: +${added} nowych, ${updated} zaktualizowanych (razem ${c.regs} pojazdów, ${c.pts} odczytów)`)}catch(e){console.error('Zapis historii liczników nie powiódł się:',e);showToast('⚠️ Błąd zapisu historii liczników','warning')}};
+const clearMeterHistory=async()=>{const c=_meterHistCount();if(!c.pts){showToast('Historia liczników jest już pusta');return}if(!confirm(`Usunąć całą zapisaną historię liczników (${c.regs} pojazdów, ${c.pts} odczytów)? Tej operacji nie można cofnąć.`))return;S_meterHistory={};try{if(typeof idbKeyval!=='undefined')await idbKeyval.del(IDB_METER_HISTORY_KEY);showToast('🗑️ Historia liczników usunięta')}catch(e){console.error('Usuwanie historii liczników nie powiodło się:',e);showToast('⚠️ Błąd usuwania historii liczników','warning')}};
+const correctMetersFromHistory=async()=>{if(!S.data.length){showToast('Brak wczytanych danych');return}const c=_meterHistCount();if(!c.pts){showToast('Brak zapisanej historii liczników — najpierw wczytaj karty paliwowe i użyj „Historia liczników”','warning');return}buildColMap();const cM=colMap['Licznik'];if(!cM){showToast('Brak kolumny Licznik w bieżących danych','warning');return}if(!confirm('Nadpisać liczniki WSZYSTKICH wierszy (dla pojazdów obecnych w historii) wartościami wyliczonymi z zapisanej historii wg dat transakcji — również tam, gdzie wiersz ma już własny odczyt? Tej operacji nie można łatwo cofnąć (trzeba by ponownie zaimportować oryginalny plik).'))return;const WINDOW_MS=60*24*3600*1000;let matched=0,changed=0;for(const r of S.data){const o=r._opt;if(!o||!o.reg||!o.date)continue;const hist=S_meterHistory[o.reg];if(!hist||!hist.length)continue;const t=o.date.getTime();let before=null,after=null;for(const e of hist){if(e.t<=t){if(!before||e.t>before.t)before=e}else{if(!after||e.t<after.t)after=e}}let est=null;if(before&&after&&(after.t-before.t)>0&&(t-before.t)<=WINDOW_MS&&(after.t-t)<=WINDOW_MS){est=Math.round(before.m+(after.m-before.m)*(t-before.t)/(after.t-before.t))}else if(before&&(t-before.t)<=WINDOW_MS){est=before.m}else if(after&&(after.t-t)<=WINDOW_MS){est=after.m}if(est!=null&&est>0){matched++;if(o.rawMeter!==est){r[cM]=est;changed++}}}if(!matched){showToast('Nie znaleziono dopasowań w historii liczników (brak wpisów w oknie ±60 dni)');return}showToast(`🔧 Zmieniono liczniki: ${changed} z ${matched} dopasowanych wierszy — przeliczam...`);await recalcAllAsync()};
+
+/* ── Narzędzie „Liczniki” — okno modalne z podglądem przechowywanych danych ── */
+function openMeterHistModal(){renderMeterHistModal();const m=document.getElementById('meterHistModal');if(m)m.style.display='flex'}
+function closeMeterHistModal(){const m=document.getElementById('meterHistModal');if(m)m.style.display='none'}
+function renderMeterHistModal(){
+  const body=document.getElementById('meterHistModalBody');if(!body)return;
+  const c=_meterHistCount();
+  const fmtD=t=>new Date(t).toLocaleDateString('pl-PL');
+  const regs=Object.keys(S_meterHistory).filter(r=>S_meterHistory[r]&&S_meterHistory[r].length).sort((a,b)=>a.localeCompare(b,'pl'));
+  const rows=regs.map(reg=>{
+    const arr=S_meterHistory[reg],first=arr[0],last=arr[arr.length-1];
+    return`<tr><td style="font-weight:700">${esc(reg)}</td><td style="text-align:right;font-family:var(--font-mono)">${arr.length}</td><td style="text-align:right;font-family:var(--font-mono);white-space:nowrap">${fmtD(first.t)} · ${fmtI(first.m)} km</td><td style="text-align:right;font-family:var(--font-mono);white-space:nowrap">${fmtD(last.t)} · ${fmtI(last.m)} km</td></tr>`;
+  }).join('');
+  body.innerHTML=`
+    <div style="padding:12px 14px 4px;font-size:.68rem;color:var(--tx-s);line-height:1.5">
+      Trwały indeks odczytów licznika (data + wartość dla każdego pojazdu), niezależny od aktualnie wczytanych plików —
+      zapisywany i kasowany wyłącznie na Twoje żądanie, więc przeżywa usunięcie pliku źródłowego z listy.
+    </div>
+    <div style="padding:8px 14px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="neu-btn" onclick="saveMeterHistory().then(renderMeterHistModal)" title="Zapisz aktualne odczyty liczników (po korekcie MCE) do historii"><i class="fas fa-save"></i> Zapisz aktualne dane</button>
+      <button class="neu-btn" onclick="correctMetersFromHistory().then(()=>setTimeout(renderMeterHistModal,50))" title="Uzupełnij/nadpisz liczniki w bieżących danych na podstawie historii"><i class="fas fa-wrench"></i> Uzupełnij liczniki</button>
+      <button class="neu-btn btn-danger" onclick="clearMeterHistory().then(renderMeterHistModal)" title="Usuń całą zapisaną historię liczników"><i class="fas fa-eraser"></i> Wyczyść historię</button>
+    </div>
+    <div style="padding:0 14px 8px;font-size:.68rem;font-weight:600;color:var(--tx-m)">${c.regs} pojazdów · ${c.pts} zapisanych odczytów</div>
+    <div class="map-table-container" style="margin:0 14px 14px">
+      <table><thead><tr><th>Rejestracja</th><th style="text-align:right">Odczytów</th><th style="text-align:right">Pierwszy</th><th style="text-align:right">Ostatni</th></tr></thead>
+      <tbody>${rows||'<tr><td colspan="4" style="text-align:center;color:var(--tx-m);padding:16px">Brak zapisanej historii — kliknij „Zapisz aktualne dane”, gdy masz wczytane karty paliwowe.</td></tr>'}</tbody></table>
+    </div>`;
+}
 document.addEventListener('DOMContentLoaded',restoreDatasetFromDB);
+document.addEventListener('DOMContentLoaded',loadMeterHistoryFromDB);
 const _fmtBytes=n=>{if(n==null||isNaN(n))return '—';if(n<1024)return n+' B';if(n<1048576)return (n/1024).toFixed(1)+' KB';return (n/1048576).toFixed(2)+' MB'};
 const _blobSize=v=>{try{return new Blob([v]).size}catch(e){return new TextEncoder().encode(String(v)).length}};
 const _logiPreview=v=>{const s=String(v);return s.length>60?esc(s.slice(0,60))+'…':esc(s)};
@@ -1677,7 +1948,7 @@ const initDragDrop=()=>{renderMap('header');renderMap('value');renderMap('regist
 const initDateFilters=()=>{if(!$('dateFrom')){const grp=$('searchInput')?.parentElement;if(!grp)return;const d1=document.createElement('input');d1.type='date';d1.id='dateFrom';d1.className='neu-input';d1.style.display='none';d1.onchange=()=>filtTab(true);const d2=document.createElement('input');d2.type='date';d2.id='dateTo';d2.className='neu-input';d2.style.display='none';d2.onchange=()=>filtTab(true);grp.insertBefore(d1,$('searchInput'));grp.insertBefore(d2,$('searchInput'))}};
 const initNameOverride=()=>{const chk=$('check-nameOverride');if(chk){chk.checked=!!S.nameOv;chk.onchange=toggleNameOverride}};
 
-const initApp=()=>{loadSettings();initTheme();initDensity();initSearchListeners();_initMdpListener();initDragDrop();initDateFilters();initNameOverride();initEruda();console.log('FLManager v4.76G_IDB załadowany!');console.log('Async chunked processing - działa lokalnie');console.log('Płynne przetwarzanie dużych zbiorów danych')};
+const initApp=()=>{loadSettings();initTheme();initDensity();initSearchListeners();_initMdpListener();initDragDrop();initDateFilters();initNameOverride();initEruda();console.log('FLManager v4.77G_IDB_TCO_METER załadowany!');console.log('Async chunked processing - działa lokalnie');console.log('Płynne przetwarzanie dużych zbiorów danych')};
 initApp();
 (function(){const css=document.createElement('style');css.textContent=`html{scroll-behavior:auto}.tabs-nav--fixed{position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:500!important;margin:0!important;padding:5px 8px 4px!important;background:var(--bg-s)!important;border-bottom:1px solid var(--bd)!important;box-shadow:0 2px 12px rgba(0,0,0,.18)!important;backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important;border-radius:0!important;will-change:transform;transform:translateZ(0)}.tab-ctrl-wrap--fixed{position:fixed!important;left:0!important;right:0!important;z-index:499!important;margin:0!important;padding:5px 8px 4px!important;background:var(--bg-s)!important;border-bottom:2px solid var(--bd)!important;box-shadow:0 3px 10px rgba(0,0,0,.13)!important;backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important;border-radius:0!important;will-change:transform;transform:translateZ(0)}.table-container{-webkit-overflow-scrolling:touch;scroll-behavior:smooth}.tabs-nav{will-change:transform}@media(max-width:768px){.tabs-nav--fixed,.tab-ctrl-wrap--fixed{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}}`;document.head.appendChild(css);const t=document.querySelector('.tabs-nav');if(!t)return;const np=document.createElement('div');np.id='tabs-nav-placeholder';np.style.cssText='display:none;flex-shrink:0';t.parentNode.insertBefore(np,t);let nf=false,not=0,npH=0,cnh=0,cwh=0,wntc=null,lat=null,rp=false,rt=null;const bw=()=>document.querySelectorAll('.tab-content').forEach(tab=>{if(tab.querySelector('.tab-ctrl-wrap'))return;const g=tab.querySelector('.gr-bar.gr-bar-main');if(!g)return;const c=Array.from(tab.children),i=c.indexOf(g);if(i<0)return;const eb=c.slice(0,i+1),w=document.createElement('div');w.className='tab-ctrl-wrap';tab.insertBefore(w,eb[0]);eb.forEach(e=>w.appendChild(e));const p=document.createElement('div');p.className='tab-ctrl-placeholder';p.style.display='none';tab.insertBefore(p,w)});const rth=()=>{document.querySelectorAll('.tab-ctrl-wrap--fixed').forEach(w=>{w.classList.remove('tab-ctrl-wrap--fixed');w.style.top=''});document.querySelectorAll('.tab-ctrl-placeholder').forEach(p=>p.style.display='none');wntc=null;cwh=0};const as=()=>{rp=false;const sy=window.scrollY;if(!nf){const nr=t.getBoundingClientRect();not=nr.top+sy;npH=t.offsetHeight}if(sy>not+2&&!nf){np.style.height=npH+'px';np.style.display='block';t.classList.add('tabs-nav--fixed');cnh=t.offsetHeight;nf=true}else if(sy<=not&&nf){t.classList.remove('tabs-nav--fixed');np.style.display='none';nf=false}const a=document.querySelector('.tab-content.active'),w=a?.querySelector('.tab-ctrl-wrap'),p=a?.querySelector('.tab-ctrl-placeholder');if(a!==lat){lat=a;wntc=null}if(!w||!p){rth();return}if(wntc===null){const f=w.classList.contains('tab-ctrl-wrap--fixed');if(f){w.classList.remove('tab-ctrl-wrap--fixed');p.style.display='none'}wntc=w.getBoundingClientRect().top+sy;cwh=w.offsetHeight;if(f){w.classList.add('tab-ctrl-wrap--fixed');p.style.display='block'}}if(sy>=wntc-cnh){if(!w.classList.contains('tab-ctrl-wrap--fixed')){p.style.height=cwh+'px';p.style.display='block';w.classList.add('tab-ctrl-wrap--fixed')}w.style.top=cnh+'px'}else if(w.classList.contains('tab-ctrl-wrap--fixed')){w.classList.remove('tab-ctrl-wrap--fixed');w.style.top='';p.style.display='none'}};bw();window.addEventListener('scroll',()=>{if(!rp){rp=true;requestAnimationFrame(as)}},{passive:true});window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{wntc=null;cwh=0;rth();requestAnimationFrame(as)},100)},{passive:true});const _st=window.switchTab;window.switchTab=(a,b)=>{rth();lat=null;if(_st)_st(a,b);bw();setTimeout(()=>{wntc=null;requestAnimationFrame(as)},60)}})();</script>
 
@@ -1895,11 +2166,11 @@ const totalVeh=lpg.length;const totalLpg=lpg.reduce((s,r)=>s+r.lpgLit,0);const t
 
 /* ══════════════════════════════════════════
    TCO MODULE — Fleet TCO Analyzer
-   Zintegrowany z FLManager v4.76G_IDB
+   Zintegrowany z FLManager v4.77G_IDB_TCO_METER
    ══════════════════════════════════════════ */
 (function(){
 const tco_$=i=>document.getElementById(i);
-const tco_f=(n,d=2)=>(isFinite(n)?n:0).toLocaleString('pl-PL',{minimumFractionDigits:d,maximumFractionDigits:d});
+const tco_f=(n,d=2)=>(isFinite(n)?n:0).toLocaleString('pl-PL',{minimumFractionDigits:d,maximumFractionDigits:d,useGrouping:false});
 const tco_zl=(n,d=2)=>tco_f(n,d)+' zł';
 
 /* ── PRESETY ── */
@@ -2349,25 +2620,30 @@ function tco_loadVehFromData(reg){
   const splitCatCount=[costs.sPrzegCost,costs.sOponCost,costs.sCzescCost].filter(v=>v>0).length
     +(costs.sNaprGenCost>0?1:0);
 
-  /* Wypełnij formularz — zawsze, niezależnie od braków */
+  /* Wypełnij formularz — zawsze, niezależnie od braków.
+     Sumy z S.data to sumy zmiennoprzecinkowe (np. 40340.60000000001) — bez zaokrąglenia
+     pola wejściowe TCO pokazywały długie „ogony” cyfr po przecinku. _r2 tnie do 2 miejsc
+     (grosze), _r1 do 1 miejsca (litry). */
+  const _r2=v=>Math.round((+v||0)*100)/100;
+  const _r1=v=>Math.round((+v||0)*10)/10;
   tco_fillForm({
     marka,model,rej:reg,
     rok:dStart?dStart.getFullYear():new Date().getFullYear(),
     dStart:fmt(dStart),dEnd:fmt(dEnd),status:'active',
-    zakup:costs.inwCost||0,          /* 0 jeśli brak → ręcznie */
-    naprawy:costs.naprCost,
+    zakup:_r2(costs.inwCost),          /* 0 jeśli brak → ręcznie */
+    naprawy:_r2(costs.naprCost),
     kmEnd:Math.round(costs.kmEnd),   /* 0 jeśli brak odczytów → ręcznie */
     kmStart:Math.round(costs.kmStart),
     sprzedaz:0,resType:'none',       /* zawsze ręcznie */
     useSplit:splitCatCount>1,
-    sPrzeg:costs.sPrzegCost,sNapr:costs.sNaprGenCost,sOpony:costs.sOponCost,sCzesci:costs.sCzescCost,
-    on:costs.onCost,litry:costs.totalLit,
-    adblue:costs.adblCost,paliwoInne:costs.lpgCost,
+    sPrzeg:_r2(costs.sPrzegCost),sNapr:_r2(costs.sNaprGenCost),sOpony:_r2(costs.sOponCost),sCzesci:_r2(costs.sCzescCost),
+    on:_r2(costs.onCost),litry:_r1(costs.totalLit),
+    adblue:_r2(costs.adblCost),paliwoInne:_r2(costs.lpgCost),
     kmDok:Math.round(costs.kmDok),
     doszac:costs.kmDok>0&&costs.totalLit>0&&costs.kmDok<costs.kmEnd*0.8,
-    ubezp:costs.ubezpCost,podatki:costs.podatkiCost,gps:costs.gpsCost,
-    reklama:costs.reklamaCost,finans:costs.najemCost,admin:0,
-    myjnia:costs.myjCost,autostrady:costs.autCost,inne:0,szkody:costs.szkCost,
+    ubezp:_r2(costs.ubezpCost),podatki:_r2(costs.podatkiCost),gps:_r2(costs.gpsCost),
+    reklama:_r2(costs.reklamaCost),finans:_r2(costs.najemCost),admin:0,
+    myjnia:_r2(costs.myjCost),autostrady:_r2(costs.autCost),inne:0,szkody:_r2(costs.szkCost),
     useWacc:false,wacc:7.0,bench:0.80,expM:1.6,hor:8,
     rflRate:+((1-tco_R_FLEET)*100).toFixed(1),
     vatType:'cargo100',citRate:19
@@ -2395,7 +2671,7 @@ function tco_renderFLMPanel(reg,all,fuelTx,c,kmSrcFuel,kmStartUnknown){
     return;
   }
   const fmt=d=>d?d.toLocaleDateString('pl-PL'):'–';
-  const fN=n=>(+n||0).toLocaleString('pl-PL',{maximumFractionDigits:0});
+  const fN=n=>(+n||0).toLocaleString('pl-PL',{maximumFractionDigits:0,useGrouping:false});
   const noKm=!fuelTx.length;
 
   /* Buduj wiersze kosztów (tylko niezerowe) */
@@ -2571,30 +2847,139 @@ function tco_report(s){
   const act=s.status==='active';
   const rep=tco_$('tco-rep');
   if(!rep)return;
+  const vatLabel=s.vatType==='mixed50'?'VAT 50% (Art. 86a)':'VAT 100% (ciężarowy)';
+
+  /* KPI cards — ikona gradientowa + duża wartość + podpis */
+  const kpi4=s.amorShield>0.01
+    ?{ic:'fa-shield-alt',col:'#7c3aed',l:'TCO po tarczy CIT',v:tco_zl(s.tcoAfterAmor,0),sub:'Oszczędność CIT: '+tco_zl(s.amorShield,0)}
+    :{ic:'fa-road',col:'#3b82f6',l:'Intensywność użycia',v:tco_f(s.kmRok,0)+' km/rok',sub:'Przebieg łącznie: '+tco_f(s.km,0)+' km'};
+  const kpis=[
+    {ic:'fa-car',col:'#7c3aed',l:'TCO łącznie',v:tco_zl(s.tco,0),sub:'Okres: '+tco_f(s.mies,1)+' mies.'},
+    {ic:'fa-road',col:'#10b981',l:'Koszt / km',v:tco_f(s.perKm,3)+' zł',sub:tco_f(s.perKm*100,1)+' zł / 100 km'},
+    {ic:'fa-calendar-alt',col:'#f59e0b',l:'Koszt / miesiąc',v:tco_zl(s.perM,0),sub:'Rok: '+tco_zl(s.perY,0)},
+    kpi4
+  ];
+
+  const topShare=s.tco&&top[0]?top[0].v/s.tco*100:0;
+  const lifecycleTxt=bi?(Math.abs(s.lata-bi.t)<1?'stan zbieżny z optimum cyklu życia.':s.lata<bi.t?'pojazd przed optimum — dalsza eksploatacja uzasadniona.':'pojazd po optimum cyklu życia — wskazana wymiana.'):'' ;
+  const judgement=`Największy udział w TCO ma <b>${top[0]?esc(top[0].n.split('(')[0].trim()):'–'}</b> (${tco_f(topShare,1)}% kosztów) przy koszcie <b>${tco_f(s.perKm,3)} zł/km</b>${lifecycleTxt?' — '+lifecycleTxt:''}`;
+
   rep.innerHTML=`
-  <div style="font-size:1rem;font-weight:800;letter-spacing:-.3px;color:var(--tx-p);margin-bottom:4px">Raport analizy TCO — ${s.D.marka} ${s.D.model} (${s.rej||'–'})</div>
-  <p style="color:var(--tx-m);font-size:.68rem;margin-bottom:14px">Okres: ${s.D.dStart} – ${s.D.dEnd} · ${tco_f(s.mies,1)} mies. · przebieg ${tco_f(s.km,0)} km · ${act?'<b>pojazd w eksploatacji</b>':'pojazd zbyty'} · wartości netto · ${new Date().toLocaleDateString('pl-PL')}</p>
-  <h5>1. Wynik główny</h5>
-  <p>TCO = <b>${tco_zl(s.tco)}</b> netto → <b>${tco_f(s.perKm,3)} zł/km</b> (${tco_zl(s.perM,0)}/mies., ${tco_zl(s.perY,0)}/rok). Wskaźnik jest ${s.perKm<s.bench?'<b>niższy</b>':'<b>wyższy</b>'} od benchmarku ${tco_f(s.bench,2)} zł/km o ${tco_f(Math.abs(s.perKm-s.bench)/Math.max(s.bench,.0001)*100,1)} %.</p>
-  <h5>2. Struktura kosztów</h5>
-  <ul>${top.slice(0,5).map(k=>`<li><b>${k.n}</b> — ${tco_zl(k.v,0)} (${tco_f(s.tco?k.v/s.tco*100:0,1)} % TCO; ${tco_f(s.km>0?k.v/s.km:0,3)} zł/km)</li>`).join('')}</ul>
-  <p>Koszty stałe: ${tco_f(s.tco?s.stale/s.tco*100:0,1)} % (${tco_zl(s.stale,0)}); zmienne: ${tco_f(s.tco?s.zmien/s.tco*100:0,1)} % (${tco_zl(s.zmien,0)}).</p>
-  <h5>3. Deprecjacja</h5>
-  <p>Zakup ${tco_zl(s.zakup)}; odzysk ${tco_zl(s.sprzedaz)} → utrata ${tco_zl(s.depr)} = <b>${tco_f(s.km>0?s.depr/s.km:0,3)} zł/km</b>. Retencja <b>${tco_f(s.ret*100,1)} %</b> po ${tco_f(s.lata,1)} latach.</p>
-  <h5>4. Eksploatacja</h5>
-  <p>Zużycie <b>${tco_f(s.l100,2)} l/100 km</b> × ${tco_f(s.cenaON,2)} zł/l = ${tco_f(s.km>0?s.paliwo/s.km:0,3)} zł/km (${tco_f(s.tco?s.paliwo/s.tco*100:0,1)} % TCO). Utrzymanie ${tco_zl(s.naprawy,0)} = <b>${tco_f(s.km>0?s.naprawy/s.km:0,3)} zł/km</b>. Intensywność: ${tco_f(s.kmRok,0)} km/rok.</p>
-  <h5>5. Cykl życia</h5>
-  <p>${bi?`Optimum wymiany w <b>${bi.t}. roku</b> (${tco_f(bi.km,0)} km) przy ${tco_f(bi.pk,3)} zł/km. Stan faktyczny (${tco_f(s.lata,1)} roku) — ${Math.abs(s.lata-bi.t)<1?'zbieżny z optimum.':(s.lata<bi.t?'przed minimum — potencjał dalszej eksploatacji.':'po minimum — wskazana wymiana.')}`:''}</p>
-  <h5>6. Rekomendacje</h5>
-  <ul>
-    <li>Stawka referencyjna TCO: <b>${tco_f(s.perKm,2)}–${tco_f(s.perKm*1.1,2)} zł/km</b>.</li>
-    <li>Redukcja ${top[0]?top[0].n:'–'} o 5 % → oszczędność ${tco_zl(top[0]?top[0].v*.05:0,0)}.</li>
-    <li>Ograniczenie zużycia o 0,5 l/100km → <b>${tco_zl(s.km/100*.5*s.cenaON,0)}</b>.</li>
-    ${act?'<li>Zaplanować zbycie — potwierdzić wycenę wartości rezydualnej.</li>':''}
-  </ul>
-  <h5>7. Zastrzeżenia</h5>
-  <p>Analiza obejmuje koszty udokumentowane, wartości netto. Poza zakresem: wynagrodzenie kierowcy, logistyka${s.D.useWacc?'':', koszt kapitału'}. ${act?'Dla pojazdu w eksploatacji — wynik bieżący, ulegnie zmianie po zbyciu.':''}</p>
-  <div class="tco-sig"><div>Sporządził — analityk floty</div><div>Zatwierdził — kierownik działu</div></div>`;
+<div class="mce-header-box" style="background:linear-gradient(135deg,rgba(124,58,237,.09),rgba(99,102,241,.06));margin-bottom:var(--sp)">
+  <div class="mce-logo" style="background:linear-gradient(135deg,#7c3aed,#6366f1);width:46px;height:46px;flex:0 0 46px;font-size:1.15rem">
+    <i class="fas fa-car"></i>
+  </div>
+  <div class="mce-header-text">
+    <h1 style="font-size:.92rem;font-family:var(--font-brand)">Raport TCO — ${esc(s.D.marka)} ${esc(s.D.model)} · ${esc(s.rej||'–')}</h1>
+    <p style="font-size:.62rem;color:var(--tx-m);margin-top:3px">Okres: ${s.D.dStart} – ${s.D.dEnd} &nbsp;·&nbsp; koszty netto &nbsp;·&nbsp; ${vatLabel} &nbsp;·&nbsp; CIT ${s.citRate}%</p>
+  </div>
+  <div class="mce-badges" style="flex-shrink:0">
+    <span class="mce-badge" style="${act?'background:rgba(16,185,129,.15);color:#10b981':'background:rgba(100,116,139,.15);color:#64748b'}">${act?'W eksploatacji':'Zbyty'}</span>
+    <span class="mce-badge badge-ai">Theil-Sen</span>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(126px,1fr));gap:6px;margin-bottom:var(--sp)">
+  ${kpis.map(k=>`
+  <div style="background:var(--bg-card);border:1px solid var(--bd);border-top:3px solid ${k.col};border-radius:var(--rmd);padding:9px 11px 8px">
+    <div style="font-size:1.05rem;font-weight:800;font-family:var(--font-mono);color:var(--tx-p);letter-spacing:-.4px;line-height:1.1">${k.v}</div>
+    <div style="display:flex;align-items:center;gap:3px;margin:4px 0 2px">
+      <i class="fas ${k.ic}" style="color:${k.col};font-size:.55rem;flex-shrink:0"></i>
+      <span style="font-size:.52rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tx-m)">${k.l}</span>
+    </div>
+    <div style="font-size:.59rem;color:var(--tx-s)">${k.sub}</div>
+  </div>`).join('')}
+</div>
+
+<div class="mce-note success" style="margin-bottom:var(--sp)">
+  <i class="fas fa-bullseye"></i>
+  <span>${judgement}</span>
+</div>
+
+<div class="mce-section">
+  <h2><i class="fas fa-table"></i> Struktura kosztów</h2>
+  <table class="tco-rep-dt">
+    <thead><tr><th>Kategoria kosztu</th><th>Kwota</th><th>% TCO</th><th>zł/km</th></tr></thead>
+    <tbody>${top.map(k=>`<tr><td>${k.n.length>36?k.n.slice(0,35)+'…':k.n}</td><td>${tco_zl(k.v,0)}</td><td>${tco_f(s.tco?k.v/s.tco*100:0,1)}%</td><td>${tco_f(s.km>0?k.v/s.km:0,3)}</td></tr>`).join('')}</tbody>
+    <tfoot><tr><td>RAZEM</td><td>${tco_zl(s.tco,0)}</td><td>100%</td><td>${tco_f(s.perKm,3)}</td></tr></tfoot>
+  </table>
+  <div class="mce-note" style="margin-top:8px">
+    <i class="fas fa-info-circle"></i>
+    <span>Koszty stałe: <b>${tco_f(s.tco?s.stale/s.tco*100:0,1)}%</b> &nbsp;·&nbsp; Koszty zmienne: <b>${tco_f(s.tco?s.zmien/s.tco*100:0,1)}%</b></span>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp);margin-bottom:var(--sp)">
+  <div class="mce-section" style="margin-bottom:0">
+    <h2><i class="fas fa-chart-line"></i> Deprecjacja</h2>
+    <table class="tco-rep-dt"><tbody>
+      <tr><td>Zakup (netto)</td><td>${tco_zl(s.zakup)}</td></tr>
+      ${s.vatOnZakup>0.01?`<tr><td>VAT 50% zakup</td><td>+${tco_zl(s.vatOnZakup,0)}</td></tr>`:''}
+      <tr><td>Zbycie (netto)</td><td>${tco_zl(s.sprzedaz)}${s.resType==='est'?' <i style="color:var(--tx-m)">(est.)</i>':''}</td></tr>
+      <tr><td>Retencja wartości</td><td>${tco_f(s.ret*100,1)}% / ${tco_f(s.lata,1)} lat</td></tr>
+    </tbody></table>
+    <p style="font-size:.6rem;color:var(--tx-m);margin:5px 0 0">Utrata wartości i zł/km uwzględnione w strukturze kosztów powyżej.</p>
+  </div>
+  <div class="mce-section" style="margin-bottom:0">
+    <h2><i class="fas fa-gas-pump"></i> Eksploatacja</h2>
+    <table class="tco-rep-dt"><tbody>
+      <tr><td>Zużycie paliwa</td><td>${s.l100>0?tco_f(s.l100,2)+' l/100 km':'–'}</td></tr>
+      <tr><td>Śr. cena ON</td><td>${s.cenaON>0?tco_f(s.cenaON,3)+' zł/l':'–'}</td></tr>
+      ${s.vatOnOps>0.01?`<tr><td>VAT 50% ekspl.</td><td>+${tco_zl(s.vatOnOps,0)}</td></tr>`:''}
+      <tr><td>Intensywność użycia</td><td>${tco_f(s.kmRok,0)} km/rok</td></tr>
+    </tbody></table>
+    ${s.paliwo>0.01&&s.l100===0?`<div class="mce-note" style="margin-top:6px;font-size:.6rem"><i class="fas fa-info-circle"></i><span>Podano koszt paliwa bez ilości litrów — zużycie niedostępne.</span></div>`:''}
+  </div>
+</div>
+
+${bi?`
+<div class="mce-section">
+  <h2><i class="fas fa-sync-alt"></i> Cykl życia — optimum eksploatacji</h2>
+  <div class="mce-phase">
+    <div class="mce-phase-header">
+      <span class="mce-phase-num">OPTIMUM</span>
+      <h3>${bi.t}. rok eksploatacji &nbsp;·&nbsp; ${tco_f(bi.km,0)} km &nbsp;·&nbsp; min. ${tco_f(bi.pk,3)} zł/km</h3>
+    </div>
+    <div class="mce-phase-content">
+      <p style="margin:0">${Math.abs(s.lata-bi.t)<1?'Stan faktyczny zbieżny z optimum cyklu życia — pojazd pracuje optymalnie.':s.lata<bi.t?`Pojazd jest w ${tco_f(s.lata,1)}. roku eksploatacji — przed minimum kosztu. Potencjał dalszego użytkowania uzasadniony ekonomicznie.`:`Pojazd jest w ${tco_f(s.lata,1)}. roku eksploatacji — po minimum kosztu. Wskazana analiza zasadności wymiany.`}</p>
+    </div>
+  </div>
+</div>`:''}
+
+${s.amorShield>0.01?`
+<div class="mce-section">
+  <h2><i class="fas fa-shield-alt"></i> Tarcza amortyzacyjna CIT ${s.citRate}%</h2>
+  <div class="mce-validation-grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr))">
+    <div class="mce-valid-item"><span class="mce-valid-label">Wartość pocz. KŚT</span><span class="mce-valid-range">${tco_zl(s.trueZakup,0)}</span></div>
+    ${s.amorOverLimit>0.01?`<div class="mce-valid-item"><span class="mce-valid-label">Nadwyżka p. limitem</span><span class="mce-valid-range">+${tco_zl(s.amorOverLimit,0)}</span></div>`:''}
+    <div class="mce-valid-item"><span class="mce-valid-label">Podstawa odpisów</span><span class="mce-valid-range">${tco_zl(s.amorBase,0)}</span></div>
+    <div class="mce-valid-item"><span class="mce-valid-label">Odpisy (${tco_f(Math.min(s.lata,5),1)} lat)</span><span class="mce-valid-range">${tco_zl(s.amorDeductible,0)}</span></div>
+    <div class="mce-valid-item" style="background:rgba(16,185,129,.07);border-color:rgba(16,185,129,.3)"><span class="mce-valid-label" style="color:#10b981;font-weight:700">Oszczędność CIT</span><span class="mce-valid-range" style="color:#10b981;font-weight:800">${tco_zl(s.amorShield,0)}</span></div>
+  </div>
+  <div class="mce-note success" style="margin-top:8px"><i class="fas fa-check-circle"></i><span>TCO po tarczy CIT: <b>${tco_zl(s.tcoAfterAmor,0)}</b></span></div>
+</div>`:''}
+
+<div class="mce-section">
+  <h2><i class="fas fa-lightbulb"></i> Rekomendacje</h2>
+  <div class="mce-criteria-list">
+    <span class="mce-crit ok"><i class="fas fa-check"></i> Stawka ref. TCO: <b>${tco_f(s.perKm,2)}–${tco_f(s.perKm*1.1,2)} zł/km</b></span>
+    ${top[0]?`<span class="mce-crit ok"><i class="fas fa-check"></i> Redukcja „${esc(top[0].n.split('(')[0].trim())}" o 5% → oszczędność <b>${tco_zl(top[0].v*.05,0)}</b></span>`:''}
+    ${s.cenaON>0?`<span class="mce-crit ok"><i class="fas fa-check"></i> –0,5 l/100 km → oszczędność <b>${tco_zl(s.km/100*.5*s.cenaON,0)}</b></span>`:''}
+    ${act?`<span class="mce-crit ok"><i class="fas fa-clock"></i> Zaplanować zbycie — potwierdzić wycenę rezydualną</span>`:''}
+  </div>
+</div>
+
+<div class="mce-section" style="margin-bottom:var(--sp)">
+  <h2><i class="fas fa-exclamation-triangle"></i> Zastrzeżenia</h2>
+  <p style="font-size:.62rem;color:var(--tx-s);margin:0;line-height:1.5">Koszty udokumentowane, wartości netto. Poza zakresem raportu: wynagrodzenie kierowcy, logistyka${s.D.useWacc?'':', koszt kapitału własnego'}. ${act?'Wynik bieżący — ulegnie zmianie po zbyciu pojazdu.':''}</p>
+</div>
+
+<div class="tco-sig"><div>Sporządził — analityk floty</div><div>Zatwierdził — kierownik działu</div></div>
+
+<div class="tco-rep-footer" style="border-radius:var(--rmd);margin-top:var(--sp)">
+  <span><i class="fas fa-file-alt"></i> FLManager · Chemirol · wartości netto</span>
+  <span><i class="fas fa-lock"></i> Raport wewnętrzny · nie stanowi porady finansowej</span>
+</div>`;
 }
 
 /* ── WYKRESY (Canvas) ── */
@@ -2775,6 +3160,16 @@ function tco_renderFleet(){
 }
 
 /* ── UI ── */
+/* ── Auto-przelicz po edycji formularza TCO ── */
+(function(){
+  var _t=null;
+  var fn=function(){clearTimeout(_t);_t=setTimeout(function(){if(typeof tco_calc==='function')tco_calc();},220);};
+  document.addEventListener('DOMContentLoaded',function(){
+    var aside=document.querySelector('.tco-aside');
+    if(aside){aside.addEventListener('input',fn);aside.addEventListener('change',fn);}
+  });
+})();
+
 window.tco_tab=function(i,el){
   document.querySelectorAll('.tco-pane').forEach((p,j)=>p.classList.toggle('tco-on',j===i));
   document.querySelectorAll('.tco-stab').forEach(t=>t.classList.remove('tco-on'));
@@ -2845,7 +3240,9 @@ setTimeout(()=>{
   const initInp=tco_$('tco-vsearch');if(initInp)initInp.value='CMG13N9';
   /* Pre-buduj dropdown (bez otwierania) żeby był gotowy */
   setTimeout(tco_populateDrop,400);
-  tco_resetFleet();
+  /* Porównywarka pojazdów (zakładka Flota) NIE jest już ładowana automatycznie —
+     zostaje pusta, dopóki użytkownik sam nie doda pojazdu (przycisk "Dodaj do porównania"
+     w Pulpicie) lub nie kliknie "Wczytaj presety" w zakładce Flota. */
 },300);
 
 function tco_loadFromFLM_update(){
@@ -2881,14 +3278,20 @@ function tco_restoreOrderAfterPrint(){
   if(tco_printApxDiv){tco_printApxDiv.remove();tco_printApxDiv=null;}
   if(p5&&p5.parentNode&&p5.parentNode.firstElementChild===p5){
     /* pane 0 (Pulpit) siedziało bezpośrednio po p5 przed przeniesieniem — ustaw z powrotem
-       na koniec listy paneli (oryginalna kolejność 0..5) */
-    p5.parentNode.appendChild(p5);
+       na koniec listy paneli. UWAGA: odkąd doszła zakładka "Benchmarki" (#tco-p6) PO
+       Raporcie, Raport przestał być ostatnim panelem — zwykłe appendChild (zawsze na
+       koniec) wstawiało Raport PO Benchmarkach, zamieniając je miejscami (stąd raport
+       w zakładce Benchmarki i odwrotnie). Wstawiamy więc z powrotem konkretnie przed
+       #tco-p6, a nie ślepo na sam koniec listy. */
+    const p6=document.getElementById('tco-p6');
+    if(p6&&p6.parentNode===p5.parentNode)p5.parentNode.insertBefore(p5,p6);
+    else p5.parentNode.appendChild(p5);
   }
 }
 window.tco_printReport=function(){
   try{
     if(!localStorage.getItem('tco_printTipShown')){
-      alert('Wskazówka: aby usunąć górny/dolny nagłówek przeglądarki (adres strony, data, numer strony) z wydruku PDF —\n\nw oknie drukowania kliknij "Więcej ustawień" i odznacz "Nagłówki i stopki".\n\nTo ustawienie samej przeglądarki, aplikacja nie może go wyłączyć automatycznie.');
+      alert('Wskazówka: raport zawiera wbudowaną numerację stron. Aby uniknąć podwójnych numerów i adresu URL z wydruku PDF —\n\nw oknie drukowania kliknij „Więcej ustawień" i odznacz „Nagłówki i stopki".\n\nTo ustawienie samej przeglądarki, aplikacja nie może go wyłączyć automatycznie.');
       localStorage.setItem('tco_printTipShown','1');
     }
   }catch(e){}
