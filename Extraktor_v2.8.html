@@ -1,0 +1,2050 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Polityka bezpieczeństwa: skrypty tylko z tego pliku i cdn.jsdelivr.net, style z tego pliku i Google Fonts, brak jakichkolwiek innych połączeń (connect-src 'none') -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Extraktor — ZIP → XLSX</title>
+<!-- Stan panelu, motywu i czcionek przed pierwszym renderem (bez „skoku” po załadowaniu) -->
+<script>(function(){try{
+  /* jednorazowe przeniesienie ustawień zapisanych pod poprzednią nazwą aplikacji */
+  var P='ekstraktor-faktur',L='fakturex',keys=['settings','sidebar','theme','webfonts','merge'];
+  for(var i=0;i<keys.length;i++){var n=P+'-'+keys[i],o=L+'-'+keys[i];if(localStorage.getItem(n)===null&&localStorage.getItem(o)!==null){localStorage.setItem(n,localStorage.getItem(o));localStorage.removeItem(o);}}
+  if(localStorage.getItem(P+'-webfonts')!=='off'){var l=document.createElement('link');l.id='webFonts';l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap';l.referrerPolicy='no-referrer';document.head.appendChild(l);}
+  var s=null;try{s=JSON.parse(localStorage.getItem(P+'-sidebar')||'null');}catch(e){}s=s&&typeof s==='object'?s:{};
+  var c=document.documentElement.classList;if(typeof s.mini==='boolean'?s.mini:true)c.add('sb-mini');if(s.off||s.hidden)c.add('sb-off');
+  var thc={light:'theme-light',paper:'theme-paper',ink:'theme-ink',pencil:'theme-pencil',chalk:'theme-chalk'}[localStorage.getItem(P+'-theme')];if(thc)c.add(thc);
+}catch(e){}})();</script>
+<!-- Biblioteki z przypiętą wersją i weryfikacją integralności (SRI): zmodyfikowany plik nie zostanie uruchomiony -->
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" integrity="sha256-rMfkFFWoB2W1/Zx+4bgHim0WC7vKRVrq6FTeZclH1Z4=" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" integrity="sha256-yVBhl8r4CaB1tt7h2g02+xnacVj/6KiOewyWxdhiPJk=" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<style>
+:root{
+  --bg:#060b14; --bg2:#0a1220; --bg3:#0e1829;
+  --card:#0d1826; --card-border:rgba(37,210,255,.12);
+  --primary:#25d2ff; --primary-dim:rgba(37,210,255,.15); --primary-glow:rgba(37,210,255,.35);
+  --emerald:#34d399; --amber:#fbbf24; --rose:#fb7185; --sky:#7dd3fc; --violet:#a78bfa;
+  --muted:rgba(148,163,184,.55); --text:#d1e8f0;
+  --font-ui:'Exo 2',sans-serif; --font-mono:'Space Mono',monospace;
+  --r:3px; --r-sm:2px; --r-md:4px; --r-lg:6px;
+  --sidebar-w:256px; --sidebar-mini:52px; --header-h:46px; --tabbar-h:42px; --bottombar-h:32px; --container:1600px; --pad:14px;
+  --topbar-bg:rgba(6,11,20,.92); --bottombar-bg:rgba(6,11,20,.96);
+  --card-shadow:0 4px 20px rgba(0,0,0,.3);
+  --card-shadow-hover:0 4px 24px rgba(0,0,0,.4),0 0 30px rgba(37,210,255,.03);
+  /* pochodne — dwa poziomy powierzchni: tło + karta; wewnątrz karty tylko linie */
+  --on-primary:#03121a;
+  --line:var(--card-border);
+  --line-primary:color-mix(in srgb,var(--primary) 45%,transparent);
+  --line-strong:color-mix(in srgb,var(--text) 26%,transparent);
+  --well:color-mix(in srgb,var(--text) 3%,transparent);
+  --zebra:color-mix(in srgb,var(--text) 5%,transparent);
+  --head-bg:color-mix(in srgb,var(--text) 7%,var(--card));
+  --track:color-mix(in srgb,var(--text) 10%,transparent);
+  --hover:color-mix(in srgb,var(--primary) 6%,transparent);
+  --overlay:rgba(0,0,0,.65);
+}
+.theme-light{
+  --bg:#e6edf4; --bg2:#f3f7fb; --bg3:#dbe5ef;
+  --card:#ffffff; --card-border:rgba(14,90,130,.18);
+  --primary:#0891b2; --primary-dim:rgba(8,145,178,.12); --primary-glow:rgba(8,145,178,.25);
+  --muted:rgba(45,75,100,.65); --text:#0d2438;
+  --topbar-bg:rgba(243,247,251,.92); --bottombar-bg:rgba(243,247,251,.97);
+  --card-shadow:0 4px 18px rgba(30,60,90,.08);
+  --card-shadow-hover:0 4px 22px rgba(30,60,90,.12),0 0 30px rgba(8,145,178,.05);
+  --on-primary:#ffffff; --overlay:rgba(13,36,56,.45);
+}
+/* — motyw „Papier": ciepła, jasna paleta (ekstraktor2 / ekstraktor3) — stonowany ceglasty akcent, użyty oszczędnie — */
+.theme-paper{
+  --bg:#e4e1dc; --bg2:#dfdcd6; --bg3:#d3cfc7;
+  --card:#f5f4f0; --card-border:rgba(25,25,25,.14);
+  --primary:#9c5a34; --primary-dim:rgba(156,90,52,.08); --primary-glow:rgba(156,90,52,.16);
+  --muted:rgba(25,25,25,.5); --text:#191919;
+  --topbar-bg:rgba(245,244,240,.92); --bottombar-bg:rgba(245,244,240,.97);
+  --card-shadow:0 4px 18px rgba(40,35,25,.08);
+  --card-shadow-hover:0 4px 22px rgba(40,35,25,.12),0 0 20px rgba(156,90,52,.05);
+  --on-primary:#f5f4f0; --overlay:rgba(40,35,25,.45);
+}
+/* — motyw „Atrament": prawdziwy granatowo-czarny atrament piórnika — chłodny, bez brązu/pomarańczu — */
+.theme-ink{
+  --bg:#0a0e15; --bg2:#0d1420; --bg3:#121b29;
+  --card:#0e1521; --card-border:rgba(150,178,224,.14);
+  --primary:#4d7cf5; --primary-dim:rgba(77,124,245,.16); --primary-glow:rgba(77,124,245,.4);
+  --muted:rgba(178,194,220,.55); --text:#e4eaf3;
+  --topbar-bg:rgba(10,14,21,.92); --bottombar-bg:rgba(10,14,21,.96);
+  --card-shadow:0 4px 20px rgba(0,0,0,.35);
+  --card-shadow-hover:0 4px 24px rgba(0,0,0,.45),0 0 30px rgba(77,124,245,.08);
+  --on-primary:#04070d; --overlay:rgba(0,0,0,.68);
+}
+/* — motyw „Ołówek": grafitowa kreska na białym papierze — monochromatyczny, bez koloru — */
+.theme-pencil{
+  --bg:#f7f6f2; --bg2:#f0efe8; --bg3:#e5e3da;
+  --card:#fefefc; --card-border:rgba(40,40,36,.16);
+  --primary:#3a3a35; --primary-dim:rgba(58,58,53,.08); --primary-glow:rgba(58,58,53,.18);
+  --muted:rgba(58,58,53,.55); --text:#242420;
+  --topbar-bg:rgba(247,246,242,.92); --bottombar-bg:rgba(247,246,242,.97);
+  --card-shadow:0 4px 16px rgba(35,35,30,.07);
+  --card-shadow-hover:0 4px 20px rgba(35,35,30,.11),0 0 24px rgba(58,58,53,.05);
+  --on-primary:#f7f6f2; --overlay:rgba(35,35,30,.42);
+}
+/* — motyw „Tablica": matowa, ciemna tablica szkolna — neutralny grafitowy szary (bez zielonego/niebieskiego podtonu), z teksturą kredowego pyłu w tle — */
+.theme-chalk{
+  --bg:#1c1c1c; --bg2:#212121; --bg3:#282828;
+  --card:#1f1f1f; --card-border:rgba(210,210,208,.09);
+  --primary:#adadab; --primary-dim:rgba(173,173,171,.07); --primary-glow:rgba(173,173,171,.10);
+  --muted:rgba(190,190,188,.48); --text:#e8e8e6;
+  --topbar-bg:rgba(28,28,28,.94); --bottombar-bg:rgba(28,28,28,.97);
+  --card-shadow:0 2px 10px rgba(0,0,0,.5);
+  --card-shadow-hover:0 2px 12px rgba(0,0,0,.55);
+  --on-primary:#1c1c1c; --overlay:rgba(0,0,0,.75);
+}
+/* delikatny pył kredowy — subtelny szum SVG (feTurbulence) nałożony tylko na tło tablicy */
+.theme-chalk body::after{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size:180px 180px;opacity:.05;mix-blend-mode:overlay;
+}
+/* ten sam szum, dużo delikatniejszy i w trybie „multiply" (nie rozjaśnia) — włókno papieru dla Papieru i Ołówka */
+.theme-paper body::after,.theme-pencil body::after{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size:160px 160px;opacity:.035;mix-blend-mode:multiply;
+}
+
+/* — tło strony (poza kartami) jest zawsze ciemne, niezależnie od wybranego motywu — karty zostają w swoim naturalnym, jasnym/ciemnym kolorze motywu i wyraźnie odcinają się od tła — */
+body{
+  --bg:#0b0e13; --bg2:#0e1219; --bg3:#131824;
+  --topbar-bg:rgba(11,14,19,.92); --bottombar-bg:rgba(11,14,19,.96);
+  --text:#dbe4ec; --muted:rgba(160,175,190,.6);
+}
+/* karty/modale/tooltipy/toasty mają jednak zachować własny, naturalny dla motywu kolor tekstu (bo ich tło zostaje jasne/ciemne wg motywu, a nie wg wymuszonego tła strony) */
+.card,.modal,.toast,.tooltip{--text:#d1e8f0;--muted:rgba(148,163,184,.55);color:var(--text);}
+/* motywy z jasnym tłem karty potrzebują też ciemniejszych, bardziej nasyconych kolorów statusów (gotowe/uwaga/błąd/info) — oryginalne pastele były dobrane pod ciemne tło i gubiły się na jasnym (np. historia operacji) */
+.theme-light .card,.theme-light .modal,.theme-light .toast,.theme-light .tooltip{--text:#0d2438;--muted:rgba(45,75,100,.65);--emerald:#0f7a4a;--amber:#b45309;--rose:#c0273f;--sky:#0369a1;--violet:#6d28d9;}
+.theme-paper .card,.theme-paper .modal,.theme-paper .toast,.theme-paper .tooltip{--text:#191919;--muted:rgba(25,25,25,.5);--emerald:#0f7a4a;--amber:#b45309;--rose:#c0273f;--sky:#0369a1;--violet:#6d28d9;}
+.theme-ink .card,.theme-ink .modal,.theme-ink .toast,.theme-ink .tooltip{--text:#e4eaf3;--muted:rgba(178,194,220,.55);}
+.theme-pencil .card,.theme-pencil .modal,.theme-pencil .toast,.theme-pencil .tooltip{--text:#242420;--muted:rgba(58,58,53,.55);--emerald:#0f7a4a;--amber:#b45309;--rose:#c0273f;--sky:#0369a1;--violet:#6d28d9;}
+.theme-chalk .card,.theme-chalk .modal,.theme-chalk .toast,.theme-chalk .tooltip{--text:#e8e8e6;--muted:rgba(190,190,188,.48);}
+/* Ołówek: grafitowy akcent jest dobrany pod biały papier kart i ginie na wymuszonym ciemnym tle „chrome" (panel boczny/górny pasek/zakładki/dolny pasek) — tam dostaje jaśniejszy, srebrzysty odcień */
+.theme-pencil .sidebar,.theme-pencil .topbar,.theme-pencil .tabbar,.theme-pencil .bottombar{--primary:#b6b6ae;--primary-dim:rgba(182,182,174,.14);--primary-glow:rgba(182,182,174,.3);}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-ui);background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(900px 500px at 85% -10%,var(--primary-dim),transparent 60%)}
+.wrap{max-width:var(--container);margin:0 auto;padding:0 var(--pad)}
+.mono{font-family:var(--font-mono)}
+.muted{color:var(--muted)}
+.icon{display:inline-grid;place-items:center;width:16px;height:16px;flex-shrink:0}
+.icon svg{width:100%;height:100%}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px}
+::-webkit-scrollbar-thumb:hover{background:var(--line-primary)}
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:4px}
+
+/* ===== Układ: panel boczny + główna kolumna ===== */
+.app{--sw:var(--sidebar-w);display:grid;grid-template-columns:var(--sw) minmax(0,1fr);min-height:100vh;min-height:100dvh;position:relative;z-index:1;overflow-x:clip;transition:grid-template-columns .22s ease}
+.sb-mini .app{--sw:var(--sidebar-mini)}
+.sb-off .app{--sw:0px}
+.main{display:flex;flex-direction:column;min-width:0;min-height:100vh;min-height:100dvh}
+.content{flex:1;width:100%;padding-top:8px;padding-bottom:12px}
+
+/* ===== Panel boczny ===== */
+.sidebar{width:var(--sidebar-w);background:var(--bg2);border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;height:100dvh;z-index:35;transition:width .22s ease,transform .22s ease,visibility 0s}
+.sb-mini .sidebar{width:var(--sidebar-mini)}
+.sb-off .sidebar{transform:translateX(-100%);visibility:hidden;pointer-events:none;transition:width .22s ease,transform .22s ease,visibility 0s linear .22s}
+.brand{height:var(--header-h);display:flex;align-items:center;gap:9px;padding:0 var(--pad);border-bottom:1px solid var(--line);flex-shrink:0;overflow:hidden;white-space:nowrap}
+.brand-logo{width:30px;height:30px;border-radius:var(--r);flex-shrink:0;background:linear-gradient(135deg,var(--primary),var(--violet));display:grid;place-items:center;font-weight:700;color:var(--on-primary);font-size:11.5px;letter-spacing:.3px;box-shadow:0 0 18px var(--primary-glow)}
+.brand-txt{min-width:0}
+.brand-name{font-weight:700;font-size:15.5px;letter-spacing:.4px;line-height:1}
+.brand-sub{font-size:9.5px;color:var(--muted);font-family:var(--font-mono);letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+.nav{flex:1;overflow-y:auto;overflow-x:hidden;padding:8px 10px}
+.nav-group{margin-bottom:10px}
+.nav-label{font-size:10px;font-family:var(--font-mono);letter-spacing:.9px;text-transform:uppercase;color:var(--muted);padding:0 10px 8px;white-space:nowrap;overflow:hidden}
+.nav-item{width:100%;display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--r);border:none;background:transparent;color:var(--text);font-family:var(--font-ui);font-size:13.5px;font-weight:500;cursor:pointer;transition:background .15s,color .15s;margin-bottom:2px;position:relative;text-align:left}
+.nav-item .icon{width:17px;height:17px;opacity:.75}
+.nav-txt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav-item:hover{background:var(--primary-dim)}
+.nav-item.active{background:var(--primary-dim);color:var(--primary)}
+.nav-item.active .icon{opacity:1}
+.nav-item.active::before{content:'';position:absolute;left:-12px;top:50%;transform:translateY(-50%);width:3px;height:20px;background:var(--primary);border-radius:0 3px 3px 0}
+.nav-badge{margin-left:auto;font-family:var(--font-mono);font-size:10px;padding:1px 7px;border-radius:var(--r-sm);border:1px solid var(--line);color:var(--muted);line-height:1.5;flex-shrink:0}
+.nav-item.active .nav-badge,.tab.active .nav-badge{border-color:var(--primary);color:var(--primary)}
+.sidebar-foot{padding:9px;border-top:1px solid var(--line);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.sidebar-note{flex:1;min-width:0;display:flex;gap:8px;align-items:flex-start;font-size:11.5px;line-height:1.45;color:var(--muted);overflow:hidden}
+.sidebar-note .icon{width:14px;height:14px;margin-top:2px;color:var(--primary);opacity:.7}
+
+/* — tryb zminimalizowany (same ikony; podpowiedzi obsługuje wspólny system) — */
+.sb-mini .brand{padding:0;justify-content:center}
+.sb-mini .brand-txt{display:none}
+.sb-mini .nav{padding:8px 6px}
+.sb-mini .nav-label{font-size:0;padding:0;height:1px;background:var(--line);margin:2px 8px 14px}
+.sb-mini .nav-group:first-child .nav-label{display:none}
+.sb-mini .sidebar .nav-item{justify-content:center;padding:10px 0}
+.sb-mini .sidebar .nav-txt{display:none}
+.sb-mini .sidebar .nav-badge{position:absolute;top:2px;right:2px;margin:0;font-size:9px;line-height:14px;padding:0 4px;min-width:16px;text-align:center;background:var(--bg2)}
+.sb-mini .sidebar .nav-badge.is-zero{display:none}
+.sb-mini .sidebar-note{display:none}
+.sb-mini .sidebar-foot{justify-content:center;padding:12px 0}
+
+/* ===== Nagłówek ===== */
+.topbar{position:sticky;top:0;z-index:30;background:var(--topbar-bg);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.topbar .wrap{height:var(--header-h);display:flex;align-items:center;gap:9px}
+.crumb{display:flex;align-items:center;gap:10px;min-width:0;font-size:14px}
+.crumb .root{font-weight:700;color:var(--text);white-space:nowrap;letter-spacing:.3px}
+.crumb .sep{width:14px;height:14px;color:var(--muted);opacity:.6}
+.crumb .cur{color:var(--primary);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crumb .root,.crumb .sep{display:none}
+.sb-off .crumb .root,.sb-off .crumb .sep{display:inline-flex}
+.topbar-actions{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.icon-btn{width:34px;height:34px;border-radius:var(--r-md);border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;display:grid;place-items:center;transition:all .15s;flex-shrink:0}
+.icon-btn:hover{color:var(--primary);border-color:var(--line-primary)}
+.icon-btn .icon{width:17px;height:17px}
+
+/* ===== Belka zakładek (mobile lub schowany panel) ===== */
+.tabbar{display:none;position:sticky;top:var(--header-h);z-index:29;background:var(--topbar-bg);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.sb-off .tabbar{display:block}
+.tabs{display:flex;gap:6px;height:var(--tabbar-h);align-items:center;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:var(--r-md);border:1px solid var(--line);background:transparent;color:var(--muted);font-family:var(--font-ui);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.tab .icon{width:15px;height:15px}
+.tab .nav-badge{margin-left:2px}
+.tab:hover{color:var(--text);border-color:var(--line-primary)}
+.tab.active{color:var(--primary);border-color:var(--line-primary);background:var(--primary-dim)}
+
+/* ===== Widoki ===== */
+.view{display:none}
+.view.active{display:block;animation:fade .2s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* ===== Karta ===== */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--card-shadow);margin-bottom:8px;overflow:hidden}
+.card-head{display:flex;align-items:center;gap:7px;padding:8px var(--pad);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.card-head>.icon{width:18px;height:18px;color:var(--primary);opacity:.85}
+.card-title{font-size:12.5px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted)}
+.card-pills{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;min-width:0;max-width:100%}
+.card-body{padding:var(--pad);container-type:inline-size}
+.subhead{font-size:11px;font-weight:600;letter-spacing:.9px;text-transform:uppercase;color:var(--muted);margin:14px 0 7px;display:flex;align-items:center;gap:6px}
+.subhead .icon{width:14px;height:14px;color:var(--primary);opacity:.8}
+.subhead:first-child{margin-top:0}
+
+/* ===== Pille / tagi ===== */
+.pill{--c:var(--primary);display:inline-flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;padding:3px 9px;border-radius:var(--r-sm);border:1px solid color-mix(in srgb,var(--c) 45%,transparent);color:var(--c);background:transparent;white-space:nowrap;line-height:1.4;max-width:100%;min-width:0}
+.pill.ok{--c:var(--emerald)}.pill.warn{--c:var(--amber)}.pill.err{--c:var(--rose)}.pill.info{--c:var(--sky)}.pill.mute{--c:var(--muted)}
+.pill.lc{text-transform:none;letter-spacing:0;gap:0}
+.pill .ellipsis{min-width:0;overflow:hidden;text-overflow:ellipsis}
+button.pill{cursor:pointer;transition:background .15s}
+button.pill:hover{background:var(--primary-dim)}
+.tag{font-family:var(--font-mono);font-size:10px;padding:1px 6px;border-radius:3px;border:1px solid var(--line);color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
+
+/* ===== Przyciski ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:var(--font-ui);font-size:13px;font-weight:600;padding:8px 14px;border-radius:var(--r-md);border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn .icon{width:15px;height:15px}
+.btn:hover:not(:disabled){color:var(--text);border-color:var(--line-primary)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.sm{padding:6px 10px;font-size:12px;border-radius:var(--r)}
+.btn.accent{color:var(--primary);border-color:var(--line-primary)}
+.btn.accent:hover:not(:disabled){color:var(--primary);border-color:var(--primary);background:var(--primary-dim)}
+.btn.danger{color:var(--rose);border-color:color-mix(in srgb,var(--rose) 35%,transparent)}
+.btn.danger:hover:not(:disabled){color:var(--rose);border-color:var(--rose);background:color-mix(in srgb,var(--rose) 8%,transparent)}
+.cta-row{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:6px}
+.cta{width:100%;min-width:0;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 16px;border-radius:var(--r-md);border:1px solid transparent;background:var(--primary);color:var(--on-primary);font-family:var(--font-ui);font-size:14px;font-weight:700;cursor:pointer;transition:all .15s;box-shadow:0 6px 24px color-mix(in srgb,var(--primary) 22%,transparent)}
+.cta .icon{width:20px;height:20px}
+.cta:hover:not(:disabled){filter:brightness(1.06);box-shadow:0 8px 30px var(--primary-glow);transform:translateY(-1px)}
+.cta:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
+.cta.ghost{background:transparent;color:var(--primary);border-color:var(--line-primary);box-shadow:none}
+.cta.ghost:hover:not(:disabled){background:var(--primary-dim);border-color:var(--primary);box-shadow:none;transform:none;filter:none}
+.btn-icon{width:32px;height:32px;border-radius:var(--r);border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;display:inline-grid;place-items:center;transition:all .15s;flex-shrink:0}
+.btn-icon .icon{width:15px;height:15px}
+.btn-icon:hover{color:var(--primary);border-color:var(--line-primary)}
+.btn-icon.danger{color:var(--rose);border-color:color-mix(in srgb,var(--rose) 35%,transparent)}
+.btn-icon.danger:hover{color:var(--rose);border-color:var(--rose);background:color-mix(in srgb,var(--rose) 8%,transparent)}
+.actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:8px}
+.actions.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.actions.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.actions .btn{min-width:0;white-space:normal;line-height:1.25;padding:8px 10px}
+.link-btn{background:none;border:none;padding:0;font:inherit;color:var(--primary);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+
+/* ===== Podpowiedzi (jeden element, pozycjonowany z JS, auto-ukrywanie) ===== */
+.tooltip{position:fixed;left:0;top:0;z-index:120;width:max-content;max-width:280px;background:var(--card);border:1px solid var(--line);color:var(--text);padding:6px 10px;border-radius:var(--r-sm);font-family:var(--font-ui);font-size:12px;font-weight:600;line-height:1.35;text-align:center;box-shadow:var(--card-shadow);opacity:0;pointer-events:none;transform:translateY(3px);transition:opacity .15s,transform .15s}
+.tooltip.show{opacity:1;transform:none}
+.tooltip kbd{font-family:var(--font-mono);font-size:10.5px;font-weight:700;color:var(--primary);border:1px solid var(--line);border-radius:4px;padding:0 5px;margin-left:6px;white-space:nowrap}
+
+/* ===== Strefa importu ===== */
+.dropzone{border:1.5px dashed var(--line);border-radius:var(--r-md);padding:var(--pad);text-align:center;cursor:pointer;transition:all .2s}
+.dropzone:hover{border-color:var(--primary)}
+.dropzone.drag{border-color:var(--primary);border-style:solid;background:var(--primary-dim)}
+.dropzone.disabled{opacity:.45;cursor:not-allowed;pointer-events:none}
+.dropzone-icon{width:48px;height:48px;border-radius:var(--r-md);margin:0 auto 10px;background:var(--primary-dim);border:1px solid var(--line-primary);display:grid;place-items:center;color:var(--primary)}
+.dropzone-icon .icon{width:22px;height:22px}
+.dropzone-title{font-size:14px;font-weight:700}
+.dropzone-sub{font-size:12.5px;color:var(--muted);margin-top:5px;line-height:1.5}
+.dropzone-tags{display:flex;gap:6px;justify-content:center;margin-top:8px;flex-wrap:wrap}
+.dropzone-row{display:flex;gap:6px;margin-top:6px;justify-content:flex-end;flex-wrap:wrap}
+.progress{display:none;margin-top:9px}
+.progress.show{display:block}
+.progress-label{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:11.5px;color:var(--muted);margin-bottom:7px;gap:10px}
+.progress-label span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.progress-label b{color:var(--primary)}
+.pbar{height:6px;background:var(--track);border-radius:4px;overflow:hidden}
+.pbar span{display:block;height:100%;background:var(--primary);border-radius:4px;transition:width .3s;box-shadow:0 0 10px var(--primary-glow)}
+
+/* ===== Kafle KPI (kompaktowe) ===== */
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.tile{--c:var(--primary);border:1px solid var(--line);border-radius:var(--r);padding:var(--pad);position:relative;overflow:hidden;min-width:0}
+.tile::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--c)}
+.tile-l{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile-v{font-family:var(--font-mono);font-size:18px;font-weight:700;color:var(--c);margin-top:5px;line-height:1.15;letter-spacing:-.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile-v small{font-size:11.5px;font-weight:700;opacity:.8}
+.tile-s{font-size:10.5px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile.c-ok{--c:var(--emerald)}.tile.c-warn{--c:var(--amber)}.tile.c-err{--c:var(--rose)}.tile.c-info{--c:var(--sky)}.tile.c-violet{--c:var(--violet)}
+
+/* ===== Narzędzia listy ===== */
+.tools{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:8px 0 7px}
+.search{position:relative;flex:1;min-width:min(220px,100%)}
+.search input{width:100%;background:var(--well);border:1px solid var(--line);border-radius:var(--r-md);padding:8px 42px 8px 36px;color:var(--text);font-family:var(--font-ui);font-size:13px;transition:border .15s,box-shadow .15s}
+.search input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-dim)}
+.search>.icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted);width:15px;height:15px}
+.search kbd{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-family:var(--font-mono);font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-family:var(--font-mono);font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;padding:6px 10px;border-radius:var(--r-sm);border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s}
+.chip-theme{display:inline-flex;align-items:center;gap:6px}
+.chip-sw{width:8px;height:8px;border-radius:50%;flex-shrink:0;box-shadow:0 0 0 1px rgba(128,128,128,.35) inset}
+.chip:hover{color:var(--text);border-color:var(--line-primary)}
+.chip.on{color:var(--primary);border-color:var(--line-primary);background:var(--primary-dim)}
+.chip.plain{text-transform:none;letter-spacing:0}
+.chip[disabled]{opacity:.4;cursor:not-allowed}
+.chip[disabled]:hover{color:var(--muted);border-color:var(--line)}
+.select-all{display:flex;align-items:center;gap:9px;font-family:var(--font-mono);font-size:11px;color:var(--muted);padding:0 4px}
+.checkbox{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--line);background:transparent;cursor:pointer;display:inline-grid;place-items:center;transition:all .15s;flex-shrink:0}
+.checkbox:hover{border-color:var(--line-primary)}
+.checkbox.on{background:var(--primary);border-color:var(--primary)}
+.checkbox .icon{width:12px;height:12px;color:var(--on-primary);opacity:0}
+.checkbox.on .icon{opacity:1}
+.tbl-sum{font-size:12.5px;color:var(--muted);line-height:1.6}
+.tbl-sum b{font-family:var(--font-mono);color:var(--primary);font-weight:700}
+
+/* ===== Tabela ===== */
+.tbl-wrap{border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden}
+.tbl-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:820px}
+table.prev{min-width:0}
+th{text-align:left;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th.sortable{cursor:pointer;user-select:none;transition:color .15s}
+th.sortable:hover{color:var(--text)}
+th .arr{opacity:.4;margin-left:4px;font-family:var(--font-mono)}
+th.sorted{color:var(--primary)}
+th.sorted .arr{opacity:1}
+td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tbody tr{transition:background .12s}
+tbody tr:hover{background:var(--hover)}
+tbody tr:last-child td{border-bottom:none}
+.file-cell{display:flex;align-items:center;gap:10px;min-width:0}
+.status-dot{--c:var(--sky);width:7px;height:7px;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c);flex-shrink:0}
+.file-meta{min-width:0}
+.file-name{font-family:var(--font-mono);font-weight:700;font-size:12.5px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px}
+.file-sub{display:flex;align-items:center;gap:7px;margin-top:3px;font-size:11px;color:var(--muted);white-space:nowrap}
+.file-sub .mono{color:var(--primary)}
+.amount{font-family:var(--font-mono);font-weight:700;color:var(--emerald);font-size:12.5px;white-space:nowrap}
+.amount-bar{height:3px;width:64px;background:var(--track);border-radius:3px;margin-top:6px;overflow:hidden}
+.amount-bar span{display:block;height:100%;background:var(--emerald);border-radius:3px;box-shadow:0 0 6px var(--emerald)}
+.name-input{background:var(--well);border:1px solid var(--line);border-radius:var(--r-sm);padding:6px 10px;color:var(--primary);font-family:var(--font-mono);font-size:11.5px;font-weight:700;width:100%;min-width:180px;max-width:240px;transition:border .15s,box-shadow .15s}
+.name-input:hover{border-color:var(--line-primary)}
+.name-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-dim)}
+.row-actions{display:flex;gap:6px;justify-content:flex-end}
+.tbl-empty{padding:32px 20px;text-align:center;color:var(--muted);font-size:12.5px}
+.tbl-empty-icon{width:48px;height:48px;margin:0 auto 12px;border-radius:var(--r-md);background:var(--primary-dim);border:1px solid var(--line-primary);color:var(--primary);display:grid;place-items:center}
+.tbl-empty-icon .icon{width:22px;height:22px}
+.tbl-empty b{display:block;color:var(--text);font-size:14px;margin-bottom:4px}
+.tbl-empty-sub{font-size:12.5px;color:var(--muted);line-height:1.5}
+.status-line{font-size:14px;color:var(--muted);margin:0 0 12px;line-height:1.6}
+.status-line b{color:var(--text)}
+.error-text{color:var(--rose);font-size:11.5px}
+.arrow{color:var(--primary);font-family:var(--font-mono)}
+.prev-more{padding:10px 14px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--line);font-family:var(--font-mono)}
+
+/* ===== Callout ===== */
+.note{--c:var(--sky);display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-left:3px solid var(--c);border-radius:0 var(--r) var(--r) 0;background:color-mix(in srgb,var(--c) 5%,transparent);font-size:13.5px;color:var(--muted);line-height:1.6}
+.note>.icon{width:20px;height:20px;color:var(--c);margin-top:1px}
+.note b{color:var(--text)}
+.note.ok{--c:var(--emerald)}.note.warn{--c:var(--amber)}.note.err{--c:var(--rose)}.note.info{--c:var(--sky)}
+
+/* ===== Formularze ===== */
+.name-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:14px}
+.field{width:100%;min-width:0;background:var(--well);border:1px solid var(--line);border-radius:var(--r-md);padding:9px 11px;color:var(--text);font-family:var(--font-ui);font-size:13px;transition:border .15s,box-shadow .15s}
+.field.mono{font-family:var(--font-mono);color:var(--primary);font-weight:700}
+.field:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-dim)}
+.form-label{display:block;font-size:10.5px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.form-label.mt{margin-top:12px}
+.hint{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.8;overflow-wrap:anywhere}
+.hint code,.kbd{font-family:var(--font-mono);color:var(--primary);font-size:11px}
+.kbd{padding:1px 7px;border:1px solid var(--line);border-radius:4px;white-space:nowrap}
+.two-col{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.name-row{display:flex;align-items:center;gap:8px}
+.name-row .field{flex:1}
+.name-row .ext{font-family:var(--font-mono);font-size:12px;color:var(--muted);white-space:nowrap}
+
+/* ===== Karty wyboru (tryb scalania) ===== */
+.option-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.option-card{position:relative;text-align:left;border:1px solid var(--line);border-radius:var(--r-md);background:transparent;padding:11px 13px 11px 40px;cursor:pointer;color:var(--muted);font-family:var(--font-ui);transition:all .15s;min-width:0}
+.option-card>.icon{position:absolute;left:13px;top:13px;width:18px;height:18px;color:var(--primary);opacity:.8}
+.option-card b{display:block;color:var(--text);font-size:13.5px;margin-bottom:4px}
+.option-card .d{display:block;font-size:12px;line-height:1.5}
+.option-card:hover{border-color:var(--line-primary)}
+.option-card.on{border-color:var(--primary);background:var(--primary-dim)}
+.option-card.on b{color:var(--primary)}
+.option-card.on::after{content:'';position:absolute;top:10px;right:10px;width:8px;height:8px;border-radius:50%;background:var(--primary);box-shadow:0 0 8px var(--primary-glow)}
+
+/* ===== Lista ustawień / przełączniki ===== */
+.settings-list{display:flex;flex-direction:column}
+.settings-row{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;padding:8px 0;font-size:13.5px}
+.settings-row+.settings-row{border-top:1px solid var(--line)}
+.settings-row>.icon{width:16px;height:16px;color:var(--primary);opacity:.8}
+.settings-row .k{color:var(--text);min-width:0;flex:1 1 200px}
+.settings-row .k .sub{font-size:11.5px;margin-top:2px;color:var(--muted)}
+.settings-row .v{margin-left:auto;font-family:var(--font-mono);font-size:12px;color:var(--muted);text-align:right;white-space:nowrap}
+.settings-row>.chips{flex:0 1 auto;flex-shrink:0;justify-content:flex-start;max-width:100%}
+.settings-row.single-only{display:none}
+.mode-single .settings-row.single-only{display:flex}
+.switch{width:44px;height:24px;border-radius:24px;border:1px solid var(--line);background:transparent;cursor:pointer;position:relative;transition:all .2s;flex-shrink:0;margin-left:auto}
+.switch::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--muted);transition:all .2s}
+.switch.on{background:var(--primary-dim);border-color:var(--line-primary)}
+.switch.on::after{left:23px;background:var(--primary);box-shadow:0 0 8px var(--primary-glow)}
+
+/* ===== Podsumowanie / historia ===== */
+.chart{width:100%;height:220px;display:block}
+.breakdown-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}
+.breakdown-row:last-child{border-bottom:none}
+.breakdown-row .k{color:var(--muted);min-width:110px}
+.breakdown-row .bar{flex:1;height:5px;background:var(--track);border-radius:4px;overflow:hidden}
+.breakdown-row .bar span{display:block;height:100%;border-radius:4px}
+.breakdown-row .v{font-family:var(--font-mono);font-weight:700;min-width:30px;text-align:right}
+.logbox{border:1px solid var(--line);border-radius:var(--r-md);padding:11px 13px;font-family:var(--font-mono);font-size:11.5px;line-height:1.9;max-height:520px;overflow:auto}
+.log-row{display:flex;gap:12px}
+.log-row>span:last-child{min-width:0;overflow-wrap:anywhere}
+.log-t{color:var(--muted);flex-shrink:0}
+.log-lvl{flex-shrink:0;width:34px;font-weight:700}
+.lv-INF{color:var(--sky)}.lv-OK{color:var(--emerald)}.lv-WRN{color:var(--amber)}.lv-ERR{color:var(--rose)}
+
+/* ===== Okna dialogowe ===== */
+.modal-backdrop{display:none;position:fixed;inset:0;z-index:70;align-items:center;justify-content:center;padding:20px;background:var(--overlay);backdrop-filter:blur(4px)}
+.modal-backdrop.show{display:flex}
+.modal{background:var(--card);border:1px solid var(--line-strong);border-radius:var(--r-lg);box-shadow:0 24px 70px rgba(0,0,0,.55);width:100%;max-width:960px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+.modal.md{max-width:720px}
+.modal-body{overflow:auto;flex:1;padding:var(--pad)}
+.modal-foot{padding:10px var(--pad);border-top:1px solid var(--line-strong);display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+.file-row{display:flex;align-items:center;gap:11px;padding-bottom:11px;border-bottom:1px solid var(--line-strong);flex-wrap:wrap}
+.file-icon{width:48px;height:48px;border-radius:var(--r-md);background:var(--primary-dim);border:1px solid var(--line-primary);color:var(--primary);display:grid;place-items:center;flex-shrink:0}
+.file-icon .icon{width:22px;height:22px}
+.file-row .file-meta{flex:1}
+.file-row .file-name{font-size:15px;max-width:none;font-family:var(--font-ui);white-space:normal;overflow-wrap:anywhere}
+.file-row .file-sub{font-size:12px;white-space:normal;flex-wrap:wrap}
+.file-row .card-pills{margin-left:auto}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--line-strong);border-radius:var(--r-md);overflow:hidden;margin-top:11px}
+.facts>div{padding:var(--pad);border-bottom:1px solid var(--line-strong);border-right:1px solid var(--line-strong);min-width:0}
+.facts>div:nth-child(3n){border-right:none}
+.facts>div:nth-last-child(-n+3){border-bottom:none}
+.facts .k{font-size:10px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted)}
+.facts .v{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--text);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sheet-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:11px 0 6px}
+.sheet-wrap{border:1px solid var(--line-strong);border-radius:var(--r-md);overflow:auto;max-height:44vh}
+.sheet{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:11.5px;min-width:0}
+.sheet th,.sheet td{border:1px solid var(--line-strong);padding:4px 8px;white-space:nowrap;text-align:left;color:var(--text)}
+.sheet th{background:var(--head-bg);color:var(--text);font-weight:700;position:sticky;top:0;letter-spacing:0;font-size:11px;z-index:1}
+.sheet thead th{background:var(--head-bg)}
+.sheet tbody th{background:var(--well);color:var(--muted);font-weight:600}
+.sheet tbody tr:nth-child(even) td{background:var(--zebra)}
+.sheet tbody tr:first-child td{font-weight:700}
+.sheet tbody tr:hover td{background:var(--hover)}
+
+/* ===== Dolny pasek ===== */
+.bottombar{position:sticky;bottom:0;z-index:25;height:var(--bottombar-h);background:var(--bottombar-bg);backdrop-filter:blur(14px);border-top:1px solid var(--line)}
+.bottombar .wrap{height:100%;display:flex;align-items:center;gap:16px;font-family:var(--font-mono);font-size:11.5px;color:var(--muted);overflow:hidden}
+.status-item{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.status-item>.icon{width:14px;height:14px;color:var(--primary);opacity:.8}
+.status-item b{color:var(--primary);font-weight:700}
+.status-item.right{margin-left:auto}
+.vsep{width:1px;height:16px;background:var(--line);flex-shrink:0}
+
+/* ===== Toasty ===== */
+.toasts{position:fixed;right:16px;left:16px;bottom:calc(var(--bottombar-h) + 10px);z-index:90;display:flex;flex-direction:column;gap:6px;align-items:flex-end;pointer-events:none}
+.toast{--c:var(--sky);pointer-events:auto;display:flex;gap:8px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-left:3px solid var(--c);border-radius:var(--r-md);padding:10px 12px;font-size:12.5px;min-width:min(250px,100%);max-width:min(360px,100%);box-shadow:var(--card-shadow);animation:slidein .25s ease}
+.toast.ok{--c:var(--emerald)}.toast.err{--c:var(--rose)}.toast.warn{--c:var(--amber)}
+.toast>.icon{width:16px;height:16px;color:var(--c);margin-top:1px}
+.toast>span:not(.icon){min-width:0;overflow-wrap:anywhere}
+.toast .undo{margin-left:auto;color:var(--primary);cursor:pointer;font-weight:700;font-size:11.5px;white-space:nowrap;text-decoration:underline}
+@keyframes slidein{from{transform:translateX(30px);opacity:0}to{transform:translateX(0);opacity:1}}
+.spinner{width:10px;height:10px;border:1.5px solid color-mix(in srgb,currentColor 25%,transparent);border-top-color:currentColor;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ===== Zapytania kontenerowe — siatki dopasowują się do szerokości karty, nie okna ===== */
+@container (max-width:760px){
+  .actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .name-grid{grid-template-columns:minmax(0,1fr)}
+}
+@container (max-width:620px){
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cta-row{grid-template-columns:minmax(0,1fr)}
+  .actions.three{grid-template-columns:minmax(0,1fr)}
+}
+@container (max-width:420px){
+  .actions,.actions.two,.two-col{grid-template-columns:minmax(0,1fr)}
+  .dropzone-row .btn{flex:1}
+}
+@container (max-width:300px){
+  .tiles{grid-template-columns:minmax(0,1fr)}
+}
+
+/* ===== Responsywność ===== */
+@media(max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .sidebar{display:none}
+  .tabbar{display:block}
+  .sidebar-toggle{display:none}
+  .crumb .root,.crumb .sep{display:inline-flex}
+}
+@media(max-width:560px){
+  .wrap{padding:0 14px}
+  .topbar .wrap{gap:8px}
+  .crumb .sep,.crumb .cur{display:none} /* na telefonie bieżący widok pokazuje belka zakładek */
+  .hdr-btn .label{display:none}
+  .hdr-btn{padding:0;width:34px;height:34px;border-radius:var(--r-md)}
+  .facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .facts>div:nth-child(3n){border-right:1px solid var(--line)}
+  .facts>div:nth-child(2n){border-right:none}
+  .facts>div:nth-last-child(-n+3){border-bottom:1px solid var(--line)}
+  .facts>div:nth-last-child(-n+2){border-bottom:none}
+  .option-grid{grid-template-columns:minmax(0,1fr)}
+  .card-body{padding:14px}
+  .card-head{padding:10px 14px}
+  .cta{font-size:14px;padding:12px}
+  .status-item.hide-m,.vsep.hide-m{display:none}
+  .modal-backdrop{padding:10px}
+  .modal{max-height:94vh}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}.spinner{animation:spin 1.2s linear infinite!important}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- ===== Panel boczny (desktop) ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-logo">EX</div>
+      <div class="brand-txt"><div class="brand-name">Extraktor</div><div class="brand-sub">ZIP → XLSX</div></div>
+    </div>
+    <nav class="nav" id="sideNav" aria-label="Nawigacja"></nav>
+    <div class="sidebar-foot">
+      <div class="sidebar-note"><span class="icon" data-icon="lock"></span><span>Pliki są przetwarzane lokalnie i nie opuszczają przeglądarki.</span></div>
+      <button class="btn-icon" id="sidebarCollapse" onclick="toggleMini()" aria-label="Zwiń panel do ikon"><span class="icon"></span></button>
+    </div>
+  </aside>
+
+  <!-- ===== Główna kolumna ===== -->
+  <div class="main">
+    <header class="topbar"><div class="wrap">
+      <button class="icon-btn sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" aria-label="Ukryj panel boczny" data-key="Ctrl+B"><span class="icon"></span></button>
+      <div class="crumb"><span class="root">Extraktor</span><span class="icon sep" data-icon="chevr"></span><span class="cur" id="crumb">Faktury</span></div>
+      <div class="topbar-actions">
+        <button class="btn sm accent hdr-btn" onclick="openFilePicker()" data-tip="Importuj pliki ZIP, XLSX lub XLS" data-key="Ctrl+O"><span class="icon" data-icon="plus"></span><span class="label">Importuj</span></button>
+        <button class="btn sm hdr-btn" id="headerDownload" onclick="downloadPackage()" disabled data-tip="Pobierz paczkę ZIP" data-key="Ctrl+S"><span class="icon" data-icon="download"></span><span class="label">Pobierz paczkę</span></button>
+        <button class="btn sm hdr-btn requires-files" onclick="openMerge()" disabled data-tip="Scal pliki w jeden XLSX" data-key="Ctrl+M"><span class="icon" data-icon="filestack"></span><span class="label">Scal pliki</span></button>
+        <button class="icon-btn" id="themeToggleBtn" onclick="toggleTheme()" aria-label="Przełącz motyw" data-tip="Zmień motyw kolorystyczny"><span class="icon" id="themeIcon"></span></button>
+      </div>
+    </div></header>
+    <nav class="tabbar" aria-label="Nawigacja"><div class="wrap tabs" id="tabNav" role="tablist"></div></nav>
+
+    <main class="wrap content">
+
+      <!-- ================= FAKTURY: import → lista → eksport ================= -->
+      <section class="view active" id="view-faktury">
+
+        <div class="card">
+          <div class="card-head"><span class="icon" data-icon="upload"></span><span class="card-title">Import</span>
+            <div class="card-pills"><button class="pill lc" onclick="showView('nazewnictwo')" data-tip="Zmień szablon nazwy"><span>szablon:&nbsp;</span><span class="template-out ellipsis">{faktura}</span><span>.xlsx</span></button></div></div>
+          <div class="card-body">
+            <div class="note err" id="libsNote" style="display:none;margin-bottom:14px"><span class="icon" data-icon="alert"></span><div><b>Nie udało się wczytać bibliotek JSZip / SheetJS</b> z cdn.jsdelivr.net. Sprawdź połączenie z internetem lub blokadę skryptów (filtr reklam, polityka firmowa). Biblioteki są weryfikowane sumą kontrolną — zmodyfikowana kopia nie zostanie uruchomiona.</div></div>
+            <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Wgraj pliki ZIP, XLSX lub XLS">
+              <div class="dropzone-icon"><span class="icon" data-icon="upload"></span></div>
+              <div class="dropzone-title">Przeciągnij pliki ZIP, XLSX lub XLS albo kliknij, aby wybrać</div>
+              <div class="dropzone-sub">Z archiwum ZIP wypakowywane są arkusze i nazywane jak archiwum (nazwa faktury). Pliki XLSX / XLS trafiają na listę bezpośrednio — wszystkie można potem pobrać w paczce lub scalić w jeden XLSX.</div>
+              <div class="dropzone-tags"><span class="pill mute">.zip</span><span class="pill mute">.xlsx</span><span class="pill mute">.xls</span><span class="pill mute">wiele plików</span><span class="pill mute">zagnieżdżone zip</span></div>
+              <input type="file" id="fileInput" accept=".zip,.xlsx,.xls,application/zip,application/x-zip-compressed,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" multiple hidden>
+              <input type="file" id="folderInput" webkitdirectory multiple hidden>
+            </div>
+            <div class="dropzone-row">
+              <button class="btn sm" onclick="document.getElementById('folderInput').click()"><span class="icon" data-icon="folder"></span>Importuj folder</button>
+              <button class="btn sm accent" onclick="openFilePicker()"><span class="icon" data-icon="plus"></span>Wybierz pliki</button>
+            </div>
+            <div class="progress" id="progressWrap">
+              <div class="progress-label"><span id="progressLabel">Przetwarzanie…</span><b id="progressPct">0%</b></div>
+              <div class="pbar"><span id="progressBar" style="width:0%"></span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><span class="icon" data-icon="list"></span><span class="card-title">Lista faktur</span>
+            <div class="card-pills"><span class="tbl-sum" id="tblSum">Łącznie: <b>0</b> faktur · <b>0</b> plików</span></div></div>
+          <div class="card-body">
+            <div class="tiles">
+              <div class="tile"><div class="tile-l">Faktury</div><div class="tile-v" id="tZip">0</div><div class="tile-s" id="tZipSub">zaimportowane pozycje</div></div>
+              <div class="tile c-ok"><div class="tile-l">Pliki XLSX / XLS</div><div class="tile-v" id="tXlsx">0</div><div class="tile-s" id="tXlsxSub">gotowe do pobrania</div></div>
+              <div class="tile c-warn"><div class="tile-l">Suma netto</div><div class="tile-v" id="tSum">0 <small>zł</small></div><div class="tile-s" id="tSumSub">wykryte kwoty</div></div>
+              <div class="tile c-err"><div class="tile-l">Uwagi / błędy</div><div class="tile-v" id="tIssues">0</div><div class="tile-s" id="tIssuesSub">0 ostrzeżeń · 0 błędów</div></div>
+            </div>
+            <div class="note warn" id="warnNote" style="display:none;margin-top:14px"><span class="icon" data-icon="alert"></span><div id="warnNoteText"></div></div>
+
+            <div class="tools">
+              <div class="select-all"><div class="checkbox" id="selectAll" onclick="toggleSelectAll()" role="checkbox" tabindex="0" aria-label="Zaznacz wszystkie"><span class="icon" data-icon="check"></span></div><span id="selectionInfo">0 zaznaczonych</span></div>
+              <div class="search"><span class="icon" data-icon="search"></span><input type="text" id="searchInput" placeholder="Szukaj: nazwa, numer, NIP…" aria-label="Szukaj"><kbd>/</kbd></div>
+              <div class="chips">
+                <button class="chip on" data-filter="all" onclick="setFilter('all',this)">Wszystkie</button>
+                <button class="chip" data-filter="done" onclick="setFilter('done',this)">Gotowe</button>
+                <button class="chip" data-filter="warn" onclick="setFilter('warn',this)">Uwagi</button>
+                <button class="chip" data-filter="error" onclick="setFilter('error',this)">Błędy</button>
+              </div>
+            </div>
+            <div class="tbl-wrap">
+              <div class="tbl-scroll">
+                <table>
+                  <thead><tr>
+                    <th style="width:34px"></th>
+                    <th class="sortable" data-sort="zip">Plik źródłowy<span class="arr">↕</span></th>
+                    <th class="sortable" data-sort="name">Nazwa pliku<span class="arr">↕</span></th>
+                    <th class="sortable" data-sort="amount">Kwota<span class="arr">↕</span></th>
+                    <th class="sortable" data-sort="date">Data<span class="arr">↕</span></th>
+                    <th>NIP</th>
+                    <th class="sortable" data-sort="size">Rozmiar<span class="arr">↕</span></th>
+                    <th>Status</th>
+                    <th style="width:86px"></th>
+                  </tr></thead>
+                  <tbody id="tbody"></tbody>
+                </table>
+              </div>
+              <div class="tbl-empty" id="tblEmpty"><div class="tbl-empty-icon"><span class="icon" data-icon="sheet"></span></div><b>Brak przetworzonych plików</b><span class="tbl-empty-sub">Wgraj archiwa ZIP lub pliki XLSX / XLS powyżej, aby rozpocząć.</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><span class="icon" data-icon="download"></span><span class="card-title">Eksport</span>
+            <div class="card-pills"><span class="pill ok" id="readyPill">0 plików</span></div></div>
+          <div class="card-body">
+            <div class="status-line" id="statusLine">Brak plików. Wgraj archiwa ZIP lub pliki XLSX / XLS, aby rozpocząć.</div>
+            <div class="cta-row">
+              <button class="cta" id="downloadAll" onclick="downloadPackage()" disabled><span class="icon" data-icon="download"></span><span id="downloadAllLabel">Pobierz paczkę ZIP</span></button>
+              <button class="cta ghost requires-files" onclick="openMerge()" disabled data-tip="Wszystkie faktury w jednym pliku XLSX" data-key="Ctrl+M"><span class="icon" data-icon="filestack"></span><span>Scal w jeden XLSX</span></button>
+            </div>
+            <div class="actions">
+              <button class="btn" id="summaryBtn" onclick="exportSummary()" disabled data-tip="Zbiorczy rejestr wszystkich faktur" data-key="Ctrl+E"><span class="icon" data-icon="filetext"></span>Zestawienie XLSX</button>
+              <button class="btn" id="downloadSelectedBtn" onclick="downloadSelected()" disabled><span class="icon" data-icon="download"></span>Pobierz zaznaczone</button>
+              <button class="btn danger" id="deleteSelectedBtn" onclick="deleteSelected()" disabled><span class="icon" data-icon="trash"></span>Usuń zaznaczone</button>
+              <button class="btn danger" id="clearBtn" onclick="clearAll()" disabled><span class="icon" data-icon="x"></span>Wyczyść wszystko</button>
+            </div>
+            <div class="hint" style="margin-top:12px">Skróty: <span class="kbd">Ctrl+O</span> import · <span class="kbd">Ctrl+S</span> paczka ZIP · <span class="kbd">Ctrl+M</span> scal w jeden XLSX · <span class="kbd">Ctrl+E</span> zestawienie · <span class="kbd">Ctrl+B</span> panel boczny · <span class="kbd">/</span> szukaj · <span class="kbd">Esc</span> zamknij okno</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= NAZEWNICTWO ================= -->
+      <section class="view" id="view-nazewnictwo">
+        <div class="card">
+          <div class="card-head"><span class="icon" data-icon="tag"></span><span class="card-title">Nazewnictwo plików XLSX</span>
+            <div class="card-pills"><span class="pill lc"><span>aktualnie:&nbsp;</span><span class="template-out ellipsis">{faktura}</span><span>.xlsx</span></span></div></div>
+          <div class="card-body">
+            <div class="name-grid">
+              <div>
+                <label class="form-label" for="templateInput">Szablon nazwy</label>
+                <input type="text" class="field mono" id="templateInput" value="{faktura}" maxlength="120" oninput="updateTemplate()">
+                <div class="chips" style="margin-top:8px">
+                  <button class="chip plain" onclick="setTemplate('{faktura}')">{faktura}</button>
+                  <button class="chip plain" onclick="setTemplate('{rok}_{faktura}')">{rok}_{faktura}</button>
+                  <button class="chip plain" onclick="setTemplate('{faktura}_{nip}')">{faktura}_{nip}</button>
+                  <button class="chip plain" onclick="setTemplate('{rok}-{miesiac}_{numer}')">{rok}-{miesiac}_{numer}</button>
+                </div>
+                <div class="hint">Znaczniki: <code>{faktura}</code> nazwa pliku ZIP (lub pliku XLSX / XLS zaimportowanego bezpośrednio) · <code>{rok}</code> · <code>{miesiac}</code> · <code>{data}</code> · <code>{numer}</code> · <code>{nip}</code>.<br>Znaczniki inne niż <code>{faktura}</code> wymagają włączonego odczytu danych z faktury (<button class="link-btn" onclick="showView('opcje')">Opcje przetwarzania</button>). Te same nazwy są używane jako nazwy arkuszy przy scalaniu w jeden XLSX.</div>
+              </div>
+              <div>
+                <label class="form-label">Prefiks / sufiks dla wszystkich plików</label>
+                <div class="two-col">
+                  <input type="text" class="field" id="prefixInput" placeholder="Prefiks (np. 2024_)" maxlength="60">
+                  <input type="text" class="field" id="suffixInput" placeholder="Sufiks (np. _kopia)" maxlength="60">
+                </div>
+                <div class="actions two" style="margin-top:10px">
+                  <button class="btn accent" onclick="applyPrefixSuffix()"><span class="icon" data-icon="check"></span>Zastosuj</button>
+                  <button class="btn" onclick="resetNames(true)"><span class="icon" data-icon="undo"></span>Przywróć wg szablonu</button>
+                </div>
+                <div class="hint">Nazwę pojedynczego pliku zmienisz bezpośrednio na <button class="link-btn" onclick="showView('faktury')">liście faktur</button> (kolumna „Nazwa pliku"). Ręcznie nadane nazwy nie są zmieniane przez szablon — przywraca je dopiero przycisk „Przywróć wg szablonu".</div>
+              </div>
+            </div>
+            <div class="subhead"><span class="icon" data-icon="eye"></span>Podgląd nazw</div>
+            <div class="tbl-wrap" id="namePreview"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= OPCJE PRZETWARZANIA ================= -->
+      <section class="view" id="view-opcje">
+        <div class="card">
+          <div class="card-head"><span class="icon" data-icon="sliders"></span><span class="card-title">Opcje przetwarzania</span></div>
+          <div class="card-body">
+            <div class="settings-list">
+              <div class="settings-row"><span class="icon" data-icon="layers"></span><div class="k"><div>Zagnieżdżone ZIP-y</div><div class="sub">Wypakowuj także archiwa ZIP znalezione wewnątrz importowanego ZIP</div></div><div class="switch on" id="swNested" onclick="toggleSwitch('swNested')" role="switch"></div></div>
+              <div class="settings-row"><span class="icon" data-icon="zap"></span><div class="k"><div>Odczyt danych z faktury</div><div class="sub">Wykrywaj numer, datę, NIP i kwoty z arkuszy XLSX / XLS (kolumny Kwota / Data / NIP na liście, znaczniki w szablonie nazwy)</div></div><div class="switch on" id="swExtract" onclick="toggleSwitch('swExtract')" role="switch"></div></div>
+              <div class="settings-row"><span class="icon" data-icon="checkc"></span><div class="k"><div>Oznaczaj niekompletne faktury</div><div class="sub">Status „uwaga", gdy nie wykryto kwoty lub numeru faktury</div></div><div class="switch on" id="swValidate" onclick="toggleSwitch('swValidate')" role="switch"></div></div>
+              <div class="settings-row"><span class="icon" data-icon="folder"></span><div class="k"><div>Podfoldery wg miesiąca w paczce</div><div class="sub">Pliki w pobieranym ZIP trafią do folderów RRRR-MM (wg daty faktury)</div></div><div class="switch" id="swFolders" onclick="toggleSwitch('swFolders')" role="switch"></div></div>
+              <div class="settings-row"><span class="icon" data-icon="db"></span><div class="k"><div>Zapamiętuj listę po odświeżeniu</div><div class="sub">Lista i pliki zostają w przeglądarce (IndexedDB) do czasu wyczyszczenia</div></div><div class="switch on" id="swRemember" onclick="toggleSwitch('swRemember')" role="switch"></div></div>
+            </div>
+            <div class="hint" style="margin-top:12px">Opcje odczytu danych, zagnieżdżonych ZIP-ów i oznaczania dotyczą plików importowanych od momentu zmiany.</div>
+            <div class="actions two" style="margin-top:14px">
+              <button class="btn danger" onclick="clearSavedSession(true)"><span class="icon" data-icon="trash"></span>Usuń zapamiętaną listę</button>
+            </div>
+
+            <div class="subhead"><span class="icon" data-icon="panelClose"></span>Wygląd</div>
+            <div class="settings-list">
+              <div class="settings-row"><span class="icon" data-icon="sun"></span><div class="k"><div>Motyw kolorystyczny</div><div class="sub">Ten sam układ i funkcje — inna paleta barw. Wybór jest zapamiętywany w tej przeglądarce</div></div>
+                <div class="chips" id="themeModeChips" role="group" aria-label="Motyw kolorystyczny">
+                  <button class="chip chip-theme" data-theme-mode="dark" data-tip="Ciemny, techniczny — cyjan"><span class="chip-sw" style="background:#25d2ff"></span>Cyber ciemny</button>
+                  <button class="chip chip-theme" data-theme-mode="light" data-tip="Jasny, techniczny — cyjan"><span class="chip-sw" style="background:#0891b2"></span>Cyber jasny</button>
+                  <button class="chip chip-theme" data-theme-mode="paper" data-tip="Ciepły papier, przygaszona cegła"><span class="chip-sw" style="background:#9c5a34"></span>Papier</button>
+                  <button class="chip chip-theme" data-theme-mode="ink" data-tip="Granatowo-czarny atrament"><span class="chip-sw" style="background:#4d7cf5"></span>Atrament</button>
+                  <button class="chip chip-theme" data-theme-mode="pencil" data-tip="Biały papier, grafitowa kreska"><span class="chip-sw" style="background:#3a3a35"></span>Ołówek</button>
+                  <button class="chip chip-theme" data-theme-mode="chalk" data-tip="Matowa czarna tablica i kreda"><span class="chip-sw" style="background:#adadab"></span>Tablica</button>
+                </div></div>
+              <div class="settings-row"><span class="icon" data-icon="panelClose"></span><div class="k"><div>Panel boczny (komputer)</div><div class="sub">Domyślnie zwinięty do ikon. Wybór jest zapamiętywany w tej przeglądarce · <span class="kbd">Ctrl+B</span> ukrywa / pokazuje</div></div>
+                <div class="chips" id="sidebarModeChips" role="group" aria-label="Tryb panelu bocznego"><button class="chip" data-sidebar-mode="full">Rozwinięty</button><button class="chip" data-sidebar-mode="mini">Ikony</button><button class="chip" data-sidebar-mode="off">Schowany</button></div></div>
+            </div>
+
+            <div class="subhead"><span class="icon" data-icon="lock"></span>Prywatność i bezpieczeństwo</div>
+            <div class="settings-list">
+              <div class="settings-row"><span class="icon" data-icon="type"></span><div class="k"><div>Czcionki webowe (Google Fonts)</div><div class="sub">Po wyłączeniu aplikacja nie łączy się z serwerami Google i używa czcionek systemowych</div></div><div class="switch" id="swWebFonts" onclick="toggleSwitch('swWebFonts')" role="switch"></div></div>
+              <div class="settings-row"><span class="icon" data-icon="shield"></span><div class="k"><div>Limity ochronne archiwów</div><div class="sub">Zabezpieczenie przed przepełnieniem pamięci (tzw. bomby ZIP)</div></div><span class="v" id="limitsInfo"></span></div>
+            </div>
+            <div class="note info" style="margin-top:14px"><span class="icon" data-icon="info"></span><div>Jedyne połączenia sieciowe to pobranie bibliotek <b>JSZip 3.10.1</b> i <b>SheetJS 0.18.5</b> z cdn.jsdelivr.net (z weryfikacją sumy kontrolnej) oraz — opcjonalnie — czcionki. Polityka bezpieczeństwa treści (CSP) blokuje wszelkie inne żądania, a faktury nigdy nie opuszczają przeglądarki.</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= PODSUMOWANIE ================= -->
+      <section class="view" id="view-podsumowanie">
+        <div class="card">
+          <div class="card-head"><span class="icon" data-icon="chart"></span><span class="card-title">Podsumowanie faktur</span>
+            <div class="card-pills"><span class="pill ok" id="rCountPill">0 FV</span></div></div>
+          <div class="card-body">
+            <div class="tiles">
+              <div class="tile"><div class="tile-l">Faktury łącznie</div><div class="tile-v" id="rTotal">0</div><div class="tile-s">zaimportowane pozycje</div></div>
+              <div class="tile c-ok"><div class="tile-l">Suma netto</div><div class="tile-v" id="rSum">0 zł</div><div class="tile-s">wszystkie wykryte kwoty</div></div>
+              <div class="tile c-info"><div class="tile-l">Średnia faktura</div><div class="tile-v" id="rAvg">0 zł</div><div class="tile-s">netto / faktura</div></div>
+              <div class="tile c-violet"><div class="tile-l">Miesiące z danymi</div><div class="tile-v" id="rVat">0</div><div class="tile-s">wg daty transakcji</div></div>
+            </div>
+            <div class="subhead"><span class="icon" data-icon="calendar"></span>Suma netto wg miesiąca (wg daty transakcji / realizacji)</div>
+            <svg class="chart" id="monthChart" viewBox="0 0 640 220" preserveAspectRatio="none" aria-label="Wykres sum miesięcznych"></svg>
+            <div class="subhead"><span class="icon" data-icon="activity"></span>Statusy</div>
+            <div id="statusBreakdown"></div>
+            <div class="actions three" style="margin-top:14px">
+              <button class="btn" onclick="exportReport()"><span class="icon" data-icon="filetext"></span>Raport TXT</button>
+              <button class="btn requires-files" onclick="exportSummary()" disabled><span class="icon" data-icon="sheet"></span>Zestawienie XLSX</button>
+              <button class="btn accent requires-files" onclick="openMerge()" disabled><span class="icon" data-icon="filestack"></span>Scal w jeden XLSX</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= HISTORIA ================= -->
+      <section class="view" id="view-historia">
+        <div class="card">
+          <div class="card-head"><span class="icon" data-icon="list"></span><span class="card-title">Historia operacji</span>
+            <div class="card-pills"><span class="pill info" id="logPill">0 wpisów</span></div></div>
+          <div class="card-body">
+            <div class="logbox" id="historyLog"></div>
+            <div class="actions two" style="margin-top:14px">
+              <button class="btn" onclick="exportHistory()"><span class="icon" data-icon="download"></span>Pobierz historię TXT</button>
+              <button class="btn danger" onclick="clearHistory()"><span class="icon" data-icon="trash"></span>Wyczyść historię</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= POMOC / O APLIKACJI ================= -->
+      <section class="view" id="view-pomoc">
+        <div class="card">
+          <div class="card-head"><span class="icon" data-icon="info"></span><span class="card-title">O aplikacji</span></div>
+          <div class="card-body">
+            <div class="status-line" style="margin-bottom:0">Extraktor zamienia archiwa ZIP i pliki XLSX / XLS z fakturami w uporządkowaną, przeszukiwalną listę — z automatycznym odczytem numeru faktury, daty i kwot, spójnym nazewnictwem plików oraz eksportem do paczki ZIP, zbiorczego zestawienia lub jednego scalonego pliku XLSX. Wszystko dzieje się lokalnie w przeglądarce — pliki nigdy nie trafiają na żaden serwer.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><span class="icon" data-icon="zap"></span><span class="card-title">Funkcje</span></div>
+          <div class="card-body">
+            <div class="settings-list">
+              <div class="settings-row"><span class="icon" data-icon="upload"></span><div class="k"><div>Import ZIP, XLSX, XLS i folderów</div><div class="sub">Przeciągnij pliki lub cały folder — obsługiwane są też archiwa ZIP zagnieżdżone wewnątrz innych archiwów</div></div></div>
+              <div class="settings-row"><span class="icon" data-icon="zap"></span><div class="k"><div>Automatyczny odczyt danych z faktury</div><div class="sub">Numer, data, NIP, kwoty netto / VAT / brutto wykrywane wprost z arkusza — bez ręcznego przepisywania</div></div></div>
+              <div class="settings-row"><span class="icon" data-icon="tag"></span><div class="k"><div>Nazewnictwo wg szablonu</div><div class="sub">Własny wzorzec nazwy pliku ze znacznikami {faktura}, {rok}, {miesiac}, {data}, {numer}, {nip}, plus prefiks/sufiks i ręczne poprawki nazw</div></div></div>
+              <div class="settings-row"><span class="icon" data-icon="search"></span><div class="k"><div>Lista, filtrowanie i wyszukiwanie</div><div class="sub">Sortowanie po każdej kolumnie, filtry statusu (gotowe / uwagi / błędy), szybkie wyszukiwanie po nazwie, numerze czy NIP-ie</div></div></div>
+              <div class="settings-row"><span class="icon" data-icon="eye"></span><div class="k"><div>Podgląd zawartości arkusza</div><div class="sub">Wgląd w dane i wszystkie arkusze pliku bez pobierania, z opcją wczytania całego arkusza dla dużych plików</div></div></div>
+              <div class="settings-row"><span class="icon" data-icon="download"></span><div class="k"><div>Eksport paczki ZIP</div><div class="sub">Wszystkie lub tylko zaznaczone pliki, opcjonalnie w podfolderach wg miesiąca faktury</div></div></div>
+              <div class="settings-row"><span class="icon" data-icon="filestack"></span><div class="k"><div>Scalanie w jeden plik XLSX</div><div class="sub">Osobne arkusze albo jeden wspólny arkusz, z opcjonalnym rejestrem zbiorczym i odnośnikami do każdej faktury</div></div></div>
+              <div class="settings-row"><span class="icon" data-icon="filetext"></span><div class="k"><div>Zbiorcze zestawienie XLSX</div><div class="sub">Rejestr wszystkich faktur z sumami netto / VAT / brutto, gotowy do dalszej pracy w arkuszu</div></div></div>
+              <div class="settings-row"><span class="icon" data-icon="chart"></span><div class="k"><div>Podsumowanie i wykres miesięczny</div><div class="sub">Suma i średnia wartość netto oraz rozbicie statusów; wykres netto wg miesiąca grupowany po dacie transakcji / realizacji, z automatycznym rozpoznaniem formatu daty w każdym pliku</div></div></div>
+              <div class="settings-row"><span class="icon" data-icon="list"></span><div class="k"><div>Historia operacji</div><div class="sub">Zapis każdej ważniejszej akcji z możliwością eksportu do pliku TXT</div></div></div>
+              <div class="settings-row"><span class="icon" data-icon="db"></span><div class="k"><div>Zapamiętywanie sesji</div><div class="sub">Lista i pliki zostają w przeglądarce (IndexedDB) po odświeżeniu — do czasu ręcznego wyczyszczenia</div></div></div>
+              <div class="settings-row"><span class="icon" data-icon="sun"></span><div class="k"><div>6 motywów kolorystycznych</div><div class="sub">Cyber ciemny / jasny, Papier, Atrament, Ołówek, Tablica — ten sam układ, inna paleta barw</div></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><span class="icon" data-icon="sliders"></span><span class="card-title">Skróty klawiszowe</span></div>
+          <div class="card-body">
+            <div class="hint">
+              <span class="kbd">Ctrl+O</span> import plików · <span class="kbd">Ctrl+S</span> pobierz paczkę ZIP · <span class="kbd">Ctrl+M</span> scal w jeden XLSX · <span class="kbd">Ctrl+E</span> zestawienie XLSX · <span class="kbd">Ctrl+B</span> pokaż/ukryj panel boczny · <span class="kbd">/</span> szukaj na liście faktur · <span class="kbd">Esc</span> zamknij okno / podgląd
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><span class="icon" data-icon="lock"></span><span class="card-title">Prywatność i bezpieczeństwo</span></div>
+          <div class="card-body">
+            <div class="note info"><span class="icon" data-icon="info"></span><div>Wszystkie pliki są przetwarzane wyłącznie w przeglądarce i nigdy jej nie opuszczają. Jedyne połączenia sieciowe to pobranie bibliotek <b>JSZip</b> i <b>SheetJS</b> (z weryfikacją sumy kontrolnej) oraz — opcjonalnie — czcionki. Szczegóły i limity ochronne archiwów znajdziesz w zakładce <button class="link-btn" onclick="showView('opcje')">Opcje przetwarzania</button>.</div></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+
+    <!-- ===== Dolny pasek ===== -->
+    <footer class="bottombar"><div class="wrap">
+      <div class="status-item"><span class="status-dot" id="statusDot" style="--c:var(--emerald)"></span><span id="statusText">bezczynny</span></div>
+      <span class="vsep hide-m"></span>
+      <div class="status-item hide-m"><span class="icon" data-icon="db"></span><span id="sessionState">lista: —</span></div>
+      <div class="status-item right">Faktury: <b id="statusZip">0</b> · pliki: <b id="statusXlsx">0</b></div>
+    </div></footer>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<!-- ===== Okno podglądu ===== -->
+<div class="modal-backdrop" id="previewModal" onclick="if(event.target===this)closePreview()">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
+    <div class="card-head"><span class="icon" data-icon="eye"></span><span class="card-title" id="previewTitle">Podgląd faktury</span>
+      <div class="card-pills"><span class="pill" id="previewPill">XLSX</span><button class="btn-icon danger" onclick="closePreview()" aria-label="Zamknij" data-tip="Zamknij" data-key="Esc"><span class="icon" data-icon="x"></span></button></div></div>
+    <div class="modal-body" id="previewBody"></div>
+    <div class="modal-foot"><button class="btn" onclick="closePreview()">Zamknij</button><button class="btn accent" id="previewDownload"><span class="icon" data-icon="download"></span>Pobierz ten plik</button></div>
+  </div>
+</div>
+
+<!-- ===== Okno scalania ===== -->
+<div class="modal-backdrop" id="mergeModal" onclick="if(event.target===this)closeMerge()">
+  <div class="modal md" id="mergeDialog" role="dialog" aria-modal="true" aria-labelledby="mergeTitle">
+    <div class="card-head"><span class="icon" data-icon="merge"></span><span class="card-title" id="mergeTitle">Scal pliki w jeden XLSX</span>
+      <div class="card-pills"><span class="pill" id="mergePill">0 XLSX</span><button class="btn-icon danger" onclick="closeMerge()" aria-label="Zamknij" data-tip="Zamknij" data-key="Esc"><span class="icon" data-icon="x"></span></button></div></div>
+    <div class="modal-body">
+      <label class="form-label">Zakres</label>
+      <div class="chips">
+        <button class="chip on" data-scope="all">Wszystkie (0)</button>
+        <button class="chip" data-scope="selected" disabled>Zaznaczone (0)</button>
+      </div>
+
+      <label class="form-label mt">Sposób scalenia</label>
+      <div class="option-grid">
+        <button class="option-card on" data-mode="sheets" aria-pressed="true"><span class="icon" data-icon="files"></span><b>Osobne arkusze</b><span class="d">Każda faktura trafia do własnego arkusza (nazwa arkusza = nazwa pliku). Układ komórek, scalenia i formaty liczb zostają bez zmian.</span></button>
+        <button class="option-card" data-mode="single" aria-pressed="false"><span class="icon" data-icon="rows"></span><b>Jeden arkusz</b><span class="d">Wiersze wszystkich faktur jeden pod drugim, z kolumną „Źródło". Dla faktur o tym samym układzie kolumn (np. eksport z jednego systemu).</span></button>
+      </div>
+      <div class="hint">Formuły są zastępowane obliczonymi wartościami; style komórek (kolory, czcionki) nie są przenoszone.</div>
+
+      <label class="form-label mt">Opcje</label>
+      <div class="settings-list">
+        <div class="settings-row"><span class="icon" data-icon="filetext"></span><div class="k"><div>Arkusz „Rejestr" na początku</div><div class="sub">Zestawienie faktur: plik, numer, data, NIP, netto / VAT / brutto z sumami — i odnośnikami do arkuszy</div></div><div class="switch" data-opt="register" role="switch"></div></div>
+        <div class="settings-row"><span class="icon" data-icon="layers"></span><div class="k"><div>Wszystkie arkusze z każdego pliku</div><div class="sub">Domyślnie brany jest tylko pierwszy arkusz każdego pliku</div></div><div class="switch" data-opt="allSheets" role="switch"></div></div>
+        <div class="settings-row single-only"><span class="icon" data-icon="list"></span><div class="k"><div>Nagłówek tylko z pierwszego pliku</div><div class="sub">Pierwszy wiersz każdego kolejnego pliku jest pomijany jako powtórzony nagłówek</div></div><div class="switch" data-opt="firstHeader" role="switch"></div></div>
+        <div class="settings-row single-only"><span class="icon" data-icon="tag"></span><div class="k"><div>Kolumna „Źródło"</div><div class="sub">Nazwa pliku w pierwszej kolumnie każdego wiersza</div></div><div class="switch" data-opt="sourceCol" role="switch"></div></div>
+        <div class="settings-row single-only"><span class="icon" data-icon="check"></span><div class="k"><div>Pomiń puste wiersze</div></div><div class="switch" data-opt="skipEmpty" role="switch"></div></div>
+        <div class="settings-row single-only"><span class="icon" data-icon="rows"></span><div class="k"><div>Pusty wiersz między fakturami</div></div><div class="switch" data-opt="blankBetween" role="switch"></div></div>
+      </div>
+
+      <label class="form-label mt" for="mergeName">Nazwa pliku wynikowego</label>
+      <div class="name-row"><input type="text" class="field mono" id="mergeName" spellcheck="false" maxlength="150"><span class="ext">.xlsx</span></div>
+
+      <div class="note info" id="mergePreview" style="margin-top:16px"></div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeMerge()">Anuluj</button><button class="btn accent" id="mergeRun" onclick="runMerge()"><span class="icon" data-icon="merge"></span>Scal i pobierz</button></div>
+  </div>
+</div>
+
+<script>
+const APP_NAME='Extraktor';
+/* klucze pamięci przeglądarki (poprzednie, spod nazwy „fakturex”, są przenoszone automatycznie) */
+const STORAGE_PREFIX='ekstraktor-faktur';
+const storageKey=k=>STORAGE_PREFIX+'-'+k;
+
+/* ================= Ikony (Lucide, outline 2px) ================= */
+const ICONS={
+upload:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
+download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+sheet:'<path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h8M8 17h8"/>',
+filetext:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+files:'<path d="M20 7h-3a2 2 0 0 1-2-2V2"/><path d="M9 18a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h7l4 4v10a2 2 0 0 1-2 2Z"/><path d="M3 7.6v12.8A1.6 1.6 0 0 0 4.6 22h9.8"/>',
+filestack:'<path d="M21 7h-3a2 2 0 0 1-2-2V2"/><path d="M21 6v6.5c0 .8-.7 1.5-1.5 1.5h-7c-.8 0-1.5-.7-1.5-1.5v-9c0-.8.7-1.5 1.5-1.5H17Z"/><path d="M7 8v8.8c0 .3.2.6.4.8.2.2.5.4.8.4H15"/><path d="M3 12v8.8c0 .3.2.6.4.8.2.2.5.4.8.4H11"/>',
+merge:'<path d="m8 6 4-4 4 4"/><path d="M12 2v10.3a4 4 0 0 1-1.172 2.872L4 22"/><path d="m20 22-5-5"/>',
+rows:'<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M21 9H3"/><path d="M21 15H3"/>',
+zip:'<rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>',
+chart:'<line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/>',
+activity:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+list:'<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>',
+info:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
+checkc:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+alert:'<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+x:'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+eye:'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+trash:'<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+search:'<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+moon:'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
+sun:'<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',
+chevr:'<polyline points="9 18 15 12 9 6"/>',
+chevsL:'<polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/>',
+chevsR:'<polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/>',
+panelClose:'<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><polyline points="16 15 13 12 16 9"/>',
+panelOpen:'<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><polyline points="14 9 17 12 14 15"/>',
+plus:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+check:'<polyline points="20 6 9 17 4 12"/>',
+tag:'<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>',
+layers:'<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
+folder:'<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>',
+db:'<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>',
+undo:'<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>',
+sliders:'<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>',
+calendar:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+zap:'<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+lock:'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+type:'<polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/>'
+};
+function icon(name){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]||''}</svg>`}
+function mountIcons(root=document){root.querySelectorAll('[data-icon]').forEach(el=>{el.innerHTML=icon(el.dataset.icon);el.classList.add('icon');el.removeAttribute('data-icon');});}
+mountIcons();
+
+/* ================= Bezpieczne odczyty ustawień i nazw ================= */
+function readJSON(key){try{const v=JSON.parse(localStorage.getItem(key)||'null');return v&&typeof v==='object'&&!Array.isArray(v)?v:null;}catch(e){return null;}}
+function writeJSON(key,obj){try{localStorage.setItem(key,JSON.stringify(obj));}catch(e){}}
+/* kopiuje tylko znane klucze o zgodnym typie — obce klucze z pamięci przeglądarki są ignorowane */
+function pick(defaults,src){const out=Object.assign({},defaults);if(src&&typeof src==='object')for(const k of Object.keys(defaults)){if(Object.prototype.hasOwnProperty.call(src,k)&&typeof src[k]===typeof defaults[k])out[k]=src[k];}return out;}
+/* nazwa pliku bezpieczna dla Windows/macOS/Linux: zakazane znaki, kropki/spacje na końcu, nazwy zastrzeżone (CON, NUL…), limit długości z zachowaniem rozszerzenia */
+const RESERVED_NAMES=/^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i;
+function safeName(s,fallback){
+  s=String(s??'').replace(/[\/\\:*?"<>|\u0000-\u001f\u007f]/g,'-').replace(/^[.\s]+/,'').replace(/[.\s]+$/,'').trim();
+  if(s.length>180){const m=/\.[a-z0-9]{1,8}$/i.exec(s);const ext=m?m[0]:'';s=s.slice(0,180-ext.length).replace(/[.\s]+$/,'')+ext;}
+  if(RESERVED_NAMES.test(s.replace(/\.[^.]*$/,'')))s='_'+s;
+  return s||fallback||'plik';
+}
+function safeDate(s){s=String(s||'');return /^\d{4}-\d{2}-\d{2}$/.test(s)?s:null}
+function safeDigits(s){s=String(s||'');return /^\d{6,20}$/.test(s)?s:null}
+function safeText(s,max){if(s==null)return null;s=String(s).replace(/[\u0000-\u001f\u007f]/g,'').slice(0,max||80);return s||null}
+function numOrNull(v){return typeof v==='number'&&isFinite(v)?v:null}
+
+/* ================= Stan ================= */
+let items=[],uid=0,sortKey='zip',sortDir=1,filter='all',searchQ='',eventLog=[],currentView='faktury';
+const SETTINGS_DEFAULT={nested:true,extract:true,validate:true,remember:true,folders:false,template:'{faktura}'};
+const storedSettings=readJSON(storageKey('settings'))||{};
+if('persist' in storedSettings&&!('remember' in storedSettings))storedSettings.remember=!!storedSettings.persist;
+const settings=pick(SETTINGS_DEFAULT,storedSettings);
+settings.template=safeText(settings.template,120)||'{faktura}';
+const DB_NAME='ekstraktor-faktur-db',LEGACY_DB_NAME='fakturex-db',STORE='session';
+const XLSX_MIME='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+/* obsługiwane arkusze: .xlsx i .xls (bezpośrednio lub wewnątrz ZIP); scalony plik jest zawsze zapisywany jako .xlsx */
+const SHEET_EXT=/\.(xlsx|xls)$/i,MIME_BY_EXT={xlsx:XLSX_MIME,xls:'application/vnd.ms-excel'};
+function extOf(name){const m=/\.([a-z0-9]+)$/i.exec(String(name||''));return m?m[1].toLowerCase():''}
+function sheetExt(name){return extOf(name)==='xls'?'xls':'xlsx'}
+function isSheetFile(name){return SHEET_EXT.test(String(name||''))}
+function isZipFile(name){return /\.zip$/i.test(String(name||''))}
+function mimeFor(ext){return MIME_BY_EXT[ext]||XLSX_MIME}
+function sourceTag(item){return item.source==='file'?sheetExt(item.zipName):'zip'}
+const STATUS_LABEL={done:'gotowe',warn:'uwaga',error:'błąd',processing:'praca'};
+const STATUSES=['done','warn','error'];
+/* limity ochronne — pojedynczy XLSX, łącznie na archiwum, liczba plików w archiwum */
+const LIMITS={fileBytes:150*1024*1024,archiveBytes:600*1024*1024,entries:500};
+const LIBS_OK=typeof JSZip!=='undefined'&&typeof XLSX!=='undefined';
+
+/* ================= Podpowiedzi: pojawiają się po 350 ms, znikają same po 2 s ================= */
+const TIP_DELAY=350,TIP_SHOW=2000;
+const tooltipEl=document.createElement('div');tooltipEl.className='tooltip';tooltipEl.setAttribute('role','tooltip');document.body.appendChild(tooltipEl);
+let tipTarget=null,tipTimerShow=null,tipTimerHide=null;
+function showTooltip(t){
+  if(!document.body.contains(t)||!t.dataset.tip)return;
+  tooltipEl.textContent=t.dataset.tip;
+  if(t.dataset.key){const k=document.createElement('kbd');k.textContent=t.dataset.key;tooltipEl.appendChild(k);}
+  tooltipEl.style.left='0px';tooltipEl.style.top='0px';tooltipEl.classList.add('show');
+  const r=t.getBoundingClientRect(),tw=tooltipEl.offsetWidth,th=tooltipEl.offsetHeight;let x,y;
+  if(t.dataset.tipPos==='right'){x=r.right+10;y=r.top+(r.height-th)/2;}
+  else{x=r.left+(r.width-tw)/2;y=r.bottom+8;if(y+th>innerHeight-8)y=r.top-th-8;}
+  x=Math.max(8,Math.min(x,innerWidth-tw-8));y=Math.max(8,Math.min(y,innerHeight-th-8));
+  tooltipEl.style.left=x+'px';tooltipEl.style.top=y+'px';
+  clearTimeout(tipTimerHide);tipTimerHide=setTimeout(hideTooltip,TIP_SHOW);
+}
+function hideTooltip(){clearTimeout(tipTimerShow);clearTimeout(tipTimerHide);tooltipEl.classList.remove('show');tipTarget=null;}
+document.addEventListener('mouseover',e=>{const t=e.target.closest('[data-tip]');if(!t||t===tipTarget)return;hideTooltip();tipTarget=t;tipTimerShow=setTimeout(()=>showTooltip(t),TIP_DELAY);});
+document.addEventListener('mouseout',e=>{const t=e.target.closest('[data-tip]');if(t&&t===tipTarget&&!t.contains(e.relatedTarget))hideTooltip();});
+document.addEventListener('mousedown',hideTooltip,true);
+document.addEventListener('focusin',e=>{const t=e.target.closest('[data-tip]');if(t&&t.matches(':focus-visible')){hideTooltip();tipTarget=t;showTooltip(t);}});
+document.addEventListener('focusout',hideTooltip);
+window.addEventListener('scroll',hideTooltip,true);
+window.addEventListener('resize',hideTooltip);
+
+/* ================= Panel boczny: rozwinięty / ikony / schowany ================= */
+const SIDEBAR_KEY=storageKey('sidebar');
+const storedSidebar=readJSON(SIDEBAR_KEY)||{};
+if('hidden' in storedSidebar&&!('off' in storedSidebar))storedSidebar.off=!!storedSidebar.hidden;
+/* domyślnie zwinięty do ikon; każda zmiana zapisywana w localStorage i odtwarzana przy następnym otwarciu */
+const SIDEBAR_DEFAULT={mini:true,off:false};
+const sidebarState=pick(SIDEBAR_DEFAULT,storedSidebar);
+function sidebarMode(){return sidebarState.off?'off':sidebarState.mini?'mini':'full'}
+function applySidebar(save){
+  const root=document.documentElement;
+  root.classList.toggle('sb-mini',sidebarState.mini);root.classList.toggle('sb-off',sidebarState.off);
+  const toggle=document.getElementById('sidebarToggle'),collapse=document.getElementById('sidebarCollapse');
+  toggle.querySelector('.icon').innerHTML=icon(sidebarState.off?'panelOpen':'panelClose');
+  const tl=sidebarState.off?'Pokaż panel boczny':'Ukryj panel boczny';toggle.dataset.tip=tl;toggle.setAttribute('aria-label',tl);toggle.setAttribute('aria-expanded',!sidebarState.off);
+  collapse.querySelector('.icon').innerHTML=icon(sidebarState.mini?'chevsR':'chevsL');
+  const cl=sidebarState.mini?'Rozwiń panel':'Zwiń panel do ikon';collapse.dataset.tip=cl;collapse.setAttribute('aria-label',cl);
+  document.getElementById('sidebar').setAttribute('aria-hidden',sidebarState.off);
+  document.querySelectorAll('#sideNav .nav-item').forEach(b=>{if(sidebarState.mini){b.dataset.tip=b.dataset.label;b.dataset.tipPos='right';}else{delete b.dataset.tip;delete b.dataset.tipPos;}});
+  const mode=sidebarMode();
+  document.querySelectorAll('[data-sidebar-mode]').forEach(b=>{const on=b.dataset.sidebarMode===mode;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);});
+  hideTooltip();
+  if(save)writeJSON(SIDEBAR_KEY,sidebarState);
+}
+function toggleSidebar(){sidebarState.off=!sidebarState.off;applySidebar(true);}
+function toggleMini(){sidebarState.mini=!sidebarState.mini;applySidebar(true);}
+const SIDEBAR_MODE_LABEL={full:'rozwinięty',mini:'ikony',off:'schowany'};
+function setSidebarMode(mode){
+  if(!(mode in SIDEBAR_MODE_LABEL))return;
+  sidebarState.off=mode==='off';if(mode!=='off')sidebarState.mini=mode==='mini';
+  applySidebar(true);logEvent('INF',`Panel boczny: ${SIDEBAR_MODE_LABEL[mode]} (zapamiętano)`);
+}
+document.getElementById('sidebarModeChips').addEventListener('click',e=>{const b=e.target.closest('[data-sidebar-mode]');if(b)setSidebarMode(b.dataset.sidebarMode);});
+
+/* ================= Nawigacja ================= */
+const NAV=[
+  {id:'faktury',label:'Faktury',short:'Faktury',icon:'zip',badge:'zip'},
+  {id:'nazewnictwo',label:'Nazewnictwo',short:'Nazwy',icon:'tag'},
+  {id:'opcje',label:'Opcje przetwarzania',short:'Opcje',icon:'sliders'},
+  {id:'podsumowanie',label:'Podsumowanie',short:'Podsumowanie',icon:'chart'},
+  {id:'historia',label:'Historia operacji',short:'Historia',icon:'list',badge:'log'},
+  {id:'pomoc',label:'Pomoc i funkcje',short:'Pomoc',icon:'info'}
+];
+const GROUPS=[{label:'Praca',ids:['faktury']},{label:'Konfiguracja',ids:['nazewnictwo','opcje']},{label:'Analiza',ids:['podsumowanie','historia']},{label:'Informacje',ids:['pomoc']}];
+function navItem(n,cls,short){return `<button class="${cls}" data-view="${n.id}" data-label="${n.label}"${cls==='tab'?' role="tab"':''}><span class="icon">${icon(n.icon)}</span><span class="nav-txt">${short?n.short:n.label}</span>${n.badge?`<span class="nav-badge is-zero" data-badge="${n.badge}">0</span>`:''}</button>`}
+function buildNav(){
+  document.getElementById('sideNav').innerHTML=GROUPS.map(g=>`<div class="nav-group"><div class="nav-label">${g.label}</div>${g.ids.map(id=>navItem(NAV.find(n=>n.id===id),'nav-item',false)).join('')}</div>`).join('');
+  document.getElementById('tabNav').innerHTML=NAV.map(n=>navItem(n,'tab',true)).join('');
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(b)showView(b.dataset.view);});
+function showView(v){
+  const n=NAV.find(x=>x.id===v);if(!n)return;currentView=v;
+  document.querySelectorAll('.view').forEach(s=>s.classList.toggle('active',s.id==='view-'+v));
+  document.querySelectorAll('[data-view]').forEach(b=>{const on=b.dataset.view===v;b.classList.toggle('active',on);if(b.classList.contains('tab'))b.setAttribute('aria-selected',on);else if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
+  document.getElementById('crumb').textContent=n.label;
+  document.title=`${APP_NAME} — ${n.label}`;
+  if(v==='podsumowanie')drawMonthChart();if(v==='historia')renderHistory();if(v==='nazewnictwo')renderNamePreview();
+  const t=document.querySelector(`.tab[data-view="${v}"]`),tabs=document.getElementById('tabNav');
+  if(t&&tabs.clientWidth)tabs.scrollTo({left:t.offsetLeft-tabs.clientWidth/2+t.clientWidth/2,behavior:'smooth'});
+  window.scrollTo({top:0});
+}
+function updateBadges(){
+  document.querySelectorAll('[data-badge="zip"]').forEach(e=>{e.textContent=items.length;e.classList.toggle('is-zero',!items.length);});
+  document.querySelectorAll('[data-badge="log"]').forEach(e=>{e.textContent=eventLog.length;e.classList.toggle('is-zero',!eventLog.length);});
+}
+
+/* ================= Motywy kolorystyczne ================= */
+/* cztery gotowe palety barw na wspólnym układzie aplikacji: dwa ciemne, dwa jasne */
+const THEME_KEY=storageKey('theme');
+const THEME_CLASS={dark:'',light:'theme-light',paper:'theme-paper',ink:'theme-ink',pencil:'theme-pencil',chalk:'theme-chalk'};
+const THEME_LABEL={dark:'Cyber ciemny',light:'Cyber jasny',paper:'Papier',ink:'Atrament',pencil:'Ołówek',chalk:'Tablica'};
+const THEME_DARK={dark:true,light:false,paper:false,ink:true,pencil:false,chalk:true};
+const THEME_LIST=['dark','light','paper','ink','pencil','chalk'];
+function currentTheme(){const c=document.documentElement.classList;for(const k of THEME_LIST)if(THEME_CLASS[k]&&c.contains(THEME_CLASS[k]))return k;return 'dark';}
+function setThemeIcon(name){document.getElementById('themeIcon').innerHTML=icon(THEME_DARK[name]?'moon':'sun');}
+function applyTheme(name,save){
+  if(!(name in THEME_CLASS))name='dark';
+  const root=document.documentElement;Object.values(THEME_CLASS).forEach(c=>{if(c)root.classList.remove(c);});
+  if(THEME_CLASS[name])root.classList.add(THEME_CLASS[name]);
+  setThemeIcon(name);
+  const btn=document.getElementById('themeToggleBtn');if(btn)btn.dataset.tip='Motyw: '+THEME_LABEL[name]+' (kliknij, aby zmienić)';
+  document.querySelectorAll('#themeModeChips [data-theme-mode]').forEach(b=>{const on=b.dataset.themeMode===name;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);});
+  if(save){try{localStorage.setItem(THEME_KEY,name)}catch(e){}}
+  drawMonthChart();
+}
+function toggleTheme(){applyTheme(THEME_LIST[(THEME_LIST.indexOf(currentTheme())+1)%THEME_LIST.length],true);}
+function setThemeMode(name){applyTheme(name,true);logEvent('INF',`Motyw: ${THEME_LABEL[name]} (zapamiętano)`);}
+document.getElementById('themeModeChips').addEventListener('click',e=>{const b=e.target.closest('[data-theme-mode]');if(b)setThemeMode(b.dataset.themeMode);});
+applyTheme(currentTheme(),false);
+const FONTS_KEY=storageKey('webfonts'),FONTS_HREF='https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap';
+function webFontsOn(){try{return localStorage.getItem(FONTS_KEY)!=='off'}catch(e){return true}}
+function setWebFonts(on){
+  try{localStorage.setItem(FONTS_KEY,on?'on':'off')}catch(e){}
+  const existing=document.getElementById('webFonts');
+  if(on&&!existing){const link=document.createElement('link');link.id='webFonts';link.rel='stylesheet';link.href=FONTS_HREF;link.referrerPolicy='no-referrer';document.head.appendChild(link);}
+  else if(!on&&existing)existing.remove();
+}
+
+/* ================= Pomocnicze ================= */
+function fmtSize(b){if(b<1024)return b+' B';if(b<1048576)return (b/1024).toFixed(1).replace('.',',')+' KB';return (b/1048576).toFixed(2).replace('.',',')+' MB'}
+function stripExt(n){return n.replace(/\.[^.]+$/,'')}
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function setStatus(s,busy){document.getElementById('statusText').textContent=s;document.getElementById('statusDot').style.setProperty('--c',busy?'var(--amber)':'var(--emerald)');}
+function fmtMoney(n){if(n==null||isNaN(n))return '—';return Number(n).toLocaleString('pl-PL',{minimumFractionDigits:2,maximumFractionDigits:2})+' zł'}
+function plural(n,a,b,c){n=Math.abs(n);if(n===1)return a;const m10=n%10,m100=n%100;if(m10>=2&&m10<=4&&(m100<12||m100>14))return b;return c;}
+function cssVar(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+function saveFile(blob,name){const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=safeName(name,'plik');document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);}
+function renderTemplateOut(){document.querySelectorAll('.template-out').forEach(e=>e.textContent=settings.template);}
+function outNameOf(item,f,fi){return (fi===0&&item.customName)?item.customName:f.newName}
+const yieldToUI=()=>new Promise(r=>setTimeout(r,0));
+/* parsowanie XLSX z pamięcią podręczną (formaty liczb + szerokości kolumn) */
+function workbookOf(f){if(!f._wb){try{f._wb=XLSX.read(f.arrayBuffer,{type:'array',cellNF:true,cellStyles:true,cellDates:true});}catch(e){f._wb=XLSX.read(f.arrayBuffer,{type:'array',cellNF:true,cellDates:true});}}return f._wb}
+
+/* ================= Toasty ================= */
+function toast(msg,type='info',undoFn){
+  const box=document.getElementById('toasts');const t=document.createElement('div');
+  t.className='toast '+(type==='info'?'':type);
+  const ico={ok:'checkc',err:'x',warn:'alert',info:'info'}[type]||'info';
+  t.innerHTML=`<span class="icon">${icon(ico)}</span><span>${msg}</span>`;
+  if(undoFn){const u=document.createElement('span');u.className='undo';u.textContent='Cofnij';u.onclick=()=>{undoFn();t.remove();};t.appendChild(u);}
+  box.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(30px)';t.style.transition='all .3s';setTimeout(()=>t.remove(),300)},undoFn?6000:3800);
+}
+
+/* ================= Historia operacji ================= */
+function logEvent(lvl,msg){
+  eventLog.unshift({t:new Date().toTimeString().slice(0,8),lvl,msg});if(eventLog.length>500)eventLog.pop();
+  updateLogCounters();if(currentView==='historia')renderHistory();
+}
+function updateLogCounters(){document.getElementById('logPill').textContent=eventLog.length+' '+plural(eventLog.length,'wpis','wpisy','wpisów');updateBadges();}
+function renderHistory(){
+  document.getElementById('historyLog').innerHTML=eventLog.length
+    ?eventLog.map(l=>`<div class="log-row"><span class="log-t">${escapeHtml(l.t)}</span><span class="log-lvl lv-${l.lvl}">${l.lvl}</span><span>${escapeHtml(l.msg)}</span></div>`).join('')
+    :'<div class="muted">Historia jest pusta.</div>';
+}
+function clearHistory(){eventLog=[];updateLogCounters();renderHistory();saveSession();toast('Historia wyczyszczona','info');}
+function exportHistory(){if(!eventLog.length){toast('Historia jest pusta','warn');return;}saveFile(new Blob([eventLog.slice().reverse().map(l=>`${l.t} [${l.lvl}] ${l.msg}`).join('\n')],{type:'text/plain;charset=utf-8'}),`historia_faktury_${new Date().toISOString().slice(0,10)}.txt`);toast('Pobrano historię TXT','ok');}
+
+/* ================= Odczyt danych z XLSX ================= */
+function parseNum(s){
+  if(typeof s==='number')return s>0&&isFinite(s)?s:null;
+  if(typeof s!=='string')return null;
+  let t=s.replace(/[^\d,.\-]/g,'').trim();if(!t||!/\d/.test(t))return null;
+  const lc=t.lastIndexOf(','),ld=t.lastIndexOf('.');
+  if(lc>=0&&ld>=0){t=lc>ld?t.replace(/\./g,'').replace(/,/g,'.'):t.replace(/,/g,'');}            /* 1.234,56 (PL) lub 1,234.56 (EN) — decyduje ostatni separator */
+  else if(lc>=0){t=(t.match(/,/g)||[]).length>1?t.replace(/,/g,''):t.replace(',','.');}          /* 1,234,567 → tysiące; 12,50 → dziesiętne */
+  else if(ld>=0&&(t.match(/\./g)||[]).length>1)t=t.replace(/\./g,'');                              /* 1.234.567 → tysiące */
+  const v=parseFloat(t);return isNaN(v)||v<=0?null:v;
+}
+function isoDateLocal(d){const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`}
+function validDate(y,m,d){y=+y;m=+m;d=+d;if(y<1990||y>2100||m<1||m>12||d<1||d>31)return null;const dt=new Date(y,m-1,d);return dt.getMonth()===m-1&&dt.getDate()===d?`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`:null}
+function validNip(n){if(!/^\d{10}$/.test(n))return false;const w=[6,5,7,2,3,4,5,6,7];const s=w.reduce((a,x,i)=>a+x*+n[i],0)%11;return s!==10&&s===+n[9]}
+function looksNumeric(str){return /^\s*-?\d[\d\s]*([.,]\d+)?\s*(zł|pln)?\s*$/i.test(str)}
+function amountIn(str){
+  for(const m of str.matchAll(/(\d[\d\s]*(?:[.,]\d{1,2})?)(\s*%)?/g)){if(m[2])continue;const v=parseNum(m[1]);if(v!=null&&v>0)return v;}
+  return null;
+}
+/* opcje odczytu do analizy: daty jako obiekty Date (nie mylą się z kwotami), limit wierszy chroni przed bardzo dużymi arkuszami */
+const READ_OPTS_EXTRACT={type:'array',cellDates:true,sheetRows:2000};
+function numAt(cell){if(!cell)return null;if(typeof cell.raw==='number')return parseNum(cell.raw);return looksNumeric(cell.str)?parseNum(cell.str):null}
+/* normalizacja nagłówka kolumny do porównań: małe litery, bez polskich znaków, bez spacji/interpunkcji — „Wartość Netto Fak.” → „wartoscnettofak” */
+function normHeaderKey(s){
+  return String(s||'').toLowerCase()
+    .replace(/ą/g,'a').replace(/ć/g,'c').replace(/ę/g,'e').replace(/ł/g,'l')
+    .replace(/ń/g,'n').replace(/ó/g,'o').replace(/ś/g,'s').replace(/[źż]/g,'z')
+    .replace(/[^a-z0-9]+/g,'');
+}
+/* suma po kolumnie: dla eksportów tabelarycznych (rejestr pozycji faktury, wiele wierszy) — szuka nagłówka kolumny wg listy wzorców w kolejności ważności (najpierw najbardziej precyzyjny, np. „wartość netto fak”, potem ogólny „netto”) i sumuje liczby poniżej w tej samej kolumnie i arkuszu */
+function findColumnSum(sheetsRows,patternSets,exclude){
+  for(const patterns of patternSets){
+    for(const rows of sheetsRows){
+      const limit=Math.min(rows.length,30);
+      for(let r=0;r<limit;r++){const row=rows[r];
+        for(let c=0;c<row.length;c++){
+          const cell=row[c];if(!cell||typeof cell.raw==='number')continue;
+          const h=normHeaderKey(cell.str);if(!h||!patterns.every(p=>h.includes(p)))continue;
+          if(exclude&&exclude.some(x=>h.includes(x)))continue;
+          let sum=0,cnt=0;
+          for(let rr=r+1;rr<rows.length;rr++){const v=numAt(rows[rr][c]);if(v!=null){sum+=v;cnt++;}}
+          if(cnt>0)return +sum.toFixed(2);
+        }
+      }
+    }
+  }
+  return null;
+}
+/* ---- rozpoznawanie daty tekstowej o nieznanym formacie (kolumny „DataTransakcji” / „Data realizacji”) ---- */
+/* rozbija „06.07.2026”, „2026/07/06”, „06-07-26 00:00:00” itp. na trzy liczbowe części (bez rozstrzygania kolejności dzień/miesiąc/rok) */
+function splitDateParts(str){
+  const s=String(str).trim().split(/[T ]/)[0];
+  const m=s.match(/^(\d{1,4})[-.\/](\d{1,2})[-.\/](\d{1,4})$/);
+  return m?[parseInt(m[1],10),parseInt(m[2],10),parseInt(m[3],10)]:null;
+}
+function expandYear2(y){return y>=100?y:(y<=50?2000+y:1900+y)}
+/* ustala kolejność dzień/miesiąc/rok na podstawie próbki wartości z tej samej kolumny (np. jeśli którakolwiek wartość ma drugą pozycję >12, to musi być rok-miesiąc-dzień lub miesiąc-dzień-rok się wyklucza) — domyślnie polska konwencja dzień.miesiąc.rok */
+function detectDateOrder(partsList){
+  let yearFirst=false,dayInPos1=false,dayInPos0=false;
+  partsList.forEach(([p0,p1,p2])=>{
+    if(p0>31&&p0>=1000)yearFirst=true;
+    if(p1>12&&p1<=31)dayInPos1=true;
+    if(p0>12&&p0<=31)dayInPos0=true;
+  });
+  if(yearFirst)return 'ymd';
+  if(dayInPos1&&!dayInPos0)return 'mdy';
+  return 'dmy';
+}
+function assembleDateFromParts(parts,order){
+  let y,mo,d;
+  if(order==='ymd'){[y,mo,d]=parts;}
+  else if(order==='mdy'){[mo,d,y]=parts;}
+  else{[d,mo,y]=parts;}
+  return validDate(expandYear2(y),mo,d);
+}
+/* szuka kolumny wg listy wzorców nagłówka (w kolejności ważności: najpierw „DataTransakcji”, potem „Data realizacji”); jeśli komórki to już daty Excela — używa gotowego ISO; jeśli to tekst — rozpoznaje format na próbce wartości tej kolumny i stosuje go do pierwszej niepustej wartości */
+function findColumnDate(sheetsRows,patternSets){
+  for(const patterns of patternSets){
+    for(const rows of sheetsRows){
+      const limit=Math.min(rows.length,30);
+      for(let r=0;r<limit;r++){const row=rows[r];
+        for(let c=0;c<row.length;c++){
+          const cell=row[c];if(!cell||typeof cell.raw==='number')continue;
+          const h=normHeaderKey(cell.str);if(!h||!patterns.every(p=>h.includes(p)))continue;
+          const vals=[];for(let rr=r+1;rr<rows.length&&vals.length<25;rr++){const dc=rows[rr][c];if(dc)vals.push(dc);}
+          if(!vals.length)continue;
+          const isoReady=vals.find(dc=>dc.raw instanceof Date&&/^\d{4}-\d{2}-\d{2}$/.test(dc.str));
+          if(isoReady)return isoReady.str;
+          const partsList=vals.map(dc=>splitDateParts(dc.str)).filter(Boolean);
+          if(!partsList.length)continue;
+          const order=detectDateOrder(partsList);
+          for(const p of partsList){const iso=assembleDateFromParts(p,order);if(iso)return iso;}
+        }
+      }
+    }
+  }
+  return null;
+}
+/* szuka kolumny wg listy wzorców nagłówka i zwraca pierwszą niepustą wartość poniżej (np. numer faktury powtórzony w każdym wierszu rejestru pozycji) */
+function findColumnValue(sheetsRows,patternSets){
+  for(const patterns of patternSets){
+    for(const rows of sheetsRows){
+      const limit=Math.min(rows.length,30);
+      for(let r=0;r<limit;r++){const row=rows[r];
+        for(let c=0;c<row.length;c++){
+          const cell=row[c];if(!cell||typeof cell.raw==='number')continue;
+          const h=normHeaderKey(cell.str);if(!h||!patterns.every(p=>h.includes(p)))continue;
+          for(let rr=r+1;rr<rows.length;rr++){const dc=rows[rr][c];const v=dc&&String(dc.str).trim();if(v)return v;}
+        }
+      }
+    }
+  }
+  return null;
+}
+function extractInvoiceData(workbook){
+  const out={number:null,date:null,nip:null,gross:null,net:null,vat:null,txDate:null};
+  try{
+    /* siatka komórek (wiersz × kolumna) — pozwala szukać wartości „na prawo od etykiety” i „pod etykietą”; sheetsRows — te same wiersze, osobno wg arkusza (do sumowania kolumn) */
+    const grid=[],flat=[],sheetsRows=[];
+    workbook.SheetNames.forEach(sn=>{
+      const rows=XLSX.utils.sheet_to_json(workbook.Sheets[sn],{header:1,defval:''});
+      const sheetGrid=[];
+      rows.forEach(r=>{const row=r.map(c=>{if(c===''||c==null)return null;const cell=c instanceof Date?{raw:c,str:isNaN(c)?'':isoDateLocal(c)}:{raw:c,str:String(c)};flat.push(cell);return cell;});grid.push(row);sheetGrid.push(row);});
+      sheetsRows.push(sheetGrid);
+    });
+    const joined=flat.map(a=>a.str).join(' | ');
+    /* NIP — pierwszy z poprawną sumą kontrolną, w ostateczności pierwszy pasujący wzorcem */
+    const nips=[...joined.matchAll(/NIP[:\s]*(?:PL\s*)?([0-9]{3}[-\s]?[0-9]{2,3}[-\s]?[0-9]{2,3}[-\s]?[0-9]{2,3})/gi)].map(m=>m[1].replace(/[-\s]/g,''));
+    out.nip=nips.find(validNip)||nips[0]||null;
+    let m=joined.match(/(?:faktura(?:\s+vat)?|nr faktury|numer|fv|invoice)[:\s#]*(?:nr\.?\s*)?([A-Z0-9][A-Z0-9\/\-_.]{2,30})/i);if(m)out.number=m[1];
+    /* numer faktury — pierwszeństwo ma dedykowana kolumna rejestru pozycji: „NrFaktury” / „Nr faktury”, w dalszej kolejności „numerDokumentu”; dopiero gdy takiej kolumny nie ma, zostaje odczyt z tekstu powyżej */
+    out.number=findColumnValue(sheetsRows,[['nrfaktury'],['numerdokumentu']])||out.number;
+    /* data — pierwsza poprawna kalendarzowo (RRRR-MM-DD lub DD-MM-RRRR) */
+    for(const dm of joined.matchAll(/(\d{4})[-.\/](\d{2})[-.\/](\d{2})|(\d{2})[-.\/](\d{2})[-.\/](\d{4})/g)){
+      const d=dm[1]?validDate(dm[1],dm[2],dm[3]):validDate(dm[6],dm[5],dm[4]);if(d){out.date=d;break;}
+    }
+    /* etykiety w kolejności ważności (każda z własną listą słów wykluczających); wartość: w tej samej komórce, na prawo (do 5 kolumn) albo poniżej (do 3 wierszy) — pasuje do prostych faktur z podsumowaniem w rogu arkusza */
+    function findAmount(labels){
+      for(const [label,exclude] of labels){
+        for(let r=0;r<grid.length;r++){const row=grid[r];
+          for(let c=0;c<row.length;c++){
+            const cell=row[c];if(!cell)continue;const s=cell.str.toLowerCase();
+            if(!s.includes(label)||exclude.some(x=>s.includes(x)))continue;
+            if(typeof cell.raw!=='number'){const v=amountIn(cell.str);if(v)return v;}
+            for(let k=c+1;k<Math.min(c+6,row.length);k++){const v=numAt(row[k]);if(v)return v;}
+            for(let d=1;d<=3&&r+d<grid.length;d++){const v=numAt(grid[r+d][c]);if(v)return v;}
+          }
+        }
+      }
+      return null;
+    }
+    /* dla eksportów tabelarycznych (rejestr pozycji faktury, wiele wierszy) — łączna kwota to suma kolumny, nie pojedyncza wartość; pierwszeństwo ma kolumna „wartość netto fak”, w dalszej kolejności ogólna „netto” (analogicznie brutto / VAT) */
+    out.net=findColumnSum(sheetsRows,[['wartosc','netto','fak'],['netto','fak'],['wartosc','netto'],['netto']],['brutto']);
+    out.gross=findColumnSum(sheetsRows,[['wartosc','brutto','fak'],['brutto','fak'],['wartosc','brutto'],['brutto']],['netto']);
+    out.vat=findColumnSum(sheetsRows,[['wartosc','vat','fak'],['vat','fak'],['wartosc','vat'],['kwotavat'],['vat']],['stawka','procent','nip','netto','brutto']);
+    /* jeśli w arkuszu nie ma tabeli pozycji (kolumny nie znaleziono) — odczyt jak dotychczas, z podsumowania w rogu arkusza */
+    const generic=['netto','vat','%'];
+    if(out.gross==null)out.gross=findAmount([['brutto',['%']],['do zapłaty',[]],['do zaplaty',[]],['łącznie',generic],['razem',generic],['suma',generic],['total',generic]]);
+    if(out.net==null)out.net=findAmount([['netto',['brutto','%']]]);
+    if(out.vat==null)out.vat=findAmount([['kwota vat',[]],['podatek vat',[]],['wartość vat',[]],['vat',['stawka','%','nip','brutto','netto','faktura']],['podatek',['%']]]);
+    /* ostateczność: największa liczba, z pominięciem lat i wartości nierealnych */
+    if(out.gross==null){let max=0;flat.forEach(a=>{const v=parseNum(a.raw);if(v&&v>max&&v<100000000&&!(Number.isInteger(v)&&v>=1990&&v<=2100))max=v;});if(max>0)out.gross=max;}
+    /* data transakcji/realizacji — do grupowania miesięcznego w podsumowaniu; osobna od daty faktury, bo w rejestrach pozycji bywa w innej kolumnie i innym formacie niż data na fakturze */
+    out.txDate=findColumnDate(sheetsRows,[['datatransakcji'],['datarealizacji']])||out.date;
+    if(out.gross&&out.net&&out.vat==null&&out.gross>=out.net)out.vat=+(out.gross-out.net).toFixed(2);
+    if(out.gross==null&&out.net!=null&&out.vat!=null)out.gross=+(out.net+out.vat).toFixed(2);
+  }catch(e){}
+  return out;
+}
+
+/* ================= Szablon nazw ================= */
+function applyTemplate(item,idx,ext){
+  const d=item.data||{};const date=safeDate(d.date)||'';const parts=date.split('-');
+  let name=settings.template
+    .replace(/{faktura}/g,item.invoiceName).replace(/{rok}/g,parts[0]||'').replace(/{miesiac}/g,parts[1]||'')
+    .replace(/{nip}/g,d.nip||'').replace(/{numer}/g,(d.number||'').replace(/[\/\\:*?"<>|]/g,'-')).replace(/{data}/g,date);
+  name=name.replace(/_+/g,'_').replace(/^[_\-.\s]+|[_\-\s]+$/g,'');
+  name=safeName(name,item.invoiceName);
+  if(idx!=null)name+='_'+idx;
+  return name+'.'+(ext||'xlsx');
+}
+
+/* ================= Przetwarzanie ZIP ================= */
+function declaredSize(entry){const d=entry&&entry._data;return d&&typeof d.uncompressedSize==='number'?d.uncompressedSize:null}
+function acceptEntry(path,entry){const base=path.split('/').pop();return !entry.dir&&!base.startsWith('.')&&!path.startsWith('__MACOSX')}
+async function processArchive(file,fileName){
+  const invoiceName=stripExt(fileName);
+  const item={id:++uid,source:'zip',zipName:fileName,invoiceName,xlsxFiles:[],status:'processing',error:null,data:{},selected:false,customName:null,addedAt:Date.now()};
+  items.push(item);scheduleRender();
+  try{
+    if(file.size>LIMITS.archiveBytes)throw new Error(`Archiwum zbyt duże (limit ${fmtSize(LIMITS.archiveBytes)})`);
+    const zip=await JSZip.loadAsync(file);const entries=[],nested=[];let tooMany=false;
+    zip.forEach((path,entry)=>{
+      if(!acceptEntry(path,entry))return;
+      if(isSheetFile(path)){if(entries.length>=LIMITS.entries){tooMany=true;return;}entries.push({path,entry});}
+      else if(/\.zip$/i.test(path)&&settings.nested)nested.push({path,entry});
+    });
+    for(const nz of nested){
+      const sz=declaredSize(nz.entry);
+      if(sz!=null&&sz>LIMITS.archiveBytes){logEvent('WRN',`${fileName}: pominięto zagnieżdżony ZIP ${nz.path} — zbyt duży`);continue;}
+      try{const inner=await JSZip.loadAsync(await nz.entry.async('arraybuffer'));inner.forEach((p,e)=>{if(!acceptEntry(p,e)||!isSheetFile(p))return;if(entries.length>=LIMITS.entries){tooMany=true;return;}entries.push({path:p,entry:e});});}
+      catch(e){logEvent('WRN',`Nie udało się wypakować zagnieżdżonego ZIP w ${fileName}`);}
+    }
+    if(tooMany)logEvent('WRN',`${fileName}: więcej niż ${LIMITS.entries} plików — wzięto pierwsze ${LIMITS.entries}`);
+    if(!entries.length)throw new Error('Brak plików XLSX / XLS w archiwum');
+    let total=0,skippedBig=0,first=true;
+    for(const e of entries){
+      const sz=declaredSize(e.entry);
+      if(sz!=null&&(sz>LIMITS.fileBytes||total+sz>LIMITS.archiveBytes)){skippedBig++;continue;}
+      const ab=await e.entry.async('arraybuffer');
+      if(ab.byteLength>LIMITS.fileBytes||total+ab.byteLength>LIMITS.archiveBytes){skippedBig++;continue;}
+      total+=ab.byteLength;
+      const originalName=safeName(e.path.split('/').pop(),'plik.xlsx'),ext=sheetExt(originalName);
+      const blob=new Blob([ab],{type:mimeFor(ext)});
+      let data={};if(settings.extract){try{data=extractInvoiceData(XLSX.read(ab,READ_OPTS_EXTRACT));}catch(err){}}
+      if(first){item.data=data;first=false;}
+      item.xlsxFiles.push({originalName,ext,blob,size:blob.size,arrayBuffer:ab,data});
+    }
+    if(skippedBig)logEvent('WRN',`${fileName}: pominięto ${skippedBig} ${plural(skippedBig,'plik','pliki','plików')} powyżej limitu ${fmtSize(LIMITS.fileBytes)}`);
+    if(!item.xlsxFiles.length)throw new Error(`Pliki w archiwum przekraczają limit ${fmtSize(LIMITS.fileBytes)}`);
+    item.xlsxFiles.forEach((f,i)=>{f.newName=applyTemplate(item,item.xlsxFiles.length>1?i+1:null,f.ext);});
+    item.status=(settings.validate&&settings.extract&&(item.data.net==null||item.data.number==null))?'warn':'done';
+    const n=item.xlsxFiles.length;
+    logEvent('OK',`Wypakowano ${fileName} → ${n} ${plural(n,'plik','pliki','plików')}${item.data.net?' · '+fmtMoney(item.data.net):''}`);
+  }catch(err){item.status='error';item.error=err.message||'Błąd';logEvent('ERR',`${fileName}: ${item.error}`);}
+  scheduleRender();saveSession();return item;
+}
+/* bezpośredni import pojedynczego pliku XLSX / XLS — trafia na listę tak samo jak faktura wypakowana z ZIP */
+async function processSpreadsheet(file,fileName){
+  const ext=sheetExt(fileName),invoiceName=stripExt(fileName);
+  const item={id:++uid,source:'file',zipName:fileName,invoiceName,xlsxFiles:[],status:'processing',error:null,data:{},selected:false,customName:null,addedAt:Date.now()};
+  items.push(item);scheduleRender();
+  try{
+    if(file.size>LIMITS.fileBytes)throw new Error(`Plik zbyt duży (limit ${fmtSize(LIMITS.fileBytes)})`);
+    const ab=await file.arrayBuffer();
+    let wb;try{wb=XLSX.read(ab,READ_OPTS_EXTRACT);}catch(e){throw new Error('Nie można odczytać pliku — uszkodzony lub nieobsługiwany format');}
+    if(!wb.SheetNames||!wb.SheetNames.length)throw new Error('Plik nie zawiera arkuszy');
+    let data={};if(settings.extract){try{data=extractInvoiceData(wb);}catch(e){}}
+    item.data=data;
+    const f={originalName:fileName,ext,blob:new Blob([ab],{type:mimeFor(ext)}),size:ab.byteLength,arrayBuffer:ab,data};
+    f.newName=applyTemplate(item,null,ext);
+    item.xlsxFiles.push(f);
+    item.status=(settings.validate&&settings.extract&&(data.net==null||data.number==null))?'warn':'done';
+    logEvent('OK',`Zaimportowano ${fileName}${data.net?' · '+fmtMoney(data.net):''}`);
+  }catch(err){item.status='error';item.error=err.message||'Błąd';logEvent('ERR',`${fileName}: ${item.error}`);}
+  scheduleRender();saveSession();return item;
+}
+/* kolejka importów: kolejne partie (np. upuszczone w trakcie przetwarzania) czekają na zakończenie poprzedniej */
+let importChain=Promise.resolve();
+function importFiles(fileList){
+  if(!LIBS_OK){toast('Biblioteki nie zostały wczytane — import jest niemożliwy','err');return importChain;}
+  const all=Array.from(fileList);const files=all.filter(f=>isZipFile(f.name)||isSheetFile(f.name));const skipped=all.length-files.length;
+  if(skipped>0)toast(`Pominięto ${skipped} ${plural(skipped,'plik','pliki','plików')} — obsługiwane są .zip, .xlsx i .xls`,'warn');
+  if(!files.length)return importChain;
+  importChain=importChain.then(()=>runImport(files)).catch(()=>{});
+  return importChain;
+}
+async function runImport(files){
+  if(currentView!=='faktury')showView('faktury');
+  const zips=files.filter(f=>isZipFile(f.name)).length,sheets=files.length-zips;
+  logEvent('INF',`Rozpoczęto import: ${describeBatch(zips,sheets)}`);
+  setStatus('przetwarzanie…',true);showProgress(true);
+  let ok=0,fail=0;
+  try{
+    for(let i=0;i<files.length;i++){
+      updateProgress(i/files.length*100,`${i+1}/${files.length} · ${files[i].name}`);
+      const zip=isZipFile(files[i].name),name=safeName(files[i].name,zip?'archiwum.zip':'plik.xlsx');
+      const it=zip?await processArchive(files[i],name):await processSpreadsheet(files[i],name);
+      if(it.status==='error')fail++;else ok++;
+    }
+  }finally{
+    updateProgress(100,'Zakończono');render();progressHideTimer=setTimeout(()=>showProgress(false),700);setStatus('bezczynny',false);
+  }
+  if(ok)toast(`Przetworzono ${ok} ${plural(ok,'plik','pliki','plików')}`,'ok');
+  if(fail)toast(`${fail} ${plural(fail,'plik','pliki','plików')} z błędem`,'err');
+}
+function describeBatch(zips,sheets){const p=[];if(zips)p.push(`${zips} ${plural(zips,'archiwum ZIP','archiwa ZIP','archiwów ZIP')}`);if(sheets)p.push(`${sheets} ${plural(sheets,'plik XLSX/XLS','pliki XLSX/XLS','plików XLSX/XLS')}`);return p.join(' i ')||'0 plików'}
+let progressHideTimer=null;
+function showProgress(v){clearTimeout(progressHideTimer);document.getElementById('progressWrap').classList.toggle('show',v)}
+function updateProgress(p,l){document.getElementById('progressBar').style.width=p+'%';document.getElementById('progressPct').textContent=Math.round(p)+'%';if(l)document.getElementById('progressLabel').textContent=l;}
+
+/* ================= Usuwanie / cofanie ================= */
+function removeItem(id){
+  const idx=items.findIndex(i=>i.id===id);if(idx<0)return;const removed=items[idx];
+  items.splice(idx,1);render();saveSession();
+  toast(`Usunięto ${escapeHtml(removed.zipName)}`,'info',()=>{items.splice(Math.min(idx,items.length),0,removed);render();saveSession();});
+}
+/* cofnięcie przywraca usunięte pozycje, nie kasując tego, co zaimportowano w międzyczasie */
+function restoreItems(removed){const present=new Set(items);removed.forEach(r=>{if(!present.has(r)){r.selected=false;items.push(r);}});render();saveSession();}
+function deleteSelected(){
+  const sel=items.filter(i=>i.selected);if(!sel.length){toast('Nic nie zaznaczono','warn');return;}
+  items=items.filter(i=>!i.selected);render();saveSession();
+  toast(`Usunięto ${sel.length} ${plural(sel.length,'pozycję','pozycje','pozycji')}`,'info',()=>restoreItems(sel));
+}
+function clearAll(){
+  if(!items.length)return;const removed=items.slice();items=[];render();saveSession();
+  toast('Lista wyczyszczona','info',()=>restoreItems(removed));
+}
+
+/* ================= Zaznaczanie / filtr / sortowanie ================= */
+function toggleSelect(id){const it=items.find(i=>i.id===id);if(it){it.selected=!it.selected;render();}}
+function toggleSelectAll(){const vis=visibleItems();const all=vis.length>0&&vis.every(i=>i.selected);vis.forEach(i=>i.selected=!all);render();}
+function setFilter(f,el){filter=f;document.querySelectorAll('.chip[data-filter]').forEach(c=>c.classList.remove('on'));el.classList.add('on');render();}
+document.getElementById('searchInput').addEventListener('input',e=>{searchQ=e.target.value.toLowerCase();render();});
+document.querySelectorAll('th.sortable').forEach(th=>th.addEventListener('click',()=>{const k=th.dataset.sort;if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=1;}render();}));
+function sizeOf(i){return i.xlsxFiles.reduce((s,f)=>s+f.size,0)}
+function nameOf(i){return i.customName||(i.xlsxFiles[0]&&i.xlsxFiles[0].newName)||''}
+function visibleItems(){
+  let arr=items.slice();
+  if(filter!=='all')arr=arr.filter(i=>i.status===filter);
+  if(searchQ)arr=arr.filter(i=>(i.zipName+' '+(i.data.number||'')+' '+(i.data.nip||'')+' '+i.xlsxFiles.map(f=>f.newName).join(' ')+' '+(i.customName||'')).toLowerCase().includes(searchQ));
+  arr.sort((a,b)=>{
+    switch(sortKey){
+      case 'name':return nameOf(a).localeCompare(nameOf(b),'pl')*sortDir;
+      case 'amount':return ((a.data.net||0)-(b.data.net||0))*sortDir;
+      case 'date':return String(a.data.date||'').localeCompare(String(b.data.date||''))*sortDir;
+      case 'size':return (sizeOf(a)-sizeOf(b))*sortDir;
+      default:return a.zipName.localeCompare(b.zipName,'pl')*sortDir;
+    }
+  });
+  return arr;
+}
+
+/* ================= Render listy ================= */
+const STATUS_COLOR={done:'var(--emerald)',warn:'var(--amber)',error:'var(--rose)',processing:'var(--sky)'};
+function statusPill(s){
+  if(s==='processing')return '<span class="pill info"><span class="spinner"></span>praca</span>';
+  if(s==='done')return '<span class="pill ok">gotowe</span>';
+  if(s==='warn')return '<span class="pill warn">uwaga</span>';
+  return '<span class="pill err">błąd</span>';
+}
+/* odświeżenia w trakcie importu są łączone (max. jedno na klatkę) */
+let renderQueued=false,renderPending=false;
+function scheduleRender(){if(renderQueued)return;renderQueued=true;requestAnimationFrame(()=>{renderQueued=false;render();});}
+function render(){
+  const tbody=document.getElementById('tbody'),empty=document.getElementById('tblEmpty');const vis=visibleItems();
+  document.querySelectorAll('th.sortable').forEach(th=>{const on=th.dataset.sort===sortKey;th.classList.toggle('sorted',on);th.querySelector('.arr').textContent=on?(sortDir>0?'↑':'↓'):'↕';});
+  /* gdy użytkownik właśnie edytuje nazwę w tabeli, nie przebudowujemy wierszy — tylko liczniki; pełne odświeżenie nastąpi po wyjściu z pola */
+  const ae=document.activeElement;
+  if(ae&&ae.classList&&ae.classList.contains('name-input')&&tbody.contains(ae)){renderPending=true;updateControls(vis);return;}
+  renderPending=false;
+  const maxNet=Math.max(1,...items.map(i=>i.data.net||0));
+  if(!items.length){tbody.innerHTML='';empty.style.display='';}
+  else{
+    empty.style.display='none';
+    tbody.innerHTML=vis.length?vis.map(i=>{
+      const n=i.xlsxFiles.length;const sub=i.data.number?`nr: <span class="mono">${escapeHtml(i.data.number)}</span>`:`faktura: <span class="mono">${escapeHtml(i.invoiceName)}</span>`;
+      const nameCell=i.status==='error'?`<span class="error-text">${escapeHtml(i.error)}</span>`:i.status==='processing'?'<span class="muted mono">…</span>':`<input class="name-input" value="${escapeHtml(stripExt(nameOf(i)))}" maxlength="180" onchange="renameItem(${i.id},this.value)" aria-label="Nazwa pliku">${n&&i.xlsxFiles[0].ext==='xls'?'<span class="tag" style="margin-left:6px" data-tip="Format XLS — w paczce ZIP zostaje bez zmian, przy scalaniu trafia do pliku XLSX">xls</span>':''}${n>1?`<span class="tag" style="margin-left:6px" data-tip="W archiwum jest ${n} plików — pozostałe dostaną sufiksy _2, _3…">+${n-1}</span>`:''}`;
+      const amt=i.data.net?`<div class="amount">${fmtMoney(i.data.net)}</div><div class="amount-bar"><span style="width:${Math.max(4,i.data.net/maxNet*100)}%"></span></div>`:'<span class="muted mono">—</span>';
+      const longName=i.zipName.length>34?` data-tip="${escapeHtml(i.zipName)}"`:'';
+      return `<tr>
+        <td><div class="checkbox ${i.selected?'on':''}" onclick="toggleSelect(${i.id})" role="checkbox" tabindex="0" aria-checked="${i.selected}"><span class="icon">${icon('check')}</span></div></td>
+        <td><div class="file-cell"><span class="status-dot" style="--c:${STATUS_COLOR[i.status]||'var(--sky)'}"></span><div class="file-meta"><div class="file-name"${longName}>${escapeHtml(i.zipName)}</div><div class="file-sub"><span class="tag">${sourceTag(i)}</span>${sub}</div></div></div></td>
+        <td>${nameCell}</td>
+        <td>${amt}</td>
+        <td class="mono muted">${escapeHtml(i.data.date||'—')}</td>
+        <td class="mono muted">${escapeHtml(i.data.nip||'—')}</td>
+        <td class="mono">${n?fmtSize(sizeOf(i)):'—'}</td>
+        <td>${statusPill(i.status)}</td>
+        <td><div class="row-actions">${n?`<button class="btn-icon" onclick="openPreview(${i.id})" data-tip="Podgląd faktury" aria-label="Podgląd"><span class="icon">${icon('eye')}</span></button>`:''}<button class="btn-icon danger" onclick="removeItem(${i.id})" data-tip="Usuń z listy" aria-label="Usuń"><span class="icon">${icon('x')}</span></button></div></td>
+      </tr>`;
+    }).join(''):`<tr><td colspan="9" class="tbl-empty" style="padding:30px">Brak wyników dla bieżącego filtra.</td></tr>`;
+  }
+  updateControls(vis);
+}
+function renameItem(id,val){
+  const it=items.find(i=>i.id===id);if(!it||!it.xlsxFiles.length)return;
+  const f0=it.xlsxFiles[0],ext=f0.ext||'xlsx';
+  const fromTemplate=applyTemplate(it,it.xlsxFiles.length>1?1:null,ext);
+  const newName=safeName(String(val).replace(SHEET_EXT,''),stripExt(f0.newName))+'.'+ext;
+  if(newName===f0.newName){render();return;}
+  /* nazwa równa szablonowej przestaje być „ręczna” */
+  it.customName=newName===fromTemplate?null:newName;f0.newName=newName;
+  render();saveSession();logEvent('INF',`Zmieniono nazwę: ${it.zipName} → ${newName}`);
+}
+document.getElementById('tbody').addEventListener('focusout',()=>{if(renderPending)setTimeout(()=>{if(renderPending)render();},0);});
+function renderNamePreview(){
+  const el=document.getElementById('namePreview');const list=items.filter(i=>i.xlsxFiles.length);
+  if(!list.length){el.innerHTML=`<div class="tbl-empty" style="padding:30px"><b>Brak plików</b>Wgraj faktury, aby zobaczyć, jak zostaną nazwane pliki.</div>`;return;}
+  const LIM=8;
+  el.innerHTML=`<div class="tbl-scroll"><table class="prev"><thead><tr><th>Plik źródłowy</th><th style="width:30px"></th><th>Nazwa w paczce</th></tr></thead><tbody>${list.slice(0,LIM).map(i=>`<tr><td class="mono muted" style="overflow-wrap:anywhere">${escapeHtml(i.zipName)}</td><td class="arrow">→</td><td class="mono" style="color:var(--primary);font-weight:700;overflow-wrap:anywhere">${escapeHtml(nameOf(i))}${i.xlsxFiles.length>1?` <span class="tag">+${i.xlsxFiles.length-1}</span>`:''}${i.customName?' <span class="tag" data-tip="Nazwa zmieniona ręcznie na liście">ręczna</span>':''}</td></tr>`).join('')}</tbody></table></div>${list.length>LIM?`<div class="prev-more">… i ${list.length-LIM} więcej</div>`:''}`;
+}
+
+/* ================= Liczniki / sterowanie ================= */
+function updateControls(vis){
+  vis=vis||visibleItems();
+  let xlsx=0,sum=0,warn=0,err=0,proc=0,sel=0,total=0,withAmt=0,direct=0;
+  items.forEach(i=>{if(i.selected)sel++;if(i.status==='warn')warn++;if(i.status==='error')err++;if(i.status==='processing')proc++;if(i.source==='file')direct++;xlsx+=i.xlsxFiles.length;total+=sizeOf(i);if(i.data.net){sum+=i.data.net;withAmt++;}});
+  const issues=warn+err,fromZip=items.length-direct;
+  document.getElementById('tZip').textContent=items.length;
+  document.getElementById('tZipSub').textContent=items.length?[fromZip?`${fromZip} ${plural(fromZip,'z archiwum ZIP','z archiwów ZIP','z archiwów ZIP')}`:'',direct?`${direct} ${plural(direct,'plik','pliki','plików')} bezpośrednio`:''].filter(Boolean).join(' · '):'zaimportowane pozycje';
+  document.getElementById('tXlsx').textContent=xlsx;
+  document.getElementById('tXlsxSub').textContent=xlsx?`${fmtSize(total)} · gotowe do pobrania`:'gotowe do pobrania';
+  document.getElementById('tSum').innerHTML=sum.toLocaleString('pl-PL',{maximumFractionDigits:0})+' <small>zł</small>';
+  document.getElementById('tSumSub').textContent=sum?`${withAmt} ${plural(withAmt,'wykryta kwota','wykryte kwoty','wykrytych kwot')}`:'wykryte kwoty';
+  document.getElementById('tIssues').textContent=issues;
+  document.getElementById('tIssuesSub').textContent=`${warn} ${plural(warn,'ostrzeżenie','ostrzeżenia','ostrzeżeń')} · ${err} ${plural(err,'błąd','błędy','błędów')}`;
+  const wn=document.getElementById('warnNote');
+  if(issues&&!proc){
+    const parts=[];
+    if(warn)parts.push(`<b>${warn}</b> ${plural(warn,'faktura','faktury','faktur')} bez wykrytej kwoty lub numeru`);
+    if(err)parts.push(`<b>${err}</b> ${plural(err,'plik','pliki','plików')} z błędem (brak arkuszy XLSX / XLS w archiwum, plik nie do odczytania, przekroczony limit rozmiaru lub uszkodzony ZIP)`);
+    document.getElementById('warnNoteText').innerHTML=parts.join(' · ')+'. Dane odczytywane są automatycznie z arkusza — sprawdź je w podglądzie (ikona oka) lub popraw nazwę bezpośrednio na liście.';
+    wn.className='note '+(err?'err':'warn');wn.style.display='';
+  }else wn.style.display='none';
+  document.getElementById('selectionInfo').textContent=`${sel} ${plural(sel,'zaznaczona','zaznaczone','zaznaczonych')}`;
+  document.getElementById('selectAll').classList.toggle('on',vis.length>0&&vis.every(i=>i.selected));
+  document.getElementById('tblSum').innerHTML=`Łącznie: <b>${items.length}</b> ${plural(items.length,'faktura','faktury','faktur')} · <b>${xlsx}</b> ${plural(xlsx,'plik','pliki','plików')} · <b>${sum.toLocaleString('pl-PL',{maximumFractionDigits:2})} zł</b> netto${(filter!=='all'||searchQ)?` · widoczne: <b>${vis.length}</b>`:''}`;
+  const sl=document.getElementById('statusLine');
+  if(!items.length)sl.innerHTML='Brak plików. Wgraj archiwa ZIP lub pliki XLSX / XLS, aby rozpocząć.';
+  else if(proc)sl.innerHTML=`Przetwarzanie <b>${proc}</b> ${plural(proc,'pliku','plików','plików')}…`;
+  else if(!xlsx)sl.innerHTML='Brak plików gotowych do pobrania — sprawdź błędy na liście.';
+  else sl.innerHTML=`Gotowe do pobrania: <b>${xlsx} ${plural(xlsx,'plik','pliki','plików')}</b> (${fmtSize(total)})${settings.folders?' · w podfolderach wg miesiąca':''}${issues?` · <span style="color:var(--amber)">${warn} ${plural(warn,'ostrzeżenie','ostrzeżenia','ostrzeżeń')}</span> · <span style="color:var(--rose)">${err} ${plural(err,'błąd','błędy','błędów')}</span>`:''}. Pobierz paczkę ZIP z osobnymi plikami albo scal wszystko w jeden XLSX.`;
+  document.getElementById('downloadAll').disabled=!xlsx;document.getElementById('headerDownload').disabled=!xlsx;
+  document.getElementById('downloadAllLabel').textContent=xlsx?`Pobierz paczkę ZIP (${xlsx} ${plural(xlsx,'plik','pliki','plików')})`:'Pobierz paczkę ZIP';
+  document.getElementById('summaryBtn').disabled=!xlsx;
+  document.getElementById('downloadSelectedBtn').disabled=!items.some(i=>i.selected&&i.xlsxFiles.length);
+  document.getElementById('deleteSelectedBtn').disabled=!sel;
+  document.getElementById('clearBtn').disabled=!items.length;
+  document.querySelectorAll('.requires-files').forEach(b=>b.disabled=!xlsx);
+  document.getElementById('readyPill').textContent=`${xlsx} ${plural(xlsx,'plik','pliki','plików')}`;
+  document.getElementById('statusZip').textContent=items.length;document.getElementById('statusXlsx').textContent=xlsx;
+  updateBadges();renderReports();renderNamePreview();
+}
+
+/* ================= Paczka ZIP ================= */
+async function buildPackage(list){
+  const out=new JSZip(),used={};
+  list.forEach(item=>item.xlsxFiles.forEach((f,fi)=>{
+    let name=safeName(outNameOf(item,f,fi),'faktura.xlsx');
+    if(settings.folders){const d=safeDate(item.data.date);name=(d?d.slice(0,7):'bez-daty')+'/'+name;}
+    /* kolizje nazw: faktura.xlsx, faktura(2).xlsx, faktura(3).xlsx… — każdy kandydat sprawdzany ponownie */
+    const base=stripExt(name),ext=sheetExt(name);let cand=name,k=1;
+    while(used[cand.toLowerCase()]){k++;cand=`${base}(${k}).${ext}`;}
+    used[cand.toLowerCase()]=true;
+    out.file(cand,f.blob);
+  }));
+  return out.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});
+}
+async function downloadPackage(){await doDownload(items.filter(i=>i.xlsxFiles.length),'wszystkie');}
+async function downloadSelected(){const sel=items.filter(i=>i.selected&&i.xlsxFiles.length);if(!sel.length){toast('Nic nie zaznaczono','warn');return;}await doDownload(sel,'zaznaczone');}
+async function doDownload(list,label){
+  if(!list.length){toast('Brak plików','warn');return;}
+  setStatus('pakowanie…',true);
+  const btn=document.getElementById('downloadAll'),hb=document.getElementById('headerDownload');const prev=btn.innerHTML;btn.disabled=true;hb.disabled=true;
+  btn.innerHTML=`<span class="spinner" style="width:16px;height:16px;border-width:2px"></span> Pakowanie…`;
+  try{
+    const blob=await buildPackage(list);const cnt=list.reduce((s,i)=>s+i.xlsxFiles.length,0);
+    saveFile(blob,`faktury_xlsx_${new Date().toISOString().slice(0,10)}.zip`);
+    toast(`Pobrano paczkę: ${cnt} ${plural(cnt,'plik','pliki','plików')} (${label})`,'ok');logEvent('OK',`Pobrano paczkę: ${cnt} ${plural(cnt,'plik','pliki','plików')} (${label}) · ${fmtSize(blob.size)}`);
+  }catch(e){toast('Błąd pakowania: '+escapeHtml(e.message),'err');logEvent('ERR','Błąd pakowania: '+e.message);}
+  finally{btn.innerHTML=prev;setStatus('bezczynny',false);updateControls();}
+}
+
+/* ================= Rejestr (zestawienie) — wspólny dla eksportu i pliku scalonego ================= */
+function toDateCell(s){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||'');return m?new Date(+m[1],+m[2]-1,+m[3]):(s||'')}
+function registerEntries(list){const e=[];list.forEach(i=>i.xlsxFiles.forEach((f,fi)=>e.push({sheet:null,file:outNameOf(i,f,fi),size:f.size,item:i})));return e}
+function buildRegisterSheet(entries,withSheet){
+  const head=(withSheet?['Arkusz']:[]).concat(['Nazwa pliku','Plik źródłowy','Numer faktury','Data','NIP','Netto','VAT','Brutto','Status','Rozmiar (KB)']);
+  const rows=entries.map(e=>{const d=e.item.data||{};return (withSheet?[e.sheet||'']:[]).concat([e.file,e.item.zipName,d.number||'',toDateCell(d.date),d.nip||'',numOrNull(d.net),numOrNull(d.vat),numOrNull(d.gross),STATUS_LABEL[e.item.status]||e.item.status,+(e.size/1024).toFixed(1)]);});
+  const n=rows.length,aoa=[head].concat(rows);
+  const iFile=head.indexOf('Nazwa pliku'),iNet=head.indexOf('Netto'),iVat=head.indexOf('VAT'),iGross=head.indexOf('Brutto');
+  if(n){const tot=new Array(head.length).fill(null);tot[iFile]='RAZEM';aoa.push(tot);}
+  const ws=XLSX.utils.aoa_to_sheet(aoa,{dateNF:'yyyy-mm-dd'});
+  [[iNet,'net'],[iVat,'vat'],[iGross,'gross']].forEach(([c,key])=>{
+    for(let r=1;r<=n;r++){const cell=ws[XLSX.utils.encode_cell({r,c})];if(cell&&cell.t==='n')cell.z='#,##0.00';}
+    if(n){const col=XLSX.utils.encode_col(c);const sum=entries.reduce((s,e)=>s+(numOrNull((e.item.data||{})[key])||0),0);ws[XLSX.utils.encode_cell({r:n+1,c})]={t:'n',v:+sum.toFixed(2),f:`SUM(${col}2:${col}${n+1})`,z:'#,##0.00'};}
+  });
+  if(withSheet)entries.forEach((e,i)=>{const cell=ws[XLSX.utils.encode_cell({r:i+1,c:0})];if(cell&&e.sheet)cell.l={Target:`#'${e.sheet.replace(/'/g,"''")}'!A1`,Tooltip:'Przejdź do arkusza'};});
+  ws['!cols']=(withSheet?[{wch:28}]:[]).concat([{wch:30},{wch:28},{wch:18},{wch:12},{wch:14},{wch:13},{wch:13},{wch:13},{wch:10},{wch:12}]);
+  ws['!autofilter']={ref:XLSX.utils.encode_range({s:{r:0,c:0},e:{r:Math.max(n,0),c:head.length-1}})};
+  return ws;
+}
+function exportSummary(){
+  const list=items.filter(i=>i.xlsxFiles.length);if(!list.length){toast('Brak danych do zestawienia','warn');return;}
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,buildRegisterSheet(registerEntries(list),false),'Rejestr faktur');
+  wb.Props={Title:'Rejestr faktur',Author:APP_NAME,CreatedDate:new Date()};
+  const ab=XLSX.write(wb,{type:'array',bookType:'xlsx',compression:true});
+  saveFile(new Blob([ab],{type:XLSX_MIME}),`zestawienie_faktur_${new Date().toISOString().slice(0,10)}.xlsx`);
+  toast('Wyeksportowano zestawienie XLSX','ok');logEvent('OK',`Wyeksportowano zestawienie XLSX (${list.length} ${plural(list.length,'faktura','faktury','faktur')})`);
+}
+function exportReport(){
+  if(!items.length){toast('Brak danych do raportu','warn');return;}
+  let sum=0,vat=0;items.forEach(i=>{if(i.data.net)sum+=i.data.net;if(i.data.vat)vat+=i.data.vat;});
+  const lines=[`=== ${APP_NAME} — raport przetwarzania faktur ===`,'Data: '+new Date().toLocaleString('pl-PL'),'',
+    `Faktury łącznie: ${items.length}`,`Suma netto: ${fmtMoney(sum)}`,`Suma VAT: ${fmtMoney(vat)}`,
+    `Gotowe: ${items.filter(i=>i.status==='done').length}`,`Ostrzeżenia: ${items.filter(i=>i.status==='warn').length}`,`Błędy: ${items.filter(i=>i.status==='error').length}`,'','=== SZCZEGÓŁY ===',
+    ...items.map(i=>`${i.zipName} → ${nameOf(i)||'-'} | ${i.data.number||'-'} | ${i.data.date||'-'} | ${fmtMoney(i.data.net)} | ${i.status}${i.error?' ('+i.error+')':''}`)];
+  saveFile(new Blob([lines.join('\n')],{type:'text/plain;charset=utf-8'}),`raport_faktur_${new Date().toISOString().slice(0,10)}.txt`);
+  toast('Pobrano raport TXT','ok');logEvent('OK','Wyeksportowano raport TXT');
+}
+
+/* ================= Scalanie w jeden XLSX ================= */
+const MERGE_DEFAULT={mode:'sheets',register:true,allSheets:false,firstHeader:true,sourceCol:true,skipEmpty:true,blankBetween:false};
+const storedMerge=readJSON(storageKey('merge'))||{};if(storedMerge.mode==='stack')storedMerge.mode='single';
+const mergeOptions=Object.assign(pick(MERGE_DEFAULT,storedMerge),{scope:'all'});
+if(mergeOptions.mode!=='sheets'&&mergeOptions.mode!=='single')mergeOptions.mode='sheets';
+function saveMergeOptions(){writeJSON(storageKey('merge'),pick(MERGE_DEFAULT,mergeOptions));}
+const sheetInfoCache=new WeakMap();
+function rowEmpty(ws,rg,R){for(let C=rg.s.c;C<=rg.e.c;C++){const c=ws[XLSX.utils.encode_cell({r:R,c:C})];if(c&&c.v!==undefined&&c.v!=='')return false;}return true}
+function sheetInfo(ws){let i=sheetInfoCache.get(ws);if(i)return i;i={all:0,nonEmpty:0};if(ws&&ws['!ref']){const rg=XLSX.utils.decode_range(ws['!ref']);i.all=rg.e.r-rg.s.r+1;for(let R=rg.s.r;R<=rg.e.r;R++)if(!rowEmpty(ws,rg,R))i.nonEmpty++;}sheetInfoCache.set(ws,i);return i}
+function safeSheetName(raw,used){
+  let n=String(raw||'Arkusz').replace(/[\\\/\?\*\[\]:]/g,'-').replace(/^'+|'+$/g,'').trim()||'Arkusz';
+  if(n.length>31)n=n.slice(0,31).trim();
+  const base=n;let i=2;
+  while(used.has(n.toLowerCase())){const suf=` (${i++})`;n=base.slice(0,31-suf.length).trim()+suf;}
+  used.add(n.toLowerCase());return n;
+}
+/* kopia arkusza z formułami zastąpionymi wartościami (odwołania między plikami przestałyby działać) */
+function cloneSheetNoFormulas(ws){
+  const o={};
+  for(const k in ws){const c=ws[k];if(k[0]==='!'||!c||typeof c!=='object'){o[k]=c;continue;}if(c.f===undefined&&c.F===undefined){o[k]=c;continue;}if(c.v===undefined)continue;const nc=Object.assign({},c);delete nc.f;delete nc.F;delete nc.D;o[k]=nc;}
+  return o;
+}
+function copyRow(ws,rg,R,out,r,colOff){for(let C=rg.s.c;C<=rg.e.c;C++){const c=ws[XLSX.utils.encode_cell({r:R,c:C})];if(!c||c.v===undefined)continue;const nc={t:c.t,v:c.v};if(c.z)nc.z=c.z;out[XLSX.utils.encode_cell({r,c:C-rg.s.c+colOff})]=nc;}}
+function appendSheetRows(single,ws,opts,src){
+  if(!ws||!ws['!ref'])return 0;
+  const rg=XLSX.utils.decode_range(ws['!ref']),colOff=opts.sourceCol?1:0;let R0=rg.s.r,written=0;
+  if(opts.firstHeader){
+    if(!single.headerDone){if(opts.sourceCol)single.ws[XLSX.utils.encode_cell({r:single.row,c:0})]={t:'s',v:'Źródło'};copyRow(ws,rg,R0,single.ws,single.row,colOff);single.last=single.row++;single.headerDone=true;}
+    R0++;
+  }
+  for(let R=R0;R<=rg.e.r;R++){
+    if(opts.skipEmpty&&rowEmpty(ws,rg,R))continue;
+    if(opts.sourceCol)single.ws[XLSX.utils.encode_cell({r:single.row,c:0})]={t:'s',v:src};
+    copyRow(ws,rg,R,single.ws,single.row,colOff);single.last=single.row++;written++;
+  }
+  single.maxC=Math.max(single.maxC,rg.e.c-rg.s.c+colOff);
+  if(!single.cols&&ws['!cols'])single.cols=ws['!cols'].slice(rg.s.c);
+  if(opts.blankBetween&&written)single.row++;
+  return written;
+}
+function finalizeSingleSheet(single,opts){
+  single.ws['!ref']=XLSX.utils.encode_range({s:{r:0,c:0},e:{r:Math.max(single.last,0),c:Math.max(single.maxC,0)}});
+  const cols=(opts.sourceCol?[{wch:30}]:[]).concat(single.cols||[]);if(cols.length)single.ws['!cols']=cols;
+  if(opts.firstHeader&&single.last>0)single.ws['!autofilter']={ref:single.ws['!ref']};
+}
+function mergeCandidates(){return items.filter(i=>i.xlsxFiles.length&&(mergeOptions.scope!=='selected'||i.selected))}
+/* szacowanie wyniku scalania — asynchroniczne (co kilka plików oddaje sterowanie), przerywane gdy zmienią się opcje */
+async function estimateMerge(list,opts,isCurrent){
+  let sheets=opts.register?1:0,rows=0,files=0,skipped=0,headerDone=false,n=0;
+  for(const it of list){
+    for(const f of it.xlsxFiles){
+      let wb;try{wb=workbookOf(f);}catch(e){skipped++;continue;}
+      files++;const names=opts.allSheets?wb.SheetNames:wb.SheetNames.slice(0,1);
+      for(const sn of names){const info=sheetInfo(wb.Sheets[sn]);
+        if(opts.mode==='sheets'){sheets++;rows+=info.all;}
+        else{let r=opts.skipEmpty?info.nonEmpty:info.all;if(opts.firstHeader){if(headerDone)r=Math.max(0,r-1);headerDone=true;}rows+=r;}
+      }
+      if(++n%4===0){await yieldToUI();if(!isCurrent())return null;}
+    }
+  }
+  if(opts.mode==='single')sheets++;
+  return {sheets,rows,files,skipped};
+}
+function dropWorkbookCache(){items.forEach(i=>i.xlsxFiles.forEach(f=>{delete f._wb;}));}
+async function buildMergedWorkbook(list,opts){
+  const out=XLSX.utils.book_new(),used=new Set(['history']),entries=[];let sheets=0,rows=0,files=0,skipped=0,n=0;
+  if(opts.register){XLSX.utils.book_append_sheet(out,XLSX.utils.aoa_to_sheet([['Rejestr']]),'Rejestr');used.add('rejestr');sheets++;}
+  const single=opts.mode==='single'?{ws:{},row:0,last:-1,maxC:0,headerDone:false,cols:null}:null;
+  for(const item of list){
+    for(let fi=0;fi<item.xlsxFiles.length;fi++){
+      const f=item.xlsxFiles[fi],fileName=outNameOf(item,f,fi),base=stripExt(fileName);
+      let wb;try{wb=workbookOf(f);}catch(e){skipped++;logEvent('WRN',`Scalanie: pominięto ${fileName} — nie można odczytać arkusza`);continue;}
+      files++;const names=opts.allSheets?wb.SheetNames:wb.SheetNames.slice(0,1);let first=null;
+      names.forEach((sn,si)=>{
+        const ws=wb.Sheets[sn],label=names.length>1?`${base} · ${sn}`:base;
+        if(single){rows+=appendSheetRows(single,ws,opts,label);}
+        else{const nm=safeSheetName(label,used);XLSX.utils.book_append_sheet(out,cloneSheetNoFormulas(ws),nm);sheets++;rows+=sheetInfo(ws).all;if(si===0)first=nm;}
+      });
+      entries.push({sheet:first,file:fileName,size:f.size,item});
+    }
+    if(++n%3===0)await yieldToUI();
+  }
+  if(single){finalizeSingleSheet(single,opts);XLSX.utils.book_append_sheet(out,single.ws,safeSheetName('Faktury',used));sheets++;rows=single.last+1;}
+  if(opts.register)out.Sheets['Rejestr']=buildRegisterSheet(entries,opts.mode==='sheets');
+  out.Props={Title:'Faktury — plik scalony',Subject:`${files} ${plural(files,'plik','pliki','plików')} XLSX`,Author:APP_NAME,CreatedDate:new Date()};
+  return {wb:out,sheets,rows,files,skipped};
+}
+function defaultMergeName(){return `faktury_scalone_${new Date().toISOString().slice(0,10)}`}
+const mergeModal=document.getElementById('mergeModal');let mergeEstimateTimer=null,mergeEstimateGen=0,mergeBusy=false;
+function openMerge(){
+  if(!LIBS_OK){toast('Biblioteki nie zostały wczytane','err');return;}
+  const all=items.filter(i=>i.xlsxFiles.length);if(!all.length){toast('Brak plików XLSX do scalenia','warn');return;}
+  hideTooltip();
+  mergeOptions.scope=items.some(i=>i.selected&&i.xlsxFiles.length)?'selected':'all';
+  document.getElementById('mergeName').value=defaultMergeName();
+  updateMergeUI();mergeModal.classList.add('show');
+}
+function closeMerge(){mergeModal.classList.remove('show');clearTimeout(mergeEstimateTimer);mergeEstimateGen++;if(!mergeBusy)dropWorkbookCache();}
+function updateMergeUI(){
+  const sel=items.filter(i=>i.selected&&i.xlsxFiles.length).length,all=items.filter(i=>i.xlsxFiles.length).length;
+  if(mergeOptions.scope==='selected'&&!sel)mergeOptions.scope='all';
+  const bs=mergeModal.querySelector('[data-scope="selected"]'),ba=mergeModal.querySelector('[data-scope="all"]');
+  bs.disabled=!sel;bs.textContent=`Zaznaczone (${sel})`;ba.textContent=`Wszystkie (${all})`;
+  mergeModal.querySelectorAll('[data-scope]').forEach(b=>b.classList.toggle('on',b.dataset.scope===mergeOptions.scope));
+  mergeModal.querySelectorAll('[data-mode]').forEach(b=>{const on=b.dataset.mode===mergeOptions.mode;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);});
+  document.getElementById('mergeDialog').classList.toggle('mode-single',mergeOptions.mode==='single');
+  mergeModal.querySelectorAll('[data-opt]').forEach(s=>{const on=!!mergeOptions[s.dataset.opt];s.classList.toggle('on',on);s.setAttribute('aria-checked',on);});
+  renderMergePreview();
+}
+function renderMergePreview(){
+  const list=mergeCandidates(),pv=document.getElementById('mergePreview'),go=document.getElementById('mergeRun');
+  const cnt=list.reduce((s,i)=>s+i.xlsxFiles.length,0);document.getElementById('mergePill').textContent=`${cnt} ${plural(cnt,'plik','pliki','plików')}`;
+  clearTimeout(mergeEstimateTimer);
+  if(!list.length){pv.className='note warn';pv.innerHTML=`<span class="icon">${icon('alert')}</span><div>Brak plików w wybranym zakresie.</div>`;go.disabled=true;return;}
+  pv.className='note info';pv.innerHTML=`<span class="icon">${icon('info')}</span><div>Obliczanie…</div>`;go.disabled=true;
+  const gen=++mergeEstimateGen,isCurrent=()=>gen===mergeEstimateGen&&mergeModal.classList.contains('show');
+  mergeEstimateTimer=setTimeout(async()=>{
+    const c=await estimateMerge(list,mergeOptions,isCurrent);if(!c||!isCurrent())return;
+    const over=mergeOptions.mode==='single'&&c.rows>1048576;
+    const fv=`${list.length} ${plural(list.length,'faktury','faktur','faktur')}`,files=`${c.files} ${plural(c.files,'plik','pliki','plików')}`;
+    let t;
+    if(mergeOptions.mode==='sheets')t=`Wynik: <b>1 plik XLSX</b> · <b>${c.sheets} ${plural(c.sheets,'arkusz','arkusze','arkuszy')}</b>${mergeOptions.register?` (Rejestr + ${c.sheets-1})`:''} · <b>${c.rows.toLocaleString('pl-PL')} ${plural(c.rows,'wiersz','wiersze','wierszy')}</b> łącznie · ${files} z ${fv}.`;
+    else t=`Wynik: <b>1 plik XLSX</b> · <b>${c.sheets} ${plural(c.sheets,'arkusz','arkusze','arkuszy')}</b>${mergeOptions.register?' (Rejestr + Faktury)':''} · <b>ok. ${c.rows.toLocaleString('pl-PL')} ${plural(c.rows,'wiersz','wiersze','wierszy')}</b> w arkuszu „Faktury" · ${files} z ${fv}.`;
+    if(c.skipped)t+=` <span style="color:var(--amber)">${c.skipped} ${plural(c.skipped,'plik','pliki','plików')} nie do odczytania — zostaną pominięte.</span>`;
+    if(over){pv.className='note err';t+=`<br><b>Przekroczony limit 1 048 576 wierszy arkusza</b> — użyj trybu „Osobne arkusze".`;}
+    pv.innerHTML=`<span class="icon">${icon(over?'alert':'info')}</span><div>${t}</div>`;go.disabled=over||!c.files;
+  },30);
+}
+mergeModal.addEventListener('click',e=>{
+  const sc=e.target.closest('[data-scope]');if(sc){if(!sc.disabled){mergeOptions.scope=sc.dataset.scope;updateMergeUI();}return;}
+  const md=e.target.closest('[data-mode]');if(md){mergeOptions.mode=md.dataset.mode;saveMergeOptions();updateMergeUI();return;}
+  const sw=e.target.closest('[data-opt]');if(sw){mergeOptions[sw.dataset.opt]=!mergeOptions[sw.dataset.opt];saveMergeOptions();updateMergeUI();}
+});
+document.getElementById('mergeName').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();runMerge();}});
+async function runMerge(){
+  if(mergeBusy)return;
+  const list=mergeCandidates();if(!list.length){toast('Brak plików w wybranym zakresie','warn');return;}
+  const name=safeName(document.getElementById('mergeName').value.replace(/\.xlsx$/i,''),defaultMergeName());
+  const go=document.getElementById('mergeRun'),prev=go.innerHTML;
+  mergeBusy=true;go.disabled=true;go.innerHTML='<span class="spinner" style="width:14px;height:14px;border-width:2px"></span> Scalanie…';setStatus('scalanie…',true);
+  try{
+    await yieldToUI();
+    const r=await buildMergedWorkbook(list,mergeOptions);
+    if(!r.files)throw new Error('Nie udało się odczytać żadnego pliku XLSX');
+    const ab=XLSX.write(r.wb,{type:'array',bookType:'xlsx',compression:true});
+    const blob=new Blob([ab],{type:XLSX_MIME});saveFile(blob,name+'.xlsx');
+    const modeTxt=mergeOptions.mode==='single'?'jeden arkusz':'osobne arkusze';
+    toast(`Scalono ${r.files} ${plural(r.files,'plik','pliki','plików')} → ${escapeHtml(name)}.xlsx · ${r.sheets} ${plural(r.sheets,'arkusz','arkusze','arkuszy')} · ${fmtSize(blob.size)}`,'ok');
+    logEvent('OK',`Scalono ${r.files} ${plural(r.files,'plik','pliki','plików')} XLSX w jeden (${modeTxt}${mergeOptions.scope==='selected'?', tylko zaznaczone':''}) → ${name}.xlsx · ${r.sheets} ark. · ${fmtSize(blob.size)}${r.skipped?' · pominięto '+r.skipped:''}`);
+    if(r.skipped)toast(`Pominięto ${r.skipped} ${plural(r.skipped,'plik','pliki','plików')} (błąd odczytu)`,'warn');
+    mergeBusy=false;closeMerge();
+  }catch(e){toast('Błąd scalania: '+escapeHtml(e.message||e),'err');logEvent('ERR','Błąd scalania: '+(e.message||e));}
+  finally{mergeBusy=false;go.innerHTML=prev;go.disabled=false;setStatus('bezczynny',false);if(mergeModal.classList.contains('show'))renderMergePreview();}
+}
+
+/* ================= Nazewnictwo ================= */
+function applyPrefixSuffix(){
+  const clean=s=>String(s).replace(/[\/\\:*?"<>|\u0000-\u001f]/g,'-');
+  const pre=clean(document.getElementById('prefixInput').value),suf=clean(document.getElementById('suffixInput').value);
+  if(!pre&&!suf){toast('Podaj prefiks lub sufiks','warn');return;}
+  if(!items.some(i=>i.xlsxFiles.length)){toast('Brak plików na liście','warn');return;}
+  items.forEach(i=>i.xlsxFiles.forEach((f,fi)=>{const base=stripExt(outNameOf(i,f,fi));const nn=safeName(pre+base+suf,base)+'.'+(f.ext||'xlsx');if(fi===0)i.customName=nn;f.newName=nn;}));
+  render();saveSession();toast('Zastosowano do wszystkich plików','ok');logEvent('INF',`Prefiks/sufiks: "${pre}" / "${suf}"`);
+}
+/* zastosowanie szablonu: keepCustom=true zostawia nazwy nadane ręcznie (zmiana szablonu), false przywraca wszystko (przycisk) */
+function applyNames(keepCustom){
+  items.forEach(i=>{if(!keepCustom)i.customName=null;i.xlsxFiles.forEach((f,idx)=>{f.newName=(idx===0&&keepCustom&&i.customName)?i.customName:applyTemplate(i,i.xlsxFiles.length>1?idx+1:null,f.ext);});});
+  render();saveSession();
+}
+function resetNames(notify){applyNames(false);if(notify)toast('Przywrócono nazwy wg szablonu','ok');}
+let templateTimer=null;
+function commitTemplate(){clearTimeout(templateTimer);const t=safeText(document.getElementById('templateInput').value,120)||'{faktura}';if(t===settings.template)return;settings.template=t;saveSettings();applyNames(true);}
+function updateTemplate(){clearTimeout(templateTimer);templateTimer=setTimeout(commitTemplate,300);}
+function setTemplate(t){document.getElementById('templateInput').value=t;commitTemplate();toast('Szablon: '+t,'ok');}
+
+/* ================= Podgląd ================= */
+let previewExpanded=false,previewCurSheet=null,previewWb=null;
+function openPreview(id){
+  const it=items.find(i=>i.id===id);if(!it||!it.xlsxFiles.length)return;
+  hideTooltip();previewExpanded=false;
+  const f=it.xlsxFiles[0],d=it.data||{};
+  document.getElementById('previewPill').textContent=it.xlsxFiles.length>1?`${it.xlsxFiles.length} ${plural(it.xlsxFiles.length,'plik','pliki','plików')}`:(f.ext||'xlsx').toUpperCase();
+  let wb=null;try{wb=workbookOf(f);}catch(e){}
+  let html=`<div class="file-row"><div class="file-icon"><span class="icon">${icon('sheet')}</span></div><div class="file-meta"><div class="file-name">${escapeHtml(nameOf(it))}</div><div class="file-sub"><span class="mono">${fmtSize(f.size)}</span><span class="tag">${escapeHtml(f.ext||'xlsx')}</span><span class="muted">${it.source==='file'?'zaimportowany bezpośrednio':'← '+escapeHtml(f.originalName)+' z '+escapeHtml(it.zipName)}</span></div></div><div class="card-pills">${statusPill(it.status)}</div></div>`;
+  const numTip=(d.number||'').length>18?` data-tip="${escapeHtml(d.number)}"`:'';
+  html+=`<div class="facts">
+    <div><div class="k">Numer</div><div class="v"${numTip}>${escapeHtml(d.number||'—')}</div></div>
+    <div><div class="k">Data</div><div class="v">${escapeHtml(d.date||'—')}</div></div>
+    <div><div class="k">NIP</div><div class="v">${escapeHtml(d.nip||'—')}</div></div>
+    <div><div class="k">Netto</div><div class="v" style="color:var(--text)">${d.net?fmtMoney(d.net):'—'}</div></div>
+    <div><div class="k">VAT</div><div class="v" style="color:var(--amber)">${d.vat?fmtMoney(d.vat):'—'}</div></div>
+    <div><div class="k">Brutto</div><div class="v" style="color:var(--emerald)">${d.gross?fmtMoney(d.gross):'—'}</div></div>
+  </div>`;
+  if(wb){html+='<div class="sheet-tabs" id="sheetTabs"></div><div class="sheet-wrap" id="sheetView"></div><div id="sheetTrunc"></div>';}
+  else html+='<div class="note warn" style="margin-top:16px"><span class="icon">'+icon('alert')+'</span><div>Nie udało się odczytać zawartości arkusza.</div></div>';
+  document.getElementById('previewBody').innerHTML=html;
+  previewWb=wb;
+  if(wb){
+    const tabs=document.getElementById('sheetTabs');
+    wb.SheetNames.forEach((sn,idx)=>{const b=document.createElement('button');b.className='chip plain'+(idx===0?' on':'');b.textContent=sn;b.onclick=()=>{tabs.querySelectorAll('.chip').forEach(t=>t.classList.remove('on'));b.classList.add('on');previewExpanded=false;renderSheet(wb,sn);};tabs.appendChild(b);});
+    previewCurSheet=wb.SheetNames[0];renderSheet(wb,previewCurSheet);
+  }
+  document.getElementById('previewDownload').onclick=()=>{saveFile(f.blob,nameOf(it));toast('Pobrano '+escapeHtml(nameOf(it)),'ok');};
+  document.getElementById('previewModal').classList.add('show');
+}
+/* podgląd: domyślnie tylko wycinek (80×24) dla szybkości; „Pokaż cały arkusz" dogrywa resztę (do 3000 wierszy × 100 kolumn — bezpieczny limit dla bardzo dużych plików) */
+/* komórka do wyświetlenia w podglądzie — daty zawsze w jednolitym formacie rrrr-mm-dd, niezależnie od formatu w źródłowym pliku: prawdziwe daty Excela wprost, tekstowe daty wg formatu rozpoznanego dla danej kolumny (dateOrders), reszta bez zmian */
+function displayCell(v,colOrder){
+  if(v instanceof Date)return isNaN(v)?'':isoDateLocal(v);
+  if(colOrder&&typeof v==='string'){const p=splitDateParts(v);if(p){const iso=assembleDateFromParts(p,colOrder);if(iso)return iso;}}
+  return v??'';
+}
+/* rozpoznaje, czy kolumna zawiera głównie daty tekstowe i w jakim formacie (dzień/miesiąc/rok), na podstawie próbki wartości z bieżącego widoku podglądu — żeby uniknąć fałszywych trafień (np. numer faktury z ukośnikami) wymaga, by większość niepustych tekstów w kolumnie dała się sparsować jako poprawna data */
+function detectColumnDateOrder(rows,cols){
+  const orders=new Array(cols).fill(null);
+  for(let c=0;c<cols;c++){
+    let total=0,parsed=[];
+    for(const r of rows){const v=r[c];if(v==null||v==='')continue;if(v instanceof Date)continue;if(typeof v!=='string')continue;total++;const p=splitDateParts(v);if(p)parsed.push(p);}
+    if(total>=1&&parsed.length&&parsed.length/total>=0.6){
+      const order=detectDateOrder(parsed);
+      if(parsed.every(p=>assembleDateFromParts(p,order)))orders[c]=order;
+    }
+  }
+  return orders;
+}
+function renderSheet(wb,sn){
+  previewCurSheet=sn;
+  const ws=wb.Sheets[sn];let totalR=0,totalC=0,range;
+  const limR=previewExpanded?3000:80,limC=previewExpanded?100:24;
+  if(ws&&ws['!ref']){
+    const full=XLSX.utils.decode_range(ws['!ref']);
+    totalR=full.e.r-full.s.r+1;totalC=full.e.c-full.s.c+1;
+    const rg=XLSX.utils.decode_range(ws['!ref']);rg.e.r=Math.min(rg.e.r,rg.s.r+limR-1);rg.e.c=Math.min(rg.e.c,rg.s.c+limC-1);range=XLSX.utils.encode_range(rg);
+  }
+  const rows=ws&&range?XLSX.utils.sheet_to_json(ws,{header:1,defval:'',range}):[];
+  const cols=Math.min(Math.max(1,...rows.map(r=>r.length)),limC);
+  const dateOrders=detectColumnDateOrder(rows,cols);
+  let h='<table class="sheet"><thead><tr><th></th>';for(let c=0;c<cols;c++)h+='<th>'+XLSX.utils.encode_col(c)+'</th>';h+='</tr></thead><tbody>';
+  rows.forEach((r,ri)=>{h+='<tr><th>'+(ri+1)+'</th>';for(let c=0;c<cols;c++)h+='<td>'+escapeHtml(displayCell(r[c],dateOrders[c]))+'</td>';h+='</tr>';});
+  document.getElementById('sheetView').innerHTML=h+'</tbody></table>';
+  const shownR=rows.length,truncR=totalR>limR,truncC=totalC>limC,trunc=document.getElementById('sheetTrunc');
+  if(truncR||truncC){
+    const parts=[];if(truncR)parts.push(`${shownR} z ${totalR} ${plural(totalR,'wiersza','wierszy','wierszy')}`);if(truncC)parts.push(`${cols} z ${totalC} ${plural(totalC,'kolumny','kolumn','kolumn')}`);
+    trunc.className='note info';trunc.style.marginTop='10px';
+    trunc.innerHTML=`<span class="icon">${icon('info')}</span><div>Podgląd: pokazano ${parts.join(' · ')}.${previewExpanded?' Osiągnięto bezpieczny limit podglądu — pobierz plik, aby zobaczyć całość.':' <button class="link-btn" id="showFullSheet">Pokaż cały arkusz</button>'}</div>`;
+    if(!previewExpanded){const btn=document.getElementById('showFullSheet');if(btn)btn.onclick=()=>{previewExpanded=true;renderSheet(wb,sn);};}
+  }else trunc.innerHTML='';
+}
+function closePreview(){document.getElementById('previewModal').classList.remove('show');}
+
+/* ================= Podsumowanie ================= */
+/* liczy się wyłącznie kwota netto; grupowanie miesięczne wg daty transakcji/realizacji (txDate) — z fallbackiem na datę faktury, gdy kolumny transakcji nie znaleziono w pliku */
+function renderReports(){
+  let sum=0,cnt=0;const byMonth={};
+  items.forEach(i=>{if(i.data.net){sum+=i.data.net;cnt++;const d=safeDate(i.data.txDate||i.data.date);const m=d?d.slice(0,7):'inne';byMonth[m]=(byMonth[m]||0)+i.data.net;}});
+  document.getElementById('rTotal').textContent=items.length;
+  document.getElementById('rSum').textContent=fmtMoney(sum);
+  document.getElementById('rAvg').textContent=fmtMoney(cnt?sum/cnt:0);
+  document.getElementById('rVat').textContent=Object.keys(byMonth).filter(k=>k!=='inne').length;
+  document.getElementById('rCountPill').textContent=items.length+' FV';
+  const st={done:0,warn:0,error:0,processing:0};items.forEach(i=>st[i.status]=(st[i.status]||0)+1);
+  const labels={done:'Gotowe',warn:'Ostrzeżenia',error:'Błędy',processing:'Przetwarzanie'};const total=items.length||1;
+  document.getElementById('statusBreakdown').innerHTML=Object.keys(labels).map(k=>`<div class="breakdown-row"><span class="status-dot" style="--c:${STATUS_COLOR[k]}"></span><span class="k">${labels[k]}</span><div class="bar"><span style="width:${(st[k]||0)/total*100}%;background:${STATUS_COLOR[k]}"></span></div><span class="v">${st[k]||0}</span></div>`).join('');
+  window._byMonth=byMonth;drawMonthChart();
+}
+function drawMonthChart(){
+  const svg=document.getElementById('monthChart');if(!svg)return;
+  const bm=window._byMonth||{},keys=Object.keys(bm).sort();const muted=cssVar('--muted'),primary=cssVar('--primary'),border=cssVar('--card-border');
+  if(!keys.length){svg.innerHTML=`<text x="320" y="112" fill="${muted}" font-size="13" text-anchor="middle" font-family="Space Mono,monospace">Brak danych — wgraj faktury z wykrytą kwotą i datą</text>`;return;}
+  const W=640,H=220,padL=16,padR=16,padT=26,padB=30;const max=Math.max(...keys.map(k=>bm[k]))*1.15||1;const bw=(W-padL-padR)/keys.length;
+  let g='';for(let i=1;i<=4;i++){const gy=padT+((H-padT-padB)/4)*i;g+=`<line x1="${padL}" y1="${gy}" x2="${W-padR}" y2="${gy}" stroke="${border}" stroke-width="1"/>`;}
+  let bars='';keys.forEach((k,i)=>{const bh=(bm[k]/max)*(H-padT-padB);const x=padL+i*bw+bw*.18,y=H-padB-bh,w=bw*.64;
+    bars+=`<rect x="${x}" y="${y}" width="${w}" height="${bh}" rx="4" fill="${primary}" opacity=".85"><title>${escapeHtml(k)}: ${fmtMoney(bm[k])}</title></rect>
+    <text x="${x+w/2}" y="${y-7}" fill="${primary}" font-size="10" text-anchor="middle" font-family="Space Mono,monospace" font-weight="700">${Math.round(bm[k]).toLocaleString('pl-PL')}</text>
+    <text x="${x+w/2}" y="${H-padB+16}" fill="${muted}" font-size="10" text-anchor="middle" font-family="Space Mono,monospace">${escapeHtml(k)}</text>`;});
+  svg.innerHTML=g+bars;
+}
+
+/* ================= Opcje ================= */
+const SWITCHES={swNested:'nested',swExtract:'extract',swValidate:'validate',swRemember:'remember',swFolders:'folders'};
+function toggleSwitch(id){
+  const el=document.getElementById(id);el.classList.toggle('on');const on=el.classList.contains('on');el.setAttribute('aria-checked',on);
+  if(id==='swWebFonts'){setWebFonts(on);logEvent('INF',`Czcionki webowe ${on?'włączone':'wyłączone'}`);return;}
+  settings[SWITCHES[id]]=on;saveSettings();
+  if(id==='swRemember'){if(!on)clearSavedSession(false);else saveSession();}
+  if(id==='swFolders')updateControls();
+  logEvent('INF',`Opcja „${SWITCHES[id]}" = ${on?'wł.':'wył.'}`);
+}
+function syncSettingsUI(){
+  Object.keys(SWITCHES).forEach(id=>{const el=document.getElementById(id);el.classList.toggle('on',!!settings[SWITCHES[id]]);el.setAttribute('aria-checked',!!settings[SWITCHES[id]]);});
+  const wf=document.getElementById('swWebFonts');wf.classList.toggle('on',webFontsOn());wf.setAttribute('aria-checked',webFontsOn());
+  document.getElementById('limitsInfo').textContent=`${fmtSize(LIMITS.fileBytes)} / plik · ${fmtSize(LIMITS.archiveBytes)} / archiwum · ${LIMITS.entries} plików`;
+  document.getElementById('templateInput').value=settings.template;renderTemplateOut();
+}
+function saveSettings(){writeJSON(storageKey('settings'),pick(SETTINGS_DEFAULT,settings));renderTemplateOut();}
+
+/* ================= Zapamiętywanie listy (IndexedDB) ================= */
+/* jedno połączenie z bazą, otwierane raz; po żądaniu zmiany wersji (inna karta) zamykane i otwierane ponownie */
+let dbPromise=null;
+function openDatabase(){
+  if(!dbPromise){
+    dbPromise=new Promise((res,rej)=>{
+      const r=indexedDB.open(DB_NAME,1);
+      r.addEventListener('upgradeneeded',e=>{const db=e.target.result;if(!db.objectStoreNames.contains(STORE))db.createObjectStore(STORE);});
+      r.addEventListener('success',e=>{const db=e.target.result;db.addEventListener('versionchange',()=>{db.close();dbPromise=null;});db.addEventListener('close',()=>{dbPromise=null;});res(db);});
+      r.addEventListener('error',()=>rej(r.error));r.addEventListener('blocked',()=>rej(new Error('blocked')));
+    });
+    dbPromise.catch(()=>{dbPromise=null;});
+  }
+  return dbPromise;
+}
+function idbGet(db){return new Promise((res,rej)=>{const r=db.transaction(STORE,'readonly').objectStore(STORE).get('state');r.addEventListener('success',()=>res(r.result));r.addEventListener('error',()=>rej(r.error));});}
+function idbPut(db,val){return new Promise((res,rej)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put(val,'state');tx.addEventListener('complete',()=>res());tx.addEventListener('error',()=>rej(tx.error));tx.addEventListener('abort',()=>rej(tx.error||new Error('Transakcja przerwana')));});}
+/* zapis jest łączony (jeden zapis na ~600 ms zamiast po każdym pliku), czeka na wczytanie poprzedniej sesji i zgłasza brak miejsca */
+let saveTimer=null,savePending=false,saveRunning=null,quotaWarned=false,sessionLoaded=Promise.resolve();
+function saveSession(){
+  if(!settings.remember||!LIBS_OK)return;
+  savePending=true;clearTimeout(saveTimer);saveTimer=setTimeout(flushSession,600);
+}
+async function flushSession(){
+  clearTimeout(saveTimer);
+  if(!savePending||!settings.remember||!LIBS_OK)return;
+  if(saveRunning){await saveRunning;return flushSession();}
+  savePending=false;
+  saveRunning=(async()=>{
+    try{
+      await sessionLoaded;
+      const db=await openDatabase();
+      const data=items.filter(i=>i.status!=='processing').map(i=>({source:i.source==='file'?'file':'zip',zipName:i.zipName,invoiceName:i.invoiceName,status:i.status,error:i.error,data:i.data,customName:i.customName,addedAt:i.addedAt,xlsxFiles:i.xlsxFiles.map(f=>({originalName:f.originalName,ext:f.ext,newName:f.newName,size:f.size,ab:f.arrayBuffer}))}));
+      await idbPut(db,{items:data,log:eventLog});
+      document.getElementById('sessionState').textContent='lista: zapisana';
+    }catch(e){
+      document.getElementById('sessionState').textContent='lista: nie zapisano';
+      const quota=e&&(e.name==='QuotaExceededError'||/quota/i.test(String(e.message||e.name||'')));
+      if(!quotaWarned){quotaWarned=true;toast(quota?'Brak miejsca w pamięci przeglądarki — lista nie zostanie zapamiętana po odświeżeniu. Pobierz paczkę, aby nie stracić plików.':'Nie udało się zapamiętać listy w przeglądarce. Pobierz paczkę, aby nie stracić plików.','warn');logEvent('WRN','Zapis listy w przeglądarce nie powiódł się'+(quota?' (brak miejsca)':''));}
+    }
+  })();
+  await saveRunning;saveRunning=null;
+}
+window.addEventListener('pagehide',()=>{if(savePending)flushSession();});
+/* jednorazowe przeniesienie listy zapisanej pod poprzednią nazwą aplikacji; stara baza jest potem usuwana */
+async function migrateLegacyDatabase(db){
+  const MIGRATED=storageKey('db-migrated');
+  try{if(localStorage.getItem(MIGRATED))return null;}catch(e){}
+  try{
+    const old=await new Promise((res,rej)=>{const r=indexedDB.open(LEGACY_DB_NAME);r.addEventListener('success',e=>res(e.target.result));r.addEventListener('error',()=>rej(r.error));});
+    let st=null;
+    if(old.objectStoreNames.contains(STORE))st=await idbGet(old);
+    old.close();indexedDB.deleteDatabase(LEGACY_DB_NAME);
+    if(st)await idbPut(db,st);
+    try{localStorage.setItem(MIGRATED,'1');}catch(e){}
+    return st;
+  }catch(e){return null;}
+}
+async function loadSession(){
+  if(!settings.remember)return;
+  try{
+    const db=await openDatabase();
+    let st=await idbGet(db);if(!st)st=await migrateLegacyDatabase(db);
+    if(!st||typeof st!=='object')return;
+      /* wpisy z bieżącego uruchomienia zostają na górze, odtworzone — pod nimi */
+      if(Array.isArray(st.log)){const restored=st.log.filter(l=>l&&typeof l.msg==='string').map(l=>({t:safeText(l.t,8)||'',lvl:['INF','OK','WRN','ERR'].includes(l.lvl)?l.lvl:'INF',msg:safeText(l.msg,300)||''}));eventLog=eventLog.concat(restored).slice(0,500);}
+      (Array.isArray(st.items)?st.items:[]).forEach(d=>{
+        if(!d||typeof d!=='object')return;
+        const zipName=safeName(d.zipName,'archiwum.zip');
+        const raw=d.data&&typeof d.data==='object'?d.data:{};
+        const data={number:safeText(raw.number,60),date:safeDate(raw.date),nip:safeDigits(raw.nip),gross:numOrNull(raw.gross),net:numOrNull(raw.net),vat:numOrNull(raw.vat),txDate:safeDate(raw.txDate)};
+        const files=(Array.isArray(d.xlsxFiles)?d.xlsxFiles:[]).filter(f=>f&&f.ab instanceof ArrayBuffer&&f.ab.byteLength<=LIMITS.fileBytes).slice(0,LIMITS.entries)
+          .map(f=>{const originalName=safeName(f.originalName,'plik.xlsx');const ext=(f.ext==='xls'||f.ext==='xlsx')?f.ext:sheetExt(originalName);let newName=safeName(f.newName,'plik.'+ext);if(!isSheetFile(newName)||sheetExt(newName)!==ext)newName=stripExt(newName)+'.'+ext;return {originalName,ext,newName,size:f.ab.byteLength,arrayBuffer:f.ab,blob:new Blob([f.ab],{type:mimeFor(ext)}),data};});
+        const ext0=files.length?files[0].ext:'xlsx';
+        let customName=d.customName?safeName(d.customName):null;if(customName&&(!isSheetFile(customName)||sheetExt(customName)!==ext0))customName=stripExt(customName)+'.'+ext0;
+        const status=STATUSES.includes(d.status)?d.status:'error';
+        items.push({id:++uid,source:d.source==='file'?'file':'zip',zipName,invoiceName:safeText(d.invoiceName,180)||stripExt(zipName),status:files.length?status:'error',error:safeText(d.error,200)||(files.length?null:'Brak danych pliku'),data,selected:false,customName,addedAt:+d.addedAt||Date.now(),xlsxFiles:files});
+      });
+      updateLogCounters();renderHistory();render();
+      if(items.length){document.getElementById('sessionState').textContent='lista: przywrócona';toast(`Przywrócono listę: ${items.length} ${plural(items.length,'faktura','faktury','faktur')}`,'info');}
+  }catch(e){}
+}
+function clearSavedSession(notify){
+  savePending=false;clearTimeout(saveTimer);
+  try{openDatabase().then(db=>db.transaction(STORE,'readwrite').objectStore(STORE).delete('state')).catch(()=>{});}catch(e){}
+  document.getElementById('sessionState').textContent='lista: —';
+  if(notify){toast('Zapamiętana lista usunięta','info');logEvent('INF','Usunięto zapamiętaną listę');}
+}
+
+/* ================= Strefa importu / wejścia ================= */
+const dropzone=document.getElementById('dropzone'),fileInput=document.getElementById('fileInput'),folderInput=document.getElementById('folderInput');
+dropzone.addEventListener('click',()=>fileInput.click());
+dropzone.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();fileInput.click();}});
+fileInput.addEventListener('change',e=>{importFiles(e.target.files);fileInput.value='';});
+folderInput.addEventListener('change',e=>{importFiles(e.target.files);folderInput.value='';});
+function openFilePicker(){if(!LIBS_OK){toast('Biblioteki nie zostały wczytane — import jest niemożliwy','err');return;}fileInput.click();}
+['dragenter','dragover'].forEach(ev=>dropzone.addEventListener(ev,e=>{e.preventDefault();e.stopPropagation();dropzone.classList.add('drag');}));
+['dragleave','drop'].forEach(ev=>dropzone.addEventListener(ev,e=>{e.preventDefault();e.stopPropagation();if(ev==='dragleave'&&dropzone.contains(e.relatedTarget))return;dropzone.classList.remove('drag');}));
+dropzone.addEventListener('drop',e=>{if(e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files.length)importFiles(e.dataTransfer.files);});
+/* upuszczenie ZIP gdziekolwiek w oknie (np. na innym widoku) też importuje */
+window.addEventListener('dragover',e=>e.preventDefault(),false);
+window.addEventListener('drop',e=>{e.preventDefault();if(dropzone.contains(e.target))return;if(e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files.length)importFiles(e.dataTransfer.files);},false);
+
+/* ================= Skróty klawiszowe (tylko kombinacje z Ctrl/Cmd, „/” i Esc — nic nie jest rejestrowane) ================= */
+/* obsługa z klawiatury pól wyboru i przełączników (Enter / Spacja) */
+document.addEventListener('keydown',e=>{
+  if((e.key==='Enter'||e.key===' ')&&e.target instanceof Element&&e.target.matches('[role="checkbox"],[role="switch"]')){e.preventDefault();e.target.click();}
+});
+document.addEventListener('keydown',e=>{
+  const inField=/INPUT|TEXTAREA|SELECT/.test((document.activeElement&&document.activeElement.tagName)||'');const k=e.key.toLowerCase();
+  if((e.ctrlKey||e.metaKey)&&k==='o'){e.preventDefault();openFilePicker();}
+  else if((e.ctrlKey||e.metaKey)&&k==='s'){e.preventDefault();if(!document.getElementById('downloadAll').disabled)downloadPackage();}
+  else if((e.ctrlKey||e.metaKey)&&k==='m'){e.preventDefault();if(items.some(i=>i.xlsxFiles.length))openMerge();}
+  else if((e.ctrlKey||e.metaKey)&&k==='e'){e.preventDefault();if(!document.getElementById('summaryBtn').disabled)exportSummary();}
+  else if((e.ctrlKey||e.metaKey)&&k==='b'){e.preventDefault();if(window.matchMedia('(min-width:901px)').matches)toggleSidebar();}
+  else if(e.key==='/'&&!inField){e.preventDefault();showView('faktury');const s=document.getElementById('searchInput');s.scrollIntoView({block:'center'});s.focus();}
+  else if(e.key==='Escape'){hideTooltip();closePreview();closeMerge();}
+});
+
+/* ================= Start ================= */
+document.querySelectorAll('[role="switch"],[role="checkbox"]').forEach(el=>{if(!el.hasAttribute('tabindex'))el.setAttribute('tabindex','0');});
+buildNav();applySidebar(false);showView('faktury');syncSettingsUI();render();updateLogCounters();renderHistory();
+if(LIBS_OK){sessionLoaded=loadSession();logEvent('INF',`${APP_NAME} uruchomiony — ZIP → XLSX`);}
+else{document.getElementById('libsNote').style.display='';dropzone.classList.add('disabled');dropzone.setAttribute('aria-disabled','true');setStatus('brak bibliotek',true);logEvent('ERR','Nie wczytano bibliotek JSZip / SheetJS — sprawdź połączenie lub blokadę skryptów');}
+</script>
+</body>
+</html>
