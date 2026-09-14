@@ -1,0 +1,2046 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1B1B1B">
+<meta name="description" content="Komunikat Działu Floty: zmiana procesu rejestrowania protokołów przekazania pojazdów służbowych oraz obiektów UDT. Wymagane dane, zdjęcia i wniosek PDF.">
+<title>Zmiana procesu rejestrowania protokołów przekazania | Dział Floty</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --lime:#A6CE39;
+    --lime-d:#8CBB1E;
+    --ink:#1B1B1B;
+    --steel:#5B5F5C;
+  }
+  html{scroll-behavior:smooth}
+  body{font-family:'Barlow',system-ui,sans-serif;color:#26292b;background:#fff;-webkit-font-smoothing:antialiased}
+  h1,h2,h3,h4,.cond{font-family:'Barlow Condensed','Barlow',sans-serif;letter-spacing:.01em}
+  .display{font-family:'Barlow Condensed',sans-serif;font-weight:800;text-transform:uppercase;line-height:.92}
+  .circuit{
+    background-image:
+      linear-gradient(to right, rgba(166,206,57,.16) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(166,206,57,.10) 1px, transparent 1px);
+    background-size:56px 56px;
+  }
+  .circuit-dots{
+    background-image:radial-gradient(rgba(166,206,57,.35) 1.4px, transparent 1.4px);
+    background-size:28px 28px;
+  }
+  .diag{background-image:repeating-linear-gradient(135deg, rgba(166,206,57,.55) 0 2px, transparent 2px 12px)}
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.2,.7,.3,1),transform .7s cubic-bezier(.2,.7,.3,1);will-change:opacity,transform}
+  .reveal.in{opacity:1;transform:none;will-change:auto}
+  .lift{transition:transform .35s ease, box-shadow .35s ease, border-color .35s ease}
+  .lift:hover{transform:translateY(-4px)}
+  input.cell, select.cell{
+    width:100%;background:transparent;border:0;outline:0;font-size:.95rem;color:#111;padding:.55rem .25rem;
+    border-bottom:1px dashed #cfd6c4;transition:border-color .2s, background .2s;
+  }
+  input.cell:focus, select.cell:focus{border-bottom-color:var(--lime-d);background:rgba(166,206,57,.10)}
+  input.cell::placeholder{color:#a9b0a5;font-style:italic;font-size:.85rem}
+  input.cell:disabled, select.cell:disabled{opacity:.65;cursor:not-allowed}
+  tr.done td.num{background:var(--lime)!important;color:#17200a!important}
+  .box{margin-top:3px}
+  .chk:checked + .box{background:var(--lime);border-color:var(--lime)}
+  .chk:checked + .box svg{opacity:1;transform:scale(1)}
+  .chk:focus-visible + .box{outline:2px solid var(--lime);outline-offset:3px}
+  .chk:checked ~ .lbl{color:#e9f3d6;text-decoration:line-through;text-decoration-color:rgba(166,206,57,.85)}
+  ::selection{background:var(--lime);color:#12180a}
+  .scrollbar-thin::-webkit-scrollbar{height:8px}
+  .scrollbar-thin::-webkit-scrollbar-thumb{background:#c9d3b6;border-radius:8px}
+  #pdfStage{position:fixed;left:-10000px;top:0;width:794px;background:#fff;z-index:-1}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .spinner{width:46px;height:46px;border:4px solid rgba(255,255,255,.18);border-top-color:#A6CE39;border-radius:50%;animation:spin .8s linear infinite}
+  kbd{font-family:'Barlow Condensed',sans-serif}
+
+  /* ── MOBILE ── */
+  @media (max-width:640px){
+    body{font-size:15px}
+    .display{line-height:.96}
+    h1.display{font-size:clamp(2.6rem,15vw,4.2rem)}
+    section{overflow-x:hidden}
+    .px-5{padding-left:14px!important;padding-right:14px!important}
+    .py-16,.md\:py-24{padding-top:44px!important;padding-bottom:44px!important}
+    .py-14,.md\:py-20{padding-top:38px!important;padding-bottom:38px!important}
+    .p-6,.md\:p-7,.p-7,.md\:p-8,.md\:p-10{padding:16px!important}
+    .p-8{padding:18px!important}
+    .gap-10,.md\:gap-16,.gap-6{gap:18px!important}
+    section h3{font-size:1.35rem;line-height:1.15}
+    input.cell, select.cell{font-size:16px;padding:.7rem .25rem}
+    button, .no-print a[href^="#"]{min-height:44px}
+    /* ── TABELA JAKO KARTY ── */
+    .tbl-wrap{overflow:visible!important;border:0!important}
+    .tbl-wrap table{min-width:0!important;width:100%;display:block}
+    .tbl-wrap thead{display:none}
+    .tbl-wrap tbody{display:block}
+    .tbl-wrap tr{
+      display:grid;
+      grid-template-columns:34px 1fr;
+      grid-template-areas:'num label' 'field field';
+      gap:0 10px;
+      border:1px solid rgba(0,0,0,.12);
+      margin-bottom:8px;
+      padding:10px 12px;
+      background:#fff!important;
+      align-items:start;
+    }
+    .tbl-wrap tr.done{border-color:#A6CE39}
+    .tbl-wrap td{display:block;border:0;padding:0}
+    .tbl-wrap td.num{
+      grid-area:num;width:28px!important;height:28px;
+      display:grid;place-items:center;font-size:13px;line-height:1;
+      background:#EDF1E6;border-radius:2px;
+    }
+    .tbl-wrap td.td-label{grid-area:label;font-size:13.5px;line-height:1.35;color:#3a3f3b;padding:4px 0 0 0!important}
+    .tbl-wrap td.td-field{grid-area:field;margin-top:8px}
+    .tbl-wrap input.cell,.tbl-wrap select.cell{border:1px solid #d7ddcd;background:#FAFBF8;padding:.7rem .6rem;border-radius:2px}
+    .tbl-wrap input.cell:focus,.tbl-wrap select.cell:focus{border-color:#8CBB1E;background:#fff}
+    .tbl-wrap td.td-field > div{margin-top:0}
+    .tbl-wrap td.td-field > div.flex{padding:0}
+    header .px-5{padding-left:12px!important;padding-right:12px!important}
+    footer .py-10{padding-top:26px!important;padding-bottom:26px!important}
+    #zdjecia label.group{padding:14px!important}
+    #gallery{gap:6px}
+    #top{min-height:auto}
+    #top .pt-10{padding-top:20px!important}
+    #top .pb-8{padding-bottom:22px!important}
+    #top .mt-9{margin-top:22px!important}
+    #top .py-5{padding-top:12px!important;padding-bottom:12px!important}
+  }
+  @media (max-width:380px){ h1.display{font-size:2.3rem} }
+
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+    .reveal{opacity:1;transform:none}
+  }
+
+  @media print{
+    .no-print{display:none!important}
+    body{font-size:11pt}
+    .reveal{opacity:1!important;transform:none!important}
+    .print-block{break-inside:avoid}
+    input.cell,select.cell{border-bottom:1px solid #999}
+    section{page-break-inside:avoid}
+    a[href^="http"]::after{content:""}
+  }
+</style>
+</head>
+<body class="bg-white">
+
+<!-- ══════════ OVERLAY GENEROWANIA PDF ══════════ -->
+<div id="pdfOverlay" role="status" aria-live="polite" class="no-print hidden fixed inset-0 z-[80] bg-[#0F110E]/95 backdrop-blur-sm flex-col items-center justify-center gap-5">
+  <div class="spinner" aria-hidden="true"></div>
+  <div class="cond uppercase tracking-[.28em] text-[12px] text-[#A6CE39]">Generowanie dokumentu PDF</div>
+  <div id="pdfNote" class="text-white/50 text-sm text-center px-6">Proszę czekać — trwa składanie dokumentu…</div>
+</div>
+<div id="pdfStage" aria-hidden="true"></div>
+
+<!-- ══════════ TOP BAR ══════════ -->
+<div class="no-print fixed top-0 left-0 right-0 z-50">
+  <div class="h-[3px] bg-black/10"><div id="prog" class="h-full bg-[#A6CE39] w-0"></div></div>
+  <header class="bg-[#1B1B1B]/95 backdrop-blur supports-[backdrop-filter]:bg-[#1B1B1B]/80 border-b border-white/10">
+    <div class="max-w-[1180px] mx-auto px-5 h-14 flex items-center justify-between gap-4">
+      <a href="#top" class="flex items-center gap-3 shrink-0">
+        <span class="w-9 h-9 grid place-items-center bg-[#A6CE39] text-[#14180b] font-extrabold cond text-xl leading-none">DF</span>
+        <span class="text-white cond font-bold tracking-[.18em] text-sm uppercase">Dział Floty</span>
+      </a>
+      <nav aria-label="Nawigacja dokumentu" class="hidden lg:flex items-center gap-6 text-[13px] uppercase tracking-[.12em] cond font-semibold text-white/60">
+        <a href="#komunikat" class="hover:text-[#A6CE39] transition">Komunikat</a>
+        <a href="#proces" class="hover:text-[#A6CE39] transition">Proces</a>
+        <a href="#tabela" class="hover:text-[#A6CE39] transition">Tabela zgłoszenia</a>
+        <a href="#zdjecia" class="hover:text-[#A6CE39] transition">Zdjęcia</a>
+        <a href="#zalaczniki" class="hover:text-[#A6CE39] transition">Podpisy</a>
+        <a href="#udt" class="hover:text-[#A6CE39] transition">UDT</a>
+      </nav>
+      <div class="flex items-center gap-2">
+        <button type="button" id="btnPrint" class="hidden lg:inline-flex items-center gap-2 text-[12px] uppercase tracking-[.14em] cond font-bold text-white/70 hover:text-white border border-white/20 hover:border-white/50 px-3 py-2 transition">Drukuj</button>
+        <button type="button" data-pdf="instrukcja" class="inline-flex items-center gap-2 text-[12px] uppercase tracking-[.14em] cond font-bold text-white hover:text-[#A6CE39] border border-white/25 hover:border-[#A6CE39] px-3 py-2 transition">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>
+          Instrukcja PDF
+        </button>
+        <a href="#tabela" class="hidden sm:inline-flex items-center gap-2 bg-[#A6CE39] hover:bg-[#b7dc4c] text-[#161c07] text-[12px] uppercase tracking-[.14em] cond font-extrabold px-4 py-2 transition">Wypełnij zgłoszenie</a>
+      </div>
+    </div>
+  </header>
+</div>
+
+<!-- ══════════ HERO ══════════ -->
+<section id="top" class="relative min-h-[100svh] flex flex-col overflow-hidden bg-[#141414] pt-14">
+  <img src="https://images.pexels.com/photos/4391469/pexels-photo-4391469.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1200&w=2000"
+       alt="" aria-hidden="true" fetchpriority="high" decoding="async"
+       class="absolute inset-0 w-full h-full object-cover opacity-[.42] grayscale-[.55] scale-105">
+  <div class="absolute inset-0 bg-gradient-to-br from-[#0e0f0d] via-[#141614]/85 to-[#1d2116]/70"></div>
+  <div class="absolute inset-0 circuit opacity-40"></div>
+  <div class="absolute -right-24 top-1/4 w-[520px] h-[520px] rounded-full bg-[#A6CE39]/10 blur-3xl"></div>
+  <div class="absolute left-0 top-0 bottom-0 w-[6px] bg-[#A6CE39]"></div>
+
+  <div class="relative max-w-[1180px] w-full mx-auto px-5 pt-10 flex-1 flex flex-col">
+    <div class="flex items-start justify-between gap-6">
+      <div>
+        <div class="text-[#A6CE39] cond font-bold tracking-[.34em] text-[11px] uppercase">Komunikat wewnętrzny</div>
+        <div class="mt-1 text-white/45 text-[11px] tracking-[.2em] uppercase cond">Dokument nr FL/2026/08 · wersja 1.0</div>
+      </div>
+      <div class="text-right hidden sm:block">
+        <div class="text-white/45 text-[11px] tracking-[.2em] uppercase cond">Obowiązuje od</div>
+        <div class="text-white cond font-extrabold text-2xl tracking-wide">17.08.2026</div>
+      </div>
+    </div>
+
+    <div class="mt-auto pb-8">
+      <div class="flex items-center gap-3 mb-5">
+        <span class="h-[2px] w-16 bg-[#A6CE39]"></span>
+        <span class="text-white/70 cond uppercase tracking-[.24em] text-[12px]">Flota · VDesk · Obiekty UDT</span>
+      </div>
+      <h1 class="display text-white text-[12vw] sm:text-[9vw] lg:text-[7.4rem] max-w-[16ch] break-words">
+        Protokoły<br><span class="text-[#A6CE39]">przekazania</span>
+      </h1>
+      <p class="mt-5 sm:mt-6 text-white/75 text-base sm:text-xl max-w-[62ch] font-light leading-relaxed">
+        Zmiana procesu rejestrowania protokołów przekazania pojazdów służbowych oraz obiektów UDT —
+        wymagane dane i zdjęcia przy zgłoszeniu.
+      </p>
+
+      <div class="no-print mt-7 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3">
+        <button type="button" data-pdf="instrukcja" class="inline-flex justify-center items-center gap-2 bg-[#A6CE39] hover:bg-[#b7dc4c] text-[#161c07] cond uppercase tracking-[.16em] text-[13px] font-extrabold px-6 py-3.5 transition">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>
+          Pobierz instrukcję (PDF)
+        </button>
+        <button type="button" data-pdf="wniosek" class="inline-flex justify-center items-center gap-2 border border-[#A6CE39] text-[#A6CE39] hover:bg-[#A6CE39] hover:text-[#161c07] cond uppercase tracking-[.16em] text-[13px] font-extrabold px-6 py-3.5 transition">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>
+          Pobierz wniosek (PDF)
+        </button>
+        <a href="#tabela" class="inline-flex justify-center items-center gap-2 border border-white/30 hover:border-[#A6CE39] text-white hover:text-[#A6CE39] cond uppercase tracking-[.16em] text-[13px] font-bold px-6 py-3.5 transition">Wypełnij tabelę zgłoszenia</a>
+        <a href="mailto:flota@chemirol.com" class="inline-flex justify-center items-center gap-2 text-white/60 hover:text-white cond uppercase tracking-[.14em] text-[12px] sm:text-[13px] font-bold px-2 py-3 transition text-center">flota@chemirol.com · 52 315 96 55</a>
+      </div>
+
+      <div class="mt-9 grid grid-cols-2 md:grid-cols-4 border-t border-white/15 divide-x divide-white/10">
+        <div class="py-5 pr-4">
+          <div class="text-[#A6CE39] cond font-extrabold text-3xl">17.08.2026</div>
+          <div class="text-white/50 text-[11px] uppercase tracking-[.16em] cond mt-1">Data wejścia w życie</div>
+        </div>
+        <div class="py-5 px-4">
+          <div class="text-white cond font-extrabold text-3xl">17</div>
+          <div class="text-white/50 text-[11px] uppercase tracking-[.16em] cond mt-1">Pozycji w tabeli</div>
+        </div>
+        <div class="py-5 px-4">
+          <div class="text-white cond font-extrabold text-3xl">VDesk</div>
+          <div class="text-white/50 text-[11px] uppercase tracking-[.16em] cond mt-1">System ewidencji</div>
+        </div>
+        <div class="py-5 px-4">
+          <div class="text-white cond font-extrabold text-3xl">100%</div>
+          <div class="text-white/50 text-[11px] uppercase tracking-[.16em] cond mt-1">Zgłoszeń ze zdjęciami</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="no-print relative border-t border-white/10">
+    <div class="max-w-[1180px] mx-auto px-5 py-4 flex items-center justify-between text-white/40 text-[11px] uppercase tracking-[.2em] cond">
+      <span>Dział Floty · komunikat dla oddziałów</span>
+      <a href="#komunikat" class="flex items-center gap-2 hover:text-[#A6CE39] transition">Przewiń <span class="animate-bounce inline-block" aria-hidden="true">↓</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ PASEK TEMATU ══════════ -->
+<section class="bg-[#A6CE39] relative overflow-hidden">
+  <div class="absolute inset-0 circuit-dots opacity-30"></div>
+  <div class="relative max-w-[1180px] mx-auto px-5 py-10 md:py-14 grid md:grid-cols-[auto_1fr] gap-6 md:gap-12 items-center">
+    <div class="text-[#1a220a]/60 cond uppercase tracking-[.3em] text-[11px] md:border-r md:border-[#1a220a]/20 md:pr-12">Temat</div>
+    <h2 class="cond font-extrabold uppercase text-[#17200a] text-2xl md:text-4xl leading-tight max-w-[54ch]">
+      Zmiana procesu rejestrowania protokołów przekazania pojazdów służbowych oraz obiektów UDT — wymagane dane i zdjęcia przy zgłoszeniu
+    </h2>
+  </div>
+</section>
+
+<!-- ══════════ SPIS TREŚCI ══════════ -->
+<section class="bg-[#F4F6F1] border-b border-black/5">
+  <div class="max-w-[1180px] mx-auto px-5 py-14 md:py-20 grid lg:grid-cols-[300px_1fr] gap-10">
+    <div class="reveal">
+      <div class="text-[#8CBB1E] cond uppercase tracking-[.3em] text-[11px]">Zawartość</div>
+      <h3 class="display text-[#1B1B1B] text-5xl md:text-6xl mt-3">Spis<br>treści</h3>
+      <div class="mt-6 h-[3px] w-24 bg-[#A6CE39]"></div>
+      <p class="mt-6 text-[15px] text-[#5B5F5C] leading-relaxed">Dokument opisuje nowe zasady obsługi protokołów przekazania obowiązujące wszystkie oddziały.</p>
+    </div>
+    <ol id="toc" class="reveal divide-y divide-black/10 border-t border-black/10"></ol>
+  </div>
+</section>
+
+<!-- ══════════ KOMUNIKAT ══════════ -->
+<section id="komunikat" class="scroll-mt-20 bg-white">
+  <div class="max-w-[1180px] mx-auto px-5 py-16 md:py-24">
+    <div class="reveal grid lg:grid-cols-[300px_1fr] gap-10 md:gap-16">
+      <div>
+        <div class="flex items-baseline gap-3">
+          <span class="cond font-extrabold text-[#A6CE39] text-4xl">01</span>
+          <span class="h-[2px] flex-1 bg-[#A6CE39]/40"></span>
+        </div>
+        <h3 class="cond font-extrabold uppercase text-2xl md:text-3xl mt-3 text-[#1B1B1B] leading-tight">Komunikat<br>Działu Floty</h3>
+        <div class="mt-6 bg-[#F4F6F1] border-l-4 border-[#A6CE39] p-5">
+          <div class="cond uppercase tracking-[.16em] text-[11px] text-[#5B5F5C]">Kto tworzy protokoły od 17.08.2026</div>
+          <div class="cond font-extrabold text-xl text-[#1B1B1B] mt-1">Wyłącznie Dział Floty</div>
+        </div>
+      </div>
+
+      <div class="text-[16.5px] leading-[1.85] text-[#3a3f3b] space-y-6">
+        <p class="cond text-2xl font-semibold text-[#1B1B1B] uppercase tracking-wide">Szanowni Państwo,</p>
+        <p>uprzejmie informuję, że z dniem <strong class="text-[#1B1B1B] bg-[#A6CE39]/30 px-1">17.08.2026 r.</strong> wprowadzamy zmianę w procesie rejestrowania protokołów przekazania pojazdów służbowych oraz obiektów UDT. Od wskazanej daty możliwość tworzenia protokołów przekazania w systemie <strong class="text-[#1B1B1B]">VDesk</strong> będzie dostępna wyłącznie dla pracowników Działu Floty.</p>
+        <p id="przyczyny" class="scroll-mt-24">Zmiana ta wynika z konieczności zapewnienia poprawności danych w ewidencji pojazdów. Obecnie zdarzają się sytuacje, w których protokoły są tworzone przez użytkowników na oddziałach, jednak nie trafiają do akceptacji lub nie zostają sfinalizowane. W konsekwencji w systemie nie następuje zmiana użytkownika pojazdu, co powoduje rozbieżności w dokumentacji oraz błędy ewidencyjne.</p>
+        <p>W związku z powyższym uprzejmie proszę o <strong class="text-[#1B1B1B]">przekazanie tej informacji Państwa pracownikom</strong>.</p>
+        <p>W przypadku konieczności przekazania pojazdu służbowego lub obiektu UDT prosimy o kontakt z Działem Floty (<a href="mailto:flota@chemirol.com" class="text-[#6f9612] font-semibold border-b border-[#A6CE39] hover:bg-[#A6CE39]/20 transition">flota@chemirol.com</a>, tel. <a href="tel:+48523159655" class="text-[#6f9612] font-semibold border-b border-[#A6CE39] hover:bg-[#A6CE39]/20 transition">52 315 96 55</a>), który przygotuje oraz zarejestruje odpowiedni protokół w systemie VDesk.</p>
+        <p>Aby usprawnić przygotowanie protokołu, osoba zgłaszająca przekazanie pojazdu proszona jest o podanie w treści wiadomości wszystkich niezbędnych informacji. W tym celu prosimy o wypełnienie poniższej tabeli.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ PROBLEM → SKUTEK ══════════ -->
+<section class="bg-[#1B1B1B] relative overflow-hidden">
+  <div class="absolute inset-0 circuit opacity-30"></div>
+  <div class="relative max-w-[1180px] mx-auto px-5 py-16 md:py-20">
+    <div class="reveal flex items-center gap-4 mb-10">
+      <span class="cond font-extrabold text-[#A6CE39] text-4xl">02</span>
+      <h3 class="cond font-extrabold uppercase text-white text-2xl md:text-3xl">Dlaczego wprowadzamy zmianę</h3>
+      <span class="h-[1px] flex-1 bg-white/15"></span>
+    </div>
+    <div class="grid md:grid-cols-3 gap-5">
+      <div class="reveal lift bg-white/[.04] border border-white/10 hover:border-[#A6CE39]/60 p-7">
+        <div class="w-11 h-11 grid place-items-center bg-[#A6CE39] text-[#17200a] cond font-extrabold text-xl">!</div>
+        <h4 class="cond font-bold uppercase text-white text-xl mt-5">Protokoły bez akceptacji</h4>
+        <p class="text-white/60 mt-3 leading-relaxed text-[15px]">Dokumenty tworzone na oddziałach nie trafiają do akceptacji lub nie zostają sfinalizowane.</p>
+      </div>
+      <div class="reveal lift bg-white/[.04] border border-white/10 hover:border-[#A6CE39]/60 p-7">
+        <div class="w-11 h-11 grid place-items-center bg-[#A6CE39] text-[#17200a] cond font-extrabold text-xl">≠</div>
+        <h4 class="cond font-bold uppercase text-white text-xl mt-5">Brak zmiany użytkownika</h4>
+        <p class="text-white/60 mt-3 leading-relaxed text-[15px]">W systemie nie następuje zmiana użytkownika pojazdu — dane pozostają nieaktualne.</p>
+      </div>
+      <div class="reveal lift bg-white/[.04] border border-white/10 hover:border-[#A6CE39]/60 p-7">
+        <div class="w-11 h-11 grid place-items-center bg-[#A6CE39] text-[#17200a] cond font-extrabold text-xl">✕</div>
+        <h4 class="cond font-bold uppercase text-white text-xl mt-5">Błędy ewidencyjne</h4>
+        <p class="text-white/60 mt-3 leading-relaxed text-[15px]">Powstają rozbieżności w dokumentacji oraz błędy w ewidencji pojazdów.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ PROCES ══════════ -->
+<section id="proces" class="scroll-mt-20 bg-[#F4F6F1]">
+  <div class="max-w-[1180px] mx-auto px-5 py-16 md:py-24">
+    <div class="reveal flex items-center gap-4 mb-12">
+      <span class="cond font-extrabold text-[#A6CE39] text-4xl">03</span>
+      <h3 class="cond font-extrabold uppercase text-[#1B1B1B] text-2xl md:text-3xl">Nowy przebieg procesu</h3>
+      <span class="h-[1px] flex-1 bg-black/10"></span>
+    </div>
+    <div class="grid md:grid-cols-4 gap-px bg-black/10 border border-black/10">
+      <div class="reveal bg-white p-7">
+        <div class="cond font-extrabold text-5xl text-[#A6CE39]">01</div>
+        <h4 class="cond font-bold uppercase text-[#1B1B1B] text-lg mt-3">Zgłoszenie</h4>
+        <p class="text-[#5B5F5C] text-[15px] mt-2 leading-relaxed">Oddział wysyła wiadomość do Działu Floty z wypełnioną tabelą i zdjęciami w załączeniu.</p>
+      </div>
+      <div class="reveal bg-white p-7">
+        <div class="cond font-extrabold text-5xl text-[#A6CE39]">02</div>
+        <h4 class="cond font-bold uppercase text-[#1B1B1B] text-lg mt-3">Weryfikacja</h4>
+        <p class="text-[#5B5F5C] text-[15px] mt-2 leading-relaxed">Dział Floty sprawdza kompletność danych oraz dokumentacji fotograficznej.</p>
+      </div>
+      <div class="reveal bg-white p-7">
+        <div class="cond font-extrabold text-5xl text-[#A6CE39]">03</div>
+        <h4 class="cond font-bold uppercase text-[#1B1B1B] text-lg mt-3">Protokół w VDesk</h4>
+        <p class="text-[#5B5F5C] text-[15px] mt-2 leading-relaxed">Pracownik Floty przygotowuje i rejestruje protokół przekazania w systemie.</p>
+      </div>
+      <div class="reveal bg-[#1B1B1B] p-7">
+        <div class="cond font-extrabold text-5xl text-[#A6CE39]">04</div>
+        <h4 class="cond font-bold uppercase text-white text-lg mt-3">Finalizacja</h4>
+        <p class="text-white/60 text-[15px] mt-2 leading-relaxed">Zmiana użytkownika pojazdu zostaje odnotowana — ewidencja pozostaje aktualna.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ TABELA ══════════ -->
+<section id="tabela" class="scroll-mt-20 bg-white">
+  <div class="max-w-[1180px] mx-auto px-5 py-16 md:py-24">
+    <div class="reveal flex flex-wrap items-center gap-4 mb-4">
+      <span class="cond font-extrabold text-[#A6CE39] text-4xl">04</span>
+      <h3 class="cond font-extrabold uppercase text-[#1B1B1B] text-2xl md:text-3xl">Tabela danych do zgłoszenia</h3>
+      <span class="h-[1px] flex-1 bg-black/10 hidden sm:block"></span>
+    </div>
+    <p class="reveal text-[#5B5F5C] max-w-[75ch] leading-relaxed mb-8">
+      Prosimy o wypełnienie poniższej tabeli i przesłanie jej <strong class="text-[#1B1B1B]">w treści wiadomości</strong> na adres
+      <a href="mailto:flota@chemirol.com" class="text-[#6f9612] font-semibold border-b border-[#A6CE39] hover:bg-[#A6CE39]/20 transition">flota@chemirol.com</a>
+      (tel. <a href="tel:+48523159655" class="text-[#6f9612] font-semibold border-b border-[#A6CE39] hover:bg-[#A6CE39]/20 transition">52 315 96 55</a>), a zdjęć <strong class="text-[#1B1B1B]">w załączeniu</strong>.
+      Możesz uzupełnić pola bezpośrednio tutaj — dane zapisują się w przeglądarce. Przyciskiem <strong class="text-[#1B1B1B]">Utwórz e-mail z wnioskiem</strong> wygenerujesz gotową wiadomość roboczą z załączonym PDF-em (dane, zdjęcia, podpis), a przyciskiem <strong class="text-[#1B1B1B]">Zapisz wniosek</strong> pobierzesz sam formularz PDF (skrót <kbd class="px-1.5 py-0.5 bg-[#EDF1E6] border border-black/10 text-[12px]">Ctrl</kbd> + <kbd class="px-1.5 py-0.5 bg-[#EDF1E6] border border-black/10 text-[12px]">S</kbd> — instrukcja).
+    </p>
+    <p class="reveal text-[#5B5F5C] max-w-[75ch] leading-relaxed mb-8 border-l-4 border-[#A6CE39] bg-[#F4F6F1] p-4 text-[14.5px]">
+      <strong class="text-[#1B1B1B]">Format PDF.</strong> Domyślny tryb <strong class="text-[#1B1B1B]">tekstowy</strong> tworzy dokument z prawdziwą warstwą tekstu —
+      treść można <strong class="text-[#1B1B1B]">zaznaczać, kopiować i wyszukiwać</strong> (Ctrl+F), plik jest kilkukrotnie lżejszy, a dane da się odczytać maszynowo.
+      Tryb <strong class="text-[#1B1B1B]">graficzny</strong> zapisuje strony jako obraz — wygląda identycznie jak ta strona, ale tekst nie jest zaznaczalny.
+      Zdjęcia i odręczny podpis w obu trybach pozostają obrazami.
+    </p>
+
+    <div class="no-print reveal flex flex-wrap items-center gap-4 mb-6 bg-[#F4F6F1] border border-black/10 p-4">
+      <div class="flex items-center gap-3">
+        <div class="cond uppercase tracking-[.16em] text-[11px] text-[#5B5F5C]">Uzupełniono</div>
+        <div class="cond font-extrabold text-2xl text-[#1B1B1B]"><span id="filled">0</span><span class="text-[#A6CE39]">/<span id="total">0</span></span></div>
+      </div>
+      <div class="flex-1 min-w-[160px] h-2 bg-black/10 overflow-hidden" role="progressbar" aria-label="Postęp wypełnienia formularza">
+        <div id="bar" class="h-full bg-[#A6CE39] w-0 transition-[width] duration-300"></div>
+      </div>
+      <label class="flex items-center gap-2 w-full sm:w-auto order-last sm:order-none">
+        <span class="cond uppercase tracking-[.16em] text-[11px] text-[#5B5F5C] shrink-0">Format PDF</span>
+        <select id="pdfMode" class="bg-white border border-black/20 text-[#1B1B1B] cond uppercase tracking-[.08em] text-[12px] font-bold px-2 py-2 focus:outline-none focus:border-[#8CBB1E]">
+          <option value="text">Tekstowy — tekst do zaznaczania</option>
+          <option value="image">Graficzny — wierny obraz strony</option>
+        </select>
+      </label>
+      <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 w-full sm:w-auto">
+        <button type="button" id="btnCopy" class="bg-[#1B1B1B] hover:bg-[#333] text-white cond uppercase tracking-[.14em] text-[12px] font-bold px-4 py-2.5 transition">Kopiuj tabelę</button>
+        <button type="button" id="btnMail" class="bg-[#A6CE39] hover:bg-[#b7dc4c] text-[#161c07] cond uppercase tracking-[.14em] text-[12px] font-extrabold px-4 py-2.5 transition">Utwórz e-mail z wnioskiem</button>
+        <button type="button" data-pdf="wniosek" class="inline-flex items-center gap-2 bg-[#6f9612] hover:bg-[#7fa81c] text-white cond uppercase tracking-[.14em] text-[12px] font-extrabold px-4 py-2.5 transition">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>
+          Zapisz wniosek
+        </button>
+        <button type="button" id="btnClear" class="border border-black/20 hover:border-black/50 text-[#1B1B1B] cond uppercase tracking-[.14em] text-[12px] font-bold px-4 py-2.5 transition">Wyczyść</button>
+      </div>
+    </div>
+
+    <div class="reveal tbl-wrap border border-black/10 overflow-x-auto scrollbar-thin print-block">
+      <table class="w-full min-w-[560px] sm:min-w-[720px] border-collapse text-left">
+        <caption class="sr-only">Dane wymagane do przygotowania protokołu przekazania</caption>
+        <thead>
+          <tr class="bg-[#1B1B1B] text-white">
+            <th scope="col" class="cond uppercase tracking-[.16em] text-[11px] font-bold py-4 px-4 w-[64px] text-center">Lp.</th>
+            <th scope="col" class="cond uppercase tracking-[.16em] text-[11px] font-bold py-4 px-4 w-[46%]">Informacja</th>
+            <th scope="col" class="cond uppercase tracking-[.16em] text-[11px] font-bold py-4 px-4 text-[#A6CE39]">Do uzupełnienia</th>
+          </tr>
+        </thead>
+        <tbody id="tbody" class="text-[#26292b]"></tbody>
+      </table>
+    </div>
+    <p id="copyMsg" class="no-print mt-3 text-[13px] cond uppercase tracking-[.14em] text-[#6f9612] opacity-0 transition-opacity" aria-live="polite"></p>
+  </div>
+</section>
+
+<!-- ══════════ ZDJĘCIA ══════════ -->
+<section id="zdjecia" class="scroll-mt-20 relative bg-[#1B1B1B] overflow-hidden">
+  <img src="https://images.pexels.com/photos/29566909/pexels-photo-29566909.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=900&w=1800"
+       alt="" aria-hidden="true" loading="lazy" decoding="async"
+       class="absolute inset-0 w-full h-full object-cover opacity-[.18] grayscale">
+  <div class="absolute inset-0 bg-gradient-to-b from-[#141614] via-[#141614]/95 to-[#141614]"></div>
+  <div class="relative max-w-[1180px] mx-auto px-5 py-16 md:py-24">
+    <div class="reveal flex flex-wrap items-center gap-4 mb-6">
+      <span class="cond font-extrabold text-[#A6CE39] text-4xl">05</span>
+      <h3 class="cond font-extrabold uppercase text-white text-2xl md:text-3xl">Wymagana dokumentacja zdjęciowa</h3>
+      <span class="h-[1px] flex-1 bg-white/15 hidden sm:block"></span>
+    </div>
+    <div class="reveal bg-[#A6CE39] text-[#17200a] p-6 md:p-7 max-w-[80ch] mb-6">
+      <p class="text-[16px] leading-relaxed">
+        Niezależnie od wypełnionej tabeli do zgłoszenia należy <strong class="uppercase cond tracking-wide text-lg">obowiązkowo załączyć zdjęcia przekazywanego pojazdu / obiektu</strong>, dokumentujące jego aktualny stan.
+      </p>
+    </div>
+
+    <div class="reveal bg-white/[.05] border-l-4 border-[#A6CE39] p-5 md:p-6 max-w-[80ch] mb-10">
+      <p class="text-white text-[16px] leading-relaxed">
+        Wykonać dokumentację fotograficzną pojazdu z <strong class="text-[#A6CE39]">czterech narożników</strong>, w ujęciach <strong class="text-[#A6CE39]">3/4</strong>.
+      </p>
+    </div>
+
+    <div class="reveal flex items-center justify-between gap-4 mb-4">
+      <div class="cond uppercase tracking-[.24em] text-[11px] text-white/50">Zalecany zakres zdjęć — lista kontrolna</div>
+      <div class="no-print cond font-extrabold text-white text-lg"><span id="photoCount">0</span><span class="text-[#A6CE39]">/<span id="photoTotal">5</span></span></div>
+    </div>
+
+    <div id="photoList" class="grid md:grid-cols-2 gap-px bg-white/10 border border-white/10"></div>
+
+    <p class="reveal text-white/70 mt-8 max-w-[80ch] leading-relaxed">
+      Prosimy o przesłanie wypełnionej tabeli w treści wiadomości, a zdjęć w załączeniu.
+      <strong class="text-white">Kompletne dane oraz dokumentacja zdjęciowa pozwolą uniknąć opóźnień i błędów ewidencyjnych.</strong>
+    </p>
+  </div>
+</section>
+
+<!-- ══════════ ZAŁĄCZNIKI: ZDJĘCIA + PODPISY ══════════ -->
+<section id="zalaczniki" class="scroll-mt-20 bg-[#F4F6F1] border-b border-black/5">
+  <div class="max-w-[1180px] mx-auto px-5 py-16 md:py-24">
+    <div class="reveal flex flex-wrap items-center gap-4 mb-4">
+      <span class="cond font-extrabold text-[#A6CE39] text-4xl">06</span>
+      <h3 class="cond font-extrabold uppercase text-[#1B1B1B] text-2xl md:text-3xl">Zdjęcia i podpisy</h3>
+      <span class="h-[1px] flex-1 bg-black/10 hidden sm:block"></span>
+    </div>
+    <p class="reveal text-[#5B5F5C] max-w-[75ch] leading-relaxed mb-8">
+      Zrób zdjęcia telefonem lub dodaj pliki z dysku, a następnie złóż podpis. Wszystko zostanie
+      <strong class="text-[#1B1B1B]">automatycznie wklejone do wniosku PDF</strong>, który możesz wysłać jako załącznik wiadomości.
+    </p>
+
+    <div class="grid lg:grid-cols-2 gap-6">
+      <!-- ZDJĘCIA -->
+      <div class="reveal bg-white border border-black/10 p-6">
+        <div class="flex items-center justify-between gap-3 mb-4">
+          <h4 class="cond font-bold uppercase text-lg text-[#1B1B1B]">Dokumentacja zdjęciowa</h4>
+          <span class="cond font-extrabold text-xl text-[#1B1B1B]"><span id="shotCount">0</span><span class="text-[#A6CE39]">/<span id="shotMax">20</span></span></span>
+        </div>
+        <div class="no-print flex flex-wrap gap-2 mb-4">
+          <button type="button" id="btnCam" class="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 bg-[#A6CE39] hover:bg-[#b7dc4c] text-[#161c07] cond uppercase tracking-[.14em] text-[12px] font-extrabold px-4 py-3 transition">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Zrób zdjęcie
+          </button>
+          <button type="button" id="btnFiles" class="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 border border-black/20 hover:border-black/50 text-[#1B1B1B] cond uppercase tracking-[.14em] text-[12px] font-bold px-4 py-3 transition">Dodaj z dysku</button>
+          <button type="button" id="btnShotsClear" class="inline-flex items-center gap-2 text-[#a33] hover:text-[#c00] cond uppercase tracking-[.14em] text-[12px] font-bold px-2 py-2.5 transition">Usuń wszystkie</button>
+        </div>
+        <input id="inpCam" type="file" accept="image/*" capture="environment" multiple class="hidden" aria-hidden="true" tabindex="-1">
+        <input id="inpFiles" type="file" accept="image/*" multiple class="hidden" aria-hidden="true" tabindex="-1">
+
+        <button type="button" id="dropZone" class="no-print w-full border-2 border-dashed border-[#cfd6c4] hover:border-[#A6CE39] transition p-6 text-center text-[#8a9182] text-sm mb-4 cursor-pointer">
+          Przeciągnij zdjęcia tutaj lub kliknij, aby wybrać pliki
+        </button>
+
+        <div id="gallery" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+        <p id="shotEmpty" class="text-[#a9b0a5] italic text-sm">Brak dodanych zdjęć.</p>
+      </div>
+
+      <!-- PODPISY -->
+      <div class="reveal bg-white border border-black/10 p-6">
+        <h4 class="cond font-bold uppercase text-lg text-[#1B1B1B] mb-4">Podpis zgłaszającego</h4>
+
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="cond uppercase tracking-[.14em] text-[11px] text-[#5B5F5C]">Pole podpisu</span>
+            <span id="sigStatus" class="cond uppercase tracking-[.12em] text-[11px] font-bold text-[#a9b0a5]">Niepodpisany</span>
+          </div>
+          <div id="sigWrap" class="relative">
+            <canvas data-sig="A" aria-label="Pole podpisu odręcznego" class="w-full h-[260px] sm:h-[340px] bg-[#FAFBF8] border border-black/10"></canvas>
+            <div class="pointer-events-none absolute left-8 right-8 bottom-14 border-b border-dashed border-[#cfd6c4]"></div>
+            <div class="pointer-events-none absolute left-8 bottom-[52px] cond uppercase tracking-[.2em] text-[10px] text-[#c2c9ba]">podpis</div>
+            <div id="sigLock" class="hidden absolute inset-0 bg-[#A6CE39]/10 border-2 border-[#A6CE39] flex items-end p-2 pointer-events-none">
+              <span class="cond uppercase tracking-[.14em] text-[10px] font-extrabold bg-[#A6CE39] text-[#17200a] px-2 py-1">Zapisany — pole zablokowane</span>
+            </div>
+            <button type="button" id="sigArm" class="absolute inset-0 grid place-items-center bg-[#FAFBF8]/80 backdrop-blur-[1px] border-2 border-dashed border-[#cfd6c4] hover:border-[#A6CE39] transition group">
+              <span class="flex flex-col items-center gap-2">
+                <svg class="w-7 h-7 text-[#A6CE39]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+                <span class="cond uppercase tracking-[.18em] text-[12px] font-extrabold text-[#1B1B1B] group-hover:text-[#6f9612] transition">Dotknij, aby podpisać</span>
+                <span class="text-[11px] text-[#8a9182]">Pole nieaktywne — bezpieczne przewijanie</span>
+              </span>
+            </button>
+          </div>
+          <div class="no-print flex flex-wrap items-center gap-2 mt-3">
+            <button type="button" id="btnSigClear" class="border border-black/20 hover:border-[#c00] hover:text-[#c00] text-[#1B1B1B] cond uppercase tracking-[.14em] text-[12px] font-bold px-4 py-2.5 transition">Wyczyść podpis</button>
+            <span id="sigHint" class="cond uppercase tracking-[.12em] text-[11px] text-[#8a9182]">Zapis automatyczny</span>
+          </div>
+        </div>
+        <p class="text-[#8a9182] text-[12px] mt-3">Złóż podpis własnoręcznie — palcem, rysikiem lub myszą. Po kilku sekundach podpis <strong>zapisze się automatycznie</strong>, a pole zostanie zablokowane przed przypadkową zmianą. Aby podpisać ponownie, kliknij <strong>Wyczyść podpis</strong>.</p>
+      </div>
+    </div>
+
+    <!-- WYSYŁKA -->
+    <div class="reveal mt-8 bg-[#1B1B1B] text-white p-6 md:p-8 relative overflow-hidden">
+      <div class="absolute inset-0 circuit opacity-30"></div>
+      <div class="relative flex flex-col lg:flex-row lg:items-center gap-6 justify-between">
+        <div>
+          <h4 class="cond font-extrabold uppercase text-2xl">Wyślij zgłoszenie</h4>
+          <p class="text-white/60 mt-2 max-w-[62ch] leading-relaxed text-[15px]">
+            Wniosek PDF (dane, zdjęcia, podpis) zostanie pobrany, a następnie otworzy się
+            <strong class="text-white">program pocztowy</strong> z wypełnionym odbiorcą
+            <span class="text-[#A6CE39]">flota@chemirol.com</span>, tematem i treścią — wystarczy przeciągnąć pobrany plik do wiadomości.
+            Na telefonie wniosek trafia do poczty od razu jako załącznik.
+          </p>
+        </div>
+        <div class="flex flex-col sm:flex-row flex-wrap gap-3 shrink-0 w-full lg:w-auto">
+          <button type="button" id="btnSend" class="inline-flex justify-center items-center gap-2 bg-[#A6CE39] hover:bg-[#b7dc4c] text-[#161c07] cond uppercase tracking-[.16em] text-[13px] font-extrabold px-6 py-3.5 transition">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg>
+            Wyślij z załącznikiem
+          </button>
+          <button type="button" data-pdf="wniosek" class="inline-flex justify-center items-center gap-2 border border-white/30 hover:border-[#A6CE39] text-white hover:text-[#A6CE39] cond uppercase tracking-[.16em] text-[13px] font-bold px-6 py-3.5 transition">Podgląd wniosku PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ UDT / KONTAKT ══════════ -->
+<section id="udt" class="scroll-mt-20 bg-white">
+  <div class="max-w-[1180px] mx-auto px-5 py-16 md:py-24 grid lg:grid-cols-2 gap-10 items-start">
+    <div class="reveal">
+      <div class="flex items-center gap-4 mb-5">
+        <span class="cond font-extrabold text-[#A6CE39] text-4xl">07</span>
+        <h3 class="cond font-extrabold uppercase text-[#1B1B1B] text-2xl md:text-3xl">Obiekty UDT</h3>
+      </div>
+      <p class="text-[#3a3f3b] leading-[1.85] text-[16.5px]">
+        W przypadku przekazania obiektu UDT prosimy o kontakt z Działem Floty — pracownicy wskażą
+        szczegółowy zakres danych i zdjęć wymaganych do przygotowania protokołu.
+      </p>
+      <div class="mt-8 border-l-4 border-[#A6CE39] bg-[#F4F6F1] p-6">
+        <p class="text-[#3a3f3b] leading-relaxed">
+          Wierzymy, że wprowadzona zmiana usprawni proces ewidencji oraz zapewni aktualność danych w systemie.
+          <span class="block mt-3 cond uppercase font-bold tracking-wide text-[#1B1B1B]">Dziękujemy za współpracę i stosowanie się do nowych zasad.</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="reveal bg-[#1B1B1B] text-white p-8 md:p-10 relative overflow-hidden">
+      <div class="absolute inset-0 circuit opacity-30"></div>
+      <div class="absolute right-0 top-0 w-2 h-full bg-[#A6CE39]"></div>
+      <div class="relative">
+        <div class="cond uppercase tracking-[.3em] text-[11px] text-[#A6CE39]">Kontakt</div>
+        <h4 class="display text-4xl md:text-5xl mt-3">Dział<br>Floty</h4>
+        <p class="text-white/60 mt-5 leading-relaxed">Przygotowanie i rejestracja protokołów przekazania pojazdów służbowych oraz obiektów UDT w systemie VDesk.</p>
+        <div class="mt-8 grid sm:grid-cols-2 gap-px bg-white/10 border border-white/10">
+          <a href="mailto:flota@chemirol.com" class="bg-[#1f221e] hover:bg-[#262a24] p-5 block transition group">
+            <div class="cond uppercase tracking-[.16em] text-[10px] text-white/40">E-mail</div>
+            <div class="cond font-bold text-lg mt-1 group-hover:text-[#A6CE39] transition break-all">flota@chemirol.com</div>
+          </a>
+          <a href="tel:+48523159655" class="bg-[#1f221e] hover:bg-[#262a24] p-5 block transition group">
+            <div class="cond uppercase tracking-[.16em] text-[10px] text-white/40">Telefon kontaktowy</div>
+            <div class="cond font-bold text-lg mt-1 group-hover:text-[#A6CE39] transition">52 315 96 55</div>
+          </a>
+          <div class="bg-[#1f221e] p-5">
+            <div class="cond uppercase tracking-[.16em] text-[10px] text-white/40">System</div>
+            <div class="cond font-bold text-lg mt-1">VDesk</div>
+          </div>
+          <div class="bg-[#1f221e] p-5">
+            <div class="cond uppercase tracking-[.16em] text-[10px] text-white/40">Obowiązuje od</div>
+            <div class="cond font-bold text-lg mt-1">17.08.2026 r.</div>
+          </div>
+        </div>
+        <div class="no-print mt-6">
+          <button type="button" data-pdf="instrukcja" class="w-full inline-flex items-center justify-center gap-2 bg-[#A6CE39] hover:bg-[#b7dc4c] text-[#161c07] cond uppercase tracking-[.16em] text-[13px] font-extrabold px-5 py-3.5 transition">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>
+            Pobierz instrukcję w PDF
+          </button>
+        </div>
+        <div class="mt-8 pt-6 border-t border-white/10">
+          <div class="text-white/50 italic">Z poważaniem,</div>
+          <div class="cond font-extrabold uppercase text-2xl tracking-wide mt-1">Dział Floty</div>
+          <div class="text-white/45 text-sm mt-2">flota@chemirol.com · tel. 52 315 96 55</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ STOPKA ══════════ -->
+<footer class="bg-[#0F110E] text-white/40 relative overflow-hidden">
+  <div class="absolute inset-0 diag opacity-[.06]"></div>
+  <div class="relative max-w-[1180px] mx-auto px-5 py-10 flex flex-col md:flex-row items-center justify-between gap-5 text-center md:text-left text-[11px] sm:text-[12px] uppercase tracking-[.16em] sm:tracking-[.18em] cond">
+    <div class="flex items-center gap-3">
+      <span class="w-8 h-8 grid place-items-center bg-[#A6CE39] text-[#14180b] font-extrabold cond">DF</span>
+      <span>Dział Floty · komunikat wewnętrzny</span>
+    </div>
+    <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-1">
+      <a href="mailto:flota@chemirol.com" class="hover:text-[#A6CE39] transition">flota@chemirol.com</a>
+      <a href="tel:+48523159655" class="hover:text-[#A6CE39] transition">tel. 52 315 96 55</a>
+      <span>Obowiązuje od 17.08.2026 r.</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <button type="button" data-pdf="instrukcja" class="relative z-10 hover:text-[#A6CE39] transition cursor-pointer">Instrukcja PDF ↓</button>
+      <button type="button" data-pdf="wniosek" class="relative z-10 hover:text-[#A6CE39] transition cursor-pointer">Wniosek PDF ↓</button>
+      <button id="btnTop" type="button" class="hover:text-[#A6CE39] transition cursor-pointer">Na górę ↑</button>
+    </div>
+  </div>
+</footer>
+
+<noscript>
+  <div style="background:#A6CE39;color:#17200a;padding:14px 20px;text-align:center;font-family:Arial,sans-serif">
+    Interaktywny formularz, galeria zdjęć i generowanie PDF wymagają włączonej obsługi JavaScript.
+    Zgłoszenia można przesłać na adres flota@chemirol.com (tel. 52 315 96 55).
+  </div>
+</noscript>
+
+<script>
+'use strict';
+/* ════════════════════════════════════════════════════════════
+   1. DANE ŹRÓDŁOWE
+   ════════════════════════════════════════════════════════════ */
+const TYRE_STATES = ['bardzo dobry','dobry','dostateczny','do wymiany','brak'];
+const CLEAN_STATES = ['bardzo dobra','dobra','dostateczna','zła'];
+
+const ROWS = [
+  {n:1,  l:'Numer rejestracyjny pojazdu', t:'text', p:'np. PO 1AB23', upper:true},
+  {n:2,  l:'Osoba, której pojazd ma być przekazany – imię i nazwisko', t:'text', p:'Imię i nazwisko', cap:true},
+  {n:3,  l:'Rodzaj pojazdu: służbowy / użyczony', t:'select', o:['służbowy','użyczony']},
+  {n:4,  l:'Aktualny przebieg – km', t:'num', p:'np. 128 400'},
+  {n:5,  l:'Liczba kluczyków ogółem', t:'num', p:'np. 2'},
+  {n:6,  l:'Liczba kluczyków wydanych', t:'num', p:'np. 1'},
+  {n:7,  l:'Opony letnie – liczba', t:'num', p:'np. 4', qty:8},
+  {n:8,  l:'Opony letnie – stan', t:'select', o:TYRE_STATES},
+  {n:9,  l:'Opony zimowe – liczba', t:'num', p:'np. 4', qty:10},
+  {n:10, l:'Opony zimowe – stan', t:'select', o:TYRE_STATES},
+  {n:11, l:'Wyposażenie dodatkowe', t:'text', p:'np. dowód rejestracyjny, karta FLOTA, apteczka, ADR, wypis'},
+  {n:12, l:'Uwagi', t:'text', p:'Dodatkowe informacje'},
+  {n:13, l:'Uszkodzenia zewnętrzne', t:'text', p:'Opis lub „brak”'},
+  {n:14, l:'Uszkodzenia wewnętrzne', t:'text', p:'Opis lub „brak”'},
+  {n:15, l:'Czystość zewnątrz', t:'select', o:CLEAN_STATES},
+  {n:16, l:'Czystość wewnątrz', t:'select', o:CLEAN_STATES},
+  {n:17, l:'Zdjęcia przekazywanego pojazdu / obiektu', t:'fixed', v:'Wymagane – prosimy załączyć do wiadomości'}
+];
+
+const PHOTO_ITEMS = [
+  ['Cztery narożniki — ujęcia 3/4','Pojazd sfotografowany z czterech narożników.'],
+  ['Wnętrze pojazdu','Kabina, fotele, przestrzeń ładunkowa.'],
+  ['Uszkodzenia','Istniejące uszkodzenia zewnętrzne i wewnętrzne.'],
+  ['Opony i wyposażenie','Stan opon letnich / zimowych oraz wyposażenia dodatkowego.'],
+  ['Obiekty UDT','Widok ogólny, tabliczka znamionowa, istotne elementy stanu technicznego.']
+];
+
+const TOC = [
+  ['#komunikat','Zakres zmiany i data wejścia w życie'],
+  ['#przyczyny','Przyczyny wprowadzenia zmiany'],
+  ['#proces','Nowy przebieg procesu przekazania'],
+  ['#tabela','Tabela danych do zgłoszenia'],
+  ['#zdjecia','Wymagana dokumentacja zdjęciowa'],
+  ['#zalaczniki','Zdjęcia, podpisy i wysyłka'],
+  ['#udt','Obiekty UDT i kontakt']
+];
+
+const MAIL_TO = 'flota@chemirol.com';
+const MAX_SHOTS = 20;
+
+const $  = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => [...(r || document).querySelectorAll(s)];
+const ESC = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const cellOf = n => $('.cell[data-n="' + n + '"]');
+const valOf  = n => { const el = cellOf(n); return el ? el.value.trim() : ''; };
+const store = {
+  get(k, fb){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : fb; }catch(_){ return fb; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(_){ return false; } },
+  del(k){ try{ localStorage.removeItem(k); }catch(_){} }
+};
+
+/* ════════════════════════════════════════════════════════════
+   2. TOAST
+   ════════════════════════════════════════════════════════════ */
+let toastEl = null;
+function toast(msg){
+  const inline = $('#copyMsg');
+  if(inline){
+    inline.textContent = msg;
+    inline.style.opacity = '1';
+    clearTimeout(inline._x);
+    inline._x = setTimeout(()=>{ inline.style.opacity = '0'; }, 3000);
+  }
+  if(!toastEl){
+    toastEl = document.createElement('div');
+    toastEl.setAttribute('role','status');
+    toastEl.className = 'no-print pointer-events-none fixed z-[90] left-1/2 -translate-x-1/2 bottom-6 bg-[#1B1B1B] text-white cond uppercase tracking-[.12em] text-[12px] font-bold px-5 py-3 border-l-4 border-[#A6CE39] shadow-2xl opacity-0 transition-opacity duration-300 max-w-[92vw] text-center';
+    document.body.appendChild(toastEl);
+  }
+  toastEl.textContent = msg;
+  requestAnimationFrame(()=>{ toastEl.style.opacity = '1'; });
+  clearTimeout(toastEl._t);
+  toastEl._t = setTimeout(()=>{ toastEl.style.opacity = '0'; }, 3400);
+}
+
+/* ════════════════════════════════════════════════════════════
+   3. SPIS TREŚCI + CHECKLISTA (generowane z danych)
+   ════════════════════════════════════════════════════════════ */
+(function buildStatic(){
+  const toc = $('#toc');
+  if(toc){
+    toc.innerHTML = TOC.map(([href, label], i) =>
+      '<li><a href="' + href + '" class="group flex items-center gap-6 py-5 hover:pl-3 transition-all">' +
+        '<span class="cond font-extrabold text-[#A6CE39] text-2xl w-10">' + String(i + 1).padStart(2,'0') + '</span>' +
+        '<span class="cond font-semibold uppercase tracking-wide text-lg md:text-xl text-[#1B1B1B] group-hover:text-[#6f9612] transition">' + ESC(label) + '</span>' +
+        '<span class="ml-auto text-[#A6CE39] opacity-0 group-hover:opacity-100 transition" aria-hidden="true">→</span></a></li>'
+    ).join('');
+  }
+  const list = $('#photoList');
+  if(list){
+    list.innerHTML = PHOTO_ITEMS.map(([title, desc]) =>
+      '<label class="reveal group flex items-start gap-4 bg-[#191b18] hover:bg-[#1f2320] p-6 cursor-pointer transition">' +
+        '<input type="checkbox" class="chk photo sr-only">' +
+        '<span class="box shrink-0 w-6 h-6 border-2 border-white/25 grid place-items-center transition" aria-hidden="true">' +
+          '<svg class="w-4 h-4 opacity-0 scale-50 transition" viewBox="0 0 20 20" fill="none" stroke="#17200a" stroke-width="3"><path d="M4 10.5l4 4 8-9"/></svg>' +
+        '</span>' +
+        '<span class="lbl text-white/80 group-hover:text-white transition">' +
+          '<span class="block cond uppercase font-bold tracking-wide text-lg text-[#A6CE39]">' + ESC(title) + '</span>' + ESC(desc) +
+        '</span></label>'
+    ).join('');
+  }
+  const pt = $('#photoTotal'); if(pt) pt.textContent = PHOTO_ITEMS.length;
+  const sm = $('#shotMax');   if(sm) sm.textContent = MAX_SHOTS;
+})();
+
+/* ════════════════════════════════════════════════════════════
+   4. TABELA FORMULARZA
+   ════════════════════════════════════════════════════════════ */
+const KEY = 'protokol-floty-v1';
+const tbody = $('#tbody');
+
+(function buildTable(){
+  const saved = store.get(KEY, {}) || {};
+  const frag = document.createDocumentFragment();
+  ROWS.forEach((r, i) => {
+    const tr = document.createElement('tr');
+    tr.className = (i % 2 ? 'bg-[#F7F9F4]' : 'bg-white') + ' border-t border-black/10 transition-colors';
+    let field;
+    if(r.t === 'fixed'){
+      field = '<div class="flex items-center gap-2 py-2"><span class="inline-block w-2 h-2 bg-[#A6CE39]"></span>' +
+              '<span class="cond uppercase font-bold tracking-wide text-[#6f9612]">' + ESC(r.v) + '</span></div>';
+    } else if(r.t === 'select'){
+      field = '<select class="cell" data-n="' + r.n + '" aria-label="' + ESC(r.l) + '"><option value="">— wybierz —</option>' +
+              r.o.map(o => '<option>' + ESC(o) + '</option>').join('') + '</select>';
+    } else {
+      field = '<input class="cell" data-n="' + r.n + '" type="text" autocomplete="off"' +
+              (r.t === 'num' ? ' inputmode="numeric"' : '') +
+              (r.upper ? ' data-upper="1" autocapitalize="characters" spellcheck="false"' : '') +
+              (r.cap ? ' data-cap="1" autocapitalize="words"' : '') +
+              (r.qty ? ' data-qty="' + r.qty + '"' : '') +
+              ' aria-label="' + ESC(r.l) + '" placeholder="' + ESC(r.p || '') + '">';
+    }
+    tr.innerHTML =
+      '<td class="num text-center align-middle cond font-extrabold text-lg text-[#8a9182] bg-[#EDF1E6] w-[64px] transition-colors">' + r.n + '</td>' +
+      '<td class="td-label py-3 px-4 align-middle text-[15px]' + (r.t === 'fixed' ? ' font-semibold text-[#1B1B1B]' : '') + '">' + ESC(r.l) + '</td>' +
+      '<td class="td-field py-1 px-4 align-middle">' + field + '</td>';
+    frag.appendChild(tr);
+  });
+  tbody.appendChild(frag);
+
+  $$('.cell').forEach(f => { if(saved[f.dataset.n] != null) f.value = saved[f.dataset.n]; });
+})();
+
+const fields = $$('.cell');
+$('#total').textContent = fields.length;
+
+let saveTimer = null;
+function persistForm(data){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=> store.set(KEY, data), 250);
+}
+function refresh(){
+  const data = {};
+  let filled = 0;
+  for(const f of fields){
+    const v = f.value.trim();
+    if(v){ data[f.dataset.n] = v; filled++; }
+    const tr = f.closest('tr');
+    if(tr) tr.classList.toggle('done', !!v);
+  }
+  persistForm(data);
+  $('#filled').textContent = filled;
+  $('#bar').style.width = (fields.length ? filled / fields.length * 100 : 0) + '%';
+}
+
+/* Każdy człon imienia/nazwiska wielką literą — także po myślniku i apostrofie */
+function capitalizeName(s){
+  return s.toLocaleLowerCase('pl-PL').replace(/(^|[\s\-'’])(\p{L})/gu, (m, sep, ch) => sep + ch.toLocaleUpperCase('pl-PL'));
+}
+/* Liczba opon = 0 → stan automatycznie „brak”; wartość > 0 zwalnia pole stanu */
+function syncTyres(f){
+  const target = cellOf(f.dataset.qty);
+  if(!target) return;
+  const raw = f.value.trim().replace(',', '.');
+  const isZero = raw !== '' && Number(raw) === 0;
+  if(isZero){
+    target.value = 'brak';
+    target.dataset.auto = '1';
+    target.disabled = true;
+    target.title = 'Ustawione automatycznie — liczba opon wynosi 0';
+  } else {
+    target.disabled = false;
+    target.title = '';
+    if(target.dataset.auto){ target.value = ''; delete target.dataset.auto; }
+  }
+}
+
+/* delegacja zdarzeń — jeden nasłuchiwacz zamiast N */
+tbody.addEventListener('input', e => {
+  const f = e.target.closest('.cell');
+  if(!f) return;
+  if(f.dataset.upper || f.dataset.cap){
+    const start = f.selectionStart;
+    const v = f.dataset.upper ? f.value.toLocaleUpperCase('pl-PL') : capitalizeName(f.value);
+    if(v !== f.value){
+      f.value = v;
+      if(f.setSelectionRange){ try{ f.setSelectionRange(start, start); }catch(_){} }
+    }
+  }
+  if(f.dataset.qty) syncTyres(f);
+  refresh();
+});
+tbody.addEventListener('change', e => { if(e.target.closest('.cell')) refresh(); });
+
+fields.filter(f => f.dataset.qty).forEach(syncTyres);
+refresh();
+
+/* ════════════════════════════════════════════════════════════
+   5. KOPIOWANIE / E-MAIL / CZYSZCZENIE
+   ════════════════════════════════════════════════════════════ */
+function rowValue(r){
+  return r.t === 'fixed' ? r.v : (valOf(r.n) || '—');
+}
+function buildText(){
+  let out = 'ZGŁOSZENIE PRZEKAZANIA POJAZDU / OBIEKTU UDT\n\n';
+  ROWS.forEach(r => { out += r.n + '. ' + r.l + ': ' + rowValue(r) + '\n'; });
+  return out + '\nZdjęcia pojazdu / obiektu – w załączeniu.';
+}
+function buildHTML(){
+  const rows = ROWS.map(r => {
+    const v = r.t === 'fixed' ? r.v : valOf(r.n);
+    return '<tr><td style="border:1px solid #ccc;padding:6px;text-align:right">' + r.n + '</td>' +
+           '<td style="border:1px solid #ccc;padding:6px">' + ESC(r.l) + '</td>' +
+           '<td style="border:1px solid #ccc;padding:6px">' + ESC(v) + '</td></tr>';
+  }).join('');
+  return '<table style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:13px"><thead><tr style="background:#A6CE39">' +
+    '<th style="border:1px solid #ccc;padding:6px">Lp.</th><th style="border:1px solid #ccc;padding:6px">Informacja</th>' +
+    '<th style="border:1px solid #ccc;padding:6px">Do uzupełnienia</th></tr></thead><tbody>' + rows + '</tbody></table>';
+}
+function buildEmailBody(){
+  const reg = valOf(1), osoba = valOf(2), rodzaj = valOf(3);
+  const line = '─────────────────────────────';
+  const L = ['Dzień dobry,', ''];
+  L.push('uprzejmie proszę o przygotowanie i zarejestrowanie protokołu przekazania'
+    + (reg ? ' pojazdu o numerze rejestracyjnym ' + reg.toUpperCase() : ' poniższego pojazdu')
+    + (rodzaj ? ' (' + rodzaj + ')' : '')
+    + (osoba ? ' na rzecz: ' + osoba : '') + '.');
+  L.push('', line, 'DANE PRZEKAZANIA', line);
+  ROWS.forEach(r => L.push(r.n + '. ' + r.l + ': ' + rowValue(r)));
+  L.push('', line, 'DOKUMENTACJA ZDJĘCIOWA', line);
+  L.push('Zdjęcia dokumentujące aktualny stan pojazdu / obiektu przesyłam w załączeniu.');
+  L.push('Dokumentacja wykonana z czterech narożników pojazdu, w ujęciach 3/4.');
+  L.push('', 'Z góry dziękuję za przygotowanie protokołu.', '', 'Z poważaniem,', '');
+  return L.join('\n');
+}
+
+$('#btnCopy').addEventListener('click', async () => {
+  const text = buildText();
+  try{
+    if(navigator.clipboard && window.ClipboardItem && window.isSecureContext){
+      await navigator.clipboard.write([new ClipboardItem({
+        'text/html':  new Blob([buildHTML()], {type:'text/html'}),
+        'text/plain': new Blob([text], {type:'text/plain'})
+      })]);
+    } else if(navigator.clipboard){
+      await navigator.clipboard.writeText(text);
+    } else {
+      throw new Error('no clipboard');
+    }
+    toast('✓ Skopiowano tabelę — wklej ją w treści wiadomości');
+  }catch(_){
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly','');
+    ta.style.cssText = 'position:fixed;top:0;left:-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand('copy'); toast('✓ Skopiowano tabelę do schowka'); }
+    catch(__){ toast('Nie udało się skopiować — zaznacz tabelę ręcznie'); }
+    ta.remove();
+  }
+});
+
+$('#btnClear').addEventListener('click', () => {
+  if(!confirm('Wyczyścić wszystkie wprowadzone dane formularza?')) return;
+  fields.forEach(f => { f.value = ''; f.disabled = false; delete f.dataset.auto; });
+  store.del(KEY);
+  refresh();
+  toast('Formularz wyczyszczony');
+});
+
+/* ════════════════════════════════════════════════════════════
+   6. CHECKLISTA ZDJĘĆ
+   ════════════════════════════════════════════════════════════ */
+const photos = $$('.photo');
+const P_KEY = 'protokol-foto-v1';
+(function initChecklist(){
+  const saved = store.get(P_KEY, []) || [];
+  photos.forEach((c, i) => { c.checked = !!saved[i]; });
+  const countEl = $('#photoCount');
+  const upd = () => {
+    const state = photos.map(c => c.checked);
+    store.set(P_KEY, state);
+    countEl.textContent = state.filter(Boolean).length;
+  };
+  photos.forEach(c => c.addEventListener('change', upd));
+  upd();
+})();
+
+/* ════════════════════════════════════════════════════════════
+   7. ZDJĘCIA: APARAT / PLIKI / GALERIA
+   ════════════════════════════════════════════════════════════ */
+const S_KEY = 'protokol-shots-v1';
+let SHOTS = store.get(S_KEY, []) || [];
+if(!Array.isArray(SHOTS)) SHOTS = [];
+
+const gallery = $('#gallery');
+const shotEmpty = $('#shotEmpty');
+let quotaWarned = false;
+
+function persistShots(){
+  if(!store.set(S_KEY, SHOTS) && !quotaWarned){
+    quotaWarned = true;
+    toast('Uwaga: pamięć przeglądarki pełna — zdjęcia zachowane tylko w tej sesji');
+  }
+}
+function renderShots(){
+  gallery.innerHTML = SHOTS.map((s, i) =>
+    '<figure class="relative group border border-black/10 overflow-hidden bg-[#EDF1E6]">' +
+      '<img src="' + s.d + '" alt="Zdjęcie ' + (i + 1) + '" loading="lazy" decoding="async" class="w-full h-28 sm:h-24 object-contain bg-[#F7F9F4]">' +
+      '<figcaption class="absolute left-0 top-0 bg-[#A6CE39] text-[#17200a] cond font-extrabold text-[11px] px-1.5">' + (i + 1) + '</figcaption>' +
+      '<button type="button" data-del="' + i + '" aria-label="Usuń zdjęcie ' + (i + 1) + '" class="no-print absolute right-1 top-1 w-8 h-8 sm:w-6 sm:h-6 grid place-items-center bg-black/70 hover:bg-[#c00] active:bg-[#c00] text-white text-xs leading-none opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition">✕</button>' +
+    '</figure>').join('');
+  shotEmpty.style.display = SHOTS.length ? 'none' : '';
+  $('#shotCount').textContent = SHOTS.length;
+}
+gallery.addEventListener('click', e => {
+  const b = e.target.closest('[data-del]');
+  if(!b) return;
+  SHOTS.splice(Number(b.dataset.del), 1);
+  persistShots(); renderShots();
+  toast('Usunięto zdjęcie');
+});
+
+function compress(file){
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const MAX = 2000;
+      let w = img.naturalWidth, h = img.naturalHeight;
+      if(!w || !h){ rej(new Error('bad image')); return; }
+      if(w > MAX || h > MAX){ const k = Math.min(MAX / w, MAX / h); w = Math.round(w * k); h = Math.round(h * k); }
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      const cx = c.getContext('2d');
+      cx.imageSmoothingEnabled = true;
+      cx.imageSmoothingQuality = 'high';
+      cx.fillStyle = '#fff';
+      cx.fillRect(0, 0, w, h);
+      cx.drawImage(img, 0, 0, w, h);
+      res({d: c.toDataURL('image/jpeg', 0.86), n: file.name || 'zdjecie.jpg', w, h});
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('decode error')); };
+    img.src = url;
+  });
+}
+async function addFiles(list){
+  const files = [...list].filter(f => f.type.startsWith('image/'));
+  if(!files.length) return;
+  let added = 0, skipped = 0;
+  for(const f of files){
+    if(SHOTS.length >= MAX_SHOTS){ skipped++; continue; }
+    try{ SHOTS.push(await compress(f)); added++; }
+    catch(_){ skipped++; }
+  }
+  persistShots(); renderShots();
+  toast('✓ Dodano zdjęć: ' + added + (skipped ? ' · pominięto: ' + skipped + ' (limit ' + MAX_SHOTS + ')' : ''));
+}
+
+const inpCam = $('#inpCam'), inpFiles = $('#inpFiles');
+$('#btnCam').addEventListener('click', () => inpCam.click());
+$('#btnFiles').addEventListener('click', () => inpFiles.click());
+[inpCam, inpFiles].forEach(inp => inp.addEventListener('change', e => {
+  addFiles(e.target.files);
+  e.target.value = '';
+}));
+$('#btnShotsClear').addEventListener('click', () => {
+  if(!SHOTS.length) return;
+  if(!confirm('Usunąć wszystkie dodane zdjęcia?')) return;
+  SHOTS = []; persistShots(); renderShots();
+  toast('Usunięto wszystkie zdjęcia');
+});
+
+const dz = $('#dropZone');
+dz.addEventListener('click', () => inpFiles.click());
+['dragenter','dragover'].forEach(ev => dz.addEventListener(ev, e => {
+  e.preventDefault(); dz.classList.add('border-[#A6CE39]','bg-[#F4F8EC]');
+}));
+['dragleave','drop'].forEach(ev => dz.addEventListener(ev, e => {
+  e.preventDefault(); dz.classList.remove('border-[#A6CE39]','bg-[#F4F8EC]');
+}));
+dz.addEventListener('drop', e => { if(e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files); });
+renderShots();
+
+/* uzupełnij wymiary zdjęć zapisanych wcześniej — poprawne proporcje w PDF */
+SHOTS.filter(s => !s.w || !s.h).forEach(s => {
+  const im = new Image();
+  im.onload = () => { s.w = im.naturalWidth; s.h = im.naturalHeight; persistShots(); };
+  im.src = s.d;
+});
+
+/* ════════════════════════════════════════════════════════════
+   8. PODPIS ODRĘCZNY
+   ════════════════════════════════════════════════════════════ */
+const SIG_KEY = 'protokol-sig-v1';
+let SIG = store.get(SIG_KEY, {}) || {};
+if(typeof SIG !== 'object' || SIG === null) SIG = {};
+
+(function initSignature(){
+  const cv = $('canvas[data-sig="A"]');
+  if(!cv) return;
+  const ID = 'A';
+  const ctx = cv.getContext('2d');
+  const status = $('#sigStatus'), lockBox = $('#sigLock'), armBtn = $('#sigArm'), hint = $('#sigHint');
+  const LOCK_AFTER = 2.5;
+
+  let drawing = false, hasInk = !!(SIG[ID] && SIG[ID].img), locked = false, armed = false;
+  let cssW = 0, cssH = 0, pts = [], lastW = 2.4;
+  let restoreSrc = (SIG[ID] && SIG[ID].img) || null;
+
+  function style(){
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#14180b';
+    ctx.fillStyle = '#14180b';
+  }
+  function resize(){
+    const r = cv.getBoundingClientRect();
+    if(!r.width || !r.height) return;
+    const dpr = Math.min(Math.max(window.devicePixelRatio || 1, 2), 3);
+    /* FIX: najpierw bieżąca treść płótna, dopiero potem zapis z pamięci */
+    const src = restoreSrc || (hasInk ? cv.toDataURL('image/png') : null);
+    restoreSrc = null;
+    cssW = r.width; cssH = r.height;
+    cv.width = Math.round(r.width * dpr);
+    cv.height = Math.round(r.height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    style();
+    if(src){
+      const img = new Image();
+      img.onload = () => ctx.drawImage(img, 0, 0, cssW, cssH);
+      img.src = src;
+      hasInk = true;
+    }
+    setStatus();
+  }
+  function setStatus(){
+    status.textContent = locked ? 'Zapisany ✓' : (hasInk ? 'Szkic' : 'Niepodpisany');
+    status.className = 'cond uppercase tracking-[.12em] text-[11px] font-bold ' +
+      (locked ? 'text-[#6f9612]' : hasInk ? 'text-[#c98a00]' : 'text-[#a9b0a5]');
+  }
+  function setArmed(v){
+    armed = v && !locked;
+    cv.style.pointerEvents = armed ? '' : 'none';
+    cv.style.touchAction = armed ? 'none' : 'auto';
+    cv.style.cursor = armed ? 'crosshair' : 'default';
+    armBtn.classList.toggle('hidden', armed || locked);
+  }
+  function setLocked(v){
+    locked = v;
+    lockBox.classList.toggle('hidden', !v);
+    if(v){
+      armed = false;
+      cv.style.pointerEvents = 'none';
+      cv.style.touchAction = 'auto';
+      cv.style.cursor = 'not-allowed';
+      armBtn.classList.add('hidden');
+      hint.textContent = 'Podpis zabezpieczony';
+      hint.className = 'cond uppercase tracking-[.12em] text-[11px] font-bold text-[#6f9612]';
+    } else {
+      hint.textContent = 'Zapis automatyczny';
+      hint.className = 'cond uppercase tracking-[.12em] text-[11px] text-[#8a9182]';
+      setArmed(false);
+    }
+    setStatus();
+  }
+  armBtn.addEventListener('click', () => {
+    if(locked) return;
+    setArmed(true);
+    hint.textContent = 'Pole aktywne — podpisz';
+    hint.className = 'cond uppercase tracking-[.12em] text-[11px] font-bold text-[#6f9612]';
+  });
+
+  function pos(e){
+    const r = cv.getBoundingClientRect();
+    return {
+      x: (e.clientX - r.left) * (cssW / r.width),
+      y: (e.clientY - r.top)  * (cssH / r.height),
+      p: (e.pointerType === 'pen' && e.pressure > 0) ? e.pressure : 0.5
+    };
+  }
+  const mid = (a, b) => ({x:(a.x + b.x) / 2, y:(a.y + b.y) / 2});
+
+  let tickT = null, left = 0;
+  const stopCountdown = () => { clearInterval(tickT); tickT = null; };
+  function commit(){
+    stopCountdown();
+    if(!hasInk) return;
+    SIG[ID] = {img: cv.toDataURL('image/png'), locked: true};
+    store.set(SIG_KEY, SIG);
+    setLocked(true);
+    toast('✓ Podpis zapisany i zabezpieczony przed zmianą');
+  }
+  function scheduleSave(){
+    stopCountdown();
+    if(!hasInk || locked) return;
+    left = LOCK_AFTER;
+    hint.className = 'cond uppercase tracking-[.12em] text-[11px] font-bold text-[#c98a00]';
+    hint.textContent = 'Zapis za ' + left.toFixed(1) + ' s…';
+    tickT = setInterval(() => {
+      left -= 0.5;
+      if(left <= 0){ commit(); return; }
+      hint.textContent = 'Zapis za ' + left.toFixed(1) + ' s…';
+    }, 500);
+  }
+  function clearCanvas(){
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.restore();
+    style();
+  }
+
+  let snapshot = null, strokeLen = 0;
+
+  cv.addEventListener('pointerdown', e => {
+    if(locked || !armed || !e.isPrimary) return;
+    e.preventDefault();
+    stopCountdown();
+    snapshot = hasInk ? cv.toDataURL('image/png') : null;
+    strokeLen = 0;
+    drawing = true;
+    try{ cv.setPointerCapture(e.pointerId); }catch(_){}
+    const p = pos(e);
+    pts = [p];
+    lastW = 1.6 + p.p * 2.2;
+    style();
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, lastW / 2, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  cv.addEventListener('pointermove', e => {
+    if(!drawing) return;
+    e.preventDefault();
+    const evs = (e.getCoalescedEvents && e.getCoalescedEvents()) || [e];
+    for(const ev of evs){
+      const p = pos(ev);
+      const last = pts[pts.length - 1];
+      if(last && Math.hypot(p.x - last.x, p.y - last.y) < 0.6) continue;
+      if(last) strokeLen += Math.hypot(p.x - last.x, p.y - last.y);
+      pts.push(p);
+      if(pts.length < 3) continue;
+      const a = pts[pts.length - 3], b = pts[pts.length - 2], c = pts[pts.length - 1];
+      const m1 = mid(a, b), m2 = mid(b, c);
+      const speed = Math.hypot(c.x - b.x, c.y - b.y);
+      const target = Math.max(1.1, Math.min(3.4, (1.6 + c.p * 2.2) - speed * 0.06));
+      lastW += (target - lastW) * 0.35;
+      ctx.lineWidth = lastW;
+      ctx.beginPath();
+      ctx.moveTo(m1.x, m1.y);
+      ctx.quadraticCurveTo(b.x, b.y, m2.x, m2.y);
+      ctx.stroke();
+    }
+    if(pts.length > 800) pts.splice(0, pts.length - 3);   // ograniczenie pamięci przy długim podpisie
+  });
+
+  ['pointerup','pointercancel'].forEach(evName =>
+    cv.addEventListener(evName, e => {
+      if(!drawing) return;
+      drawing = false;
+      try{ cv.releasePointerCapture(e.pointerId); }catch(_){}
+
+      /* przypadkowe muśnięcie — cofnij */
+      if(strokeLen < 4 && pts.length < 3){
+        pts = [];
+        if(snapshot){
+          const img = new Image();
+          img.onload = () => { clearCanvas(); ctx.drawImage(img, 0, 0, cssW, cssH); style(); };
+          img.src = snapshot;
+        } else {
+          clearCanvas();
+        }
+        if(hasInk) scheduleSave();
+        return;
+      }
+      if(pts.length === 2){
+        ctx.lineWidth = lastW;
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x, pts[0].y);
+        ctx.lineTo(pts[1].x, pts[1].y);
+        ctx.stroke();
+      }
+      pts = [];
+      hasInk = true;
+      setStatus();
+      scheduleSave();
+    }));
+
+  $('#btnSigClear').addEventListener('click', () => {
+    clearCanvas();
+    hasInk = false; drawing = false; pts = []; snapshot = null; restoreSrc = null;
+    SIG[ID] = {};
+    stopCountdown();
+    store.set(SIG_KEY, SIG);
+    setLocked(false);
+    setArmed(true);
+    toast('Podpis wyczyszczony — możesz podpisać ponownie');
+  });
+
+  window.sigFlush = () => { if(hasInk && !locked) commit(); };
+
+  resize();
+  if(SIG[ID] && SIG[ID].locked && SIG[ID].img) setLocked(true);
+  else { locked = false; setArmed(false); setStatus(); }
+
+  let rT = null;
+  addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(resize, 250); }, {passive:true});
+})();
+
+/* ════════════════════════════════════════════════════════════
+   9. SCROLL: PASEK POSTĘPU + REVEAL
+   ════════════════════════════════════════════════════════════ */
+(function initScroll(){
+  const prog = $('#prog');
+  let ticking = false;
+  const update = () => {
+    const h = document.documentElement.scrollHeight - innerHeight;
+    prog.style.width = (h > 0 ? Math.min(scrollY / h * 100, 100) : 0) + '%';
+    ticking = false;
+  };
+  addEventListener('scroll', () => {
+    if(ticking) return;
+    ticking = true;
+    requestAnimationFrame(update);
+  }, {passive:true});
+  update();
+
+  const els = $$('.reveal');
+  if(!('IntersectionObserver' in window)){
+    els.forEach(el => el.classList.add('in'));
+    return;
+  }
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(en => { if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+  }, {threshold:.12, rootMargin:'0px 0px -40px 0px'});
+  els.forEach((el, i) => {
+    el.style.transitionDelay = ((i % 4) * 70) + 'ms';
+    io.observe(el);
+  });
+})();
+
+$('#btnTop').addEventListener('click', () => {
+  try{ scrollTo({top:0, left:0, behavior:'smooth'}); }
+  catch(_){ scrollTo(0, 0); }
+  setTimeout(() => { if(scrollY > 0) scrollTo(0, 0); }, 700);
+});
+$('#btnPrint').addEventListener('click', () => window.print());
+
+/* ════════════════════════════════════════════════════════════
+   10. PDF — leniwe ładowanie biblioteki + generowanie
+   ════════════════════════════════════════════════════════════ */
+const H2P_SOURCES = [
+  'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js',
+  'https://cdn.jsdelivr.net/npm/html2pdf.js@0.9.3/dist/html2pdf.bundle.min.js'
+];
+let h2pPromise = null;
+function loadHtml2Pdf(){
+  if(window.html2pdf) return Promise.resolve(window.html2pdf);
+  if(h2pPromise) return h2pPromise;
+  h2pPromise = new Promise((resolve, reject) => {
+    let i = 0;
+    const tryNext = () => {
+      if(i >= H2P_SOURCES.length){ h2pPromise = null; reject(new Error('Nie udało się pobrać biblioteki PDF')); return; }
+      const s = document.createElement('script');
+      s.src = H2P_SOURCES[i++];
+      s.async = true;
+      s.onload = () => window.html2pdf ? resolve(window.html2pdf) : tryNext();
+      s.onerror = () => { s.remove(); tryNext(); };
+      document.head.appendChild(s);
+    };
+    tryNext();
+  });
+  return h2pPromise;
+}
+/* ── WYBÓR SILNIKA: 'text' = wektorowy (pdfmake), 'image' = rastrowy (html2pdf) ── */
+const ENG_KEY = 'protokol-pdf-engine';
+const pdfEngine = () => (store.get(ENG_KEY, 'text') === 'image' ? 'image' : 'text');
+(function initEngineSelect(){
+  const sel = $('#pdfMode');
+  if(!sel) return;
+  sel.value = pdfEngine();
+  sel.addEventListener('change', () => {
+    store.set(ENG_KEY, sel.value);
+    toast(sel.value === 'text'
+      ? '✓ PDF tekstowy — tekst można zaznaczać, kopiować i wyszukiwać'
+      : '✓ PDF graficzny — wierne odwzorowanie układu strony');
+    warmUpEngine();
+  });
+})();
+
+/* Biblioteka pobierana dopiero przy pierwszym kontakcie z przyciskiem PDF */
+let warmed = false;
+function warmUpEngine(){
+  warmed = true;
+  (pdfEngine() === 'text' ? loadPdfMake() : loadHtml2Pdf()).catch(() => {});
+}
+['pointerover','focusin','touchstart'].forEach(ev =>
+  document.addEventListener(ev, e => {
+    if(warmed || !e.target.closest || !e.target.closest('[data-pdf],#btnSend,#btnMail,#pdfMode')) return;
+    warmUpEngine();
+  }, {passive:true}));
+
+/* ── SILNIK WEKTOROWY: pdfmake (wbudowana Roboto obsługuje polskie znaki) ── */
+const PDFMAKE_SETS = [
+  ['https://cdn.jsdelivr.net/npm/pdfmake@0.2.7/build/pdfmake.min.js', 'https://cdn.jsdelivr.net/npm/pdfmake@0.2.7/build/vfs_fonts.js'],
+  ['https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js'],
+  ['https://unpkg.com/pdfmake@0.2.7/build/pdfmake.min.js', 'https://unpkg.com/pdfmake@0.2.7/build/vfs_fonts.js']
+];
+function loadScript(src){
+  return new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = src; s.async = true;
+    s.onload = res;
+    s.onerror = () => { s.remove(); rej(new Error('Nie pobrano: ' + src)); };
+    document.head.appendChild(s);
+  });
+}
+let pmPromise = null;
+function loadPdfMake(){
+  if(window.pdfMake && window.pdfMake.vfs) return Promise.resolve(window.pdfMake);
+  if(pmPromise) return pmPromise;
+  pmPromise = (async () => {
+    for(const [core, fonts] of PDFMAKE_SETS){
+      try{
+        if(!window.pdfMake) await loadScript(core);
+        if(!window.pdfMake) continue;
+        if(!window.pdfMake.vfs) await loadScript(fonts);
+        /* różne warianty pakietu z czcionkami */
+        if(!window.pdfMake.vfs && window.vfs_fonts){
+          window.pdfMake.vfs = window.vfs_fonts.pdfMake ? window.vfs_fonts.pdfMake.vfs : window.vfs_fonts;
+        }
+        if(window.pdfMake.vfs) return window.pdfMake;
+      }catch(_){ /* następne źródło */ }
+    }
+    pmPromise = null;
+    throw new Error('Nie udało się pobrać silnika PDF (pdfmake)');
+  })();
+  return pmPromise;
+}
+
+/* ── elementy składu wektorowego ── */
+const PG = {M:40, W:595.28};
+const CW = PG.W - PG.M * 2;                 // szerokość kolumny treści (pt)
+const bandLayout = pad => ({
+  hLineWidth:()=>0, vLineWidth:()=>0,
+  paddingLeft:()=>PG.M, paddingRight:()=>PG.M, paddingTop:()=>pad, paddingBottom:()=>pad
+});
+const band = (fill, content, pad, top) => ({
+  table:{widths:['*'], body:[[Object.assign({fillColor:fill}, content)]]},
+  layout: bandLayout(pad == null ? 20 : pad),
+  margin:[-PG.M, top ? -PG.M : 0, -PG.M, 0]
+});
+const vSecTitle = (no, title) => ({
+  stack:[
+    {columns:(no ? [{width:24, text:no, color:'#A6CE39', bold:true, fontSize:17}] : []).concat([
+      {width:'*', text:title.toUpperCase(), bold:true, fontSize:12.5, characterSpacing:0.4, color:'#1B1B1B', margin:[0,3,0,0]}
+    ])},
+    {canvas:[{type:'line', x1:0, y1:0, x2:CW, y2:0, lineWidth:0.7, lineColor:'#dce1d5'}], margin:[0,4,0,0]}
+  ],
+  margin:[0,12,0,9]
+});
+const vTableLayout = {
+  hLineWidth:()=>0.5, vLineWidth:()=>0.5,
+  hLineColor:()=>'#dde2d5', vLineColor:()=>'#dde2d5',
+  paddingTop:()=>4.5, paddingBottom:()=>4.5, paddingLeft:()=>6, paddingRight:()=>6,
+  fillColor:i => i === 0 ? '#1B1B1B' : (i % 2 === 0 ? '#F7F9F4' : null)
+};
+const vCheckBox = on => ({
+  width:14,
+  canvas:[{type:'rect', x:0, y:1, w:9, h:9, lineWidth:0.8, lineColor:on ? '#A6CE39' : '#b9c0b2', color:on ? '#A6CE39' : null}]
+    .concat(on ? [{type:'polyline', lineWidth:1.5, lineColor:'#17200a', points:[{x:2,y:5.6},{x:3.8,y:7.6},{x:7.2,y:3}]}] : [])
+});
+function vDataTable(useValues){
+  const th = t => ({text:t, bold:true, fontSize:7.5, characterSpacing:1, color:'#fff'});
+  const body = [[Object.assign(th('LP.'), {alignment:'center'}), th('INFORMACJA'), Object.assign(th('DO UZUPEŁNIENIA'), {color:'#A6CE39'})]];
+  ROWS.forEach(r => {
+    let cell, filled = false;
+    if(r.t === 'fixed'){
+      cell = {text:r.v.toUpperCase(), color:'#5d7f0d', bold:true, fontSize:7.5};
+      filled = useValues;
+    } else if(!useValues && r.t === 'select'){
+      cell = {text:r.o.join('  /  '), color:'#8a9182', fontSize:7.5};
+    } else {
+      const x = useValues ? valOf(r.n) : '';
+      filled = !!x;
+      cell = x ? {text:x, bold:true, color:'#111'} : {text:'.'.repeat(48), color:'#c2c9ba'};
+    }
+    body.push([
+      {text:String(r.n), alignment:'center', bold:true, fillColor:filled ? '#A6CE39' : '#EDF1E6', color:filled ? '#17200a' : '#8a9182'},
+      {text:r.l},
+      cell
+    ]);
+  });
+  return {table:{headerRows:1, widths:[20, 190, '*'], body}, layout:vTableLayout, fontSize:8.5};
+}
+function vChecklist(items, checkedFn){
+  return {
+    table:{widths:[14, '*'], body: items.map((p, i) => [
+      vCheckBox(checkedFn ? !!checkedFn(i) : false),
+      {stack:[
+        {text:p[0].toUpperCase(), bold:true, color:'#5d7f0d', fontSize:9.5, characterSpacing:0.3},
+        {text:p[1], fontSize:8.5, color:'#4a4f4a', margin:[0,1,0,0]}
+      ]}
+    ])},
+    layout:{hLineWidth:i => i === 0 ? 0 : 0.5, vLineWidth:()=>0, hLineColor:()=>'#e6eade', paddingTop:()=>5, paddingBottom:()=>5, paddingLeft:()=>0}
+  };
+}
+const vFooter = label => (cur, total) => ({
+  columns:[
+    {text:label, fontSize:7, characterSpacing:1, color:'#9aa094'},
+    {text:'Strona ' + cur + ' z ' + total, alignment:'right', fontSize:7, characterSpacing:1, color:'#9aa094'}
+  ],
+  margin:[PG.M, 14, PG.M, 0]
+});
+const vBase = (title, subject, footerLabel) => ({
+  pageSize:'A4',
+  pageMargins:[PG.M, PG.M, PG.M, 54],
+  info:{title, author:'Dział Floty', subject, keywords:'protokół przekazania, pojazd służbowy, UDT, VDesk, Dział Floty', creator:'Dział Floty — komunikat FL/2026/08'},
+  defaultStyle:{fontSize:9, lineHeight:1.3, color:'#2b2f2b'},
+  footer: vFooter(footerLabel)
+});
+
+function ddInstrukcja(){
+  const step = (no, t, d, dark) => ({
+    stack:[
+      {text:no, bold:true, fontSize:16, color:'#A6CE39'},
+      {text:t.toUpperCase(), bold:true, fontSize:9.5, color:dark ? '#fff' : '#1B1B1B', margin:[0,2,0,2]},
+      {text:d, fontSize:7.5, color:dark ? '#b6bbb2' : '#5B5F5C'}
+    ],
+    fillColor: dark ? '#1B1B1B' : null
+  });
+  const kv = (k, v) => ({
+    stack:[{text:k, fontSize:7, characterSpacing:1.2, color:'#8d938a'}, {text:v, bold:true, fontSize:10.5, color:'#fff', margin:[0,2,0,0]}],
+    fillColor:'#1f221e', margin:[8,7,8,7]
+  });
+  const p = (txt, gap) => ({text:txt, margin:[0,0,0, gap == null ? 7 : gap], alignment:'justify'});
+
+  return Object.assign(vBase(
+    'Protokoły przekazania — instrukcja dla oddziałów',
+    'Zmiana procesu rejestrowania protokołów przekazania pojazdów służbowych oraz obiektów UDT',
+    'Dział Floty · flota@chemirol.com · tel. 52 315 96 55'
+  ), {
+    content:[
+      band('#141614', {columns:[
+        {width:'*', stack:[
+          {text:'KOMUNIKAT WEWNĘTRZNY · DZIAŁ FLOTY', color:'#A6CE39', fontSize:7.5, characterSpacing:2.4},
+          {text:[{text:'PROTOKOŁY ', color:'#fff'}, {text:'PRZEKAZANIA', color:'#A6CE39'}], bold:true, fontSize:30, characterSpacing:0.5, margin:[0,8,0,0]},
+          {text:'Zmiana procesu rejestrowania protokołów przekazania pojazdów służbowych oraz obiektów UDT — wymagane dane i zdjęcia przy zgłoszeniu.', color:'#a7aca4', fontSize:8.5, margin:[0,8,0,0]}
+        ]},
+        {width:118, alignment:'right', stack:[
+          {text:'OBOWIĄZUJE OD', fontSize:7, characterSpacing:1.4, color:'#8d938a'},
+          {text:'17.08.2026', bold:true, fontSize:19, color:'#fff', margin:[0,2,0,0]},
+          {text:'DOK. FL/2026/08 · V1.0', fontSize:7, characterSpacing:1.2, color:'#8d938a', margin:[0,8,0,0]}
+        ]}
+      ]}, 22, true),
+      band('#A6CE39', {text:'INSTRUKCJA DLA ODDZIAŁÓW · ZGŁOSZENIE PRZEKAZANIA POJAZDU / OBIEKTU UDT · FLOTA@CHEMIROL.COM · TEL. 52 315 96 55', bold:true, fontSize:9, characterSpacing:0.4, color:'#17200a'}, 9),
+
+      vSecTitle('01', 'Komunikat Działu Floty'),
+      {text:'Szanowni Państwo,', bold:true, margin:[0,0,0,7]},
+      p([{text:'uprzejmie informuję, że z dniem '}, {text:'17.08.2026 r.', bold:true}, {text:' wprowadzamy zmianę w procesie rejestrowania protokołów przekazania pojazdów służbowych oraz obiektów UDT. Od wskazanej daty możliwość tworzenia protokołów przekazania w systemie '}, {text:'VDesk', bold:true}, {text:' będzie dostępna wyłącznie dla pracowników Działu Floty.'}]),
+      p('Zmiana ta wynika z konieczności zapewnienia poprawności danych w ewidencji pojazdów. Obecnie zdarzają się sytuacje, w których protokoły są tworzone przez użytkowników na oddziałach, jednak nie trafiają do akceptacji lub nie zostają sfinalizowane. W konsekwencji w systemie nie następuje zmiana użytkownika pojazdu, co powoduje rozbieżności w dokumentacji oraz błędy ewidencyjne.'),
+      p([{text:'W związku z powyższym uprzejmie proszę o '}, {text:'przekazanie tej informacji Państwa pracownikom', bold:true}, {text:'.'}]),
+      p([{text:'W przypadku konieczności przekazania pojazdu służbowego lub obiektu UDT prosimy o kontakt z Działem Floty ('}, {text:'flota@chemirol.com', bold:true}, {text:', tel. '}, {text:'52 315 96 55', bold:true}, {text:'), który przygotuje oraz zarejestruje odpowiedni protokół w systemie VDesk.'}]),
+      p([{text:'Aby usprawnić przygotowanie protokołu, osoba zgłaszająca przekazanie pojazdu proszona jest o wypełnienie '}, {text:'Wniosku o przekazanie pojazdu / obiektu UDT', bold:true}, {text:' oraz załączenie wymaganej dokumentacji zdjęciowej.'}], 2),
+
+      vSecTitle('02', 'Nowy przebieg procesu'),
+      {table:{widths:['*','*','*','*'], body:[[
+        step('01', 'Zgłoszenie', 'Oddział wysyła wiadomość z wypełnioną tabelą i zdjęciami.'),
+        step('02', 'Weryfikacja', 'Dział Floty sprawdza kompletność danych i zdjęć.'),
+        step('03', 'Protokół w VDesk', 'Pracownik Floty rejestruje protokół w systemie.'),
+        step('04', 'Finalizacja', 'Zmiana użytkownika pojazdu — ewidencja aktualna.', true)
+      ]]}, layout:{hLineWidth:()=>0.5, vLineWidth:()=>0.5, hLineColor:()=>'#dde2d5', vLineColor:()=>'#dde2d5', paddingTop:()=>8, paddingBottom:()=>8, paddingLeft:()=>8, paddingRight:()=>8}},
+
+      Object.assign(vSecTitle('03', 'Tabela danych do zgłoszenia'), {pageBreak:'before'}),
+      {text:[{text:'Poniższą tabelę należy wypełnić i przesłać na adres '}, {text:'flota@chemirol.com', bold:true}, {text:', a zdjęcia załączyć do wiadomości.'}], fontSize:8.5, color:'#5B5F5C', margin:[0,0,0,9]},
+      vDataTable(false),
+
+      Object.assign(vSecTitle('04', 'Wymagana dokumentacja zdjęciowa'), {pageBreak:'before'}),
+      {table:{widths:['*'], body:[[{text:[{text:'Niezależnie od wypełnionego wniosku do zgłoszenia należy '}, {text:'OBOWIĄZKOWO ZAŁĄCZYĆ ZDJĘCIA PRZEKAZYWANEGO POJAZDU / OBIEKTU', bold:true}, {text:', dokumentujące jego aktualny stan.'}], color:'#17200a', fillColor:'#A6CE39', margin:[10,8,10,8]}]]}, layout:'noBorders', margin:[0,0,0,9]},
+      {table:{widths:[3,'*'], body:[[{text:'', fillColor:'#A6CE39'}, {text:'Wykonać dokumentację fotograficzną pojazdu z czterech narożników, w ujęciach 3/4.', bold:true, color:'#1B1B1B', fillColor:'#F4F6F1', margin:[10,7,10,7]}]]}, layout:'noBorders', margin:[0,0,0,11]},
+      vChecklist(PHOTO_ITEMS, null),
+      {text:'Kompletne dane oraz dokumentacja zdjęciowa pozwolą uniknąć opóźnień i błędów ewidencyjnych.', fontSize:8.5, color:'#4a4f4a', margin:[0,11,0,0]},
+
+      vSecTitle('05', 'Obiekty UDT i kontakt'),
+      p('W przypadku przekazania obiektu UDT prosimy o kontakt z Działem Floty — pracownicy wskażą szczegółowy zakres danych i zdjęć wymaganych do przygotowania protokołu.', 11),
+      {table:{widths:['*'], body:[[{fillColor:'#141614', margin:[16,14,16,14], stack:[
+        {text:'KONTAKT', color:'#A6CE39', fontSize:7, characterSpacing:2},
+        {text:'DZIAŁ FLOTY', bold:true, color:'#fff', fontSize:21, margin:[0,4,0,10]},
+        {columns:[kv('E-MAIL', 'flota@chemirol.com'), kv('TELEFON', '52 315 96 55'), kv('SYSTEM', 'VDesk')], columnGap:6},
+        {text:'Wierzymy, że wprowadzona zmiana usprawni proces ewidencji oraz zapewni aktualność danych w systemie. Dziękujemy za współpracę i stosowanie się do nowych zasad.', color:'#b6bbb2', fontSize:8.5, margin:[0,12,0,0]},
+        {text:'Z poważaniem,', color:'#8d938a', italics:true, fontSize:8.5, margin:[0,10,0,0]},
+        {text:'DZIAŁ FLOTY', bold:true, color:'#fff', fontSize:13}
+      ]}]]}, layout:'noBorders'},
+      {text:'Instrukcja wygenerowana ' + todayPL() + ' · dokument zawiera tekst do zaznaczania i wyszukiwania.', fontSize:7.5, color:'#9aa094', margin:[0,12,0,0]}
+    ]
+  });
+}
+
+function ddWniosek(){
+  const today = todayPL();
+  const reg = valOf(1).toUpperCase();
+  const sig = SIG.A || {};
+  const content = [
+    band('#141614', {columns:[
+      {width:'*', stack:[
+        {text:'ZAŁĄCZNIK DO ZGŁOSZENIA · DZIAŁ FLOTY', color:'#A6CE39', fontSize:7.5, characterSpacing:2.4},
+        {text:[{text:'WNIOSEK O PRZEKAZANIE\n', color:'#fff'}, {text:'POJAZDU / OBIEKTU UDT', color:'#A6CE39'}], bold:true, fontSize:23, lineHeight:1.05, margin:[0,8,0,0]}
+      ]},
+      {width:112, alignment:'right', stack:[
+        {text:'DATA ZGŁOSZENIA', fontSize:7, characterSpacing:1.4, color:'#8d938a'},
+        {text:today, bold:true, fontSize:17, color:'#fff', margin:[0,2,0,0]},
+        {text:reg || '—', fontSize:8, characterSpacing:1.2, color:'#8d938a', margin:[0,8,0,0]}
+      ]}
+    ]}, 20, true),
+    band('#A6CE39', {text:'WYPEŁNIJ TABELĘ I WYŚLIJ NA FLOTA@CHEMIROL.COM · ZDJĘCIA ZAŁĄCZ DO WIADOMOŚCI', bold:true, fontSize:9, characterSpacing:0.4, color:'#17200a'}, 8),
+    {text:'', margin:[0,0,0,12]},
+    vDataTable(true),
+
+    Object.assign(vSecTitle('', 'Dokumentacja zdjęciowa'), {pageBreak:'before'}),
+    {table:{widths:['*'], body:[[{text: SHOTS.length
+      ? [{text:'Do wniosku dołączono '}, {text:String(SHOTS.length), bold:true}, {text:' zdjęć(-cia) — patrz załącznik fotograficzny na kolejnych stronach.'}]
+      : [{text:'Zaznacz zakres wykonanych zdjęć i '}, {text:'załącz je do wiadomości', bold:true}, {text:'.'}],
+      color:'#17200a', fillColor:'#A6CE39', margin:[10,7,10,7]}]]}, layout:'noBorders', margin:[0,0,0,9]},
+    {table:{widths:[3,'*'], body:[[{text:'', fillColor:'#A6CE39'}, {text:'Wykonać dokumentację fotograficzną pojazdu z czterech narożników, w ujęciach 3/4.', bold:true, color:'#1B1B1B', fillColor:'#F4F6F1', margin:[10,7,10,7]}]]}, layout:'noBorders', margin:[0,0,0,11]},
+    vChecklist(PHOTO_ITEMS.slice(0, -1), i => photos[i] && photos[i].checked),
+
+    {columns:[
+      {width:'48%', stack:[
+        sig.img ? {image:sig.img, fit:[200, 64], margin:[0,0,0,4]} : {text:'', margin:[0,0,0,68]},
+        {canvas:[{type:'line', x1:0, y1:0, x2:230, y2:0, lineWidth:0.7, lineColor:'#9aa094'}]},
+        {text:'Podpis zgłaszającego', fontSize:8, color:'#5B5F5C', margin:[0,3,0,0]},
+        {text:'Data: ' + today, fontSize:7.5, color:'#8a9182'}
+      ]},
+      {width:'*', text:''}
+    ], margin:[0,24,0,0]},
+    {text:[{text:'Wniosek składa się na adres '}, {text:'flota@chemirol.com', bold:true}, {text:' (tel. '}, {text:'52 315 96 55', bold:true}, {text:').'}], fontSize:8, color:'#4a4f4a', margin:[0,14,0,0]}
+  ];
+
+  /* załącznik fotograficzny — 2 zdjęcia na stronę, proporcje zachowane przez `fit` */
+  const pages = Math.ceil(SHOTS.length / 2);
+  SHOTS.forEach((s, i) => {
+    if(i % 2 === 0){
+      content.push(Object.assign(
+        vSecTitle('', 'Załącznik fotograficzny' + (pages > 1 ? ' — str. ' + (i / 2 + 1) + '/' + pages : '')),
+        {pageBreak:'before'}
+      ));
+    }
+    content.push({
+      table:{widths:['auto'], body:[[{stack:[
+        {image:s.d, fit:[CW - 16, 300]},
+        {text:'ZDJĘCIE ' + (i + 1) + ' / ' + SHOTS.length + (reg ? ' · ' + reg : ''), fontSize:7.5, characterSpacing:1, color:'#5d7f0d', margin:[0,4,0,0]}
+      ], margin:[5,5,5,5]}]]},
+      layout:{hLineWidth:()=>0.5, vLineWidth:()=>0.5, hLineColor:()=>'#dde2d5', vLineColor:()=>'#dde2d5'},
+      alignment:'center', margin:[0,0,0,10]
+    });
+  });
+
+  return Object.assign(vBase(
+    'Wniosek o przekazanie pojazdu / obiektu UDT' + (reg ? ' — ' + reg : ''),
+    'Zgłoszenie przekazania pojazdu służbowego / obiektu UDT do Działu Floty',
+    'Wniosek o przekazanie pojazdu / obiektu UDT · wygenerowano ' + today
+  ), {content});
+}
+
+async function renderVectorPDF(type, mode){
+  const pm = await loadPdfMake();
+  const doc = pm.createPdf(type === 'wniosek' ? ddWniosek() : ddInstrukcja());
+  if(mode === 'blob'){
+    return await new Promise((res, rej) => {
+      const t = setTimeout(() => rej(new Error('Przekroczono czas generowania PDF')), 60000);
+      try{ doc.getBlob(b => { clearTimeout(t); res(b); }); }
+      catch(err){ clearTimeout(t); rej(err); }
+    });
+  }
+  doc.download(pdfFileName(type));
+  return null;
+}
+
+function pdfSectionTitle(no, title){
+  return '<table style="width:100%;border-collapse:collapse;margin:0 0 12px 0"><tr>' +
+    (no ? '<td style="width:34px;font-family:\'Barlow Condensed\',Arial,sans-serif;font-weight:800;color:#A6CE39;font-size:26px;line-height:1;vertical-align:middle">' + no + '</td>' : '') +
+    '<td style="white-space:nowrap;padding-right:12px;font-family:\'Barlow Condensed\',Arial,sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.02em;color:#1B1B1B;font-size:19px;vertical-align:middle">' + title + '</td>' +
+    '<td style="vertical-align:middle"><div style="height:1px;background:#dce1d5;width:100%"></div></td></tr></table>';
+}
+const todayPL = () => new Date().toLocaleDateString('pl-PL', {day:'2-digit', month:'2-digit', year:'numeric'});
+
+function pdfTableRows(useValues){
+  return ROWS.map((r, i) => {
+    let cell, numBg = '#EDF1E6', numCol = '#8a9182';
+    if(r.t === 'fixed'){
+      cell = '<span style="color:#5d7f0d;font-weight:700;text-transform:uppercase;letter-spacing:.03em;font-size:11.5px">' + ESC(r.v) + '</span>';
+      if(useValues){ numBg = '#A6CE39'; numCol = '#17200a'; }
+    } else if(!useValues && r.t === 'select'){
+      cell = '<span style="color:#8a9182;font-size:11px">' + ESC(r.o.join('  /  ')) + '</span>';
+    } else {
+      const x = useValues ? valOf(r.n) : '';
+      if(x){ cell = '<span style="color:#111;font-weight:600">' + ESC(x) + '</span>'; numBg = '#A6CE39'; numCol = '#17200a'; }
+      else { cell = '<span style="color:#c2c9ba;letter-spacing:1px">...................................................</span>'; }
+    }
+    return '<tr style="background:' + (i % 2 ? '#F7F9F4' : '#ffffff') + '">' +
+      '<td style="border:1px solid #dde2d5;background:' + numBg + ';color:' + numCol + ';text-align:center;font-weight:800;padding:6px 4px;width:34px">' + r.n + '</td>' +
+      '<td style="border:1px solid #dde2d5;padding:6px 10px;width:44%">' + ESC(r.l) + '</td>' +
+      '<td style="border:1px solid #dde2d5;padding:6px 10px">' + cell + '</td></tr>';
+  }).join('');
+}
+const PDF_THEAD = '<thead><tr style="background:#1B1B1B;color:#fff">' +
+  '<th style="border:1px solid #1B1B1B;padding:8px 4px;font-family:\'Barlow Condensed\',Arial,sans-serif;text-transform:uppercase;letter-spacing:.14em;font-size:10px">Lp.</th>' +
+  '<th style="border:1px solid #1B1B1B;padding:8px 10px;text-align:left;font-family:\'Barlow Condensed\',Arial,sans-serif;text-transform:uppercase;letter-spacing:.14em;font-size:10px">Informacja</th>' +
+  '<th style="border:1px solid #1B1B1B;padding:8px 10px;text-align:left;color:#A6CE39;font-family:\'Barlow Condensed\',Arial,sans-serif;text-transform:uppercase;letter-spacing:.14em;font-size:10px">Do uzupełnienia</th></tr></thead>';
+
+function photoChecklistRows(items, checkedFn){
+  return items.map((p, i) => {
+    const on = checkedFn ? checkedFn(i) : false;
+    const box = on
+      ? '<span style="display:inline-block;width:15px;height:15px;background:#A6CE39;border:1.5px solid #A6CE39;color:#17200a;text-align:center;line-height:14px;font-weight:800;font-size:11px">✓</span>'
+      : '<span style="display:inline-block;width:15px;height:15px;border:1.5px solid #b9c0b2"></span>';
+    return '<tr><td style="padding:7px 10px 7px 0;vertical-align:top;width:26px">' + box + '</td>' +
+      '<td style="padding:7px 0;border-bottom:1px solid #e6eade">' +
+      '<span style="font-family:\'Barlow Condensed\',Arial,sans-serif;text-transform:uppercase;font-weight:700;letter-spacing:.03em;color:#5d7f0d;font-size:14px">' + ESC(p[0]) + '</span><br>' +
+      '<span style="color:#4a4f4a;font-size:12px">' + ESC(p[1]) + '</span></td></tr>';
+  }).join('');
+}
+
+function pdfInstrukcjaHTML(){
+  const today = todayPL();
+  const kv = (k, v) => '<div style="border:1px solid #33362f;background:#1f221e;padding:12px 14px">' +
+    '<div style="font-family:\'Barlow Condensed\',Arial,sans-serif;text-transform:uppercase;letter-spacing:.16em;font-size:9px;color:#8d938a">' + k + '</div>' +
+    '<div style="font-family:\'Barlow Condensed\',Arial,sans-serif;font-weight:700;font-size:16px;color:#fff;margin-top:2px">' + v + '</div></div>';
+  const step = (no, title, desc, dark) =>
+    '<td style="width:25%;border:1px solid #dde2d5;padding:10px;vertical-align:top' + (dark ? ';background:#1B1B1B' : '') + '">' +
+    '<div style="font-family:\'Barlow Condensed\',Arial,sans-serif;font-weight:800;color:#A6CE39;font-size:22px;line-height:1">' + no + '</div>' +
+    '<div style="font-family:\'Barlow Condensed\',Arial,sans-serif;font-weight:700;text-transform:uppercase;color:' + (dark ? '#fff' : '#1B1B1B') + ';font-size:14px">' + title + '</div>' +
+    '<div style="font-size:11.5px;color:' + (dark ? '#b6bbb2' : '#5B5F5C') + '">' + desc + '</div></td>';
+
+  return `
+<div style="width:794px;background:#fff;font-family:'Barlow',Arial,sans-serif;font-size:12.5px;line-height:1.65;color:#2b2f2b">
+  <div style="background:#141614;padding:26px 44px;border-left:8px solid #A6CE39">
+    <table style="width:100%;border-collapse:collapse"><tr>
+      <td style="vertical-align:top">
+        <div style="font-family:'Barlow Condensed',Arial,sans-serif;text-transform:uppercase;letter-spacing:.32em;font-size:9.5px;color:#A6CE39">Komunikat wewnętrzny · Dział Floty</div>
+        <div style="font-family:'Barlow Condensed',Arial,sans-serif;font-weight:800;text-transform:uppercase;color:#fff;font-size:44px;line-height:1;margin-top:8px">Protokoły <span style="color:#A6CE39">przekazania</span></div>
+        <div style="color:#a7aca4;font-size:12px;margin-top:8px;max-width:56ch">Zmiana procesu rejestrowania protokołów przekazania pojazdów służbowych oraz obiektów UDT — wymagane dane i zdjęcia przy zgłoszeniu.</div>
+      </td>
+      <td style="vertical-align:top;text-align:right;padding-left:18px;width:170px">
+        <div style="font-family:'Barlow Condensed',Arial,sans-serif;text-transform:uppercase;letter-spacing:.18em;font-size:9px;color:#8d938a">Obowiązuje od</div>
+        <div style="font-family:'Barlow Condensed',Arial,sans-serif;font-weight:800;color:#fff;font-size:26px;line-height:1.1">17.08.2026</div>
+        <div style="font-family:'Barlow Condensed',Arial,sans-serif;letter-spacing:.14em;font-size:9px;color:#8d938a;margin-top:8px">Dok. FL/2026/08 · v1.0</div>
+      </td>
+    </tr></table>
+  </div>
+
+  <div style="background:#A6CE39;padding:12px 44px;font-family:'Barlow Condensed',Arial,sans-serif;text-transform:uppercase;font-weight:700;letter-spacing:.04em;color:#17200a;font-size:14px">
+    Instrukcja dla oddziałów · zgłoszenie przekazania pojazdu / obiektu UDT · flota@chemirol.com · tel. 52 315 96 55
+  </div>
+
+  <div style="padding:26px 44px 10px 44px">
+    ${pdfSectionTitle('01','Komunikat Działu Floty')}
+    <p style="margin:0 0 9px 0"><strong>Szanowni Państwo,</strong></p>
+    <p style="margin:0 0 9px 0">uprzejmie informuję, że z dniem <strong>17.08.2026 r.</strong> wprowadzamy zmianę w procesie rejestrowania protokołów przekazania pojazdów służbowych oraz obiektów UDT. Od wskazanej daty możliwość tworzenia protokołów przekazania w systemie <strong>VDesk</strong> będzie dostępna wyłącznie dla pracowników Działu Floty.</p>
+    <p style="margin:0 0 9px 0">Zmiana ta wynika z konieczności zapewnienia poprawności danych w ewidencji pojazdów. Obecnie zdarzają się sytuacje, w których protokoły są tworzone przez użytkowników na oddziałach, jednak nie trafiają do akceptacji lub nie zostają sfinalizowane. W konsekwencji w systemie nie następuje zmiana użytkownika pojazdu, co powoduje rozbieżności w dokumentacji oraz błędy ewidencyjne.</p>
+    <p style="margin:0 0 9px 0">W związku z powyższym uprzejmie proszę o <strong>przekazanie tej informacji Państwa pracownikom</strong>.</p>
+    <p style="margin:0 0 9px 0">W przypadku konieczności przekazania pojazdu służbowego lub obiektu UDT prosimy o kontakt z Działem Floty (<strong>flota@chemirol.com</strong>, tel. <strong>52 315 96 55</strong>), który przygotuje oraz zarejestruje odpowiedni protokół w systemie VDesk.</p>
+    <p style="margin:0 0 16px 0">Aby usprawnić przygotowanie protokołu, osoba zgłaszająca przekazanie pojazdu proszona jest o wypełnienie <strong>Wniosku o przekazanie pojazdu / obiektu UDT</strong> oraz załączenie wymaganej dokumentacji zdjęciowej.</p>
+
+    ${pdfSectionTitle('02','Nowy przebieg procesu')}
+    <table style="width:100%;border-collapse:collapse;margin-bottom:6px"><tr>
+      ${step('01','Zgłoszenie','Oddział wysyła wiadomość z wypełnioną tabelą i zdjęciami.')}
+      ${step('02','Weryfikacja','Dział Floty sprawdza kompletność danych i zdjęć.')}
+      ${step('03','Protokół w VDesk','Pracownik Floty rejestruje protokół w systemie.')}
+      ${step('04','Finalizacja','Zmiana użytkownika pojazdu — ewidencja aktualna.', true)}
+    </tr></table>
+  </div>
+
+  <div class="html2pdf__page-break"></div>
+
+  <div style="padding:30px 44px 10px 44px">
+    ${pdfSectionTitle('03','Tabela danych do zgłoszenia')}
+    <p style="margin:0 0 12px 0;font-size:12px;color:#5B5F5C">Poniższą tabelę należy wypełnić i przesłać na adres <strong style="color:#2b2f2b">flota@chemirol.com</strong>, a zdjęcia załączyć do wiadomości.</p>
+    <table style="width:100%;border-collapse:collapse;font-size:12px">${PDF_THEAD}<tbody>${pdfTableRows(false)}</tbody></table>
+  </div>
+
+  <div class="html2pdf__page-break"></div>
+
+  <div style="padding:30px 44px 10px 44px">
+    ${pdfSectionTitle('04','Wymagana dokumentacja zdjęciowa')}
+    <div style="background:#A6CE39;color:#17200a;padding:12px 16px;margin-bottom:12px;font-size:12.5px">
+      Niezależnie od wypełnionego wniosku do zgłoszenia należy <strong>OBOWIĄZKOWO ZAŁĄCZYĆ ZDJĘCIA PRZEKAZYWANEGO POJAZDU / OBIEKTU</strong>, dokumentujące jego aktualny stan.
+    </div>
+    <div style="border-left:4px solid #A6CE39;background:#F4F6F1;padding:10px 14px;margin-bottom:14px;font-size:12.5px;color:#1B1B1B">
+      <strong>Wykonać dokumentację fotograficzną pojazdu z czterech narożników, w ujęciach 3/4.</strong>
+    </div>
+    <table style="width:100%;border-collapse:collapse">${photoChecklistRows(PHOTO_ITEMS, null)}</table>
+    <p style="margin:14px 0 0 0;font-size:12px;color:#4a4f4a">Kompletne dane oraz dokumentacja zdjęciowa pozwolą uniknąć opóźnień i błędów ewidencyjnych.</p>
+  </div>
+
+  <div style="padding:22px 44px 10px 44px">
+    ${pdfSectionTitle('05','Obiekty UDT i kontakt')}
+    <p style="margin:0 0 14px 0">W przypadku przekazania obiektu UDT prosimy o kontakt z Działem Floty — pracownicy wskażą szczegółowy zakres danych i zdjęć wymaganych do przygotowania protokołu.</p>
+    <div style="background:#141614;padding:20px 22px;border-right:6px solid #A6CE39">
+      <div style="font-family:'Barlow Condensed',Arial,sans-serif;text-transform:uppercase;letter-spacing:.28em;font-size:9px;color:#A6CE39">Kontakt</div>
+      <div style="font-family:'Barlow Condensed',Arial,sans-serif;font-weight:800;text-transform:uppercase;color:#fff;font-size:28px;line-height:1;margin:6px 0 14px 0">Dział Floty</div>
+      <table style="width:100%;border-collapse:separate;border-spacing:8px 0"><tr>
+        <td style="width:34%">${kv('E-mail','flota@chemirol.com')}</td>
+        <td style="width:33%">${kv('Telefon','52 315 96 55')}</td>
+        <td style="width:33%">${kv('System','VDesk')}</td>
+      </tr></table>
+      <div style="color:#b6bbb2;font-size:12px;margin-top:16px">Wierzymy, że wprowadzona zmiana usprawni proces ewidencji oraz zapewni aktualność danych w systemie. Dziękujemy za współpracę i stosowanie się do nowych zasad.</div>
+      <div style="color:#8d938a;font-size:12px;font-style:italic;margin-top:16px">Z poważaniem,</div>
+      <div style="font-family:'Barlow Condensed',Arial,sans-serif;font-weight:800;text-transform:uppercase;color:#fff;font-size:20px">Dział Floty</div>
+    </div>
+  </div>
+
+  <div style="padding:16px 44px 26px 44px">
+    <table style="width:100%;border-collapse:collapse;font-family:'Barlow Condensed',Arial,sans-serif;text-transform:uppercase;letter-spacing:.16em;font-size:9px;color:#9aa094"><tr>
+      <td>Dział Floty · flota@chemirol.com · tel. 52 315 96 55</td>
+      <td style="text-align:right">Instrukcja wygenerowana ${today}</td>
+    </tr></table>
+  </div>
+</div>`;
+}
+
+function pdfWniosekHTML(){
+  const today = todayPL();
+  const reg = valOf(1);
+  const sig = SIG.A || {};
+  const sigImg = sig.img
+    ? '<img src="' + sig.img + '" style="max-width:100%;max-height:86px;display:block;margin:0 auto">'
+    : '';
+  const sigBlock =
+    '<div style="margin-top:24px"><table style="width:100%;border-collapse:collapse"><tr>' +
+      '<td style="width:48%;vertical-align:bottom">' +
+        '<div style="height:90px;display:block">' + sigImg + '</div>' +
+        '<div style="border-top:1px solid #9aa094;padding-top:4px;font-size:11px;color:#5B5F5C">Podpis zgłaszającego</div>' +
+        '<div style="font-size:10.5px;color:#8a9182">Data: ' + today + '</div>' +
+      '</td><td style="width:52%"></td></tr></table></div>';
+
+  /* Załącznik fotograficzny — 2 zdjęcia na stronę A4 */
+  let shotPages = '';
+  if(SHOTS.length){
+    const SLOT_W = 690, SLOT_H = 400, PER_PAGE = 2;
+    const pages = Math.ceil(SHOTS.length / PER_PAGE);
+    for(let p = 0; p < pages; p++){
+      let cells = '';
+      for(let k = 0; k < PER_PAGE; k++){
+        const i = p * PER_PAGE + k;
+        if(i >= SHOTS.length) break;
+        const s = SHOTS[i];
+        const ratio = (s.w && s.h) ? (s.h / s.w) : 0.75;
+        let dw = SLOT_W, dh = Math.round(dw * ratio);
+        if(dh > SLOT_H){ dh = SLOT_H; dw = Math.round(dh / ratio); }
+        cells +=
+          '<tr><td style="padding:0 0 12px 0;text-align:center;vertical-align:top">' +
+            '<table style="margin:0 auto;border-collapse:collapse"><tr><td style="border:1px solid #dde2d5;padding:6px;background:#fff">' +
+              '<img src="' + s.d + '" width="' + dw + '" height="' + dh + '" style="width:' + dw + 'px;height:' + dh + 'px;display:block">' +
+              '<div style="font-family:\'Barlow Condensed\',Arial,sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:10px;color:#5d7f0d;margin-top:5px;text-align:left">' +
+                'Zdjęcie ' + (i + 1) + ' / ' + SHOTS.length + (reg ? ' · ' + ESC(reg.toUpperCase()) : '') +
+              '</div></td></tr></table></td></tr>';
+      }
+      shotPages += '<div class="html2pdf__page-break"></div><div style="padding:26px 44px 10px 44px">' +
+        pdfSectionTitle('', 'Załącznik fotograficzny' + (pages > 1 ? ' — str. ' + (p + 1) + '/' + pages : '')) +
+        '<table style="width:100%;border-collapse:collapse">' + cells + '</table></div>';
+    }
+  }
+
+  return `
+<div style="width:794px;background:#fff;font-family:'Barlow',Arial,sans-serif;font-size:12.5px;line-height:1.65;color:#2b2f2b">
+  <div style="background:#141614;padding:24px 44px;border-left:8px solid #A6CE39">
+    <table style="width:100%;border-collapse:collapse"><tr>
+      <td style="vertical-align:top">
+        <div style="font-family:'Barlow Condensed',Arial,sans-serif;text-transform:uppercase;letter-spacing:.32em;font-size:9.5px;color:#A6CE39">Załącznik do zgłoszenia · Dział Floty</div>
+        <div style="font-family:'Barlow Condensed',Arial,sans-serif;font-weight:800;text-transform:uppercase;color:#fff;font-size:34px;line-height:1.02;margin-top:8px">Wniosek o przekazanie<br><span style="color:#A6CE39">pojazdu / obiektu UDT</span></div>
+      </td>
+      <td style="vertical-align:top;text-align:right;padding-left:18px;width:160px">
+        <div style="font-family:'Barlow Condensed',Arial,sans-serif;text-transform:uppercase;letter-spacing:.18em;font-size:9px;color:#8d938a">Data zgłoszenia</div>
+        <div style="font-family:'Barlow Condensed',Arial,sans-serif;font-weight:800;color:#fff;font-size:24px;line-height:1.1">${today}</div>
+        <div style="font-family:'Barlow Condensed',Arial,sans-serif;letter-spacing:.14em;font-size:9px;color:#8d938a;margin-top:8px">${ESC(reg.toUpperCase()) || '—'}</div>
+      </td>
+    </tr></table>
+  </div>
+
+  <div style="background:#A6CE39;padding:10px 44px;font-family:'Barlow Condensed',Arial,sans-serif;text-transform:uppercase;font-weight:700;letter-spacing:.04em;color:#17200a;font-size:13px">
+    Wypełnij tabelę i wyślij na flota@chemirol.com · zdjęcia załącz do wiadomości
+  </div>
+
+  <div style="padding:24px 44px 8px 44px">
+    <table style="width:100%;border-collapse:collapse;font-size:12px">${PDF_THEAD}<tbody>${pdfTableRows(true)}</tbody></table>
+  </div>
+
+  <div class="html2pdf__page-break"></div>
+
+  <div style="padding:20px 44px 8px 44px">
+    ${pdfSectionTitle('','Dokumentacja zdjęciowa')}
+    <div style="background:#A6CE39;color:#17200a;padding:10px 14px;margin-bottom:12px;font-size:12px">
+      ${SHOTS.length
+        ? 'Do wniosku dołączono <strong>' + SHOTS.length + '</strong> zdjęć(-cia) — patrz załącznik fotograficzny na kolejnych stronach.'
+        : 'Zaznacz zakres wykonanych zdjęć i <strong>załącz je do wiadomości</strong>.'}
+    </div>
+    <div style="border-left:4px solid #A6CE39;background:#F4F6F1;padding:9px 14px;margin-bottom:12px;font-size:12px;color:#1B1B1B">
+      <strong>Wykonać dokumentację fotograficzną pojazdu z czterech narożników, w ujęciach 3/4.</strong>
+    </div>
+    <table style="width:100%;border-collapse:collapse">${photoChecklistRows(PHOTO_ITEMS.slice(0, -1), i => photos[i] && photos[i].checked)}</table>
+    ${sigBlock}
+    <p style="margin:16px 0 0 0;font-size:11.5px;color:#4a4f4a">Wniosek składa się na adres <strong>flota@chemirol.com</strong> (tel. <strong>52 315 96 55</strong>).</p>
+  </div>
+
+  ${shotPages}
+
+  <div style="padding:14px 44px 26px 44px">
+    <table style="width:100%;border-collapse:collapse;font-family:'Barlow Condensed',Arial,sans-serif;text-transform:uppercase;letter-spacing:.16em;font-size:9px;color:#9aa094"><tr>
+      <td>Wniosek o przekazanie pojazdu / obiektu UDT</td>
+      <td style="text-align:right">Wygenerowano ${today}</td>
+    </tr></table>
+  </div>
+</div>`;
+}
+
+function pdfFileName(type){
+  const reg = valOf(1).replace(/\s+/g, '').replace(/[^\w\-]/g, '');
+  return type === 'wniosek'
+    ? 'Wniosek_przekazanie_pojazdu_UDT' + (reg ? '_' + reg : '') + '.pdf'
+    : 'Instrukcja_protokoly_przekazania_Dzial_Floty.pdf';
+}
+
+/* ── SILNIK RASTROWY (html2pdf) — wierny obraz strony, tekst nieedytowalny ── */
+async function renderRasterPDF(type, mode){
+  const stage = $('#pdfStage');
+  const isWniosek = type === 'wniosek';
+  try{
+    const html2pdf = await loadHtml2Pdf();
+    stage.innerHTML = isWniosek ? pdfWniosekHTML() : pdfInstrukcjaHTML();
+
+    /* poczekaj na pełne zdekodowanie obrazów — inaczej puste ramki w PDF */
+    const imgs = $$('img', stage);
+    await Promise.all(imgs.map(im => {
+      if(im.complete && im.naturalWidth) return im.decode ? im.decode().catch(() => {}) : Promise.resolve();
+      return new Promise(r => { im.onload = im.onerror = r; });
+    }));
+    if(document.fonts && document.fonts.ready) await document.fonts.ready;
+    await new Promise(r => requestAnimationFrame(() => setTimeout(r, 120)));
+
+    const scale = imgs.length > 6 ? 1.7 : imgs.length > 2 ? 2.1 : 2.5;
+    const worker = html2pdf().set({
+      margin: 0,
+      filename: pdfFileName(type),
+      image: {type:'jpeg', quality:0.95},
+      html2canvas: {scale, useCORS:true, allowTaint:false, backgroundColor:'#ffffff', windowWidth:794, scrollX:0, scrollY:0, logging:false, imageTimeout:0},
+      jsPDF: {unit:'mm', format:'a4', orientation:'portrait', compress:true},
+      pagebreak: {mode:['css','legacy'], avoid:['tr','.avoid']}
+    }).from(stage.firstElementChild);
+
+    if(mode === 'blob') return await worker.outputPdf('blob');
+    await worker.save();
+    return null;
+  } finally {
+    stage.innerHTML = '';
+  }
+}
+
+/* ── WSPÓLNE WEJŚCIE: wybór silnika + overlay + awaryjne przełączenie ──
+   mode: 'save' | 'blob' */
+let pdfBusy = false, lastEngineUsed = 'text';
+async function renderPDF(type, mode){
+  if(pdfBusy) throw new Error('Trwa już generowanie dokumentu');
+  pdfBusy = true;
+  const overlay = $('#pdfOverlay'), note = $('#pdfNote');
+  const setNote = t => { if(note) note.textContent = t; };
+  if(type === 'wniosek' && window.sigFlush) window.sigFlush();
+  overlay.classList.remove('hidden');
+  overlay.classList.add('flex');
+  setNote(pdfEngine() === 'text'
+    ? 'Tryb tekstowy — tekst w pliku będzie można zaznaczać i wyszukiwać…'
+    : 'Tryb graficzny — składanie wiernego obrazu stron…');
+
+  try{
+    if(pdfEngine() === 'text'){
+      try{
+        const out = await renderVectorPDF(type, mode);
+        lastEngineUsed = 'text';
+        return out;
+      }catch(err){
+        console.warn('Silnik tekstowy niedostępny — przechodzę na graficzny.', err);
+        setNote('Tryb tekstowy niedostępny — generuję wersję graficzną…');
+      }
+    }
+    lastEngineUsed = 'image';
+    return await renderRasterPDF(type, mode);
+  } finally {
+    overlay.classList.add('hidden');
+    overlay.classList.remove('flex');
+    setNote('Proszę czekać — trwa składanie dokumentu…');
+    pdfBusy = false;
+  }
+}
+
+async function makePDF(type){
+  try{
+    await renderPDF(type, 'save');
+    const what = type === 'wniosek' ? 'wniosek' : 'instrukcję';
+    toast('✓ Zapisano ' + what + ' w PDF' + (lastEngineUsed === 'text' ? ' — tekst można zaznaczać i wyszukiwać' : ' (wersja graficzna)'));
+  }catch(err){
+    console.error(err);
+    toast('Nie udało się wygenerować PDF — otwieram okno drukowania');
+    setTimeout(() => window.print(), 700);
+  }
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-pdf]');
+  if(b) makePDF(b.dataset.pdf || 'instrukcja');
+});
+addEventListener('keydown', e => {
+  if((e.ctrlKey || e.metaKey) && typeof e.key === 'string' && e.key.toLowerCase() === 's'){
+    e.preventDefault();
+    makePDF('instrukcja');
+  }
+});
+
+/* ════════════════════════════════════════════════════════════
+   11. WYSYŁKA: POCZTA + ZAŁĄCZNIK
+   ════════════════════════════════════════════════════════════ */
+function downloadBlob(blob, name){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 8000);
+}
+
+async function createDraftWithAttachment(){
+  const reg = valOf(1);
+  const subject = 'Zgłoszenie przekazania' + (reg ? ' – ' + reg.toUpperCase() : ' pojazdu / obiektu UDT');
+  const body = buildEmailBody();
+  const fname = pdfFileName('wniosek');
+  const openMail = extra => {
+    window.location.href = 'mailto:' + MAIL_TO +
+      '?subject=' + encodeURIComponent(subject) +
+      '&body=' + encodeURIComponent(body + (extra || ''));
+  };
+
+  let blob = null;
+  try{ blob = await renderPDF('wniosek', 'blob'); }
+  catch(err){ console.error(err); }
+
+  if(!blob){
+    toast('Nie udało się utworzyć PDF — otwieram program pocztowy');
+    openMail();
+    return;
+  }
+
+  const file = new File([blob], fname, {type:'application/pdf'});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    try{
+      await navigator.share({files:[file], title:subject, text:'Do: ' + MAIL_TO + '\n\n' + body});
+      toast('✓ Wniosek przekazany do aplikacji pocztowej');
+      return;
+    }catch(err){
+      if(err && err.name === 'AbortError') return;
+      console.error(err);
+    }
+  }
+
+  downloadBlob(blob, fname);
+  setTimeout(() => openMail('\n\n[ Załącz pobrany plik: ' + fname + ' ]'), 900);
+  toast('✓ Pobrano wniosek — otwieram program pocztowy, dołącz plik do wiadomości');
+}
+
+$('#btnMail').addEventListener('click', createDraftWithAttachment);
+$('#btnSend').addEventListener('click', createDraftWithAttachment);
+</script>
+</body>
+</html>
