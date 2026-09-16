@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#1f2937">
 <meta name="description" content="FLMANAGER - Zaawansowany system zarządzania flotą pojazdów z MCE, analizą kosztów i raportowaniem">
-<title>FLMANAGER v4.77G_IDB</title>
+<title>FLMANAGER v4.77H_IDB_TCO_Meter</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Roboto+Condensed:wght@400;600;700&family=Roboto+Mono:wght@400;500;600&family=Orbitron:wght@900&family=Chakra+Petch:wght@600&family=Inter:wght@400;500;600;700&display=swap">
@@ -74,16 +74,13 @@ select.tco-inp{cursor:pointer;appearance:none;background-image:url("data:image/s
 .tco-stab{padding:7px 11px;border-radius:4px;font-size:.68rem;font-weight:700;color:var(--tx-s);cursor:pointer;white-space:nowrap;border:none;background:transparent;font-family:var(--font-tabs);text-transform:uppercase;letter-spacing:.5px;transition:.14s;border-bottom:2px solid transparent}
 .tco-stab:hover{background:var(--hov);color:var(--tx-p)}
 .tco-stab.tco-on{background:var(--bg-p);color:var(--act);box-shadow:var(--neu-s);border-bottom:2px solid var(--act)}
-.tco-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:var(--sp);margin-bottom:var(--sp)}
-.tco-kpi{background:var(--bg-card);border-radius:var(--rmd);padding:12px 13px;box-shadow:var(--neu-s);border:1px solid var(--bd);border-top:3px solid var(--act);overflow:hidden}
-.tco-kpi.tco-hero{background:linear-gradient(135deg,var(--act),#6366f1);color:#fff;border-top-color:#a78bfa}
-.tco-kpi .tco-kl{font-size:.58rem;text-transform:uppercase;letter-spacing:.7px;color:var(--tx-m);font-weight:700}
-.tco-kpi.tco-hero .tco-kl{color:rgba(255,255,255,.75)}
-.tco-kpi .tco-kv{font-size:1.35rem;font-weight:800;letter-spacing:-.5px;margin-top:2px;font-family:var(--font-mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tco-kpi.tco-hero .tco-kv{color:#fff}
-.tco-kpi .tco-ks{font-size:.6rem;color:var(--tx-m);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tco-kpi.tco-hero .tco-ks{color:rgba(255,255,255,.7)}
-.tco-tag{display:inline-block;font-size:.55rem;font-weight:800;padding:2px 6px;border-radius:12px;margin-top:5px;letter-spacing:.3px}
+.tco-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:8px;margin-bottom:var(--sp)}
+.tco-kpi{background:var(--bg-card);border-radius:var(--rmd);padding:8px 10px 7px;box-shadow:var(--neu-s);border:1px solid var(--bd);border-top:3px solid var(--act);overflow:hidden}
+.tco-kpi .tco-kv{font-size:1.02rem;font-weight:800;letter-spacing:-.3px;font-family:var(--font-mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--tx-p)}
+.tco-kpi .tco-kpi-lbl{display:flex;align-items:center;gap:4px;font-size:.52rem;text-transform:uppercase;letter-spacing:.5px;color:var(--tx-m);font-weight:700;margin-top:4px}
+.tco-kpi .tco-kpi-lbl i{font-size:.56rem;flex-shrink:0}
+.tco-kpi .tco-ks{font-size:.55rem;color:var(--tx-m);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tco-tag{display:inline-block;font-size:.5rem;font-weight:800;padding:2px 5px;border-radius:10px;margin-top:4px;letter-spacing:.3px}
 .tco-tg{background:#dcfce7;color:#14532d}.tco-ta{background:#fef3c7;color:#78350f}.tco-tr{background:#fee2e2;color:#7f1d1d}.tco-tb{background:#dbeafe;color:#1e3a8a}
 .tco-card{background:var(--bg-card);border-radius:var(--rmd);padding:12px 14px;box-shadow:var(--neu-s);border:1px solid var(--bd);margin-bottom:var(--sp);overflow:hidden;min-width:0}
 .tco-card>h4{font-size:.6rem;text-transform:uppercase;letter-spacing:.9px;color:var(--tx-m);font-weight:700;padding-bottom:8px;border-bottom:2px solid var(--bd);margin-bottom:9px;display:flex;align-items:center;gap:6px}
@@ -91,9 +88,10 @@ select.tco-inp{cursor:pointer;appearance:none;background-image:url("data:image/s
 .tco-tw{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
 .tco-tw::-webkit-scrollbar{height:5px}.tco-tw::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
 table.tco-t{width:100%;border-collapse:collapse;font-size:.7rem}
-table.tco-t th{text-align:right;padding:6px 6px;font-size:.58rem;text-transform:uppercase;letter-spacing:.5px;color:var(--tx-m);border-bottom:2px solid var(--bd);font-weight:700;white-space:nowrap;background:var(--bg-card);position:sticky;top:0;z-index:2}
-table.tco-t th:first-child{text-align:left}
-table.tco-t td{padding:5px 6px;text-align:right;border-bottom:1px solid var(--bg-s);font-family:var(--font-mono);font-size:.68rem;white-space:nowrap}
+table.tco-t th{text-align:right;padding:7px 8px;font-size:.56rem;text-transform:uppercase;letter-spacing:.4px;color:var(--tx-m);border-bottom:2px solid var(--act);font-weight:700;white-space:nowrap;background:var(--bg-s);position:sticky;top:0;z-index:2}
+table.tco-t th:first-child{text-align:left;border-top-left-radius:4px}
+table.tco-t th:last-child{border-top-right-radius:4px}
+table.tco-t td{padding:5px 8px;text-align:right;border-bottom:1px solid var(--bg-s);font-family:var(--font-mono);font-size:.68rem;white-space:nowrap}
 table.tco-t td:first-child{text-align:left;white-space:normal;min-width:120px;font-family:var(--font-text)}
 table.tco-t tbody tr:hover td{background:var(--hov)}
 table.tco-t tr.tco-tot td{font-weight:800;background:var(--bg-t);border-top:2px solid var(--act);border-bottom:none;font-size:.72rem}
@@ -168,8 +166,9 @@ table.tco-t tr.tco-hl td{background:rgba(124,58,237,.07)!important;font-weight:7
 .tco-rep-dt td:first-child{text-align:left;white-space:nowrap;color:var(--tx-m);font-size:.68rem}
 .tco-rep-dt td:last-child{text-align:right;font-family:var(--font-mono);font-weight:600;color:var(--tx-p);font-size:.68rem;white-space:nowrap;padding-left:12px}
 .tco-rep-dt tr:last-child>td{border-bottom:none}
-.tco-rep-dt thead th{text-align:right;padding:6px 6px;font-size:.58rem;text-transform:uppercase;letter-spacing:.5px;color:var(--tx-m);border-bottom:2px solid var(--bd);font-weight:700;white-space:nowrap;background:var(--bg-card)}
-.tco-rep-dt thead th:first-child{text-align:left}
+.tco-rep-dt thead th{text-align:right;padding:7px 8px;font-size:.56rem;text-transform:uppercase;letter-spacing:.4px;color:var(--tx-m);border-bottom:2px solid var(--act);font-weight:700;white-space:nowrap;background:var(--bg-s)}
+.tco-rep-dt thead th:first-child{text-align:left;border-top-left-radius:4px}
+.tco-rep-dt thead th:last-child{border-top-right-radius:4px}
 .tco-rep-dt tfoot td{font-weight:800;border-top:2px solid var(--act);border-bottom:none;background:var(--bg-t);font-size:.72rem}
 @media(max-width:640px){.tco-rep-grid{grid-template-columns:1fr}.tco-rep-kpis{grid-template-columns:repeat(2,1fr)}.tco-rep-hdr{flex-direction:column;align-items:flex-start;gap:4px}.tco-rep-hdr-meta{text-align:left}}
 @media(max-width:640px){#tco-rep .tco-dep-exp-grid{grid-template-columns:1fr!important}#tco-rep .mce-section{margin-bottom:var(--sp)!important}}
@@ -334,7 +333,7 @@ table.tco-t tr.tco-hl td{background:rgba(124,58,237,.07)!important;font-weight:7
 
 <div id="vehicleModal" class="modal"><div class="modal-content modal-content-wide"><div class="modal-header"><i class="fas fa-car" style="font-size:.85rem;opacity:.9;flex-shrink:0"></i><h3 id="vehicleModalTitle" class="modal-title"><span id="vehicleModalReg" onclick="closeVehicleModal()" title="Kliknij aby zamknąć" style="font-family:var(--font-mono);background:rgba(255,255,255,.18);padding:1px 8px;border-radius:5px;letter-spacing:1px;cursor:pointer;transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.32)'" onmouseout="this.style.background='rgba(255,255,255,.18)'">—</span><span id="vehicleModalMeta" style="font-size:.6rem;font-weight:400;opacity:.8;font-family:var(--font-text);margin-left:4px"></span><div id="customLegend" style="display:flex;gap:8px;overflow-x:auto;white-space:nowrap;margin-left:10px;scrollbar-width:none;flex-shrink:1;min-width:0"></div></h3><div style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto"><button id="vehicleModalPDF" onclick="exportVehicleModalPDF()" title="Eksport PDF" style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:5px;padding:3px 10px;font-size:.65rem;font-family:var(--font-text);font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:background .15s"><i class="fas fa-file-pdf"></i> PDF</button></div></div><div class="modal-body"><div class="chart-container"><canvas id="vehicleChart"></canvas></div><div id="vehicleSummary" style="padding:0 8px 12px"></div></div></div></div>
 <div class="app-container">
-<div class="header neu-card" style="padding:2px 12px;min-height:auto"><div class="app-title" style="gap:8px"><i class="fa-solid fa-truck-fast"></i><div style="display:flex;flex-direction:column;justify-content:center;line-height:1"><span style="font-size:.85rem;letter-spacing:.5px">FLMANAGER</span><span class="app-version" style="font-size:.55rem;font-weight:400;opacity:.7">v4.77G_IDB_TCO_METER</span></div></div><button id="densityBtn" onclick="cycleDensity()" class="theme-toggle-btn" title="Gęstość wierszy tabeli" style="margin-left:6px;flex-shrink:0"><i class="fas fa-grip-lines" id="densityIcon"></i></button><div class="flex items-center gap-2"><span id="datasetName" class="dataset-name">Brak danych</span><div class="control-group mce-toggle-group"><label class="switch"><input type="checkbox" id="aiCorrectionToggle" checked onchange="recalcAll()"><span class="slider"></span></label><span class="mce-label">MCE</span></div><button class="neu-btn async-status async-status-btn" id="asyncStatus" onclick="testAsync()" title="Test animacji async"><span class="async-dot"></span> Async</button><input type="checkbox" id="themeToggle" style="display:none"><label for="themeToggle" class="theme-toggle-btn" title="Zmień motyw"><i id="themeIcon" class="fas fa-sun"></i></label><button id="ai-open-btn" class="theme-toggle-btn" title="Gemini AI — Analiza floty" style="border:1px solid rgba(124,58,237,.4);border-radius:6px;width:auto;height:28px;padding:0 10px;gap:5px;font-size:.7rem;font-weight:700;color:var(--act);font-family:var(--font-text);letter-spacing:.3px;background:rgba(124,58,237,.14);margin-left:12px"><i class="fas fa-robot" style="font-size:.85rem"></i><span id="ai-btn-label">AI</span></button></div></div>
+<div class="header neu-card" style="padding:2px 12px;min-height:auto"><div class="app-title" style="gap:8px"><i class="fa-solid fa-truck-fast"></i><div style="display:flex;flex-direction:column;justify-content:center;line-height:1"><span style="font-size:.85rem;letter-spacing:.5px">FLMANAGER</span><span class="app-version" style="font-size:.55rem;font-weight:400;opacity:.7">v4.77H_IDB_TCO_Meter</span></div></div><button id="densityBtn" onclick="cycleDensity()" class="theme-toggle-btn" title="Gęstość wierszy tabeli" style="margin-left:6px;flex-shrink:0"><i class="fas fa-grip-lines" id="densityIcon"></i></button><div class="flex items-center gap-2"><span id="datasetName" class="dataset-name">Brak danych</span><div class="control-group mce-toggle-group"><label class="switch"><input type="checkbox" id="aiCorrectionToggle" checked onchange="recalcAll()"><span class="slider"></span></label><span class="mce-label">MCE</span></div><button class="neu-btn async-status async-status-btn" id="asyncStatus" onclick="testAsync()" title="Test animacji async"><span class="async-dot"></span> Async</button><input type="checkbox" id="themeToggle" style="display:none"><label for="themeToggle" class="theme-toggle-btn" title="Zmień motyw"><i id="themeIcon" class="fas fa-sun"></i></label><button id="ai-open-btn" class="theme-toggle-btn" title="Gemini AI — Analiza floty" style="border:1px solid rgba(124,58,237,.4);border-radius:6px;width:auto;height:28px;padding:0 10px;gap:5px;font-size:.7rem;font-weight:700;color:var(--act);font-family:var(--font-text);letter-spacing:.3px;background:rgba(124,58,237,.14);margin-left:12px"><i class="fas fa-robot" style="font-size:.85rem"></i><span id="ai-btn-label">AI</span></button></div></div>
 <div class="neu-card upload-card"><div class="flex items-center gap-2 upload-controls"><input type="file" id="fileInput" multiple style="display:none" onchange="loadFiles()"><div id="dropZone" class="drop-zone" onclick="$('fileInput').click()"><i class="fa-solid fa-cloud-arrow-up upload-icon"></i><div class="upload-text-wrapper"><span>Wgraj pliki</span><span class="upload-subtext">Upuść lub kliknij</span></div></div><button class="neu-btn" id="fileListToggle" onclick="(function(){var c=$('fileListContainer');var v=c.style.display==='flex';c.style.display=v?'none':'flex';$('fileListToggle').classList.toggle('active',!v)})()" title="Lista plików" style="display:none"><i class="fas fa-folder-open"></i></button><div class="flex-spacer"></div><button class="neu-btn btn-demo" onclick="loadSampleData()"><i class="fas fa-database"></i> Demo</button><button class="neu-btn" onclick="openMeterHistModal()" title="Narzędzie: historia liczników (zapis / uzupełnianie / podgląd / kasowanie)"><i class="fas fa-tachometer-alt"></i> Liczniki</button><button class="neu-btn" onclick="openDatasetModal()" title="Narzędzie: zapisane bazy danych (przywracanie, wiele baz)"><i class="fas fa-layer-group"></i> Bazy</button><button class="neu-btn btn-danger" onclick="clearData()"><i class="fas fa-trash"></i></button></div><div id="fileListContainer" class="file-list-container" style="display:none"></div></div>
 <div class="tabs-nav">
   <button class="tab-btn active" onclick="switchTab('main', this)"><i class="fa-solid fa-table"></i> Dane</button>
@@ -801,9 +800,9 @@ table.tco-t tr.tco-hl td{background:rgba(124,58,237,.07)!important;font-weight:7
   <!-- PANE 0: DASHBOARD -->
   <div class="tco-pane tco-on" id="tco-p0">
     <div class="tco-kpis">
-      <div class="tco-kpi tco-hero"><div class="tco-kl">TCO na kilometr</div><div class="tco-kv" id="tco-k1">–</div><div class="tco-ks" id="tco-k1s">–</div></div>
-      <div class="tco-kpi"><div class="tco-kl">TCO całkowite</div><div class="tco-kv" id="tco-k2">–</div><div class="tco-ks" id="tco-k2s">–</div><div id="tco-k2t"></div></div>
-      <div class="tco-kpi"><div class="tco-kl">Koszt miesięczny</div><div class="tco-kv" id="tco-k3">–</div><div class="tco-ks" id="tco-k3s">–</div></div>
+      <div class="tco-kpi" style="border-top-color:#10b981"><div class="tco-kv" id="tco-k1">–</div><div class="tco-kpi-lbl"><i class="fas fa-road" style="color:#10b981"></i> Koszt / km</div><div class="tco-ks" id="tco-k1s">–</div></div>
+      <div class="tco-kpi" style="border-top-color:#7c3aed"><div class="tco-kv" id="tco-k2">–</div><div class="tco-kpi-lbl"><i class="fas fa-car" style="color:#7c3aed"></i> TCO łącznie</div><div class="tco-ks" id="tco-k2s">–</div><div id="tco-k2t"></div></div>
+      <div class="tco-kpi" style="border-top-color:#f59e0b"><div class="tco-kv" id="tco-k3">–</div><div class="tco-kpi-lbl"><i class="fas fa-calendar-alt" style="color:#f59e0b"></i> Koszt / miesiąc</div><div class="tco-ks" id="tco-k3s">–</div></div>
     </div>
     <div class="tco-charts">
       <div class="tco-card"><h4><i>◑</i>Struktura kosztów <span id="tco-chTot" style="margin-left:auto;text-transform:none;letter-spacing:0;font-size:.7rem;color:var(--tx-m)"></span></h4>
@@ -812,6 +811,7 @@ table.tco-t tr.tco-hl td{background:rgba(124,58,237,.07)!important;font-weight:7
         <div class="tco-cbox"><canvas id="tco-barsC"></canvas></div></div>
     </div>
     <div class="tco-card"><h4><i>Σ</i>Wskaźniki kluczowe</h4><div class="tco-stats" id="tco-stats"></div><div id="tco-alerts"></div></div>
+    <div class="tco-card" id="tco-disclaimer-card"><h4><i class="fas fa-exclamation-triangle" style="color:var(--warn)"></i> Zastrzeżenia</h4><p style="font-size:.62rem;color:var(--tx-s);margin:0;line-height:1.5" id="tco-disclaimer-text">Koszty udokumentowane, wartości netto. Poza zakresem raportu: wynagrodzenie kierowcy, logistyka, koszt kapitału własnego.</p></div>
   </div>
 
   <!-- PANE 1: STRUCTURE -->
@@ -896,7 +896,7 @@ table.tco-t tr.tco-hl td{background:rgba(124,58,237,.07)!important;font-weight:7
 
 <script>const $=i=>document.getElementById(i),$$=s=>document.querySelectorAll(s),esc=t=>String(t||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[m]);const _FC=new Intl.NumberFormat('pl-PL',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:false});const _FN=new Intl.NumberFormat('pl-PL',{maximumFractionDigits:2,useGrouping:false});const _FI=new Intl.NumberFormat('pl-PL',{maximumFractionDigits:0,useGrouping:false});const fmtC=v=>_FC.format(v||0),fmtN=v=>_FN.format(v||0),fmtI=v=>_FI.format(v||0);const cleanReg=v=>String(v||'').toUpperCase().replace(/\s+/g,'').replace(/[^A-Z0-9]/g,''),formatCard=v=>{let s=String(v).replace(/\D/g,'');return s.length>10?s.match(/.{1,6}/g).join(' '):v};const parseDate=v=>{if(!v)return null;if(v instanceof Date)return isNaN(v)?null:v;const s=String(v).trim();if(!isNaN(s)&&s>1000&&s<60000){const d=new Date(1899,11,30);d.setDate(d.getDate()+Number(s));return d}let i=s.match(/^(\d{4})-(\d{2})-(\d{2})/);if(i)return new Date(i[1],i[2]-1,i[3]);i=s.match(/^(\d{1,2})[.\-\/](\d{1,2})[.\-\/](\d{4})/);return i?new Date(i[3],i[2]-1,i[1]):new Date(s)};const parseNum=v=>{if(typeof v==='number')return v;let s=String(v||0).replace(/\s|PLN|EUR|zł|km|l/gi,'');const c=s.includes(','),d=s.includes('.');if(c&&d)s=s.indexOf(',')>s.indexOf('.')?s.replace(/\./g,'').replace(',','.'):s.replace(/,/g,'');else if(c)s=s.replace(',','.');return parseFloat(s)||0};const isWeekend=d=>d&&(d.getDay()%6===0),getDayName=d=>d?['Niedziela','Poniedziałek','Wtorek','Środa','Czwartek','Piątek','Sobota'][d.getDay()]:'',DAY_NAMES=['Nd','Pn','Wt','Śr','Cz','Pt','So'];const G_COLS={'olej napędowy':'#7c7fd6',benzyna:'#16a34a',lpg:'#f59e0b',adblue:'#3b82f6',myjnia:'#06b6d4',paliwo:'#4b5563','opłaty':'#ef4444',autostrady:'#7d8c1a','energia elektryczna':'#8b5cf6'},colCache=new Map();const resolveColor=n=>{const x=String(n).toLowerCase().trim();if(colCache.has(x))return colCache.get(x);let c=G_COLS[x];if(!c){if(x.includes('on')||x.includes('diesel')||x.includes('olej'))c=G_COLS['olej napędowy'];else if(x.includes('pb')||x.includes('benzyna'))c=G_COLS.benzyna;else if(x.includes('lpg')||x.includes('gaz')||x.includes('autogas'))c=G_COLS.lpg;else if(x.includes('adblue')||x.includes('ad blue')||x.includes('dodatek'))c=G_COLS.adblue;else if(x.includes('elektr')||x.includes('ev'))c=G_COLS['energia elektryczna'];else if(x.includes('myjni'))c=G_COLS.myjnia;else if(x.includes('autostrad'))c=G_COLS.autostrady;else if(x.includes('opłat')||x.includes('oplat'))c=G_COLS['opłaty'];else{let h=0;for(let i=0;i<x.length;i++)h=x.charCodeAt(i)+((h<<5)-h);c='#'+('00000'+(h&0xffffff).toString(16)).slice(-6)}}colCache.set(x,c);return c};const FUEL_GROUPS=['olej napędowy','benzyna','lpg','energia elektryczna','paliwo','pb','on','diesel','gaz'],isFuelGroup=g=>FUEL_GROUPS.includes(String(g).toLowerCase().trim()),adBlueRgx=/adblue|ad blue|dodatek/i;const DEF_MAP={header:{NrFaktury:'Nr karty',MiejsceKosztu:'Miejscowość',Dział:'Miejscowość',DataKosztu:'Data realizacji',dataDokumentu:'Data realizacji',Tresc:'Dane kosztowe',Opis:'Dane kosztowe',ImportKodProduktu:'Grupa prod',Ilosc:'Ilość','Ilość litrów':'Ilość',ImportNrRejestracyjny:'Nr rejestracyjny',Rejestracja:'Nr rejestracyjny','Nazwa obiektu kosztowego':'Nr rejestracyjny',StanLicznika:'Licznik','Wartość netto fak':'Wartość netto',NettoOpis:'Wartość netto',Netto:'Wartość netto',Nazwa:'Nr rejestracyjny','Numer karty':'Nr karty',AktualnyPrzebieg:'Licznik',Rodzaj:'Grupa prod','Kwota zakupu':'Wartość netto',NrStacji:'Nr stacji',StationNo:'Nr stacji',TypStacji:'Typ stacji',Imie:'Imię','First Name':'Imię',Nazwisko:'Nazwisko',Surname:'Nazwisko',OpisRodzajuKosztu:'Grupa prod'},value:{'01':'Olej napędowy','02':'Olej napędowy','03':'Benzyna','05':'Benzyna','06':'LPG','08':'Bioester','11':'Oleje silnikowe','12':'Płyny eksploatacyjne','13':'Oleje i smary przemysłowe','14':'Produkty naftowe','20':'Usługi myjni','21':'Usługi inne','24':'Energia elektryczna','29':'Autokosmetyki','30':'Artykuły motoryzacyjne','35':'Opłaty parkingowe','36':'Autostrady','37':'Parking','41':'Autostrady','49':'Autostrady','50':'Artykuły konsumenckie','51':'Artykuły spożywcze','52':'Napoje','53':'Artykuły tytoniowe','54':'Alkohole','80':'Opłata za karty','81':'AdBlue','86':'Usługa webserwisu'},registration:{CB032NM:'CMG4651A',CB885NL:'CMG4649A',CB976NL:'CMG4724A',CB027NM:'CMG4647A',CB977NL:'CMG4728A',CB698NL:'CMG4650A',CB026NM:'CMG4773A',CB884NL:'CMG4729A',CB864NL:'CMG4743A',CB196NL:'CMG4652A',CB861NL:'CMG4732A',CB623NK:'CMG4648A',CB449NL:'CMG4758A',CB029NM:'CMG4754A',CB964NK:'CMG4891A',CB695NL:'CMG4850A',CB447NL:'CMG4757A',CB697NL:'CMG4731A',CB195NL:'CMG4755A',CB949NL:'CMG4759A',CB185NN:'CMG4750A',CB807NN:'CMG4751A',CB671NN:'CMG4748A',CB629NN:'CMG4752A',CB827NN:'CMG4753A',CB826NN:'CMG4746A',CB498NN:'CMG4727A',CB802NN:'CMG4726A',CB499NN:'CMG4745A',CB805NN:'CMG4730A',CB801NN:'CMG4725A',CB184NN:'CMG4756A',CB674NN:'CMG4890A',WE5E887:'CMG4248A',WE5F505:'CMG4259A',WE5F508:'CMG4260A',WE5E883:'CMG4284A',BI023FU:'WE5U406',CB240PW:'WE5T559',CB289PY:'WE5F411',CB520RM:'WE5F414',CT356AU:'WE5F411',DW4UT26:'WE5F409',DW5PJ62:'WE5F409',DW6WA09:'WE5F506',DW7WC05:'WE5T554',EL5S578:'WE6A165',EL6HA17:'WE5F411',EL6HF92:'WE6A164',EL9GY20:'WE5T549',GD4L893:'WE6A165',KR5CX40:'WE5T564',OP1009V:'WE5F410',PO1NF64:'WE6N046',PY57518:'WE6A164',PY70604:'WE6A619',PY99131:'WE5T566',RJA94800:'WE5E884',RZ425EJ:'WE5T566',WB2043Y:'WE6E586',WB6885Y:'WE6E588',WB7863X:'WE6A618',WD0601R:'WE5F507',WE1AT27:'WE5E890',WE4AT46:'WE6E585',WE6R101:'WE6A166',WE849VG:'WE5E885',WJ0025N:'WE5T552',WJ0860M:'WE5T552',WJ4435K:'WE5E884',WL1467U:'WE5T562',WN3683T:'WE6A166',WN4034S:'WE5F409',WN814R:'WE5E886',WND5828C:'WE6A621',WPN03788:'WE5F402',WPN07190:'WE6N023',WPN31427:'WE5E884',WPN8PW8:'WE5F507',WT4697G:'WE6E588',WT9021F:'WE5T554',WT9335F:'WE5T554',WY128XE:'WE5T556',WY441XJ:'WE5E885',WY548EL:'WE5F506',WZ039HE:'WE5F405',WZ180GG:'WE5F406',WZ246HE:'WE5F502',WZ307GV:'WE6A166',WZ730GF:'WE5T551',WZ917EG:'WE6A166',BI173GN:'CMG16X3',PO5WF01:'CMG7H25',EL7LKO6:'CMG24C5',EL8LS16:'CMG24C5',PY5093A:'CMG89C8',CB729MS:'CMG76G5',NE5386K:'CMG24G9',CT075CH:'CMG7H25',CT157CG:'CMG7H25',CT882CE:'CMG7H25',WD7984S:'CMG23J9',EKU14274:'CMG34K2',EKU15533:'CMG51G3',WJ5911L:'CMG59X8',BI798FM:'CMG59X8',WND54897:'CMG79W6',WP0080S:'CMG56S2',WY190XL:'CMG17U4',ZS905SE:'CMG4730A',KK93461:'CMG4730A',EL6JK38:'CMG4730A',WZ831GK:'CMG63X1',WX1326E:'CMG63X1',WZ249GV:'CMG4752A',EL7HX81:'CMG4752A',WY653XL:'CB803NN',LU924SJ:'CB803NN',WU8242P:'CMG37G6',WS829F:'CMG31J9',WPI9176J:'CB693NL',WN0987T:'CB286NP',WL821V:'CMG91W6',WGM0892G:'CMG4732A',WEB49VG:'WE5E885',WE8T727:'CMG80W7',CIN9187C:'CMG57E6',DLU7063C:'CMG59N4',DW1WL22:'CB806NN',EL1EF06:'CMG4729A',EL6ER38:'CMG4647A',EL8HX92:'CMG5N89',GA391KH:'CMG06W4',GD2G431:'CMG85J7',KK51242:'CB675NN',KK9512C:'CMG2026A',LSW42863:'CMG43Y7',LU078SG:'CMG12U9',NO3094V:'CMG92W6',NOL6745E:'CB028NM',PK0944R:'CMG20W4',PK7921L:'CMG4731A',PO2WF24:'CMG30H2',PO8LW83:'CMG56E6',PY06526:'CMG5N89',PY09266:'CMG89W7',PY1411E:'CMG13N9',PY72650:'CMG15X3',RMI5601C:'CMG06W4',WD8099P:'CMG4W19',PY72787:'CMG4652A',PY71142:'CMG16W4',NO2236W:'CMG15W4',KK64370:'CMG59N4',EL3GY54:'CMG12U9',RZE99880:'CMG62N4',PK6799R:'CB828NN',PK5606R:'CMG92W7',OP7350T:'CMG14X3',NOL2104F:'CB950NL',PY76088:'CB675NN',PK9289L:'CMG4731A',KK5199C:'CMG08W4',EKU32647:'CMG94S3',EKU32648:'CMG1S17',WB227CA:'CMG64W7',DLU3049C:'CMG99W3',CB752LH:'CMG4725A',BI121EC:'CMG17W4',_ADOWARKA:'ŁADOWARKA',WÓZEKWIDŁO:'WÓZEK',WOZEK:'WÓZEK',WIDLAK:'WÓZEK'},groupCode:{'401-115-01':'Paliwo','402-211-03-1':'Usługi monitoring GPS','401-116-01':'Materiały części','401-116-02':'Materiały opony','401-199-1':'Materiały pozostałe','401-116-03':'Materiały części','402-211-04':'Usługi przeglądy','402-211-05':'Usługi myjnia','403-302-05':'Autostrady','762-03-03-2':'Szkody','762-03-03-1':'Szkody','403-302-99':'Podatki i opłaty','402-211-02':'Usługi opon','402-211-01':'Usługi','402-299-1':'Usługi','248-02-0':'Najem długoterminowy - czynsz','406-605':'Ubezpieczenia','080-01-01':'Zakupy Inwestycyjne nowe','080-01-02':'Zakupy Inwestycyjne używane','080-02-009':'Zakupy Inwestycyjne nowe','406-601-99':'Reklama','247-01-0100568':'Kaucje','403-301-02':'Podatki i opłaty','402-201-99':'Najem inne','762-03-99-1':'Koszty operacyjne','Usługi napraw i remontów pojazdów | Monitoring':'Usługi monitoring GPS','Usługi napraw i remontów pojazdów | Naprawa':'Usługi','Usługi napraw i remontów pojazdów | Pozostałe':'Usługi','Usługi napraw i remontów pojazdów | Przeglądy':'Usługi przeglądy','Usługi napraw i remontów pojazdów | Wymiana opon':'Usługi opon','Materiały | Materiały - pozostałe | Materiały pozostałe':'Materiały pozostałe','Materiały | Paliwo (benzyna, olej napędowy, LPG)':'Paliwo','Materiały do napraw':'Materiały części','Materiały do remontu':'Materiały części','Materiały pozostałe KUP':'Materiały pozostałe','Najem i dzierżawa':'Najem długoterminowy - czynsz','opłata ewidencyjna':'Podatki i opłaty','Opłata za przejazd po drogach krajowych':'Autostrady','Opłaty za przejazd':'Autostrady','Paliwo do środków transportu':'Paliwo','Podatki i opłaty | Opłaty':'Podatki i opłaty','Pozostałe koszty':'Ubezpieczenia','Pozostałe Koszty Operacyjne':'Koszty operacyjne','Rozliczenie szkód majątkowych':'Szkody','Szkoda komunikacyjna':'Szkody','Usługi pozostałe':'Usługi','Zakup nowych środków trwałych':'Zakupy Inwestycyjne nowe','Zakup używanych środków trwałych':'Zakupy Inwestycyjne używane'}};const HIDDEN=['MPK','Nazwa produktu','Cena za litr','Wartość netto - stacja','Wartość VAT - stacja','Wartość brutto - stacja','Rodzaj pojazdu','EAN','Data księgowania','Pozycja faktury','Wartość fak','Stawka vat','Wartość vat fak','CenaSprzedazySrednia','IdFloty','Cena_załącznik'],M_S=['Sty','Lut','Mar','Kwi','Maj','Cze','Lip','Sie','Wrz','Paź','Lis','Gru'];let curSumTp='value',curStTp='value',curMilTp='mileage',colMap={},activeQuickFilter=null,isProcessing=false,colFilterVals=new Set(),_mdpAllVals=[],_MDP_EMPTY='__empty__';const S={data:[],filteredData:[],displayRows:[],summaryYears:[],sort:{main:{c:null,d:'asc'},sum:{c:'year',d:'desc'},st:{c:'year',d:'desc'},mil:{c:'reg',d:'asc'},cpk:{c:'reg',d:'asc'}},rep:{sum:[],st:[],mil:[],cpk:[],rank:[],weekend:[]},selY:{sum:[],st:[],mil:[],cpk:[],ranking:[]},selGr:new Set(),map:JSON.parse(JSON.stringify(DEF_MAP)),enMap:{header:1,value:1,registration:1,groupCode:1},nameOv:1,hide:new Set(),rpp:50,curP:1,files:new Set(),upd:{st:1,mil:1,cpk:1,sum:1},regIdx:new Map(),_dashDirty:true,regFilter:new Set()};const delay=ms=>new Promise(r=>setTimeout(r,ms)),nextFrame=()=>new Promise(r=>requestAnimationFrame(r));const setAsyncStatus=active=>{const el=$('asyncStatus');if(el){el.classList.toggle('active',active);el.title=active?'Przetwarzanie w tle...':'Gotowy'}};const showProg=(t,p,stats='')=>{const lt=$('loaderText'),lp=$('loaderProgress'),ls=$('loaderStats');if(lt)lt.textContent=t;if(lp)lp.style.width=p+'%';if(ls)ls.textContent=stats};const showToast=m=>{const t=$('toast');if(t){t.textContent=m;t.classList.add('visible');setTimeout(()=>t.classList.remove('visible'),2000)}};async function testAsync(){console.log('🚀 Test Async + DOM rozpoczęty');setAsyncStatus(true);const l=$('loader');if(l)l.classList.add('active');console.log('🔍 Test DOM rozpoczęty');const tests=[()=>document.body!==null,()=>$('loader')!==null,()=>document.readyState==='complete'||document.readyState==='interactive'];let passed=0;for(let i=0;i<tests.length;i++){await nextFrame();try{if(tests[i]())passed++;else console.warn(`❌ Test DOM ${i+1} niezaliczony`)}catch(e){console.error(`💥 Test DOM ${i+1} wyjątek`,e)}}const domOK=passed===tests.length;console.log(`✅ Test DOM zakończony: ${passed}/${tests.length}`);const steps=20,delayMs=100;for(let i=0;i<=steps;i++){const pct=(i*100)/steps;showProg(`Test ${pct}%...`,pct,`⚡ Krok ${i}/${steps}`);await nextFrame();await delay(delayMs)}if(l)l.classList.remove('active');setAsyncStatus(false);showToast(domOK?'✅ Test Async + DOM zakończony pomyślnie!':'⚠️ Test zakończony, ale DOM zgłosił problem');console.log('🏁 Test Async zakończony')}
 const buildColMap=()=>{colMap={};if(!S.data.length)return;for(const k of Object.keys(S.data[0]))if(k!=='_source'&&k!=='_opt'&&k!=='_proc')colMap[applyMap(k,'header')]=k};const findCol=n=>colMap[n];const isPsnl=r=>{const n=colMap['Imię'],s=colMap['Nazwisko'];return(n&&r[n]&&String(r[n]).trim().length>0)||(s&&r[s]&&String(r[s]).trim().length>0)};const applyMap=(v,t,r)=>{if(!S.enMap[t])return v;const s=v==null?'':String(v).trim();if(t==='header')return S.map.header[s]||s;if(t==='value')return S.map.value[s]||s;if(t==='groupCode'){for(const[k,val]of Object.entries(S.map.groupCode))if(s.includes(k))return val}if(t==='registration'){let fr=cleanReg(S.map.registration[s]||s);if(S.nameOv&&r){const nc=colMap['Nazwisko'],nv=nc?String(r[nc]||'').trim():'';if(nv.length>0&&nv.toLowerCase()!=='wszołek'){const c=colMap['Nr karty'];if(c&&r[c])return formatCard(r[c])}}return fr}return s};async function processDataAsync(data,onProgress,onlyNew){const CHUNK=500,total=data.length,cD=colMap['Data realizacji'],cV=colMap['Wartość netto'],cL=colMap['Ilość'],cM=colMap['Licznik'],cR=colMap['Nr rejestracyjny'],cG=colMap['Grupa prod'],cC=colMap['Nr karty'],cDe=colMap['Dane kosztowe'],cN=colMap['Nr stacji'],cT=colMap['Typ stacji'],cKI=colMap['IdKontrahenta']||colMap['Id kontrahenta'],cKN=colMap['NazwaKontrahenta']||colMap['Nazwa kontrahenta'],cKNip=colMap['NIPKontrahenta']||colMap['NIP kontrahenta'],cRP=colMap['RodzajPojazdu']||colMap['Rodzaj pojazdu'],cRokProd=colMap['RokProdukcji']||colMap['Rok produkcji'],cPK=colMap['PrzelewKwota']||colMap['Przelew kwota'],cCS=colMap['CzySprzedany']||colMap['Czy sprzedany'],cGO=colMap['GrupaObiektu']||colMap['Grupa obiektu'],cDocId=colMap['DocumentId'],cDocNr=colMap['numerDokumentu']||colMap['Numer dokumentu'],cDocRok=colMap['rokDokumentu']||colMap['Rok dokumentu'],cUser=colMap['aktualnyUzytkownik']||colMap['Aktualny użytkownik'],cMarka=colMap['Marka'],cModel=colMap['Model'],cDOA=colMap['DOA'];for(let i=0;i<total;i+=CHUNK){const end=Math.min(i+CHUNK,total);for(let j=i;j<end;j++){const r=data[j];if(onlyNew&&r._proc)continue;if(!r._opt)r._opt={};const o=r._opt;o.date=parseDate(r[cD]);o.year=o.date?o.date.getFullYear():null;o.month=o.date?o.date.getMonth():null;o.isWeekend=isWeekend(o.date);o.dayName=getDayName(o.date);o.val=parseNum(r[cV]);o.lit=parseNum(r[cL]);o.rawMeter=parseNum(r[cM]);o.origMeter=o.rawMeter;o.meter=o.rawMeter;let rg=r[cG];if(S.enMap.groupCode)rg=applyMap(rg,'groupCode');o.group=applyMap(rg,'value');o.isFuel=isFuelGroup(o.group);o.isAdBlue=adBlueRgx.test(String(o.group));o.isPersonal=isPsnl(r);o.reg=applyMap(r[cR],'registration',r);o.desc=String(r[cDe]||r[findCol('Tresc')]||'').trim();o.card=formatCard(r[cC]);o.stNo=r[cN]?String(r[cN]).trim():'';o.stType=r[cT]?String(r[cT]).trim():'';o.kontrId=cKI?String(r[cKI]||'').trim():'';o.kontrNazwa=cKN?String(r[cKN]||'').trim():'';o.kontrNip=cKNip?String(r[cKNip]||'').trim():'';o.vehType=cRP?String(r[cRP]||'').trim():'';o.prodYear=cRokProd?parseNum(r[cRokProd]):null;o.przelew=cPK?parseNum(r[cPK]):0;o.sold=cCS?/^(1|tak|true|yes)$/i.test(String(r[cCS]||'').trim()):false;o.objGroup=cGO?String(r[cGO]||'').trim():'';o.docId=cDocId?String(r[cDocId]||'').trim():'';o.docNr=cDocNr?String(r[cDocNr]||'').trim():'';o.docRok=cDocRok?parseNum(r[cDocRok]):null;o.userAktualny=cUser?String(r[cUser]||'').trim():'';o.marka=cMarka?String(r[cMarka]||'').trim():'';o.model=cModel?String(r[cModel]||'').trim():'';o.doa=cDOA?String(r[cDOA]||'').trim():'';o.isFixed=false;if(!o.group||o.group==='Inne'||o.group.includes('?')){const desc=(o.desc+' '+String(r[cDe]||'')).toLowerCase();if(desc.includes('adblue')||desc.includes('ad blue'))o.group='AdBlue';else if(desc.includes('lpg')||desc.includes('gaz'))o.group='LPG';else if((desc.includes('olej')&&desc.includes('nap'))||desc.includes('diesel'))o.group='Olej napędowy';else if(desc.includes('benzyna')||desc.includes('pb95')||desc.includes('pb98'))o.group='Benzyna';else if(desc.includes('elektr')||desc.includes('ładow'))o.group='Energia elektryczna';else if(desc.includes('myjnia'))o.group='Myjnia';else if(desc.includes('autostrada'))o.group='Autostrady';o.isFuel=isFuelGroup(o.group)}const aV=[];for(const k in r)if(k!=='_source'&&k!=='_opt'&&k!=='_proc'&&r[k])aV.push(String(r[k]).toLowerCase());if(o.reg)aV.push(o.reg.toLowerCase());if(o.group)aV.push(o.group.toLowerCase());o.flatSearch=aV.join(' ');r._proc=true}if(onProgress)onProgress(Math.round((end/total)*40),`Przetwarzanie ${end}/${total}...`);await nextFrame()}return data}
-async function runMileageCorrectionAsync(data,onProgress,onlyRegs){const gr={};for(const r of data){if(!r._opt||!r._opt.date||!r._opt.reg)continue;(gr[r._opt.reg]||(gr[r._opt.reg]=[])).push(r)}let regs=Object.keys(gr);if(onlyRegs)regs=regs.filter(r=>onlyRegs.has(r));const totalRegs=regs.length;let processed=0;const _mceIsLpg=g=>/lpg|gaz|autogas/i.test(String(g||''));const _mceIsPb=g=>/benzyna|pb\b|petrol|pb9[58]/i.test(String(g||''));const _typoConsOk=(fix,prevM,nextM,litFix,minC,maxC)=>{if(prevM>0&&litFix>0){const d=fix-prevM;if(d>0&&litFix/d*100<minC)return false}if(nextM>0&&nextM>fix&&litFix>0){const d=nextM-fix;if(d>0&&litFix/d*100>maxC*2)return false}return true};for(const reg of regs){const tr=gr[reg].sort((a,b)=>a._opt.date-b._opt.date).filter(r=>(r._opt.isFuel||r._opt.isAdBlue)&&!r._opt.isPersonal&&r._opt.rawMeter>0);if(tr.length>=3){const minC=2,maxC=80;for(const r of tr)r._opt.origMeter=r._opt.rawMeter;
+async function runMileageCorrectionAsync(data,onProgress,onlyRegs){const gr={};for(const r of data){if(!r._opt||!r._opt.date||!r._opt.reg)continue;(gr[r._opt.reg]||(gr[r._opt.reg]=[])).push(r)}let regs=Object.keys(gr);if(onlyRegs)regs=regs.filter(r=>onlyRegs.has(r));const totalRegs=regs.length;let processed=0;const _mceIsLpg=g=>/lpg|gaz|autogas/i.test(String(g||''));const _mceIsPb=g=>/benzyna|pb\b|petrol|pb9[58]/i.test(String(g||''));const _typoConsOk=(fix,prevM,nextM,litFix,minC,maxC)=>{if(prevM>0&&litFix>0){const d=fix-prevM;if(d>0&&litFix/d*100<minC)return false}if(nextM>0&&nextM>fix&&litFix>0){const d=nextM-fix;if(d>0&&litFix/d*100>maxC*2)return false}return true};for(const reg of regs){const tr=gr[reg].sort((a,b)=>a._opt.date-b._opt.date).filter(r=>(r._opt.isFuel||r._opt.isAdBlue)&&!r._opt.isPersonal&&r._opt.rawMeter>=100);/* próg 100 (nie >0!) — niektórzy użytkownicy wpisują placeholder "1" zamiast "0", gdy nie znają odczytu; oba są tak samo niewiarygodne dla pojazdu z przebiegiem rzędu dziesiątek/setek tysięcy km */if(tr.length>=3){const minC=2,maxC=80;for(const r of tr)r._opt.origMeter=r._opt.rawMeter;
 /* KROK 0 (nowy) — bezpiecznik dla dokładnie 3 rekordów (minimum wymagane przez
    MCE) ze środkowym odczytem niespójnym z ŻADNYM sąsiadem. Przy tak cienkich
    danych (tylko 1 para segmentów do oceny) regresja/interpolacja mogłaby
@@ -985,40 +985,202 @@ let firstRel=0;{let hit=false;for(let i=0;i<tr.length-1&&!hit;i++){const s=tr[i]
 let run=tr[firstRel]._opt.rawMeter;tr[firstRel]._opt.meter=run;tr[firstRel]._opt.isFixed=false;for(let i=firstRel-1;i>=0;i--){const r=tr[i],n=tr[i+1];if(!r._opt.isAdBlue){const l=n._opt.isFuel&&!n._opt.isAdBlue?n._opt.lit:0;const est=Math.max(0,Math.round(run-l/avg*100));run=(r._opt.rawMeter>0&&r._opt.rawMeter<run&&r._opt.rawMeter>=est*0.7)?r._opt.rawMeter:est}if(r._opt.isDualFuelSession){r._opt.meter=r._opt.rawMeter;r._opt.isFixed=false}else{r._opt.meter=run;r._opt.isFixed=r._opt.meter!==r._opt.rawMeter}}
 const _segOk=(d,l,ratio)=>d>0&&l>0&&l/d*100>=minC&&l/d*100<=maxC&&d>=l*kmL*ratio;const _getLocalAvg=(anchorIdx,N=3)=>{const rates=[];let curIdx=anchorIdx;for(let _iter=0;_iter<N*3&&curIdx>firstRel&&rates.length<N;_iter++){const cur=tr[curIdx];const prev=tr.slice(0,curIdx).reverse().find(x=>x._opt.isAnchor&&x._opt.meter>0&&!x._opt.isAdBlue);if(!prev)break;const prevIdx=tr.indexOf(prev);const ld=cur._opt.meter-prev._opt.meter;let ll=0;for(let _k=prevIdx+1;_k<=curIdx;_k++)if(tr[_k]._opt.isFuel&&!tr[_k]._opt.isAdBlue)ll+=tr[_k]._opt.lit;if(ld>50&&ll>5){const r=ll/ld*100;if(r>=minC&&r<=30)rates.push(r)}curIdx=prevIdx;}if(!rates.length)return avg;rates.sort((a,b)=>a-b);return rates[rates.length>>1];};let aIdx=firstRel;while(aIdx<tr.length-1){const s=tr[aIdx];let nIdx=-1;for(let i=aIdx+1;i<tr.length&&nIdx===-1;i++){const c=tr[i],raw=c._opt.rawMeter;if(c._opt.isAdBlue||raw<100||raw<s._opt.meter*0.97||!c._opt.isAnchor)continue;const d=raw-s._opt.meter;if(d===0){nIdx=i;break}let l=0;for(let k=aIdx+1;k<=i;k++)if(tr[k]._opt.isFuel&&!tr[k]._opt.isAdBlue)l+=tr[k]._opt.lit;if(_segOk(d,l,0.4))nIdx=i}if(nIdx===-1){for(let i=aIdx+1;i<tr.length;i++){const c=tr[i],raw=c._opt.rawMeter;if(c._opt.isAdBlue||raw<100||raw<s._opt.meter*0.97||!c._opt.isAnchor)continue;const d=raw-s._opt.meter;if(d===0){nIdx=i;break}let l=0;for(let k=aIdx+1;k<=i;k++)if(tr[k]._opt.isFuel&&!tr[k]._opt.isAdBlue)l+=tr[k]._opt.lit;if(d>=l*kmL*0.3){nIdx=i;break}}}if(nIdx!==-1){const e=tr[nIdx],tD=e._opt.rawMeter-s._opt.meter;e._opt.meter=e._opt.rawMeter;e._opt.isFixed=false;let tL=0;for(let k=aIdx+1;k<=nIdx;k++)if(tr[k]._opt.isFuel&&!tr[k]._opt.isAdBlue)tL+=tr[k]._opt.lit;let iRun=s._opt.meter;for(let k=aIdx+1;k<nIdx;k++){const r=tr[k];if(r._opt.isAdBlue){r._opt.meter=r._opt.rawMeter>iRun&&r._opt.rawMeter<e._opt.meter?r._opt.rawMeter:iRun;r._opt.isFixed=r._opt.meter!==r._opt.rawMeter}else if(r._opt.isDualFuelSession){r._opt.meter=r._opt.rawMeter;r._opt.isFixed=false}else if(tD===0){r._opt.meter=iRun;r._opt.isFixed=false}else if(r._opt.isAnchor&&r._opt.rawMeter>iRun&&r._opt.rawMeter<e._opt.meter){iRun=r._opt.rawMeter;r._opt.meter=iRun;r._opt.isFixed=false}else{iRun+=Math.round(tD*(r._opt.lit/tL||0));r._opt.meter=iRun;r._opt.isFixed=true}}aIdx=nIdx;}else{const _localAvg=_getLocalAvg(aIdx);let curRun=s._opt.meter;for(let k=aIdx+1;k<tr.length;k++){const r=tr[k];let _nAM=Infinity;for(let _n=k+1;_n<tr.length;_n++){if(tr[_n]._opt.isAnchor&&tr[_n]._opt.rawMeter>curRun){_nAM=tr[_n]._opt.rawMeter;break}}if(r._opt.isAdBlue){r._opt.meter=r._opt.rawMeter>curRun?r._opt.rawMeter:curRun;r._opt.isFixed=r._opt.meter!==r._opt.rawMeter}else if(r._opt.isDualFuelSession){r._opt.meter=r._opt.rawMeter;r._opt.isFixed=false}else{const _exp=curRun+Math.round(r._opt.lit/_localAvg*100);let _v;if(r._opt.rawMeter>curRun&&r._opt.rawMeter>=curRun+10&&r._opt.rawMeter<=curRun+Math.round(r._opt.lit/_localAvg*100)*3){_v=r._opt.rawMeter;r._opt.isFixed=false}else{_v=_exp;r._opt.isFixed=true}if(_nAM<Infinity&&_nAM-curRun>=_exp-curRun)_v=Math.min(_v,_nAM);curRun=_v;r._opt.meter=curRun}}break}}
 }
-/* KROK 11.5 (nowy) — twardy floor monotoniczności: skorygowany licznik
-   pojazdu nie powinien nigdy spadać w kolejności dat. Działa dla WSZYSTKICH
-   pojazdów z >=3 rekordami — również tych obsłużonych przez bezpiecznik
-   3-rekordowy (KROK 0) i wpisów chronionych jako DualFuel, gdzie ochrona nie
-   powinna łamać tego niezmiennika. */
+/* KROK 11.5 (poprawiony) — twardy floor monotoniczności: skorygowany licznik
+   pojazdu nie powinien nigdy spadać w kolejności dat. WAŻNE: jeśli globalna
+   regresja "poprawiła" odczyt na wartość niższą niż poprzedni punkt, ale
+   sam WŁASNY, wpisany odczyt (rawMeter) jest sam w sobie spójny (>= poprzedniego
+   ustalonego punktu), ufamy TEMU odczytowi — nie spłaszczamy do poprzedniej
+   wartości. Spłaszczenie (zostawienie identycznej wartości co poprzedni punkt)
+   to ostateczność tylko gdy NAWET surowy odczyt też cofa się w czasie (co
+   sugeruje inny, głębszy problem, np. dwa pojazdy pod tą samą rejestracją). */
 for(let k=1;k<tr.length;k++){
   if(tr[k]._opt.meter<tr[k-1]._opt.meter){
-    tr[k]._opt.meter=tr[k-1]._opt.meter;
-    tr[k]._opt.isFixed=tr[k]._opt.meter!==tr[k]._opt.rawMeter;
+    if(tr[k]._opt.rawMeter>=tr[k-1]._opt.meter&&tr[k]._opt.rawMeter>100){
+      tr[k]._opt.meter=tr[k]._opt.rawMeter;
+      tr[k]._opt.isFixed=false;
+    }else{
+      tr[k]._opt.meter=tr[k-1]._opt.meter;
+      tr[k]._opt.isFixed=tr[k]._opt.meter!==tr[k]._opt.rawMeter;
+    }
   }
 }
-for(const r of tr)if(r._opt.meter===r._opt.origMeter)r._opt.isFixed=false;}
+for(const r of tr)if(r._opt.meter===r._opt.origMeter)r._opt.isFixed=false;
+/* KROK 11.6 (nowy) — ostateczna nadpisująca kontrola LOKALNEJ spójności,
+   niezależna od globalnej regresji. Globalna regresja (kmL/ic policzone
+   z medianowego nachylenia na przestrzeni CAŁEJ historii pojazdu) może
+   błędnie odrzucić jako "nie-kotwicę" prawdziwy, świeży odczyt, jeśli
+   wzorzec spalania zmienił się na przestrzeni lat (bardzo prawdopodobne
+   przy wieloletniej historii) — wtedy CAŁY późniejszy odcinek dostaje
+   wyliczone, a nie wpisane wartości, mimo że prawdziwe odczyty są
+   całkowicie spójne z NAJBLIŻSZYMI sąsiadami. Tu sprawdzamy TYLKO
+   sąsiedztwo (poprzedni ustalony punkt i następny surowy odczyt) —
+   jeśli własny wpisany odczyt mieści się między nimi, ufamy mu wprost. */
+for(let k=0;k<tr.length;k++){
+  const r=tr[k];
+  if(r._opt.isAdBlue||r._opt.isDualFuelSession||r._opt.rawMeter<100)continue;
+  const prevM=k>0?tr[k-1]._opt.meter:0;
+  let nextRaw=null;
+  for(let j=k+1;j<tr.length;j++){
+    if(!tr[j]._opt.isAdBlue&&tr[j]._opt.rawMeter>=100){nextRaw=tr[j]._opt.rawMeter;break}
+  }
+  const okLow=r._opt.rawMeter>=prevM;
+  const okHigh=nextRaw==null||r._opt.rawMeter<=nextRaw;
+  if(okLow&&okHigh&&r._opt.meter!==r._opt.rawMeter){
+    r._opt.meter=r._opt.rawMeter;
+    r._opt.isFixed=false;
+  }
+}
+/* KROK 11.65 (nowy) — wykrywanie literówki jednej cyfry w prawdziwym odczycie.
+   Dwa kolejne prawdziwe odczyty mogą być każdy z osobna "wiarygodny" (rosnący,
+   powyżej progu), a mimo to sugerować fizycznie nierealne spalanie na odcinku
+   między nimi — np. 68600 → 79212 to prawdziwy, rosnący ciąg, ale przy 72,21 l
+   na dystansie 10612 km wychodzi 0,68 l/100km. Zamiast zostawiać to tylko jako
+   ostrzeżenie ("LUKA"), sprawdzamy: czy zmiana JEDNEJ cyfry w odczycie sprawia,
+   że OBA sąsiadujące odcinki (do poprzedniego i do następnego prawdziwego
+   odczytu) stają się jednocześnie prawdopodobne? Jeśli tak — i jeśli istnieje
+   DOKŁADNIE JEDEN taki kandydat — to prawie na pewno literówka przy wpisywaniu
+   (np. 68600 zamiast 78600), a nie faktyczny przebieg. Świadomie ostrożne: nie
+   dotyka odczytów, które już są lokalnie spójne (nie chcemy "poprawiać" czegoś,
+   co nie jest zepsute), i wymaga JEDNOZNACZNEGO kandydata — przy niejasności
+   nic nie zmienia, zostawiając to do ręcznej weryfikacji (plakietka "LUKA"). */
+const MINC_TYPO=3,MAXC_TYPO=25;
+const _digitVariants=n=>{
+  const s=String(Math.round(n));const out=[];
+  for(let i=0;i<s.length;i++)for(let d=0;d<=9;d++){
+    if(String(d)===s[i])continue;
+    if(i===0&&d===0)continue;
+    out.push(parseInt(s.slice(0,i)+d+s.slice(i+1),10));
+  }
+  return out;
+};
+for(let k=0;k<tr.length;k++){
+  const r=tr[k];
+  if(r._opt.isAdBlue||r._opt.isDualFuelSession||r._opt.rawMeter<100||r._opt.isFixed)continue;
+  const prevM=k>0?tr[k-1]._opt.meter:null;
+  const dRaw=prevM!=null?r._opt.rawMeter-prevM:null,litR=r._opt.lit||0;
+  const rateRaw=dRaw!=null&&dRaw>0&&litR>0?litR/dRaw*100:null;
+  let nextReal=null;
+  for(let j=k+1;j<tr.length;j++){
+    if(!tr[j]._opt.isAdBlue&&tr[j]._opt.rawMeter>=100){nextReal=tr[j]._opt;break}
+  }
+  let rateOut=null;
+  if(nextReal){
+    const dOut=nextReal.rawMeter-r._opt.rawMeter,litOut=nextReal.lit||0;
+    rateOut=dOut>0&&litOut>0?litOut/dOut*100:null;
+  }
+  const inOk=rateRaw==null||(rateRaw>=MINC_TYPO&&rateRaw<=MAXC_TYPO);
+  const outOk=rateOut==null||(rateOut>=MINC_TYPO&&rateOut<=MAXC_TYPO);
+  if(inOk&&outOk)continue;
+  const candidates=[];
+  for(const cand of _digitVariants(r._opt.rawMeter)){
+    if(prevM!=null){
+      if(cand<=prevM)continue;
+      const d2=cand-prevM,r2=litR>0&&d2>0?litR/d2*100:null;
+      if(r2==null||r2<MINC_TYPO||r2>MAXC_TYPO)continue;
+    }
+    if(nextReal){
+      const d3=nextReal.rawMeter-cand;
+      if(d3<=0)continue;
+      const lit3=nextReal.lit||0,r3=lit3>0?lit3/d3*100:null;
+      if(r3!=null&&(r3<MINC_TYPO||r3>MAXC_TYPO))continue;
+    }
+    candidates.push(cand);
+  }
+  if(candidates.length===1){
+    r._opt.meter=candidates[0];
+    r._opt.isFixed=true;
+    r._opt.isTypoFix=true;
+  }
+}
+for(let k=1;k<tr.length;k++){
+  if(tr[k]._opt.meter<tr[k-1]._opt.meter){
+    if(tr[k]._opt.rawMeter>=tr[k-1]._opt.meter&&tr[k]._opt.rawMeter>100){
+      tr[k]._opt.meter=tr[k]._opt.rawMeter;
+      tr[k]._opt.isFixed=false;
+    }else{
+      /* Nawet surowy odczyt cofa się w czasie — ten wiersz jest niewiarygodny
+         jako "kotwica". Spłaszczenie do poprzedniej wartości tylko na wypadek,
+         gdyby coś inne (poza KROKIEM 12/B) jeszcze czytało .meter — ale
+         oznaczamy go jako mceUnreliable, żeby w KROKU 12 (B) NIE wchodził do
+         `trusted` z tą sztuczną, płaską wartością (co inaczej zeruje dystans
+         segmentu i psuje rekonstrukcję wszystkich sąsiednich wierszy zerowych
+         — patrz komentarz przy `trusted` niżej). Zamiast tego trafi do
+         rekonstrukcji na tych samych zasadach co tankowania z Licznik=0. */
+      tr[k]._opt.meter=tr[k-1]._opt.meter;
+      tr[k]._opt.isFixed=tr[k]._opt.meter!==tr[k]._opt.rawMeter;
+      tr[k]._opt.mceUnreliable=true;
+    }
+  }
+}
+}
 /* KROK 12 (nowy) — baza zwalidowanych przebiegów (z transakcji paliwowych,
    już przetworzonych przez MCE powyżej) i dowiązanie ich do POZOSTAŁYCH
-   wierszy tego pojazdu (np. z innych zestawień kosztów floty — serwis,
-   ubezpieczenie, rata leasingu itp.), które mogły mieć WŁASNY, zawodny
-   odczyt licznika. Zamiast ufać temu odczytowi, dociągamy przebieg z
-   najbliższych w czasie, zwalidowanych wpisów paliwowych (interpolacja
-   liniowa między dwoma najbliższymi znanymi punktami; poza zakresem dat —
-   najbliższa znana wartość brzegowa, bez ekstrapolacji na ślepo).
-   Wiersze paliwowe (tr) — bez zmian, to one są źródłem prawdy. */
-{
+   wierszy tego pojazdu. Dwie ODDZIELNE ścieżki, bo mają inną naturę:
+   (A) inne kategorie kosztów (serwis, ubezpieczenie, leasing...) — nie mają
+       żadnego związku z przebiegiem, więc jedyny rozsądny szacunek to
+       interpolacja liniowa W CZASIE między dwoma najbliższymi, zwalidowanymi
+       odczytami paliwowymi.
+   (B) transakcje PALIWOWE z Licznikiem = 0/brak (np. literówka "0" przy
+       imporcie, albo pojazd zastępczy, dla którego kierowca nie zna/nie chce
+       podawać licznika) — TE mają zatankowane litry, więc naturalny szacunek
+       to interpolacja proporcjonalna do LITRÓW w obrębie segmentu (więcej
+       litrów = więcej przejechanych km od poprzedniego znanego punktu), a nie
+       płaska interpolacja czasowa — inaczej kilka tankowań tuż po sobie w
+       krótkim odstępie czasu, ale z dużą ilością paliwa, dostawałoby
+       nienaturalnie małe przyrosty licznika mimo realnego zużycia.
+   Wiersze paliwowe (tr) — bez zmian, to one są źródłem prawdy.
+
+   Uruchamiamy to DWUKROTNIE (druga tura z odświeżonym `trusted`): jeśli w
+   pierwszej turze jakiś "podejrzany"/mceUnreliable punkt (np. 04-08) został
+   przeliczony na nową wartość, punkty PO nim (np. zerowe tankowania 04-19)
+   powinny liczyć się względem TEJ nowej wartości, a nie względem zamrożonego
+   zrzutu `trusted` sprzed korekty — inaczej mogą wyjść NIŻSZE niż punkt,
+   który go poprzedza (widoczny "dołek" mimo że oba źródłowo są już naprawione). */
+for(let _pass=0;_pass<2;_pass++){
   const trSet=new Set(tr);
-  const trusted=tr.filter(r=>r._opt.meter>0&&r._opt.date)
-    .map(r=>({t:r._opt.date.getTime(),m:r._opt.meter}))
+  /* WAŻNE: wyklucz wiersze oznaczone mceUnreliable (KROK 11.5 musiał je spłaszczyć
+     do wartości poprzedniego punktu, bo nawet ich WŁASNY odczyt cofał się w czasie).
+     Gdyby zostały w `trusted` z tą sztuczną, płaską wartością, dwa sąsiednie punkty
+     o identycznym `.m` dawałyby dystans segmentu = 0, co dla JAKIEGOKOLWIEK dodatniego
+     zużycia paliwa jest "nieskończenie nierealne" — wymuszałoby to niepotrzebne,
+     szerokie poszerzanie okna (i błędne domalowanie samych tych punktów), zamiast po
+     prostu zrekonstruować JE SAME proporcjonalnie do litrów, tak jak wiersze zerowe. */
+  const trusted0=tr.filter(r=>r._opt.meter>0&&r._opt.date&&(_pass>0||!r._opt.mceUnreliable))
+    .map(r=>({t:r._opt.date.getTime(),m:r._opt.meter,row:r}))
     .sort((a,b)=>a.t-b.t);
-  /* Uwaga: "other" to WYŁĄCZNIE wiersze spoza paliw/AdBlue — czyli faktycznie
-     inne zestawienia kosztów floty (serwis, ubezpieczenie, leasing...). Wiersze
-     paliwowe pominięte z tr (np. tankowania prywatne, albo bez odczytu licznika)
-     zostają przy swoim własnym odczycie — to nadal dane "z dystrybutora", nie
-     zawodny ręczny wpis z arkusza kosztów, więc nie ma powodu ich nadpisywać. */
-  const other=gr[reg].filter(r=>!trSet.has(r)&&!r._opt.isFuel&&!r._opt.isAdBlue);
+  /* Ostateczny filtr monotoniczności na `trusted`: nawet po wszystkich krokach
+     powyżej pojedynczy punkt może wciąż cofać licznik względem WCZEŚNIEJSZEGO
+     punktu (nie tylko bezpośrednio poprzedniego — to właśnie umykało KROKOWI 11.5,
+     który porównywał tylko sąsiadów). Taki punkt demotujemy: usuwamy go z `trusted`
+     i kierujemy do tej samej rekonstrukcji proporcjonalnej co wiersze zerowe,
+     zamiast zostawiać jako fałszywą kotwicę zaniżającą kolejne segmenty. */
+  let _runMax=-Infinity;
+  const trusted=[];
+  for(const t of trusted0){
+    if(t.m<_runMax){t.row._opt.mceUnreliable=true}
+    else{trusted.push(t);_runMax=t.m;t.row._opt.mceUnreliable=false}
+  }
+  const trustedRowSet=new Set(trusted.map(t=>t.row));
+
+  /* (A) inne kategorie kosztów — interpolacja liniowa w czasie (jak dotąd) */
+  const otherCost=gr[reg].filter(r=>!trSet.has(r)&&!r._opt.isFuel&&!r._opt.isAdBlue);
+  /* Średnie tempo przejazdów (km/dzień) tego pojazdu — do ekstrapolacji, żeby
+     wiersze BEZ jednej z kotwic nie dostawały wartości IDENTYCZNEJ z najbliższym
+     prawdziwym odczytem (co wyglądało jak "powtórzony licznik"). */
+  let _sumDist2=0,_sumDays2=0;
+  for(let i=1;i<trusted.length;i++){
+    const dd=trusted[i].m-trusted[i-1].m,dt=(trusted[i].t-trusted[i-1].t)/86400000;
+    if(dd>0&&dt>0){_sumDist2+=dd;_sumDays2+=dt}
+  }
+  const vehDayRate=_sumDays2>0?_sumDist2/_sumDays2:50;
+  /* Wiersze tego samego dnia (np. myjnia w dniu tankowania) powinny dostać
+     TĘ SAMĄ wartość licznika co rozstrzygnięta transakcja paliwowa z tego dnia
+     — ekstrapolacja czasowa "w ciemno" potrafi dać inną wartość niż tankowanie
+     zaledwie kilka godzin wcześniej/później tego samego dnia. */
+  const sameDayMap=new Map();
+  for(const r of gr[reg])if(r._opt.date&&r._opt.meter>0&&(r._opt.isFuel||r._opt.isAdBlue))sameDayMap.set(r._opt.date.toISOString().slice(0,10),r._opt.meter);
   if(trusted.length>=2){
-    for(const r of other){
+    for(const r of otherCost){
       if(!r._opt.date){continue}
       const t=r._opt.date.getTime();
       let lo=null,hi=null;
@@ -1027,26 +1189,169 @@ for(const r of tr)if(r._opt.meter===r._opt.origMeter)r._opt.isFixed=false;}
         if(trusted[i].t>=t&&hi===null)hi=trusted[i];
       }
       let est=null;
-      if(lo&&hi)est=lo.t===hi.t?lo.m:lo.m+(hi.m-lo.m)*((t-lo.t)/(hi.t-lo.t));
-      else if(lo)est=lo.m;
-      else if(hi)est=hi.m;
+      const _sameDay=sameDayMap.get(r._opt.date.toISOString().slice(0,10));
+      if(_sameDay!=null&&(!lo||!hi))est=_sameDay;
+      else if(lo&&hi)est=lo.t===hi.t?lo.m:lo.m+(hi.m-lo.m)*((t-lo.t)/(hi.t-lo.t));
+      else if(lo)est=lo.m+vehDayRate*((t-lo.t)/86400000);
+      else if(hi)est=Math.max(0,hi.m-vehDayRate*((hi.t-t)/86400000));
       if(est!=null){
-        r._opt.meterFleetRaw=r._opt.rawMeter>0?r._opt.rawMeter:null; /* własny (niepewny) odczyt — zachowany do wglądu */
+        r._opt.meterFleetRaw=r._opt.rawMeter>0?r._opt.rawMeter:null;
         r._opt.meter=Math.round(est);
-        r._opt.meterEstimated=true; /* przebieg dociągnięty z MCE/paliw, nie z własnego odczytu tego wiersza */
-        r._opt.isFixed=r._opt.rawMeter>0&&Math.round(est)!==r._opt.rawMeter;
+        r._opt.meterEstimated=true;
+        r._opt.isFixed=Math.round(est)!==(r._opt.rawMeter||0);
       }else{
         r._opt.meter=0;
       }
     }
   }else{
-    /* za mało zwalidowanych odczytów paliwowych dla tego pojazdu (0-1) —
-       nie ma z czym porównać, więc NIE ufamy własnym odczytom licznika
-       z innych zestawień: zerujemy, żeby nie zniekształcały dystansu/CPK. */
-    for(const r of other){
+    for(const r of otherCost){
       if(r._opt.rawMeter>0)r._opt.meterFleetRaw=r._opt.rawMeter;
       r._opt.meter=0;
     }
+  }
+
+  /* (B+C) transakcje paliwowe z Licznik=0/brak (nie AdBlue, nie prywatne),
+     oraz zaufane odczyty, które lokalnie wyglądają OK, ale w świetle
+     pominiętych zerowych tankowań między nimi sugerują fizycznie nierealne
+     spalanie ("podejrzane") — rekonstruujemy je RAZEM, SEKWENCYJNIE, jednym
+     przebiegiem na segment [lo,hi], zamiast dzielić cały dystans segmentu
+     proporcjonalnie do SUMY litrów w oknie. Ta druga metoda (używana
+     poprzednio) potrafiła upchnąć 100% dystansu w OSTATNIM wierszu przed
+     końcem segmentu, dając kilka identycznych wartości z rzędu i zerowy
+     przyrost tuż przed prawdziwym odczytem — dokładnie to, co zauważyłeś.
+     Teraz: szacujemy typowe spalanie TEGO pojazdu (L/100km) na podstawie
+     jego własnych, wiarygodnych par odczytów w całym zestawieniu, i każdemu
+     tankowaniu w segmencie przydzielamy przyrost = jego_litry/spalanie*100,
+     dodawany KOLEJNO od `lo`, z sufitem nieprzekraczającym `hi` — więc małe
+     tankowanie dostaje mały przyrost, duże dostaje duży, a nie "cały reszta
+     dystansu na raz", niezależnie od tego, które tankowanie jest ostatnie
+     w kolejności dat. */
+  /* Do rekonstrukcji trafiają: (a) prawdziwe "puste" tankowania (Licznik<100,
+     np. 0 lub 1) ORAZ (b) wiersze oznaczone mceUnreliable — czyli takie, których
+     WŁASNY wpisany odczyt jest niespójny (cofa się w czasie) i został wykluczony
+     z `trusted` powyżej. Obie grupy traktujemy identycznie: proporcjonalnie do
+     zatankowanych litrów w obrębie segmentu między dwoma prawdziwie zaufanymi
+     punktami. */
+  const zeroFuel=gr[reg].filter(r=>r._opt.isFuel&&!r._opt.isAdBlue&&!r._opt.isPersonal&&r._opt.date&&!trustedRowSet.has(r)&&(r._opt.mceUnreliable||(!trSet.has(r)&&!(r._opt.rawMeter>=100))))
+    .sort((a,b)=>a._opt.date-b._opt.date);
+  const MAXC_SEG=35;
+
+  const suspects=new Map(); /* trusted-idx (pominięty przy poszerzaniu) -> {loIdx,hiIdx} finalnego segmentu */
+  const findSeg=t=>{
+    let loIdx=-1,hiIdx=-1;
+    for(let i=0;i<trusted.length;i++){
+      if(trusted[i].t<=t)loIdx=i;
+      if(trusted[i].t>=t&&hiIdx===-1)hiIdx=i;
+    }
+    if(loIdx===-1||hiIdx===-1)return{loIdx,hiIdx,lo:loIdx>=0?trusted[loIdx]:null,hi:hiIdx>=0?trusted[hiIdx]:null};
+    while(true){
+      const lo=trusted[loIdx],hi=trusted[hiIdx],dist=hi.m-lo.m;
+      const segRows=zeroFuel.filter(z=>{const zt=z._opt.date.getTime();return zt>=lo.t&&zt<=hi.t});
+      const lit=segRows.reduce((s,z)=>s+(z._opt.lit||0),0);
+      const implausible=dist>=0&&lit>0&&(lit/Math.max(dist,1)*100)>MAXC_SEG;
+      if(!implausible)break;
+      if(hiIdx<trusted.length-1)hiIdx++;
+      else if(loIdx>0)loIdx--;
+      else break;
+    }
+    for(let i=loIdx+1;i<hiIdx;i++)if(!suspects.has(i))suspects.set(i,{loIdx,hiIdx});
+    return{loIdx,hiIdx,lo:trusted[loIdx],hi:trusted[hiIdx]};
+  };
+
+  if(trusted.length>=2&&zeroFuel.length){
+    /* zbierz segmenty (z poszerzaniem + wykryciem "podejrzanych") dla wszystkich zero-wierszy */
+    const segGroups=new Map(); /* "loIdx_hiIdx" -> {lo,hi,items:[{ref,t,lit,isSuspect}]} */
+    for(const r of zeroFuel){
+      const seg=findSeg(r._opt.date.getTime());
+      if(seg.loIdx<0||seg.hiIdx<0||seg.loIdx===seg.hiIdx)continue;
+      const key=seg.loIdx+'_'+seg.hiIdx;
+      if(!segGroups.has(key))segGroups.set(key,{lo:seg.lo,hi:seg.hi,items:[]});
+      segGroups.get(key).items.push({ref:r,t:r._opt.date.getTime(),lit:r._opt.lit||0,isSuspect:false});
+    }
+    /* dołóż "podejrzane" zaufane odczyty do właściwych grup */
+    for(const[idx,{loIdx,hiIdx}]of suspects){
+      const key=loIdx+'_'+hiIdx;
+      let g=segGroups.get(key);
+      if(!g){g={lo:trusted[loIdx],hi:trusted[hiIdx],items:[]};segGroups.set(key,g)}
+      const susp=trusted[idx];
+      g.items.push({ref:susp.row,t:susp.t,lit:susp.row._opt.lit||0,isSuspect:true});
+    }
+    /* rekonstrukcja proporcjonalna do SKUMULOWANYCH litrów w obrębie segmentu —
+       jeden, spójny przebieg na cały segment (nie osobno dla wierszy zerowych
+       i osobno dla "podejrzanego" zaufanego odczytu, bo dwa nakładające się
+       przebiegi z różną sumą litrów w mianowniku dawały zduplikowane wartości).
+       Ta metoda zawsze kończy się DOKŁADNIE na `hi` — płynne przejście, bez
+       skoku tuż przed prawdziwym odczytem — kosztem tego, że pojedyncze
+       tankowanie może nieznacznie odbiegać od "typowego" spalania pojazdu,
+       jeśli sam segment (od-do dwóch zaufanych punktów) sugeruje inną
+       średnią niż reszta historii. */
+    for(const g of segGroups.values()){
+      if(!g.lo||!g.hi||g.lo.t===g.hi.t)continue;
+      const items=g.items.slice().sort((a,b)=>a.t-b.t);
+      const totalLit=items.reduce((s,it)=>s+it.lit,0);
+      const totalDist=g.hi.m-g.lo.m;
+      let cum=0;
+      for(const it of items){
+        cum+=it.lit;
+        const est=totalLit>0?Math.round(g.lo.m+totalDist*(cum/totalLit)):g.lo.m;
+        it.ref._opt.meterFleetRaw=it.isSuspect?it.ref._opt.rawMeter:(it.ref._opt.rawMeter>=100?it.ref._opt.rawMeter:null);
+        it.ref._opt.meter=est;
+        it.ref._opt.meterEstimated=true;
+        it.ref._opt.isFixed=it.isSuspect?true:est!==(it.ref._opt.rawMeter||0);
+      }
+    }
+    /* Wiersze BEZ dolnej kotwicy (przed samym pierwszym prawdziwym odczytem
+       pojazdu w całej historii — np. Licznik="1" jako pierwsza transakcja)
+       nigdy nie trafiały do żadnego segmentu powyżej (findSeg wymagał ZARÓWNO
+       lo, JAK i hi). Zamiast zostawiać je przy surowym placeholderze,
+       ekstrapolujemy WSTECZ od najbliższego znanego punktu, korzystając ze
+       średniego spalania TEGO pojazdu (z jego własnych, wiarygodnych
+       segmentów w dalszej historii) — analogicznie do KROK 11.6, tylko
+       działając "do tyłu" zamiast "do przodu". */
+    {
+      let _sumLit=0,_sumDist=0;
+      for(let i=1;i<trusted.length;i++){
+        const d=trusted[i].m-trusted[i-1].m,l=trusted[i].row._opt.lit||0;
+        if(d>0&&l>0){const rr=l/d*100;if(rr>=3&&rr<=30){_sumLit+=l;_sumDist+=d}}
+      }
+      const vehRateGlobal=_sumDist>0?_sumLit/_sumDist*100:8;
+      const preByHi=new Map();
+      for(const r of zeroFuel){
+        if(r._opt.meterEstimated)continue;
+        const seg=findSeg(r._opt.date.getTime());
+        if(seg.loIdx>=0||seg.hiIdx<0)continue;
+        if(!preByHi.has(seg.hiIdx))preByHi.set(seg.hiIdx,[]);
+        preByHi.get(seg.hiIdx).push(r);
+      }
+      for(const[hiIdx,rows]of preByHi){
+        const hi=trusted[hiIdx];
+        const sortedDesc=rows.slice().sort((a,b)=>b._opt.date-a._opt.date);
+        /* WAŻNE (spójność z resztą algorytmu): litry tankowania "kończącego"
+           dany odcinek wyjaśniają dystans PRZED nim (paliwo, które pozwoliło
+           do niego dojechać) — nie PO nim. Idąc wstecz, krok od punktu Y do
+           poprzedzającego go X używamy więc litrów Y (punktu, DO którego
+           dojeżdżamy), a nie litrów X. Zaczynamy od `hi` (prawdziwy odczyt) —
+           jego WŁASNE litry wyjaśniają ostatni odcinek do najbliższego wiersza
+           zerowego. Bez tego przesunięcia powstawało nienaturalne "złamanie"
+           tempa dokładnie na granicy tej metody z resztą łańcucha. */
+        let running=hi.m;
+        let nextLit=hi.row._opt.lit||0;
+        for(const r of sortedDesc){
+          const distBack=nextLit/vehRateGlobal*100;
+          running=Math.max(0,Math.round(running-distBack));
+          r._opt.meterFleetRaw=null;
+          r._opt.meter=running;
+          r._opt.meterEstimated=true;
+          r._opt.isFixed=true;
+          nextLit=r._opt.lit||0;
+        }
+      }
+    }
+    /* zero-wiersze, które nadal nie trafiły do żadnego segmentu (np. poza
+       zakresem dat, albo brak JAKIEJKOLWIEK zaufanej kotwicy w ogóle) */
+    for(const r of zeroFuel)if(!(r._opt.meter>0))r._opt.meter=0;
+  }else{
+    for(const r of zeroFuel)r._opt.meter=0;
   }
 }
 if(++processed%20===0){if(onProgress)onProgress(40+Math.round((processed/totalRegs)*50),`Korekta: ${reg} (${processed}/${totalRegs})`);await nextFrame()}}return data}
@@ -1065,7 +1370,7 @@ const avgLpgPrice=v.lpg.lit>0?v.lpg.cost/v.lpg.lit:2.5;const avgPbPrice=v.pb.lit
 const metered=sessions.filter(s=>s.meter>0);let avgDist=0;if(metered.length>1){let sum=0,cnt=0;for(let i=1;i<metered.length;i++){const d=metered[i].meter-metered[i-1].meter;if(d>0&&d<totalRangeEst*3){sum+=d;cnt++}}if(cnt)avgDist=(sum/cnt)|0}
 const potentialSavings=Math.max(0,v.pb.cost-(v.pb.lit*DF_SPEC.lpgToPbEq*avgLpgPrice));results.push({reg,lpgShare,totalLit,totalDist,status,statusCode,statusColor,recommendation,lpgLit:v.lpg.lit,lpgCost:v.lpg.cost,lpgTrans:v.lpg.trans,pbLit:v.pb.lit,pbCost:v.pb.cost,pbTrans:v.pb.trans,totalCost:v.lpg.cost+v.pb.cost,totalTrans:v.lpg.trans+v.pb.trans,avgDistBetweenFills:avgDist,suspiciousCount:suspicious,certainCount:certain,suspiciousPatterns:patterns,potentialSavings,avgLpgPrice,avgPbPrice,lpgTankEst,pbTankEst,lpgCons,pbCons,lpgRangeEst,pbRangeEst,totalRangeEst,medInterDist,certDistKm,suspDistKm,expTxRatio,actualTxRatio,txRatioOk,lpgFillAvg:v.lpg.trans>0?+(v.lpg.lit/v.lpg.trans).toFixed(1):0,pbFillAvg:v.pb.trans>0?+(v.pb.lit/v.pb.trans).toFixed(1):0,dfScore,lpgMonths:lpgMonths.size,lpgSpanDays:Math.round(lpgSpanDays),maxMeter:v.maxMeter>0?v.maxMeter:0})}
 return results.sort((a,b)=>a.lpgShare-b.lpgShare)};const calcVO=ys=>{if(!ys?.length||!S.data.length)return[];const yS=new Set(ys),min=Math.min(...ys),cars={};for(const r of S.data){const opt=r._opt;if(!opt?.date||!opt.reg)continue;const{reg:g,year:y,month:m,meter:mt}=opt;if(!cars[g])cars[g]={lb:null,y:{}};const c=cars[g];if(y<min&&mt>0&&(!c.lb||mt>c.lb))c.lb=mt;if(!yS.has(y))continue;if(!c.y[y])c.y[y]={mL:Array(12).fill(null),mF:Array(12).fill(false),mV:Array(12).fill(0),mLit:Array(12).fill(0),mT:Array(12).fill(0),co:0,li:0,tr:0,fm:12,lm:-1,lo:null,minOdo:null,ds:new Set(),wknd:0,anyFixed:false};const d=c.y[y];if(mt>0){if(d.mL[m]===null||mt>d.mL[m]){d.mL[m]=mt;d.mF[m]=!!opt.isFixed}else if(opt.isFixed)d.mF[m]=true;if(opt.isFixed)d.anyFixed=true;if(!d.lo||mt>d.lo)d.lo=mt;if(d.minOdo===null||mt<d.minOdo)d.minOdo=mt}
-if(S.selGr.size&&!S.selGr.has(opt.group))continue;const fuelLit=opt.isFuel?opt.lit:0;d.mV[m]+=opt.val;d.mLit[m]+=fuelLit;d.mT[m]++;if(m<d.fm)d.fm=m;if(m>d.lm)d.lm=m;d.co+=opt.val;d.li+=fuelLit;d.tr++;if(opt.isWeekend)d.wknd++;d.ds.add(opt.desc||opt.group)}const res=[];for(const g of Object.keys(cars).sort()){const c=cars[g];let pe=c.lb;for(const y of Object.keys(c.y).map(Number).sort((a,b)=>a-b)){const d=c.y[y];if(d.fm>d.lm)continue;const hp=pe!==null,so=hp?pe:d.minOdo,dst=(d.lo&&so)?Math.max(0,d.lo-so):0;res.push({year:y,reg:g,startOdometer:so,endOdometer:d.lo,hadPrevYear:hp,firstMonth:d.fm,lastMonth:d.lm,monthlyLast:d.mL,monthlyFixed:d.mF,anyFixed:d.anyFixed,monthlyValue:d.mV,monthlyLit:d.mLit,monthlyTrans:d.mT,totalDist:dst,totalCost:d.co,totalLit:d.li,transCount:d.tr,weekendCount:d.wknd,desc:Array.from(d.ds).slice(0,3).join(', ')+(d.ds.size>3?'...':'')});if(d.lo)pe=d.lo}}return res};const calcMil=()=>{const l=$('loader');if(l)l.classList.add('active');setTimeout(()=>{S.rep.mil=calcVO(S.selY.mil);S.upd.mil=0;const ph=$('mileage-placeholder'),tw=$('mileage-table-wrapper');if(ph)ph.style.display='none';if(tw)tw.style.display='block';renMil();if(l)l.classList.remove('active')},20)};const renMil=()=>{if(S.upd.mil){calcMil();return}if(!S.rep.mil.length){const _mb=$('mileageReportBody');if(_mb)_mb.innerHTML='<tr><td colspan="16">Brak danych</td></tr>';return}const q=$('mileageSearch').value.toLowerCase(),md=curMilTp,so=md==='mileage'||md==='odometer',ft=q?S.rep.mil.filter(r=>r.reg.toLowerCase().includes(q)):S.rep.mil,lbl={mileage:'Przebieg',odometer:'Przebieg',value:'Koszt',liters:'Paliwo',transactions:'Trans.'}[md],srcKey={value:'monthlyValue',liters:'monthlyLit',transactions:'monthlyTrans'},cellColor={mileage:'color:var(--succ);',value:'color:var(--act);',liters:'color:#10b981;',transactions:'color:#8b5cf6;'},cellFmt=v=>so?fmtI(Math.round(v)):md==='value'?fmtC(v):md==='liters'?fmtN(v)+' L':v,fmOv=v=>v==null?'-':so?fmtI(Math.round(v))+' km':md==='value'?fmtC(v):md==='liters'?fmtN(v)+' L':fmtN(v),getTotal=r=>({odometer:r.totalDist,value:r.totalCost,liters:r.totalLit,transactions:r.transCount})[md];const tbl=$('mileageReportTable');if(!tbl)return;tbl.querySelector('thead').innerHTML=`<tr><th onclick="sortReport('mil','year')">Rok</th><th onclick="sortReport('mil','reg')">Nr Rej.</th>${so?'<th>Licz.pocz.</th>':''}${M_S.map(m=>`<th>${m}</th>`).join('')}<th onclick="sortReport('mil','total')">${lbl}</th></tr>`;let lr=null;const extraColor=cellColor[md]||'',base='text-align:right;font-size:0.7rem;';const rw=ft.map(r=>{const fst=r.reg!==lr,{firstMonth:fm,lastMonth:lm}=r,mn=Array(12);lr=r.reg;if(md==='mileage'){let pv=r.startOdometer;for(let m=0;m<12;m++){if(m<fm||m>lm){mn[m]=null;continue}if(r.monthlyLast[m]!==null&&pv!==null){mn[m]=Math.max(0,r.monthlyLast[m]-pv);pv=r.monthlyLast[m]}else{mn[m]=null;if(r.monthlyLast[m]!==null)pv=r.monthlyLast[m]}}}else if(md==='odometer'){let l=r.startOdometer;for(let m=0;m<12;m++){if(m<fm||m>lm){mn[m]=null;continue}if(r.monthlyLast[m]!==null)l=r.monthlyLast[m];mn[m]=l}}else{const src=r[srcKey[md]];for(let m=0;m<12;m++)mn[m]=(m<fm||m>lm||src[m]<=0)?null:src[m]}const tt=md==='mileage'?mn.reduce((a,b)=>a+(b||0),0):getTotal(r),oc=so?`<td style="color:var(--act);font-weight:600;text-align:right"><span class="tooltip"><span>${r.startOdometer?fmtI(Math.round(r.startOdometer)):'-'}</span><span class="tooltip-text">${r.hadPrevYear?'Dane z poprz. roku':'Pierwszy odczyt'}</span></span></td>`:'',mc=mn.map((v,m)=>{if(m<fm||m>lm||v==null||v<=0)return`<td style="${base}">-</td>`;const fx=(md==='odometer')&&r.monthlyFixed&&r.monthlyFixed[m];return`<td style="${base}${extraColor}${fx?';position:relative':''}">${fx?'<span class="tooltip" style="display:inline-flex;align-items:center;gap:3px"><span style="width:6px;height:6px;border-radius:50%;background:#f59e0b;flex-shrink:0"></span>'+cellFmt(v)+'<span class="tooltip-text">Skorygowano przez MCE</span></span>':cellFmt(v)}</td>`}).join('');return`<tr${fst?' class="group-first"':''}><td>${r.year}</td><td style="font-weight:600;cursor:pointer;color:var(--act);text-decoration:underline dotted" onclick="showMilTimeline('${r.reg}')" title="Oś licznika${r.anyFixed?' — zawiera korekty MCE':''}">${r.reg}${r.anyFixed?'<span class="tooltip" style="margin-left:4px"><i class="fas fa-wrench" style="font-size:.6rem;color:#f59e0b"></i><span class="tooltip-text">Ten rok zawiera odczyty skorygowane przez MCE</span></span>':''}</td>${oc}${mc}<td style="text-align:right;font-weight:bold;color:var(--act)">${fmOv(tt)}</td></tr>`});const _mb2=$('mileageReportBody');if(_mb2)_mb2.innerHTML=rw.join('');};window.showMilTimeline=function(reg){var rows=S.data.filter(function(r){return r._opt&&r._opt.reg===reg&&r._opt.date&&r._opt.meter>0}).sort(function(a,b){return a._opt.date-b._opt.date});if(!rows.length){showToast('Brak odczytów licznika: '+reg);return}if(vehicleChartInstance){vehicleChartInstance.destroy();vehicleChartInstance=null}var _sumEl0=$('vehicleSummary');if(_sumEl0)_sumEl0.innerHTML='';var _legEl0=$('customLegend');if(_legEl0)_legEl0.innerHTML='';var _vm0=$('vehicleModal');if(_vm0){_vm0.style.display='flex';void _vm0.offsetHeight;}var fixedCnt=rows.filter(function(r){return r._opt.isFixed}).length;var regEl=$('vehicleModalReg');if(regEl){regEl.onclick=closeVehicleModal;regEl.textContent=reg}var metaEl=$('vehicleModalMeta');if(metaEl)metaEl.textContent=rows.length+' odczytów · '+fixedCnt+' korekt MCE';var legEl=$('customLegend');if(legEl)legEl.innerHTML='<span style="font-size:.58rem;font-weight:600;display:inline-flex;align-items:center;gap:4px"><span style="width:10px;height:3px;background:#10b981;border-radius:2px;display:inline-block"></span>Po MCE</span>'+(fixedCnt?'<span style="font-size:.58rem;font-weight:600;display:inline-flex;align-items:center;gap:4px;margin-left:6px"><span style="width:8px;height:8px;color:#ef4444;font-weight:900;display:inline-block">x</span>Przed MCE</span>':'');var _mtModal=$('vehicleModal');if(_mtModal)_mtModal.style.display='flex';requestAnimationFrame(function(){requestAnimationFrame(function(){if(vehicleChartInstance){vehicleChartInstance.destroy();vehicleChartInstance=null}var canvas=$('vehicleChart');var ctx=canvas.getContext('2d');var isDark=document.documentElement.getAttribute('data-theme')==='dark';var labels=rows.map(function(r){return r._opt.date.toISOString().split('T')[0].substring(2)});var corrected=rows.map(function(r){return Math.round(r._opt.meter)});var rawPts=rows.map(function(r){return r._opt.isFixed&&r._opt.rawMeter>0?Math.round(r._opt.rawMeter):null});var hasRaw=rawPts.some(function(v){return v!==null});var grad=ctx.createLinearGradient(0,0,0,300);grad.addColorStop(0,'rgba(16,185,129,.30)');grad.addColorStop(1,'rgba(16,185,129,.0)');var ptColors=rows.map(function(r){return r._opt.isFixed?'#f59e0b':'#10b981'});var ptRadius=rows.map(function(r){return r._opt.isFixed?5:2.5});var datasets=[{label:'Licznik (po MCE)',data:corrected,borderColor:'#10b981',backgroundColor:grad,borderWidth:2,pointRadius:ptRadius,pointBackgroundColor:ptColors,pointBorderColor:ptColors,fill:true,tension:0.2,spanGaps:false,order:1}];if(hasRaw){datasets.push({label:'Błędny odczyt',data:rawPts,borderColor:'#ef4444',backgroundColor:'transparent',borderWidth:0,pointRadius:7,pointStyle:'crossRot',pointBackgroundColor:'#ef4444',pointBorderColor:'#ef4444',pointBorderWidth:2.5,fill:false,spanGaps:false,showLine:false,order:0})}vehicleChartInstance=new Chart(ctx,{type:'line',data:{labels:labels,datasets:datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(15,23,42,.92)',titleFont:{size:8},bodyFont:{size:8},callbacks:{title:function(items){var d=rows[items[0].dataIndex]&&rows[items[0].dataIndex]._opt&&rows[items[0].dataIndex]._opt.date;return d?d.toISOString().split('T')[0]:items[0].label},label:function(item){if(item.parsed.y===null)return null;var r=rows[item.dataIndex]&&rows[item.dataIndex]._opt;var badge=r&&r.isFixed?' (MCE)':'';return' '+item.dataset.label+': '+fmtI(item.parsed.y)+' km'+badge},afterBody:function(items){var r=rows[items[0].dataIndex]&&rows[items[0].dataIndex]._opt;if(!r)return[];var out=[];if(r.isFixed&&r.rawMeter>0)out.push(' Oryginal: '+fmtI(Math.round(r.rawMeter))+' km');if(r.isFuel&&r.lit>0)out.push(' Paliwo: '+fmtN(r.lit)+' L');out.push(' Koszt: '+fmtC(r.val||0));if(r.isWeekend)out.push(' Weekend');return out}}}},scales:{x:{grid:{display:false},ticks:{font:{size:7},maxTicksLimit:20,maxRotation:45}},y:{grid:{color:isDark?'rgba(255,255,255,.05)':'rgba(0,0,0,.04)'},ticks:{font:{size:8},callback:function(v){return v>=1000?(v/1000).toFixed(0)+'k':v}},title:{display:true,text:'km',font:{size:8},color:'#9ca3af'}}}}});var sumEl=$('vehicleSummary');if(sumEl){var meters=corrected;var totalDist=meters.length>=2?Math.max(0,meters[meters.length-1]-meters[0]):0;var wknd=rows.filter(function(r){return r._opt.isWeekend}).length;var allTx=S.data.filter(function(r){return r._opt&&r._opt.reg===reg}).length;var trs=rows.map(function(r,i){var d=r._opt;var ds=d.date.toISOString().split('T')[0];var rawS=d.isFixed&&d.rawMeter>0?'<span class="val-original">'+fmtI(Math.round(d.rawMeter))+'</span><span class="val-fixed">'+fmtI(Math.round(d.meter))+'</span>':fmtI(Math.round(d.meter));var mceB=d.isFixed?'<span style="background:#f59e0b;color:#000;font-size:.48rem;font-weight:800;padding:1px 3px;border-radius:2px;margin-left:3px">MCE</span>':'';var wkB=d.isWeekend?'<span class="weekend-badge" style="font-size:.48rem">'+(d.dayName||'').substring(0,3)+'</span>':'';var bl=d.isFixed?';border-left:3px solid #f59e0b':';border-left:3px solid transparent';var bg=d.isWeekend?';background:rgba(239,68,68,.03)':'';return'<tr style="border-bottom:1px solid var(--bd)'+bg+bl+'"><td style="font-family:var(--font-mono);font-size:.6rem;color:var(--tx-m);padding:3px 4px;text-align:center;width:22px">'+(i+1)+'</td><td style="font-family:var(--font-mono);font-size:.65rem;padding:3px 5px;white-space:nowrap">'+ds+wkB+'</td><td style="font-family:var(--font-mono);font-size:.65rem;padding:3px 5px;text-align:right;color:#10b981">'+rawS+mceB+'</td><td style="font-size:.62rem;padding:3px 5px;color:var(--tx-m);max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(d.group||'')+'</td><td style="font-family:var(--font-mono);font-size:.65rem;padding:3px 5px;text-align:right;color:#3b82f6">'+(d.isFuel&&d.lit>0?fmtN(d.lit)+' L':'—')+'</td><td style="font-family:var(--font-mono);font-size:.65rem;padding:3px 5px;text-align:right;color:var(--act)">'+fmtC(d.val||0)+'</td></tr>'}).join('');var kpiS='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:1px;background:var(--bd);margin-bottom:6px"><div style="background:var(--bg-p);padding:5px 8px"><div style="font-family:var(--font-mono);font-weight:700;font-size:.78rem;color:#38bdf8">'+fmtI(meters[0]||0)+' km</div><div style="font-size:.53rem;color:var(--tx-m);text-transform:uppercase;letter-spacing:.4px">Licznik pocz.</div></div><div style="background:var(--bg-p);padding:5px 8px"><div style="font-family:var(--font-mono);font-weight:700;font-size:.78rem;color:#10b981">'+fmtI(meters[meters.length-1]||0)+' km</div><div style="font-size:.53rem;color:var(--tx-m);text-transform:uppercase;letter-spacing:.4px">Licznik końc.</div></div><div style="background:var(--bg-p);padding:5px 8px"><div style="font-family:var(--font-mono);font-weight:700;font-size:.78rem;color:var(--act)">'+fmtI(totalDist)+' km</div><div style="font-size:.53rem;color:var(--tx-m);text-transform:uppercase;letter-spacing:.4px">Dystans</div></div><div style="background:var(--bg-p);padding:5px 8px"><div style="font-family:var(--font-mono);font-weight:700;font-size:.78rem;color:var(--tx-s)">'+rows.length+' / '+allTx+'</div><div style="font-size:.53rem;color:var(--tx-m);text-transform:uppercase;letter-spacing:.4px">Licznik / Tx</div></div><div style="background:var(--bg-p);padding:5px 8px"><div style="font-family:var(--font-mono);font-weight:700;font-size:.78rem;color:'+(fixedCnt?'#f59e0b':'var(--succ)')+'">'+fixedCnt+'</div><div style="font-size:.53rem;color:var(--tx-m);text-transform:uppercase;letter-spacing:.4px">Korekt MCE</div></div><div style="background:var(--bg-p);padding:5px 8px"><div style="font-family:var(--font-mono);font-weight:700;font-size:.78rem;color:'+(wknd>0?'#ef4444':'var(--tx-s)')+'">'+wknd+'</div><div style="font-size:.53rem;color:var(--tx-m);text-transform:uppercase;letter-spacing:.4px">Weekendy</div></div></div>';var tblS='<div style="overflow:auto;max-height:260px;border:1px solid var(--bd);border-radius:var(--rmd)"><table style="width:100%;border-collapse:collapse"><thead style="position:sticky;top:0;z-index:2"><tr style="background:var(--bg-t)"><th style="padding:4px;font-size:.57rem;color:var(--tx-m);text-align:center">#</th><th style="padding:4px 5px;font-size:.57rem;color:var(--tx-m);text-align:left">Data</th><th style="padding:4px 5px;font-size:.57rem;color:#10b981;text-align:right">Licznik km</th><th style="padding:4px 5px;font-size:.57rem;color:var(--tx-m)">Grupa</th><th style="padding:4px 5px;font-size:.57rem;color:#3b82f6;text-align:right">Paliwo</th><th style="padding:4px 5px;font-size:.57rem;color:var(--act);text-align:right">Koszt</th></tr></thead><tbody>'+trs+'</tbody></table></div><div style="padding:4px 6px;font-size:.54rem;color:var(--tx-m);margin-top:3px"><span style="color:#f59e0b;font-weight:700">MCE</span> = korekta &nbsp; <span style="color:#ef4444;font-weight:700">x</span> = błędny odczyt na wykresie &nbsp; <span style="color:#f59e0b">●</span> = punkt po korekcie</div>';sumEl.innerHTML=kpiS+tblS}var modal=$('vehicleModal');if(modal){modal.style.display='flex';requestAnimationFrame(function(){modal.classList.add('active');requestAnimationFrame(function(){if(vehicleChartInstance)vehicleChartInstance.resize()})})}})})};const calcCPKData=()=>{if(!S.selY.cpk?.length&&S.summaryYears.length)S.selY.cpk=[S.summaryYears[0]];if(!S.selY.ranking?.length&&S.summaryYears.length)S.selY.ranking=[S.summaryYears[0]];S.rep.cpk=calcVO(S.selY.cpk).map(i=>{const d=i.totalDist;return{year:i.year,reg:i.reg,desc:i.desc,startOdometer:i.startOdometer,endOdometer:i.endOdometer,hadPrevYear:i.hadPrevYear,weekendCount:i.weekendCount,totalCost:i.totalCost,totalLit:i.totalLit,dist:d,cpk:d>0?i.totalCost/d:0,avgCons:d>0?(i.totalLit/d)*100:0}});calcRankingInternal()};const _estTank=(lits,opts)=>{if(!lits||!lits.length)return null;if(lits.length<3)return null;const months=new Set(opts.map(o=>o.year*100+(o.month??-1)).filter(k=>k>0));if(months.size<3)return null;const sorted=[...lits].sort((a,b)=>b-a);const filtered=sorted[0]===sorted[1]?sorted:sorted.slice(1);const useMax=Math.max(...filtered);if(useMax<5)return null;return Math.floor(useMax/5)*5||5;};const _isDualFuel=(lpgOpts,allYears)=>{if(!lpgOpts||!lpgOpts.length)return false;const lpgYears=new Set(lpgOpts.map(o=>o.year).filter(Boolean));if(lpgOpts.length<lpgYears.size)return false;const lpgMonths=new Set(lpgOpts.map(o=>o.year*100+(o.month??-1)).filter(k=>k>0));if(lpgMonths.size<3)return false;return true;};const calcCPK=()=>{const l=$('loader');if(l)l.classList.add('active');setTimeout(()=>{calcCPKData();S.upd.cpk=0;const ph=$('cpk-placeholder'),rs=$('cpkResults');if(ph)ph.style.display='none';if(rs)rs.style.display='block';renCPK();if(l)l.classList.remove('active')},20)};const renCPK=()=>{if(S.upd.cpk){calcCPK();return}const el=$('cpkResults');if(!el)return;if(!S.rep.cpk.length){el.innerHTML='<table id="cpkTable"><tr><td>Brak danych</td></tr></table>';return}const q=$('cpkSearch').value.toLowerCase(),ft=q?S.rep.cpk.filter(r=>r.reg.toLowerCase().includes(q)):S.rep.cpk,fmtOdo=v=>v!=null?fmtI(Math.round(v)):'-';let lr=null;const rw=ft.map(r=>{const fst=r.reg!==lr,hasDist=r.dist>0,cc=r.cpk>2?'var(--dang)':r.cpk>0?'var(--succ)':'inherit',ac=r.avgCons,acColor=hasDist?(ac>15?'var(--dang)':ac>10?'var(--warn, orange)':'var(--succ)'):'inherit';lr=r.reg;return`<tr${fst?' class="group-first"':''}>`+`<td onclick="showVehicleChart('${r.reg}')" style="cursor:pointer;color:var(--act);font-weight:700">${r.reg}</td>`+`<td>${r.year}</td>`+`<td style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;font-size:0.7rem" title="${esc(r.desc)}">${esc(r.desc)}</td>`+`<td style="color:var(--act);font-weight:600;text-align:right"><span class="tooltip"><span>${fmtOdo(r.startOdometer)}</span><span class="tooltip-text">${r.hadPrevYear?'Dane z poprz. roku':'Pierwszy odczyt'}</span></span></td>`+`<td style="text-align:right">${fmtOdo(r.endOdometer)}</td>`+`<td style="font-weight:600;text-align:right">${fmtN(r.dist)} km</td>`+`<td style="text-align:right">${fmtN(r.totalLit)} L</td>`+`<td style="text-align:right">${fmtC(r.totalCost)}</td>`+`<td style="font-weight:600;color:${acColor};text-align:right"><span class="tooltip tooltip-left"><span>${hasDist?ac.toFixed(1):'-'}</span><span class="tooltip-text">${hasDist?`${fmtN(r.totalLit)}L/${fmtN(r.dist)}km*100`:'Brak dystansu'}</span></span></td>`+`<td style="font-weight:bold;color:${cc};text-align:right"><span class="tooltip tooltip-left">${hasDist?fmtC(r.cpk):'-'}<span class="tooltip-text">${hasDist?`CPK=${fmtC(r.totalCost)}/ ${fmtN(r.dist)}`:'Brak dystansu'}</span></span></td>`+`<td style="text-align:right;font-family:var(--font-mono);font-size:.68rem">${(()=>{const _r=(S.regIdx||new Map()).get(r.reg)||[];const _lO=_r.filter(o=>o._opt?.isFuel&&/lpg|gaz|autogas/i.test(o._opt?.group||'')).map(o=>o._opt);const _oO=_r.filter(o=>o._opt?.isFuel&&!/lpg|gaz|autogas/i.test(o._opt?.group||'')).map(o=>o._opt);const tL=_estTank(_lO.map(o=>o.lit||0).filter(v=>v>0),_lO)||0;const tO=_estTank(_oO.map(o=>o.lit||0).filter(v=>v>0),_oO)||0;const _years=[...new Set(_r.map(o=>o._opt?.year).filter(Boolean))];if(tL&&_isDualFuel(_lO,_years))return'<span style="color:#f59e0b">'+tL+'L</span><span style="color:var(--tx-m);font-size:.55rem">/</span>'+tO+'L';if(tO||tL)return'~'+(tO>tL?tO:tL)+' L';return'—'})()}</td></tr>`});el.innerHTML=`<table id="cpkTable"><thead><tr><th onclick="sortReport('cpk','reg')">Nr Rej.</th><th onclick="sortReport('cpk','year')">Rok</th><th>Dane kosztowe</th><th onclick="sortReport('cpk','startOdometer')">Licznik pocz.</th><th>Licznik konc.</th><th onclick="sortReport('cpk','dist')">Dystans</th><th onclick="sortReport('cpk','totalLit')">Ilosc</th><th onclick="sortReport('cpk','totalCost')">Koszt</th><th onclick="sortReport('cpk','avgCons')">l/100km</th><th onclick="sortReport('cpk','cpk')">CPK</th><th>Zbiornik</th></tr></thead><tbody>${rw.join('')}</tbody></table>`};
+if(S.selGr.size&&!S.selGr.has(opt.group))continue;const fuelLit=opt.isFuel?opt.lit:0;d.mV[m]+=opt.val;d.mLit[m]+=fuelLit;d.mT[m]++;if(m<d.fm)d.fm=m;if(m>d.lm)d.lm=m;d.co+=opt.val;d.li+=fuelLit;d.tr++;if(opt.isWeekend)d.wknd++;d.ds.add(opt.desc||opt.group)}const res=[];for(const g of Object.keys(cars).sort()){const c=cars[g];let pe=c.lb;for(const y of Object.keys(c.y).map(Number).sort((a,b)=>a-b)){const d=c.y[y];if(d.fm>d.lm)continue;const hp=pe!==null,so=hp?pe:d.minOdo,dst=(d.lo&&so)?Math.max(0,d.lo-so):0;res.push({year:y,reg:g,startOdometer:so,endOdometer:d.lo,hadPrevYear:hp,firstMonth:d.fm,lastMonth:d.lm,monthlyLast:d.mL,monthlyFixed:d.mF,anyFixed:d.anyFixed,monthlyValue:d.mV,monthlyLit:d.mLit,monthlyTrans:d.mT,totalDist:dst,totalCost:d.co,totalLit:d.li,transCount:d.tr,weekendCount:d.wknd,desc:Array.from(d.ds).slice(0,3).join(', ')+(d.ds.size>3?'...':'')});if(d.lo)pe=d.lo}}return res};const calcMil=()=>{const l=$('loader');if(l)l.classList.add('active');setTimeout(()=>{S.rep.mil=calcVO(S.selY.mil);S.upd.mil=0;const ph=$('mileage-placeholder'),tw=$('mileage-table-wrapper');if(ph)ph.style.display='none';if(tw)tw.style.display='block';renMil();if(l)l.classList.remove('active')},20)};const renMil=()=>{if(S.upd.mil){calcMil();return}if(!S.rep.mil.length){const _mb=$('mileageReportBody');if(_mb)_mb.innerHTML='<tr><td colspan="16">Brak danych</td></tr>';return}const q=$('mileageSearch').value.toLowerCase(),md=curMilTp,so=md==='mileage'||md==='odometer',ft=q?S.rep.mil.filter(r=>r.reg.toLowerCase().includes(q)):S.rep.mil,lbl={mileage:'Przebieg',odometer:'Przebieg',value:'Koszt',liters:'Paliwo',transactions:'Trans.'}[md],srcKey={value:'monthlyValue',liters:'monthlyLit',transactions:'monthlyTrans'},cellColor={mileage:'color:var(--succ);',value:'color:var(--act);',liters:'color:#10b981;',transactions:'color:#8b5cf6;'},cellFmt=v=>so?fmtI(Math.round(v)):md==='value'?fmtC(v):md==='liters'?fmtN(v)+' L':v,fmOv=v=>v==null?'-':so?fmtI(Math.round(v))+' km':md==='value'?fmtC(v):md==='liters'?fmtN(v)+' L':fmtN(v),getTotal=r=>({odometer:r.totalDist,value:r.totalCost,liters:r.totalLit,transactions:r.transCount})[md];const tbl=$('mileageReportTable');if(!tbl)return;tbl.querySelector('thead').innerHTML=`<tr><th onclick="sortReport('mil','year')">Rok</th><th onclick="sortReport('mil','reg')">Nr Rej.</th>${so?'<th>Licz.pocz.</th>':''}${M_S.map(m=>`<th>${m}</th>`).join('')}<th onclick="sortReport('mil','total')">${lbl}</th></tr>`;let lr=null;const extraColor=cellColor[md]||'',base='text-align:right;font-size:0.7rem;';const rw=ft.map(r=>{const fst=r.reg!==lr,{firstMonth:fm,lastMonth:lm}=r,mn=Array(12);lr=r.reg;if(md==='mileage'){let pv=r.startOdometer;for(let m=0;m<12;m++){if(m<fm||m>lm){mn[m]=null;continue}if(r.monthlyLast[m]!==null&&pv!==null){mn[m]=Math.max(0,r.monthlyLast[m]-pv);pv=r.monthlyLast[m]}else{mn[m]=null;if(r.monthlyLast[m]!==null)pv=r.monthlyLast[m]}}}else if(md==='odometer'){let l=r.startOdometer;for(let m=0;m<12;m++){if(m<fm||m>lm){mn[m]=null;continue}if(r.monthlyLast[m]!==null)l=r.monthlyLast[m];mn[m]=l}}else{const src=r[srcKey[md]];for(let m=0;m<12;m++)mn[m]=(m<fm||m>lm||src[m]<=0)?null:src[m]}const tt=md==='mileage'?mn.reduce((a,b)=>a+(b||0),0):getTotal(r),oc=so?`<td style="color:var(--act);font-weight:600;text-align:right"><span class="tooltip"><span>${r.startOdometer?fmtI(Math.round(r.startOdometer)):'-'}</span><span class="tooltip-text">${r.hadPrevYear?'Dane z poprz. roku':'Pierwszy odczyt'}</span></span></td>`:'',mc=mn.map((v,m)=>{if(m<fm||m>lm||v==null||v<=0)return`<td style="${base}">-</td>`;const fx=(md==='odometer')&&r.monthlyFixed&&r.monthlyFixed[m];return`<td style="${base}${extraColor}${fx?';position:relative':''}">${fx?'<span class="tooltip" style="display:inline-flex;align-items:center;gap:3px"><span style="width:6px;height:6px;border-radius:50%;background:#f59e0b;flex-shrink:0"></span>'+cellFmt(v)+'<span class="tooltip-text">Skorygowano przez MCE</span></span>':cellFmt(v)}</td>`}).join('');return`<tr${fst?' class="group-first"':''}><td>${r.year}</td><td style="font-weight:600;cursor:pointer;color:var(--act);text-decoration:underline dotted" onclick="showMilTimeline('${r.reg}')" title="Oś licznika${r.anyFixed?' — zawiera korekty MCE':''}">${r.reg}${r.anyFixed?'<span class="tooltip" style="margin-left:4px"><i class="fas fa-wrench" style="font-size:.6rem;color:#f59e0b"></i><span class="tooltip-text">Ten rok zawiera odczyty skorygowane przez MCE</span></span>':''}</td>${oc}${mc}<td style="text-align:right;font-weight:bold;color:var(--act)">${fmOv(tt)}</td></tr>`});const _mb2=$('mileageReportBody');if(_mb2)_mb2.innerHTML=rw.join('');};window.showMilTimeline=function(reg){var rows=S.data.filter(function(r){return r._opt&&r._opt.reg===reg&&r._opt.date&&r._opt.meter>0&&(r._opt.isFuel||r._opt.isAdBlue)}).sort(function(a,b){return a._opt.date-b._opt.date});if(!rows.length){showToast('Brak odczytów licznika: '+reg);return}if(vehicleChartInstance){vehicleChartInstance.destroy();vehicleChartInstance=null}var _sumEl0=$('vehicleSummary');if(_sumEl0)_sumEl0.innerHTML='';var _legEl0=$('customLegend');if(_legEl0)_legEl0.innerHTML='';var _vm0=$('vehicleModal');if(_vm0){_vm0.style.display='flex';void _vm0.offsetHeight;}var fixedCnt=rows.filter(function(r){return r._opt.isFixed}).length;var regEl=$('vehicleModalReg');if(regEl){regEl.onclick=closeVehicleModal;regEl.textContent=reg}var metaEl=$('vehicleModalMeta');if(metaEl)metaEl.textContent=rows.length+' odczytów · '+fixedCnt+' korekt MCE';var legEl=$('customLegend');if(legEl)legEl.innerHTML='<span style="font-size:.58rem;font-weight:600;display:inline-flex;align-items:center;gap:4px"><span style="width:10px;height:3px;background:#10b981;border-radius:2px;display:inline-block"></span>Po MCE</span>'+(fixedCnt?'<span style="font-size:.58rem;font-weight:600;display:inline-flex;align-items:center;gap:4px;margin-left:6px"><span style="width:8px;height:8px;color:#ef4444;font-weight:900;display:inline-block">x</span>Przed MCE</span>':'');var _mtModal=$('vehicleModal');if(_mtModal)_mtModal.style.display='flex';requestAnimationFrame(function(){requestAnimationFrame(function(){if(vehicleChartInstance){vehicleChartInstance.destroy();vehicleChartInstance=null}var canvas=$('vehicleChart');var ctx=canvas.getContext('2d');var isDark=document.documentElement.getAttribute('data-theme')==='dark';var labels=rows.map(function(r){return r._opt.date.toISOString().split('T')[0].substring(2)});var corrected=rows.map(function(r){return Math.round(r._opt.meter)});var rawPts=rows.map(function(r){return r._opt.isFixed&&r._opt.rawMeter>0?Math.round(r._opt.rawMeter):null});var hasRaw=rawPts.some(function(v){return v!==null});var grad=ctx.createLinearGradient(0,0,0,300);grad.addColorStop(0,'rgba(16,185,129,.30)');grad.addColorStop(1,'rgba(16,185,129,.0)');var ptColors=rows.map(function(r){return r._opt.isFixed?'#f59e0b':'#10b981'});var ptRadius=rows.map(function(r){return r._opt.isFixed?5:2.5});var datasets=[{label:'Licznik (po MCE)',data:corrected,borderColor:'#10b981',backgroundColor:grad,borderWidth:2,pointRadius:ptRadius,pointBackgroundColor:ptColors,pointBorderColor:ptColors,fill:true,tension:0.2,spanGaps:false,order:1}];if(hasRaw){datasets.push({label:'Błędny odczyt',data:rawPts,borderColor:'#ef4444',backgroundColor:'transparent',borderWidth:0,pointRadius:7,pointStyle:'crossRot',pointBackgroundColor:'#ef4444',pointBorderColor:'#ef4444',pointBorderWidth:2.5,fill:false,spanGaps:false,showLine:false,order:0})}vehicleChartInstance=new Chart(ctx,{type:'line',data:{labels:labels,datasets:datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(15,23,42,.92)',titleFont:{size:8},bodyFont:{size:8},callbacks:{title:function(items){var d=rows[items[0].dataIndex]&&rows[items[0].dataIndex]._opt&&rows[items[0].dataIndex]._opt.date;return d?d.toISOString().split('T')[0]:items[0].label},label:function(item){if(item.parsed.y===null)return null;var r=rows[item.dataIndex]&&rows[item.dataIndex]._opt;var badge=r&&r.isFixed?' (MCE)':'';return' '+item.dataset.label+': '+fmtI(item.parsed.y)+' km'+badge},afterBody:function(items){var r=rows[items[0].dataIndex]&&rows[items[0].dataIndex]._opt;if(!r)return[];var out=[];if(r.isFixed&&r.rawMeter>0)out.push(' Oryginal: '+fmtI(Math.round(r.rawMeter))+' km');if(r.isFuel&&r.lit>0)out.push(' Paliwo: '+fmtN(r.lit)+' L');out.push(' Koszt: '+fmtC(r.val||0));if(r.isWeekend)out.push(' Weekend');return out}}}},scales:{x:{grid:{display:false},ticks:{font:{size:7},maxTicksLimit:20,maxRotation:45}},y:{grid:{color:isDark?'rgba(255,255,255,.05)':'rgba(0,0,0,.04)'},ticks:{font:{size:8},callback:function(v){return v>=1000?(v/1000).toFixed(0)+'k':v}},title:{display:true,text:'km',font:{size:8},color:'#9ca3af'}}}}});var sumEl=$('vehicleSummary');if(sumEl){var meters=corrected;var totalDist=meters.length>=2?Math.max(0,meters[meters.length-1]-meters[0]):0;var wknd=rows.filter(function(r){return r._opt.isWeekend}).length;var allTx=S.data.filter(function(r){return r._opt&&r._opt.reg===reg}).length;var trs=rows.map(function(r,i){var d=r._opt;var ds=d.date.toISOString().split('T')[0];var rawS=d.isFixed&&d.rawMeter>0?'<span class="val-original">'+fmtI(Math.round(d.rawMeter))+'</span><span class="val-fixed">'+fmtI(Math.round(d.meter))+'</span>':fmtI(Math.round(d.meter));var mceB=d.isFixed?'<span class="tooltip" style="background:#f59e0b;color:#000;font-size:.48rem;font-weight:800;padding:1px 3px;border-radius:2px;margin-left:3px">'+(d.isTypoFix?'LITERÓWKA':'MCE')+(d.isTypoFix?'<span class="tooltip-text">Wykryto pojedynczą, jednoznaczną zmianę cyfry w odczycie, która sprawia że spalanie na OBU sąsiadujących odcinkach staje się typowe dla tego pojazdu. Oryginalny wpis: '+fmtI(Math.round(d.rawMeter))+' km.</span>':'')+'</span>':'';var gapB='';if(!d.isFixed&&i>0){var _pd=rows[i-1]._opt;if(!_pd.isFixed){var _dist=d.meter-_pd.meter;if(_dist>0&&d.isFuel&&d.lit>0){var _rate=d.lit/_dist*100;if(_rate<3||_rate>25){gapB='<span class="tooltip" style="background:#eab308;color:#000;font-size:.48rem;font-weight:800;padding:1px 3px;border-radius:2px;margin-left:3px;display:inline-flex;align-items:center;gap:2px"><i class="fas fa-triangle-exclamation" style="font-size:.45rem"></i>LUKA<span class="tooltip-text">Dwa prawdziwe odczyty z rzędu, ale spalanie na tym odcinku ('+_rate.toFixed(1)+' l/100km) jest nietypowe dla tego pojazdu — możliwe tankowanie poza tym zestawieniem (inna karta, gotówka). Wartości NIE są zmienione — to tylko oznaczenie do ręcznej weryfikacji.</span></span>'}}}}var wkB=d.isWeekend?'<span class="weekend-badge" style="font-size:.48rem">'+(d.dayName||'').substring(0,3)+'</span>':'';var bl=d.isFixed?';border-left:3px solid #f59e0b':';border-left:3px solid transparent';var bg=d.isWeekend?';background:rgba(239,68,68,.03)':'';return'<tr style="border-bottom:1px solid var(--bd)'+bg+bl+'"><td style="font-family:var(--font-mono);font-size:.6rem;color:var(--tx-m);padding:3px 4px;text-align:center;width:22px">'+(i+1)+'</td><td style="font-family:var(--font-mono);font-size:.65rem;padding:3px 5px;white-space:nowrap">'+ds+wkB+'</td><td style="font-family:var(--font-mono);font-size:.65rem;padding:3px 5px;text-align:right;color:#10b981">'+rawS+mceB+gapB+'</td><td style="font-size:.62rem;padding:3px 5px;color:var(--tx-m);max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(d.group||'')+'</td><td style="font-family:var(--font-mono);font-size:.65rem;padding:3px 5px;text-align:right;color:#3b82f6">'+(d.isFuel&&d.lit>0?fmtN(d.lit)+' L':'—')+'</td><td style="font-family:var(--font-mono);font-size:.65rem;padding:3px 5px;text-align:right;color:var(--act)">'+fmtC(d.val||0)+'</td></tr>'}).join('');var kpiS='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:1px;background:var(--bd);margin-bottom:6px"><div style="background:var(--bg-p);padding:5px 8px"><div style="font-family:var(--font-mono);font-weight:700;font-size:.78rem;color:#38bdf8">'+fmtI(meters[0]||0)+' km</div><div style="font-size:.53rem;color:var(--tx-m);text-transform:uppercase;letter-spacing:.4px">Licznik pocz.</div></div><div style="background:var(--bg-p);padding:5px 8px"><div style="font-family:var(--font-mono);font-weight:700;font-size:.78rem;color:#10b981">'+fmtI(meters[meters.length-1]||0)+' km</div><div style="font-size:.53rem;color:var(--tx-m);text-transform:uppercase;letter-spacing:.4px">Licznik końc.</div></div><div style="background:var(--bg-p);padding:5px 8px"><div style="font-family:var(--font-mono);font-weight:700;font-size:.78rem;color:var(--act)">'+fmtI(totalDist)+' km</div><div style="font-size:.53rem;color:var(--tx-m);text-transform:uppercase;letter-spacing:.4px">Dystans</div></div><div style="background:var(--bg-p);padding:5px 8px"><div style="font-family:var(--font-mono);font-weight:700;font-size:.78rem;color:var(--tx-s)">'+rows.length+' / '+allTx+'</div><div style="font-size:.53rem;color:var(--tx-m);text-transform:uppercase;letter-spacing:.4px">Licznik / Tx</div></div><div style="background:var(--bg-p);padding:5px 8px"><div style="font-family:var(--font-mono);font-weight:700;font-size:.78rem;color:'+(fixedCnt?'#f59e0b':'var(--succ)')+'">'+fixedCnt+'</div><div style="font-size:.53rem;color:var(--tx-m);text-transform:uppercase;letter-spacing:.4px">Korekt MCE</div></div><div style="background:var(--bg-p);padding:5px 8px"><div style="font-family:var(--font-mono);font-weight:700;font-size:.78rem;color:'+(wknd>0?'#ef4444':'var(--tx-s)')+'">'+wknd+'</div><div style="font-size:.53rem;color:var(--tx-m);text-transform:uppercase;letter-spacing:.4px">Weekendy</div></div></div>';var tblS='<div style="overflow:auto;max-height:260px;border:1px solid var(--bd);border-radius:var(--rmd)"><table style="width:100%;border-collapse:collapse"><thead style="position:sticky;top:0;z-index:2"><tr style="background:var(--bg-t)"><th style="padding:4px;font-size:.57rem;color:var(--tx-m);text-align:center">#</th><th style="padding:4px 5px;font-size:.57rem;color:var(--tx-m);text-align:left">Data</th><th style="padding:4px 5px;font-size:.57rem;color:#10b981;text-align:right">Licznik km</th><th style="padding:4px 5px;font-size:.57rem;color:var(--tx-m)">Grupa</th><th style="padding:4px 5px;font-size:.57rem;color:#3b82f6;text-align:right">Paliwo</th><th style="padding:4px 5px;font-size:.57rem;color:var(--act);text-align:right">Koszt</th></tr></thead><tbody>'+trs+'</tbody></table></div><div style="padding:4px 6px;font-size:.54rem;color:var(--tx-m);margin-top:3px"><span style="color:#f59e0b;font-weight:700">MCE</span> = korekta &nbsp; <span style="color:#ef4444;font-weight:700">x</span> = błędny odczyt na wykresie &nbsp; <span style="color:#f59e0b">●</span> = punkt po korekcie &nbsp; <span style="color:#eab308;font-weight:700">LUKA</span> = dwa prawdziwe odczyty, nietypowe spalanie — do ręcznej weryfikacji &nbsp; <span style="color:#f59e0b;font-weight:700">LITERÓWKA</span> = wykryta i poprawiona jedna cyfra w odczycie</div>';sumEl.innerHTML=kpiS+tblS}var modal=$('vehicleModal');if(modal){modal.style.display='flex';requestAnimationFrame(function(){modal.classList.add('active');requestAnimationFrame(function(){if(vehicleChartInstance)vehicleChartInstance.resize()})})}})})};const calcCPKData=()=>{if(!S.selY.cpk?.length&&S.summaryYears.length)S.selY.cpk=[S.summaryYears[0]];if(!S.selY.ranking?.length&&S.summaryYears.length)S.selY.ranking=[S.summaryYears[0]];S.rep.cpk=calcVO(S.selY.cpk).map(i=>{const d=i.totalDist;return{year:i.year,reg:i.reg,desc:i.desc,startOdometer:i.startOdometer,endOdometer:i.endOdometer,hadPrevYear:i.hadPrevYear,weekendCount:i.weekendCount,totalCost:i.totalCost,totalLit:i.totalLit,dist:d,cpk:d>0?i.totalCost/d:0,avgCons:d>0?(i.totalLit/d)*100:0}});calcRankingInternal()};const _estTank=(lits,opts)=>{if(!lits||!lits.length)return null;if(lits.length<3)return null;const months=new Set(opts.map(o=>o.year*100+(o.month??-1)).filter(k=>k>0));if(months.size<3)return null;const sorted=[...lits].sort((a,b)=>b-a);const filtered=sorted[0]===sorted[1]?sorted:sorted.slice(1);const useMax=Math.max(...filtered);if(useMax<5)return null;return Math.floor(useMax/5)*5||5;};const _isDualFuel=(lpgOpts,allYears)=>{if(!lpgOpts||!lpgOpts.length)return false;const lpgYears=new Set(lpgOpts.map(o=>o.year).filter(Boolean));if(lpgOpts.length<lpgYears.size)return false;const lpgMonths=new Set(lpgOpts.map(o=>o.year*100+(o.month??-1)).filter(k=>k>0));if(lpgMonths.size<3)return false;return true;};const calcCPK=()=>{const l=$('loader');if(l)l.classList.add('active');setTimeout(()=>{calcCPKData();S.upd.cpk=0;const ph=$('cpk-placeholder'),rs=$('cpkResults');if(ph)ph.style.display='none';if(rs)rs.style.display='block';renCPK();if(l)l.classList.remove('active')},20)};const renCPK=()=>{if(S.upd.cpk){calcCPK();return}const el=$('cpkResults');if(!el)return;if(!S.rep.cpk.length){el.innerHTML='<table id="cpkTable"><tr><td>Brak danych</td></tr></table>';return}const q=$('cpkSearch').value.toLowerCase(),ft=q?S.rep.cpk.filter(r=>r.reg.toLowerCase().includes(q)):S.rep.cpk,fmtOdo=v=>v!=null?fmtI(Math.round(v)):'-';let lr=null;const rw=ft.map(r=>{const fst=r.reg!==lr,hasDist=r.dist>0,cc=r.cpk>2?'var(--dang)':r.cpk>0?'var(--succ)':'inherit',ac=r.avgCons,acColor=hasDist?(ac>15?'var(--dang)':ac>10?'var(--warn, orange)':'var(--succ)'):'inherit';lr=r.reg;return`<tr${fst?' class="group-first"':''}>`+`<td onclick="showVehicleChart('${r.reg}')" style="cursor:pointer;color:var(--act);font-weight:700">${r.reg}</td>`+`<td>${r.year}</td>`+`<td style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;font-size:0.7rem" title="${esc(r.desc)}">${esc(r.desc)}</td>`+`<td style="color:var(--act);font-weight:600;text-align:right"><span class="tooltip"><span>${fmtOdo(r.startOdometer)}</span><span class="tooltip-text">${r.hadPrevYear?'Dane z poprz. roku':'Pierwszy odczyt'}</span></span></td>`+`<td style="text-align:right">${fmtOdo(r.endOdometer)}</td>`+`<td style="font-weight:600;text-align:right">${fmtN(r.dist)} km</td>`+`<td style="text-align:right">${fmtN(r.totalLit)} L</td>`+`<td style="text-align:right">${fmtC(r.totalCost)}</td>`+`<td style="font-weight:600;color:${acColor};text-align:right"><span class="tooltip tooltip-left"><span>${hasDist?ac.toFixed(1):'-'}</span><span class="tooltip-text">${hasDist?`${fmtN(r.totalLit)}L/${fmtN(r.dist)}km*100`:'Brak dystansu'}</span></span></td>`+`<td style="font-weight:bold;color:${cc};text-align:right"><span class="tooltip tooltip-left">${hasDist?fmtC(r.cpk):'-'}<span class="tooltip-text">${hasDist?`CPK=${fmtC(r.totalCost)}/ ${fmtN(r.dist)}`:'Brak dystansu'}</span></span></td>`+`<td style="text-align:right;font-family:var(--font-mono);font-size:.68rem">${(()=>{const _r=(S.regIdx||new Map()).get(r.reg)||[];const _lO=_r.filter(o=>o._opt?.isFuel&&/lpg|gaz|autogas/i.test(o._opt?.group||'')).map(o=>o._opt);const _oO=_r.filter(o=>o._opt?.isFuel&&!/lpg|gaz|autogas/i.test(o._opt?.group||'')).map(o=>o._opt);const tL=_estTank(_lO.map(o=>o.lit||0).filter(v=>v>0),_lO)||0;const tO=_estTank(_oO.map(o=>o.lit||0).filter(v=>v>0),_oO)||0;const _years=[...new Set(_r.map(o=>o._opt?.year).filter(Boolean))];if(tL&&_isDualFuel(_lO,_years))return'<span style="color:#f59e0b">'+tL+'L</span><span style="color:var(--tx-m);font-size:.55rem">/</span>'+tO+'L';if(tO||tL)return'~'+(tO>tL?tO:tL)+' L';return'—'})()}</td></tr>`});el.innerHTML=`<table id="cpkTable"><thead><tr><th onclick="sortReport('cpk','reg')">Nr Rej.</th><th onclick="sortReport('cpk','year')">Rok</th><th>Dane kosztowe</th><th onclick="sortReport('cpk','startOdometer')">Licznik pocz.</th><th>Licznik konc.</th><th onclick="sortReport('cpk','dist')">Dystans</th><th onclick="sortReport('cpk','totalLit')">Ilosc</th><th onclick="sortReport('cpk','totalCost')">Koszt</th><th onclick="sortReport('cpk','avgCons')">l/100km</th><th onclick="sortReport('cpk','cpk')">CPK</th><th>Zbiornik</th></tr></thead><tbody>${rw.join('')}</tbody></table>`};
 const calcRankingInternal=()=>{let ys=S.selY.ranking?.length?[...S.selY.ranking]:[];if(!ys.length){ys=S.selY.cpk?.length?[...S.selY.cpk]:S.summaryYears.length?[S.summaryYears[0]]:[];S.selY.ranking=ys}if(!S.rep.cpk?.length){S.rep.rank=[];S.rep.lpgAnalysis=[];return}const ySet=new Set(ys);S.rep.rank=S.rep.cpk.reduce((acc,r)=>{if(!ySet.has(r.year))return acc;const cons=r.dist>0?r.totalLit/r.dist*100:0;if(cons>0&&r.dist>100)acc.push({reg:r.reg,year:r.year,cpk:r.cpk,consumption:cons,cost:r.totalCost,dist:r.dist,liters:r.totalLit,weekendCount:r.weekendCount||0});return acc},[]);S.rep.lpgAnalysis=calcLPGAnalysis(ys)};
 
 const renRanking=()=>{if(!S.rep.rank||!S.rep.rank.length){const e='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:150px;color:var(--tx-m)"><i class="fas fa-trophy fa-2x" style="margin-bottom:10px;opacity:0.3"></i><p>Brak danych</p><button class="neu-btn" onclick="loadSampleData()"><i class="fas fa-database"></i> Demo</button></div>';['rankingBestCons','rankingWorstCons','rankingBestCPK','rankingWorstCPK'].forEach(function(id){if($(id))$(id).innerHTML=e});renWeekendTransactions();return;}const q=$('rankingSearch')?$('rankingSearch').value.toLowerCase():'';const data=q?S.rep.rank.filter(function(r){return r.reg.toLowerCase().includes(q)}):S.rep.rank;if(!data.length){const n='<div style="text-align:center;padding:30px;color:var(--tx-m)">Brak wynikow</div>';['rankingBestCons','rankingWorstCons','rankingBestCPK','rankingWorstCPK'].forEach(function(id){if($(id))$(id).innerHTML=n});renWeekendTransactions();return;}const bestCons=[...data].sort((a,b)=>a.consumption-b.consumption).slice(0,10);const worstCons=[...data].sort((a,b)=>b.consumption-a.consumption).slice(0,10);const bestCPK=[...data].sort((a,b)=>a.cpk-b.cpk).slice(0,10);const worstCPK=[...data].sort((a,b)=>b.cpk-a.cpk).slice(0,10);const renderTable=function(arr,type){if(!arr.length)return'<div>Brak danych</div>';const isCons=type.includes('Cons');return'<table style="width:100%"><thead><tr><th style="width:40px">#</th><th>Pojazd</th><th>Rok</th><th>'+(isCons?'Spalanie':'CPK')+'</th><th>Dystans</th></tr></thead><tbody>'+arr.map(function(r,i){const medal=i<3?'<span class="medal medal-'+(i+1)+'">'+(i+1)+'</span>':'<span style="opacity:0.6;font-weight:600">'+(i+1)+'.</span>';const val=isCons?fmtN(r.consumption)+' L/100km':fmtC(r.cpk);const color=isCons?(r.consumption<7?'var(--succ)':r.consumption>12?'var(--dang)':'var(--warn)'):(r.cpk<0.8?'var(--succ)':r.cpk>1.5?'var(--dang)':'var(--warn)');return'<tr><td style="text-align:center">'+medal+'</td><td style="font-weight:600;cursor:pointer;color:var(--act)" onclick="showVehicleChart(\''+r.reg+'\')">' +r.reg+'</td><td>'+r.year+'</td><td style="color:'+color+';font-weight:700;text-align:right">'+val+'</td><td style="text-align:right;color:var(--tx-m)">'+fmtN(r.dist)+' km</td></tr>';}).join('')+'</tbody></table>';};if($('rankingBestCons'))$('rankingBestCons').innerHTML=renderTable(bestCons,'bestCons');if($('rankingWorstCons'))$('rankingWorstCons').innerHTML=renderTable(worstCons,'worstCons');if($('rankingBestCPK'))$('rankingBestCPK').innerHTML=renderTable(bestCPK,'bestCPK');if($('rankingWorstCPK'))$('rankingWorstCPK').innerHTML=renderTable(worstCPK,'worstCPK');renWeekendTransactions();};
@@ -1948,7 +2253,7 @@ const initDragDrop=()=>{renderMap('header');renderMap('value');renderMap('regist
 const initDateFilters=()=>{if(!$('dateFrom')){const grp=$('searchInput')?.parentElement;if(!grp)return;const d1=document.createElement('input');d1.type='date';d1.id='dateFrom';d1.className='neu-input';d1.style.display='none';d1.onchange=()=>filtTab(true);const d2=document.createElement('input');d2.type='date';d2.id='dateTo';d2.className='neu-input';d2.style.display='none';d2.onchange=()=>filtTab(true);grp.insertBefore(d1,$('searchInput'));grp.insertBefore(d2,$('searchInput'))}};
 const initNameOverride=()=>{const chk=$('check-nameOverride');if(chk){chk.checked=!!S.nameOv;chk.onchange=toggleNameOverride}};
 
-const initApp=()=>{loadSettings();initTheme();initDensity();initSearchListeners();_initMdpListener();initDragDrop();initDateFilters();initNameOverride();initEruda();console.log('FLManager v4.77G_IDB_TCO_METER załadowany!');console.log('Async chunked processing - działa lokalnie');console.log('Płynne przetwarzanie dużych zbiorów danych')};
+const initApp=()=>{loadSettings();initTheme();initDensity();initSearchListeners();_initMdpListener();initDragDrop();initDateFilters();initNameOverride();initEruda();console.log('FLManager v4.77H_IDB_TCO_Meter załadowany!');console.log('Async chunked processing - działa lokalnie');console.log('Płynne przetwarzanie dużych zbiorów danych')};
 initApp();
 (function(){const css=document.createElement('style');css.textContent=`html{scroll-behavior:auto}.tabs-nav--fixed{position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:500!important;margin:0!important;padding:5px 8px 4px!important;background:var(--bg-s)!important;border-bottom:1px solid var(--bd)!important;box-shadow:0 2px 12px rgba(0,0,0,.18)!important;backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important;border-radius:0!important;will-change:transform;transform:translateZ(0)}.tab-ctrl-wrap--fixed{position:fixed!important;left:0!important;right:0!important;z-index:499!important;margin:0!important;padding:5px 8px 4px!important;background:var(--bg-s)!important;border-bottom:2px solid var(--bd)!important;box-shadow:0 3px 10px rgba(0,0,0,.13)!important;backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important;border-radius:0!important;will-change:transform;transform:translateZ(0)}.table-container{-webkit-overflow-scrolling:touch;scroll-behavior:smooth}.tabs-nav{will-change:transform}@media(max-width:768px){.tabs-nav--fixed,.tab-ctrl-wrap--fixed{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}}`;document.head.appendChild(css);const t=document.querySelector('.tabs-nav');if(!t)return;const np=document.createElement('div');np.id='tabs-nav-placeholder';np.style.cssText='display:none;flex-shrink:0';t.parentNode.insertBefore(np,t);let nf=false,not=0,npH=0,cnh=0,cwh=0,wntc=null,lat=null,rp=false,rt=null;const bw=()=>document.querySelectorAll('.tab-content').forEach(tab=>{if(tab.querySelector('.tab-ctrl-wrap'))return;const g=tab.querySelector('.gr-bar.gr-bar-main');if(!g)return;const c=Array.from(tab.children),i=c.indexOf(g);if(i<0)return;const eb=c.slice(0,i+1),w=document.createElement('div');w.className='tab-ctrl-wrap';tab.insertBefore(w,eb[0]);eb.forEach(e=>w.appendChild(e));const p=document.createElement('div');p.className='tab-ctrl-placeholder';p.style.display='none';tab.insertBefore(p,w)});const rth=()=>{document.querySelectorAll('.tab-ctrl-wrap--fixed').forEach(w=>{w.classList.remove('tab-ctrl-wrap--fixed');w.style.top=''});document.querySelectorAll('.tab-ctrl-placeholder').forEach(p=>p.style.display='none');wntc=null;cwh=0};const as=()=>{rp=false;const sy=window.scrollY;if(!nf){const nr=t.getBoundingClientRect();not=nr.top+sy;npH=t.offsetHeight}if(sy>not+2&&!nf){np.style.height=npH+'px';np.style.display='block';t.classList.add('tabs-nav--fixed');cnh=t.offsetHeight;nf=true}else if(sy<=not&&nf){t.classList.remove('tabs-nav--fixed');np.style.display='none';nf=false}const a=document.querySelector('.tab-content.active'),w=a?.querySelector('.tab-ctrl-wrap'),p=a?.querySelector('.tab-ctrl-placeholder');if(a!==lat){lat=a;wntc=null}if(!w||!p){rth();return}if(wntc===null){const f=w.classList.contains('tab-ctrl-wrap--fixed');if(f){w.classList.remove('tab-ctrl-wrap--fixed');p.style.display='none'}wntc=w.getBoundingClientRect().top+sy;cwh=w.offsetHeight;if(f){w.classList.add('tab-ctrl-wrap--fixed');p.style.display='block'}}if(sy>=wntc-cnh){if(!w.classList.contains('tab-ctrl-wrap--fixed')){p.style.height=cwh+'px';p.style.display='block';w.classList.add('tab-ctrl-wrap--fixed')}w.style.top=cnh+'px'}else if(w.classList.contains('tab-ctrl-wrap--fixed')){w.classList.remove('tab-ctrl-wrap--fixed');w.style.top='';p.style.display='none'}};bw();window.addEventListener('scroll',()=>{if(!rp){rp=true;requestAnimationFrame(as)}},{passive:true});window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{wntc=null;cwh=0;rth();requestAnimationFrame(as)},100)},{passive:true});const _st=window.switchTab;window.switchTab=(a,b)=>{rth();lat=null;if(_st)_st(a,b);bw();setTimeout(()=>{wntc=null;requestAnimationFrame(as)},60)}})();</script>
 
@@ -2166,7 +2471,7 @@ const totalVeh=lpg.length;const totalLpg=lpg.reduce((s,r)=>s+r.lpgLit,0);const t
 
 /* ══════════════════════════════════════════
    TCO MODULE — Fleet TCO Analyzer
-   Zintegrowany z FLManager v4.77G_IDB_TCO_METER
+   Zintegrowany z FLManager v4.77H_IDB_TCO_Meter
    ══════════════════════════════════════════ */
 (function(){
 const tco_$=i=>document.getElementById(i);
@@ -2253,7 +2558,7 @@ function tco_compute(D){
 
   const cat=[
     {n:'Deprecjacja (zakup − zbycie)',v:depr,c:'#0f172a',g:'S',k:'depr'},
-    {n:'Paliwo (ON + AdBlue + inne)',v:paliwo,c:'#dc2626',g:'Z',k:'fuel'},
+    {n:'Paliwo + AdBlue + inne',v:paliwo,c:'#dc2626',g:'Z',k:'fuel'},
     {n:'Naprawy, serwis i opony',v:naprawy,c:'#ea580c',g:'Z',k:'serw'},
     {n:'Koszt kapitału',v:kap,c:'#4f46e5',g:'S',k:'kap'},
     {n:'Ubezpieczenia',v:+D.ubezp||0,c:'#7c3aed',g:'S',k:'ub'},
@@ -2369,7 +2674,7 @@ window.tco_calc=function(){
   if(s.dni<=0)a+=`<div class="tco-al e"><b>Błąd:</b> data końcowa musi być późniejsza od zakupu.</div>`;
   if(act){const _rr=D.rflRate>0&&D.rflRate<100?D.rflRate:(1-tco_R_FLEET)*100;a+=`<div class="tco-al i"><b>Pojazd w eksploatacji</b> — TCO bieżące (na ${D.dEnd}). ${s.resType==='est'?'Wartość rezydualna '+tco_zl(s.sprzedaz,0)+' — szacunek modelowy (dep. '+tco_f(_rr,1)+' %/rok; ref. flota: '+tco_f(tco_R_FLEET*100,1)+' % retencji).':''}</div>`;}
   if(s.doszac>0)a+=`<div class="tco-al w"><b>Korekta paliwa:</b> doszacowano ${tco_zl(s.doszac,0)} dla ${tco_f(s.km-D.kmDok,0)} km bez dokumentów.</div>`;
-  if(s.lata>0&&s.zakup>0&&D.ubezp/s.lata<s.zakup*0.015)a+=`<div class="tco-al w"><b>Ubezpieczenie niekompletne:</b> ${tco_zl(D.ubezp/s.lata,0)}/rok = ${tco_f(D.ubezp/s.lata/s.zakup*100,2)} %. Rynkowo OC+AC dla LCV: 2–5 %.</div>`;
+  if(s.lata>0&&s.zakup>0&&D.ubezp/s.lata<s.zakup*0.006)a+=`<div class="tco-al w"><b>Ubezpieczenie niekompletne:</b> ${tco_zl(D.ubezp/s.lata,0)}/rok = ${tco_f(D.ubezp/s.lata/s.zakup*100,2)} %. Rynkowo OC + NNW + assistance dla LCV: 0,5–1,5 % wartości pojazdu/rok (AC/Autocasco to opcja dodatkowa, rzadka we flotach — nie zakładamy jej domyślnie).</div>`;
   if(s.ret>0.55&&s.lata>2.5)a+=`<div class="tco-al s"><b>Wysoka retencja:</b> ${tco_f(s.ret*100,1)} % po ${tco_f(s.lata,1)} latach — deprecjacja to ${tco_f(s.tco?s.depr/s.tco*100:0,1)} % TCO.</div>`;
   if(s.tco&&s.paliwo/s.tco>0.5)a+=`<div class="tco-al i"><b>Dominacja kosztu paliwa (${tco_f(s.paliwo/s.tco*100,1)} % TCO):</b> redukcja o 0,5 l/100km = ${tco_zl(s.km/100*0.5*s.cenaON,0)} oszczędności.</div>`;
   if(s.km>100000&&s.naprawy/s.km<0.10)a+=`<div class="tco-al s"><b>Niska awaryjność:</b> ${tco_f(s.naprawy/s.km,3)} zł/km — poniżej typowych 0,12–0,20 zł/km dla LCV.</div>`;
@@ -2391,6 +2696,9 @@ window.tco_calc=function(){
   }
 
   const alerts=tco_$('tco-alerts');if(alerts)alerts.innerHTML=a;
+
+  const discEl=tco_$('tco-disclaimer-text');
+  if(discEl)discEl.textContent=`Koszty udokumentowane, wartości netto. Poza zakresem raportu: wynagrodzenie kierowcy, logistyka${s.D.useWacc?'':', koszt kapitału własnego'}.${s.status==='active'?' Wynik bieżący — ulegnie zmianie po zbyciu pojazdu.':''}`;
 
   /* TABELA STRUKTURY */
   const mx=Math.max(...s.cat.map(x=>Math.abs(x.v)),1);
@@ -2428,7 +2736,7 @@ window.tco_calc=function(){
   if(tM)tM.innerHTML=zuz.map(z=>`<tr><td><b>${tco_f(z,1)}</b></td>`+ceny.map(c=>{
       const val=s.km>0?(restK+s.km/100*z*c)/s.km:0,near=Math.abs(z-s.l100)<0.3&&Math.abs(c-s.cenaON)<0.3;
       const isDk=document.body.getAttribute('data-theme')==='dark';
-      const bg=val<s.bench?(isDk?'#14532d':'#dcfce7'):val<s.bench*1.12?(isDk?'#78350f':'#fef9c3'):(isDk?'#7f1d1d':'#fee2e2');
+      const bg=val<s.perKm*0.95?(isDk?'#14532d':'#dcfce7'):val<s.perKm*1.08?(isDk?'#78350f':'#fef9c3'):(isDk?'#7f1d1d':'#fee2e2');
       return`<td style="background:${near?'rgba(124,58,237,.25)':bg};${near?'font-weight:800;':''}font-family:var(--font-mono)">${tco_f(val,3)}</td>`;}).join('')+'</tr>').join('');
 
   const kmLuka=Math.max(0,s.km-D.kmDok),fuelLuka=D.doszac?0:kmLuka*(s.paliwo/Math.max(D.kmDok,1));
@@ -2626,6 +2934,12 @@ function tco_loadVehFromData(reg){
      (grosze), _r1 do 1 miejsca (litry). */
   const _r2=v=>Math.round((+v||0)*100)/100;
   const _r1=v=>Math.round((+v||0)*10)/10;
+  /* Auto-detekcja typu pojazdu → vatType */
+  const _colVT=(typeof colMap!=='undefined')&&(colMap['RodzajPojazdu']||colMap['Rodzaj pojazdu']);
+  const _vehTypeRaw=_colVT?(all.map(r=>r[_colVT]).find(v=>v&&String(v).trim())||''):'';
+  /* Osobowe i motocykle → Art. 86a UVAT (50% VAT); reszta → cargo/dostawczy (100% VAT) */
+  const _vatTypeAuto=/osobow|motocykl|quad|passenger|car/i.test(_vehTypeRaw)?'mixed50':'cargo100';
+
   tco_fillForm({
     marka,model,rej:reg,
     rok:dStart?dStart.getFullYear():new Date().getFullYear(),
@@ -2646,7 +2960,7 @@ function tco_loadVehFromData(reg){
     myjnia:_r2(costs.myjCost),autostrady:_r2(costs.autCost),inne:0,szkody:_r2(costs.szkCost),
     useWacc:false,wacc:7.0,bench:0.80,expM:1.6,hor:8,
     rflRate:+((1-tco_R_FLEET)*100).toFixed(1),
-    vatType:'cargo100',citRate:19
+    vatType:_vatTypeAuto,citRate:19
   });
   tco_calc();
   tco_renderFLMPanel(reg,all,fuelTx,costs,kmSrcFuel,kmStartUnknown);
@@ -2676,7 +2990,7 @@ function tco_renderFLMPanel(reg,all,fuelTx,c,kmSrcFuel,kmStartUnknown){
 
   /* Buduj wiersze kosztów (tylko niezerowe) */
   const rows=[
-    ['Paliwo (ON / Pb)','zł',c.onCost],['LPG','zł',c.lpgCost],
+    ['Paliwo','zł',c.onCost],['LPG','zł',c.lpgCost],
     ['Paliwo łącznie','L',c.totalLit],['AdBlue','zł',c.adblCost],
     ['Naprawy / serwis','zł',c.naprCost],['Myjnia','zł',c.myjCost],
     ['Autostrady','zł',c.autCost],['Szkody','zł',c.szkCost],
@@ -2879,6 +3193,12 @@ function tco_report(s){
   </div>
 </div>
 
+<div class="tco-kpis" style="margin-bottom:var(--sp)">
+  <div class="tco-kpi" style="border-top-color:#64748b"><div class="tco-kv">${tco_f(s.D.kmStart,0)}<small style="font-size:.6rem;font-weight:600;color:var(--tx-m)"> km</small></div><div class="tco-kpi-lbl"><i class="fas fa-flag" style="color:#64748b"></i> Przebieg początkowy</div></div>
+  <div class="tco-kpi" style="border-top-color:#475569"><div class="tco-kv">${tco_f(s.D.kmEnd,0)}<small style="font-size:.6rem;font-weight:600;color:var(--tx-m)"> km</small></div><div class="tco-kpi-lbl"><i class="fas fa-flag-checkered" style="color:#475569"></i> Przebieg końcowy</div></div>
+  <div class="tco-kpi" style="border-top-color:#06b6d4"><div class="tco-kv">${tco_f(s.km,0)}<small style="font-size:.6rem;font-weight:600;color:var(--tx-m)"> km</small></div><div class="tco-kpi-lbl"><i class="fas fa-route" style="color:#06b6d4"></i> Przejechano</div></div>
+</div>
+
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(126px,1fr));gap:6px;margin-bottom:var(--sp)">
   ${kpis.map(k=>`
   <div style="background:var(--bg-card);border:1px solid var(--bd);border-top:3px solid ${k.col};border-radius:var(--rmd);padding:9px 11px 8px">
@@ -2924,7 +3244,7 @@ function tco_report(s){
     <h2><i class="fas fa-gas-pump"></i> Eksploatacja</h2>
     <table class="tco-rep-dt"><tbody>
       <tr><td>Zużycie paliwa</td><td>${s.l100>0?tco_f(s.l100,2)+' l/100 km':'–'}</td></tr>
-      <tr><td>Śr. cena ON</td><td>${s.cenaON>0?tco_f(s.cenaON,3)+' zł/l':'–'}</td></tr>
+      <tr><td>Śr. cena paliwa</td><td>${s.cenaON>0?tco_f(s.cenaON,3)+' zł/l':'–'}</td></tr>
       ${s.vatOnOps>0.01?`<tr><td>VAT 50% ekspl.</td><td>+${tco_zl(s.vatOnOps,0)}</td></tr>`:''}
       <tr><td>Intensywność użycia</td><td>${tco_f(s.kmRok,0)} km/rok</td></tr>
     </tbody></table>
@@ -2969,17 +3289,7 @@ ${s.amorShield>0.01?`
   </div>
 </div>
 
-<div class="mce-section" style="margin-bottom:var(--sp)">
-  <h2><i class="fas fa-exclamation-triangle"></i> Zastrzeżenia</h2>
-  <p style="font-size:.62rem;color:var(--tx-s);margin:0;line-height:1.5">Koszty udokumentowane, wartości netto. Poza zakresem raportu: wynagrodzenie kierowcy, logistyka${s.D.useWacc?'':', koszt kapitału własnego'}. ${act?'Wynik bieżący — ulegnie zmianie po zbyciu pojazdu.':''}</p>
-</div>
-
-<div class="tco-sig"><div>Sporządził — analityk floty</div><div>Zatwierdził — kierownik działu</div></div>
-
-<div class="tco-rep-footer" style="border-radius:var(--rmd);margin-top:var(--sp)">
-  <span><i class="fas fa-file-alt"></i> FLManager · Chemirol · wartości netto</span>
-  <span><i class="fas fa-lock"></i> Raport wewnętrzny · nie stanowi porady finansowej</span>
-</div>`;
+<div class="tco-sig"><div>Sporządził — analityk floty</div><div>Zatwierdził — kierownik działu</div></div>`;
 }
 
 /* ── WYKRESY (Canvas) ── */
@@ -3164,10 +3474,13 @@ function tco_renderFleet(){
 (function(){
   var _t=null;
   var fn=function(){clearTimeout(_t);_t=setTimeout(function(){if(typeof tco_calc==='function')tco_calc();},220);};
-  document.addEventListener('DOMContentLoaded',function(){
+  /* DOMContentLoaded już minął — skrypt jest na dole pliku, aside istnieje w DOM */
+  function _attach(){
     var aside=document.querySelector('.tco-aside');
     if(aside){aside.addEventListener('input',fn);aside.addEventListener('change',fn);}
-  });
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',_attach);}
+  else{_attach();}
 })();
 
 window.tco_tab=function(i,el){
