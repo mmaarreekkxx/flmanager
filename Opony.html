@@ -1361,6 +1361,36 @@ tbody tr:hover { background: var(--shadow-inset-light); }
     color: var(--text-secondary);
 }
 
+.catalog-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+.catalog-select {
+    flex: 1;
+    min-width: 160px;
+    padding: 5px 10px;
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border-radius: 6px;
+    cursor: pointer;
+    outline: none;
+    height: 30px;
+    border: 1px solid var(--border-inset);
+    box-shadow: inset 1px 1px 2px var(--shadow-inset-dark), inset -1px -1px 2px var(--shadow-inset-light);
+    transition: all .2s ease;
+}
+.catalog-select option {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
 /* Missing price rows in cennik */
 .missing-badge {
     display: inline-block;
@@ -1472,10 +1502,17 @@ tbody tr:hover { background: var(--shadow-inset-light); }
                     <span class="chevron">▼</span>
                 </div>
                 <div class="panel-content hide">
+                    <div class="catalog-bar">
+                        <select id="catalogSelect" class="catalog-select"></select>
+                        <button id="cloneCatalog" class="btn neu-raised" title="Klonuj jako nowy cennik">📋 Klonuj</button>
+                        <button id="newFromExcel" class="btn success neu-raised" title="Importuj Excel jako nowy cennik">📥 Nowy z Excel</button>
+                        <input type="file" id="newFromExcelInput" accept=".xlsx,.xls" style="display:none;">
+                        <button id="deleteCatalog" class="btn danger neu-raised" title="Usuń cennik">🗑</button>
+                    </div>
                     <div class="export" style="margin-bottom: 10px;">
                         <button id="addPrice" class="btn success neu-raised">➕ Dodaj</button>
                         <button id="exportPrices" class="btn neu-raised">📊 Eksport Excel</button>
-                        <button id="importPrices" class="btn neu-raised">📥 Import Excel</button>
+                        <button id="importPrices" class="btn neu-raised">📥 Zastąp z Excel</button>
                         <input type="file" id="priceFileInput" accept=".xlsx,.xls" style="display:none;">
                         <button id="resetPrices" class="btn danger neu-raised">🔄 Reset</button>
                         <button id="showMissing" class="btn warning neu-raised">⚠️ Brakujące</button>
@@ -1885,58 +1922,81 @@ let S = {
     editingKey: null, missingTires: new Set()
 };
 
-const DEFAULT_CAT_ZIMA = {
-    '175 70 R14':    { p: 'Dębica',      b: 'Frigo2',       n: 171.83 },
-    '185 60 R15':    { p: 'Dębica',      b: 'Frigo2',       n: 164.60 },
-    '205 55 R16':    { p: 'Dębica',      b: 'Frigo HP2',    n: 202.82 },
-    '205 55 R17':    { p: 'Barum',       b: 'POLARIS 6',    n: 330.38 },
-    '205 60 R16':    { p: 'Dębica',      b: 'Frigo HP2',    n: 231.70 },
-    '215 55 R17':    { p: 'Dębica',      b: 'Frigo HP2',    n: 310.28 },
-    '215 60 R17':    { p: 'Dębica',      b: 'Frigo SUV 2',  n: 335.09 },
-    '215 60 R18':    { p: 'Barum',       b: 'POLARIS 6',    n: 397.56 },
-    '215 65 R16':    { p: 'Dębica',      b: 'Frigo HP2',    n: 257.89 },
-    '215 75 R16C':   { p: 'Barum',       b: 'SNOVANIS 3',   n: 398.62 },
-    '225 55 R18':    { p: 'Bridgestone', b: 'BLIZZAK 6',    n: 560.92 },
-    '235 55 R18':    { p: 'Bridgestone', b: 'BLIZZAK 6',    n: 607.68 },
-    '235 55 R20':    { p: 'Bridgestone', b: 'BLIZZAK 6',    n: 905.11 },
-    '235 60 R18':    { p: 'Bridgestone', b: 'BLIZZAK 6',    n: 487.38 },
-    '245 45 R17':    { p: 'Bridgestone', b: 'BLIZZAK 6',    n: 665.87 }
+// ============================================================
+//  KATALOG CENNIKÓW — wbudowane + użytkownika
+// ============================================================
+
+const BUILTIN_CATALOGS = {
+    'zima-handlopex-2026': {
+        id: 'zima-handlopex-2026', name: 'Handlopex Zima 2026', season: 'zima',
+        prices: {
+            '175 70 R14':    { p: 'Dębica',      b: 'Frigo2',        n: 171.83 },
+            '185 60 R15':    { p: 'Dębica',      b: 'Frigo2',        n: 164.60 },
+            '195 65 R15':    { p: 'Dębica',      b: 'Frigo2',        n: 161.40 },
+            '205 55 R16':    { p: 'Dębica',      b: 'Frigo HP2',     n: 202.82 },
+            '205 55 R17':    { p: 'Barum',       b: 'POLARIS 6',     n: 330.38 },
+            '205 60 R16':    { p: 'Dębica',      b: 'Frigo HP2',     n: 231.70 },
+            '215 55 R17':    { p: 'Dębica',      b: 'Frigo HP2',     n: 310.28 },
+            '215 60 R16':    { p: 'Dębica',      b: 'Frigo HP2',     n: 262.40 },
+            '215 60 R17':    { p: 'Dębica',      b: 'Frigo SUV 2',   n: 335.09 },
+            '215 60 R18':    { p: 'Barum',       b: 'POLARIS 6',     n: 397.56 },
+            '215 65 R16':    { p: 'Dębica',      b: 'Frigo HP2',     n: 257.89 },
+            '215 65 R17':    { p: 'Firestone',   b: 'WINTERHAWK 4',  n: 403.40 },
+            '215 75 R16C':   { p: 'Barum',       b: 'SNOVANIS 3',    n: 398.62 },
+            '225 45 R18':    { p: 'Bridgestone', b: 'BLIZZAK 6',     n: 499.40 },
+            '225 55 R16':    { p: 'Dębica',      b: 'Frigo HP2',     n: 292.40 },
+            '225 55 R18':    { p: 'Bridgestone', b: 'BLIZZAK 6',     n: 560.92 },
+            '235 55 R18':    { p: 'Bridgestone', b: 'BLIZZAK 6',     n: 607.68 },
+            '235 55 R20':    { p: 'Bridgestone', b: 'BLIZZAK 6',     n: 905.11 },
+            '235 60 R18':    { p: 'Bridgestone', b: 'BLIZZAK 6',     n: 487.38 },
+            '245 45 R17':    { p: 'Bridgestone', b: 'BLIZZAK 6',     n: 665.87 },
+        }
+    },
+    'lato-handlopex-2025': {
+        id: 'lato-handlopex-2025', name: 'Handlopex Lato 2025', season: 'lato',
+        prices: {
+            '175 70 R14':    { p: 'Nexen',       b: "N'BLUE HD PLUS [88] T",                  n: 178.16 },
+            '185 65 R15':    { p: 'Nexen',       b: "N'BLUE HD PLUS [88] T",                  n: 162.15 },
+            '205 55 R16':    { p: 'Vredestein',  b: 'PRESTO HP 2 [91] V',                     n: 185.02 },
+            '205 55 R17':    { p: 'Vredestein',  b: 'ULTRAC + [95] V XL ZR',                  n: 330.28 },
+            '205 60 R16':    { p: 'Vredestein',  b: 'PRESTO HP 2 [92] H',                     n: 250.92 },
+            '215 55 R17':    { p: 'Vredestein',  b: 'PRESTO UHP 2 [98] W XL FP',             n: 286.80 },
+            '215 60 R16':    { p: 'Vredestein',  b: 'ULTRAC + [95] V',                        n: 353.89 },
+            '215 65 R16':    { p: 'Firestone',   b: 'ROADHAWK 2 [102] V XL',                 n: 276.20 },
+            '215 75 R16C':   { p: 'Matador',     b: 'HECTORRA VAN [116/114] R',              n: 329.96 },
+            '225 45 R18':    { p: 'Continental', b: 'PREMIUMCONTACT 7 [91] W FR',             n: 468.20 },
+            '225 55 R18':    { p: 'Pirelli',     b: 'CINTURATO P7 (P7C1) [102] Y XL FR AO', n: 459.01 },
+            '235 55 R18':    { p: 'Goodyear',    b: 'EFFICIENTGRIP 2 SUV [98] V',             n: 427.50 },
+            '235 55 R20':    { p: 'Bridgestone', b: 'POTENZA SPORT [105] Y XL EV NE0',        n: 751.51 },
+        }
+    }
 };
 
-const DEFAULT_CAT_LATO = {
-    '175 70 R14':    { p: 'Nexen',       b: "N'BLUE HD PLUS [88] T",                  n: 178.16 },
-    '185 65 R15':    { p: 'Nexen',       b: "N'BLUE HD PLUS [88] T",                  n: 162.15 },
-    '205 55 R16':    { p: 'Vredestein',  b: 'PRESTO HP 2 [91] V',                     n: 185.02 },
-    '205 55 R17':    { p: 'Vredestein',  b: 'ULTRAC + [95] V XL ZR',                  n: 330.28 },
-    '205 60 R16':    { p: 'Vredestein',  b: 'PRESTO HP 2 [92] H',                     n: 250.92 },
-    '215 55 R17':    { p: 'Vredestein',  b: 'PRESTO UHP 2 [98] W XL FP',             n: 286.80 },
-    '215 60 R16':    { p: 'Vredestein',  b: 'ULTRAC + [95] V',                        n: 353.89 },
-    '215 65 R16':    { p: 'Firestone',   b: 'ROADHAWK 2 [102] V XL',                 n: 276.20 },
-    '215 75 R16C':   { p: 'Matador',     b: 'HECTORRA VAN [116/114] R',              n: 329.96 },
-    '225 45 R18':    { p: 'Continental', b: 'PREMIUMCONTACT 7 [91] W FR',             n: 468.20 },
-    '225 55 R18':    { p: 'Pirelli',     b: 'CINTURATO P7 (P7C1) [102] Y XL FR AO', n: 459.01 },
-    '235 55 R18':    { p: 'Goodyear',   b: 'EFFICIENTGRIP 2 SUV [98] V',             n: 427.50 },
-    '235 55 R20':    { p: 'Bridgestone',b: 'POTENZA SPORT [105] Y XL EV NE0',        n: 751.51 }
+// Cenniki użytkownika (tworzone przez klonowanie / import Excel)
+let USER_CATALOGS = JSON.parse(localStorage.getItem('userCatalogs')) || {};
+
+const getAllCatalogs      = () => ({ ...BUILTIN_CATALOGS, ...USER_CATALOGS });
+const getCatalogsBySezon  = (s) => Object.values(getAllCatalogs()).filter(c => c.season === s);
+const getActiveCatalogId  = () => activeCennik === 'zima' ? activeCatalogZima : activeCatalogLato;
+const getCurrentCatalog   = () => getAllCatalogs()[getActiveCatalogId()];
+
+const getCatalogPrices = (id) => {
+    const edited = localStorage.getItem('catPrices_' + id);
+    if (edited) return JSON.parse(edited);
+    const cat = getAllCatalogs()[id];
+    return cat ? { ...cat.prices } : {};
+};
+const persistCatalogPrices = (id, prices) => {
+    localStorage.setItem('catPrices_' + id, JSON.stringify(prices));
 };
 
-// Backward compat: stary klucz 'tirePrices' trafia do cennika zimowego
-let CAT_ZIMA = JSON.parse(localStorage.getItem('tirePrices_zima'))
-            || JSON.parse(localStorage.getItem('tirePrices'))
-            || { ...DEFAULT_CAT_ZIMA };
+const _m = new Date().getMonth() + 1;
+let activeCennik      = (_m >= 3 && _m <= 10) ? 'lato' : 'zima';
+let activeCatalogZima = localStorage.getItem('activeCatalogZima') || 'zima-handlopex-2026';
+let activeCatalogLato = localStorage.getItem('activeCatalogLato') || 'lato-handlopex-2025';
 
-// Wersja cennika letniego — zmień przy każdej aktualizacji domyślnych cen
-const CAT_LATO_VER = '2025-03';
-const _savedLatoVer = localStorage.getItem('tirePrices_lato_ver');
-let CAT_LATO = (_savedLatoVer === CAT_LATO_VER)
-    ? (JSON.parse(localStorage.getItem('tirePrices_lato')) || { ...DEFAULT_CAT_LATO })
-    : { ...DEFAULT_CAT_LATO };
-if (_savedLatoVer !== CAT_LATO_VER) {
-    localStorage.setItem('tirePrices_lato', JSON.stringify(CAT_LATO));
-    localStorage.setItem('tirePrices_lato_ver', CAT_LATO_VER);
-}
-
-const _m = new Date().getMonth() + 1; // 1=sty … 12=gru; lato: mar–paź
-let activeCennik = (_m >= 3 && _m <= 10) ? 'lato' : 'zima';
+let CAT_ZIMA = getCatalogPrices(activeCatalogZima);
+let CAT_LATO = getCatalogPrices(activeCatalogLato);
 let CAT = activeCennik === 'lato' ? CAT_LATO : CAT_ZIMA;
 let HISTORY = JSON.parse(localStorage.getItem('importHistory')) || [];
 
@@ -2281,15 +2341,25 @@ const exportMissingList = () => {
 
 // Backup
 const exportBackup = () => {
+    // Zbierz edycje wszystkich cenników z localStorage
+    const catalogPrices = {};
+    Object.keys(getAllCatalogs()).forEach(id => {
+        const saved = localStorage.getItem('catPrices_' + id);
+        if (saved) catalogPrices[id] = JSON.parse(saved);
+    });
     const backup = {
-        version: '1.0',
+        version: '2.0',
         timestamp: new Date().toISOString(),
+        userCatalogs: USER_CATALOGS,
+        activeCatalogZima,
+        activeCatalogLato,
+        catalogPrices,
+        // Backward compat
         prices_zima: CAT_ZIMA,
         prices_lato: CAT_LATO,
         prices: CAT_ZIMA,
         history: HISTORY
     };
-    
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -2297,7 +2367,6 @@ const exportBackup = () => {
     a.download = `backup_${new Date().toISOString().slice(0,10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    
     showAlert('Backup wyeksportowany pomyślnie', 'success');
 };
 
@@ -2315,15 +2384,31 @@ const importBackup = (e) => {
             }
             
             if (confirm('Czy na pewno przywrócić backup? To nadpisze obecną konfigurację.')) {
-                CAT_ZIMA = backup.prices_zima || backup.prices || {};
-                CAT_LATO = backup.prices_lato || {};
+                if (backup.version === '2.0') {
+                    USER_CATALOGS = backup.userCatalogs || {};
+                    localStorage.setItem('userCatalogs', JSON.stringify(USER_CATALOGS));
+                    if (backup.catalogPrices) {
+                        Object.keys(backup.catalogPrices).forEach(id =>
+                            localStorage.setItem('catPrices_' + id, JSON.stringify(backup.catalogPrices[id]))
+                        );
+                    }
+                    activeCatalogZima = backup.activeCatalogZima || 'zima-handlopex-2026';
+                    activeCatalogLato = backup.activeCatalogLato || 'lato-handlopex-2025';
+                    localStorage.setItem('activeCatalogZima', activeCatalogZima);
+                    localStorage.setItem('activeCatalogLato', activeCatalogLato);
+                    CAT_ZIMA = getCatalogPrices(activeCatalogZima);
+                    CAT_LATO = getCatalogPrices(activeCatalogLato);
+                } else {
+                    // Backup v1.0 — importuj do aktywnych cenników
+                    CAT_ZIMA = backup.prices_zima || backup.prices || {};
+                    CAT_LATO = backup.prices_lato || {};
+                    persistCatalogPrices(activeCatalogZima, CAT_ZIMA);
+                    persistCatalogPrices(activeCatalogLato, CAT_LATO);
+                }
                 CAT = activeCennik === 'zima' ? CAT_ZIMA : CAT_LATO;
                 HISTORY = backup.history || [];
-                
-                localStorage.setItem('tirePrices_zima', JSON.stringify(CAT_ZIMA));
-                localStorage.setItem('tirePrices_lato', JSON.stringify(CAT_LATO));
                 localStorage.setItem('importHistory', JSON.stringify(HISTORY));
-                
+                renderCatalogSelect();
                 renderPriceTable();
                 
                 $('#backupModal').removeClass('on');
@@ -2355,15 +2440,25 @@ const quickSearch = () => {
 
 // Cennik
 const savePrices = () => {
-    const key = activeCennik === 'zima' ? 'tirePrices_zima' : 'tirePrices_lato';
-    localStorage.setItem(key, JSON.stringify(CAT));
+    persistCatalogPrices(getActiveCatalogId(), CAT);
     renderPriceTable();
-    if (S.data.length > 0) {
-        process(null, true);
-    }
+    if (S.data.length > 0) process(null, true);
+};
+
+const renderCatalogSelect = () => {
+    const cats   = getCatalogsBySezon(activeCennik);
+    const active = getActiveCatalogId();
+    const opts   = cats.map(c =>
+        `<option value="${c.id}" ${c.id === active ? 'selected' : ''}>${c.name}</option>`
+    ).join('');
+    $('#catalogSelect').html(opts);
+    // Usuń jest aktywne tylko dla cenników użytkownika
+    const isBuiltin = !!BUILTIN_CATALOGS[active];
+    $('#deleteCatalog').prop('disabled', isBuiltin).css('opacity', isBuiltin ? 0.4 : 1);
 };
 
 const renderPriceTable = () => {
+    renderCatalogSelect();
     const sorted = Object.keys(CAT).sort();
 
     // Brakujące — rozmiary z danych które nie mają ceny w aktywnym cenniku
@@ -2434,16 +2529,16 @@ const renderPriceTable = () => {
 };
 
 const openPriceModal = (key = null) => {
-    const seasonLabel = activeCennik === 'zima' ? '❄ Zimowy' : '☀ Letni';
+    const catLabel = getCurrentCatalog()?.name || (activeCennik === 'zima' ? '❄ Zimowy' : '☀ Letni');
     S.editingKey = key;
     if (key) {
-        $('#modalTitle').text(`Edytuj cenę — cennik ${seasonLabel}`);
+        $('#modalTitle').text(`Edytuj cenę — ${catLabel}`);
         $('#editSize').val(key).prop('disabled', true);
         $('#editProducer').val(CAT[key].p);
         $('#editTread').val(CAT[key].b);
         $('#editPrice').val(CAT[key].n);
     } else {
-        $('#modalTitle').text(`Dodaj cenę — cennik ${seasonLabel}`);
+        $('#modalTitle').text(`Dodaj cenę — ${catLabel}`);
         $('#editSize').val('').prop('disabled', false);
         $('#editProducer').val('');
         $('#editTread').val('');
@@ -2469,11 +2564,10 @@ const savePriceFromModal = () => {
     }
 
     const normalized = norm(size);
-    const seasonLabel = activeCennik === 'zima' ? '❄ zimowy' : '☀ letni';
     CAT[normalized] = { p: producer, b: tread, n: price };
     savePrices();
     closePriceModal();
-    showAlert(`Cena zapisana do cennika ${seasonLabel}`, 'success');
+    showAlert(`Cena zapisana do cennika "${getCurrentCatalog()?.name || ''}"`, 'success');
 };
 
 window.editPrice = (key) => {
@@ -2525,11 +2619,12 @@ const importPricesFromExcel = (e) => {
                 }
             });
             
-            if (confirm(`Zaimportować ${Object.keys(newCAT).length} pozycji do cennika ${activeCennik === 'zima' ? 'zimowego' : 'letniego'}? To zastąpi obecny cennik.`)) {
+            const catName = getCurrentCatalog()?.name || 'aktywny';
+            if (confirm(`Zastąpić ${Object.keys(newCAT).length} pozycjami cennik "${catName}"? Wszystkie zmiany w nim zostaną utracone.`)) {
                 if (activeCennik === 'zima') { CAT_ZIMA = newCAT; CAT = CAT_ZIMA; }
                 else { CAT_LATO = newCAT; CAT = CAT_LATO; }
                 savePrices();
-                showAlert('Cennik zaimportowany pomyślnie', 'success');
+                showAlert('Cennik zastąpiony pomyślnie', 'success');
             }
         } catch (err) {
             showAlert('Błąd importu: ' + err.message, 'error');
@@ -2540,17 +2635,17 @@ const importPricesFromExcel = (e) => {
 };
 
 const resetPrices = () => {
-    const label = activeCennik === 'zima' ? 'zimowy' : 'letni';
-    if (!confirm(`Czy na pewno przywrócić domyślny cennik ${label}? To usunie wszystkie zmiany.`)) return;
-    if (activeCennik === 'zima') {
-        CAT_ZIMA = { ...DEFAULT_CAT_ZIMA };
-        CAT = CAT_ZIMA;
-    } else {
-        CAT_LATO = { ...DEFAULT_CAT_LATO };
-        CAT = CAT_LATO;
-    }
-    savePrices();
-    showAlert(`Cennik ${label} przywrócony do wartości domyślnych`, 'success');
+    const id  = getActiveCatalogId();
+    const cat = getCurrentCatalog();
+    if (!cat) return;
+    if (!confirm(`Przywrócić oryginalne ceny cennika "${cat.name}"? To usunie wszystkie zmiany.`)) return;
+    localStorage.removeItem('catPrices_' + id);
+    const restored = { ...cat.prices };
+    if (activeCennik === 'zima') { CAT_ZIMA = restored; } else { CAT_LATO = restored; }
+    CAT = restored;
+    renderPriceTable();
+    if (S.data.length > 0) process(null, true);
+    showAlert(`Cennik "${cat.name}" przywrócony do oryginału`, 'success');
 };
 
 // Przełączanie cennika sezonowego
@@ -2558,11 +2653,94 @@ window.switchCennik = (type) => {
     if (activeCennik === type) return;
     activeCennik = type;
     CAT = type === 'zima' ? CAT_ZIMA : CAT_LATO;
+    renderCatalogSelect();
     renderPriceTable();
     if (S.data.length > 0) {
         process(null, true);
-        showAlert(type === 'zima' ? '❄️ Aktywny cennik: Opony Zimowe' : '☀️ Aktywny cennik: Opony Letnie', 'success');
+        const cat = getCurrentCatalog();
+        showAlert(`${type === 'zima' ? '❄️' : '☀️'} Aktywny: ${cat ? cat.name : (type === 'zima' ? 'Zimowy' : 'Letni')}`, 'success');
     }
+};
+
+// Przełączanie konkretnego cennika (z dropdown)
+const switchCatalog = (id) => {
+    const cat = getAllCatalogs()[id];
+    if (!cat) return;
+    if (activeCennik === 'zima') {
+        activeCatalogZima = id;
+        CAT_ZIMA = getCatalogPrices(id);
+        CAT = CAT_ZIMA;
+        localStorage.setItem('activeCatalogZima', id);
+    } else {
+        activeCatalogLato = id;
+        CAT_LATO = getCatalogPrices(id);
+        CAT = CAT_LATO;
+        localStorage.setItem('activeCatalogLato', id);
+    }
+    renderCatalogSelect();
+    renderPriceTable();
+    if (S.data.length > 0) process(null, true);
+    showAlert(`✅ Aktywny cennik: ${cat.name}`, 'success');
+};
+
+// Klonuj bieżący cennik jako nowy cennik użytkownika
+const cloneCurrentCatalog = () => {
+    const cat  = getCurrentCatalog();
+    if (!cat) return;
+    const name = prompt(`Nazwa nowego cennika (klon "${cat.name}"):`, cat.name + ' — kopia');
+    if (!name?.trim()) return;
+    const id = 'user-' + Date.now();
+    USER_CATALOGS[id] = { id, name: name.trim(), season: activeCennik, prices: { ...CAT } };
+    localStorage.setItem('userCatalogs', JSON.stringify(USER_CATALOGS));
+    // Zapisz ceny nowego cennika (są już ustawione przez klon)
+    persistCatalogPrices(id, { ...CAT });
+    switchCatalog(id);
+};
+
+// Usuń bieżący cennik (tylko użytkownika)
+const deleteCurrentCatalog = () => {
+    const id = getActiveCatalogId();
+    if (BUILTIN_CATALOGS[id]) { showAlert('Nie można usunąć wbudowanego cennika.', 'error'); return; }
+    const cat = USER_CATALOGS[id];
+    if (!cat || !confirm(`Czy na pewno usunąć cennik "${cat.name}"?`)) return;
+    delete USER_CATALOGS[id];
+    localStorage.setItem('userCatalogs', JSON.stringify(USER_CATALOGS));
+    localStorage.removeItem('catPrices_' + id);
+    const remaining = getCatalogsBySezon(activeCennik);
+    const fallback  = remaining[0]?.id || (activeCennik === 'zima' ? 'zima-handlopex-2026' : 'lato-handlopex-2025');
+    switchCatalog(fallback);
+    showAlert('Cennik usunięty.', 'success');
+};
+
+// Import Excel jako NOWY cennik
+const importAsNewCatalog = (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const season = activeCennik;
+    const name   = prompt(`Nazwa nowego cennika (${season === 'zima' ? 'zimowy' : 'letni'}):`, '');
+    if (!name?.trim()) { e.target.value = ''; return; }
+    const r = new FileReader();
+    r.onload = ev => {
+        try {
+            const wb  = XLSX.read(new Uint8Array(ev.target.result), { type: 'array' });
+            const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
+            if (json.length < 2) throw new Error('Plik pusty');
+            const prices = {};
+            json.slice(1).forEach(row => {
+                if (row[0] && row[1] && row[2] && row[3])
+                    prices[row[0]] = { p: row[1], b: row[2], n: parseFloat(row[3]) };
+            });
+            const id = 'user-' + Date.now();
+            USER_CATALOGS[id] = { id, name: name.trim(), season, prices };
+            localStorage.setItem('userCatalogs', JSON.stringify(USER_CATALOGS));
+            switchCatalog(id);
+            showAlert(`Cennik "${name.trim()}" dodany (${Object.keys(prices).length} poz.)`, 'success');
+        } catch (err) {
+            showAlert('Błąd importu: ' + err.message, 'error');
+        }
+    };
+    r.readAsArrayBuffer(f);
+    e.target.value = '';
 };
 
 // Inicjalizacja
@@ -2593,6 +2771,12 @@ const init = () => {
     $('#priceFileInput').on('change', importPricesFromExcel);
     $('#resetPrices').on('click', resetPrices);
     $('#showMissing').on('click', showMissingTires);
+    // Katalog cenników
+    $('#catalogSelect').on('change', e => switchCatalog(e.target.value));
+    $('#cloneCatalog').on('click', cloneCurrentCatalog);
+    $('#deleteCatalog').on('click', deleteCurrentCatalog);
+    $('#newFromExcel').on('click', () => $('#newFromExcelInput').click());
+    $('#newFromExcelInput').on('change', importAsNewCatalog);
     $('#exportMissing').on('click', exportMissingList);
     
     $('#showHistory').on('click', () => { renderHistory(); $('#historyModal').addClass('on'); });
