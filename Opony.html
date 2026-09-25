@@ -3705,21 +3705,43 @@ const exportXlsx = () => {
 
     const lab = mode === 'oddzial' ? 'Oddzial' : 'Adres';
     const sec = mode === 'oddzial' ? 'Adres' : 'Oddzial';
-    
+
+    // Nazwy arkuszy Excel: max 31 znaków, bez znaków / \ * ? [ ] :
+    // Adresy często zawierają te znaki — bez sanitizacji XLSX rzuca błąd
+    const usedSheets = new Set();
+    const mkSheet = (s) => {
+        let name = String(s || 'Brak').replace(/[\/\\*?\[\]:]/g, '_').trim().substring(0, 31) || 'Arkusz';
+        if (usedSheets.has(name)) {
+            let i = 2;
+            while (usedSheets.has(name.substring(0, 28) + '_' + i)) i++;
+            name = name.substring(0, 28) + '_' + i;
+        }
+        usedSheets.add(name);
+        return name;
+    };
+
     Object.keys(g).sort().forEach(k => {
         const rs = g[k];
         const tot = rs.reduce((s,r) => s + (parseFloat(r.i) || 0), 0);
-        const tv = rs.reduce((s,r) => s + r.w, 0);
-        
+        const tv  = rs.reduce((s,r) => s + r.w, 0);
+        const dataRows = rs.map(r => [r.nr, r.naz, r.r, r.p, r.b, r.i,
+            r.n > 0 ? r.n.toFixed(2) : '-',
+            r.w > 0 ? r.w.toFixed(2) : '-',
+            r.s, r.u]);
+        // Wiersz sumy
+        dataRows.push(['SUMA', '', '', '', '', tot.toString(), '', tv.toFixed(2), '', '']);
+
         const d = [
             [lab, k],
             ['Pojazdy:', rs.length, 'Opony:', tot, 'Wartosc:', tv.toFixed(2)],
             [],
             ['Nr rej', 'Nazwa', 'Rozmiar', 'Producent', 'Bieznik', 'Ilosc', 'Netto', 'Wartosc', sec, 'Uwagi'],
-            ...rs.map(r => [r.nr, r.naz, r.r, r.p, r.b, r.i, r.n > 0 ? r.n.toFixed(2) : '-', r.w > 0 ? r.w.toFixed(2) : '-', r.s, r.u])
+            ...dataRows
         ];
-        
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(d), k.substring(0, 31));
+
+        const ws = XLSX.utils.aoa_to_sheet(d);
+        ws['!cols'] = [{ wch: 12 }, { wch: 22 }, { wch: 13 }, { wch: 12 }, { wch: 15 }, { wch: 6 }, { wch: 9 }, { wch: 10 }, { wch: 20 }, { wch: 20 }];
+        XLSX.utils.book_append_sheet(wb, ws, mkSheet(k));
     });
     
     XLSX.writeFile(wb, `Podsumowanie_${mode}_${new Date().toISOString().slice(0,10)}.xlsx`);
