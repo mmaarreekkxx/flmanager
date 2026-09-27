@@ -1,377 +1,888 @@
 <!DOCTYPE html>
 <html lang="pl"><head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: blob: data:; script-src 'self' https: 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' https: 'unsafe-inline'; font-src 'self' https: data:; img-src 'self' https: data: blob:; frame-src 'self' https: blob: data:; connect-src 'self' https:; object-src 'none'; base-uri 'self'; frame-ancestors 'self';">
-<title>PANEL NARZĘDZI · Single File</title>
+
+
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07090B">
+<meta name="description" content="Fleet & Docs Suite — szybki, izolowany panel narzędzi i dokumentów.">
+<link rel="dns-prefetch" href="https://api.github.com">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<title>PANEL NARZĘDZI · Fleet &amp; Docs Suite</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
 <style>
-:root{--bg:#04070c;--bg2:#070d18;--bg3:#0b1422;--card:#0d1826;--card-border:rgba(37,210,255,.12);--list-divider:rgba(37,210,255,.28);--primary:#25d2ff;--primary-dim:rgba(37,210,255,.15);--primary-glow:rgba(37,210,255,.35);--emerald:#34d399;--amber:#fbbf24;--rose:#ff3b5c;--sky:#8ceaff;--violet:#a78bfa;--muted:rgba(186,199,217,.92);--text:#eaf3fa;--font-ui:'Exo 2',sans-serif;--font-mono:'Space Mono',monospace;--r:9px;--sidebar-w:196px;--header-h:42px;--topbar-bg:rgba(6,11,20,.92);--card-shadow:0 4px 20px rgba(0,0,0,.3);--card-shadow-hover:0 4px 24px rgba(0,0,0,.4),0 0 30px rgba(37,210,255,.03);
---sidebar-bg:rgba(4,7,13,.88);--tree-line:rgba(37,210,255,.25);--muted-strong:rgba(226,236,248,.98)}
-.theme-light{--bg:#e6edf4;--bg2:#f3f7fb;--bg3:#dbe5ef;--card:#ffffff;--card-border:rgba(10,70,100,.28);--list-divider:rgba(10,70,100,.28);--primary:#0891b2;--primary-dim:rgba(8,145,178,.14);--primary-glow:rgba(8,145,178,.25);--muted:rgba(15,32,48,.95);--text:#04101c;--topbar-bg:rgba(243,247,251,.92);--card-shadow:0 4px 18px rgba(30,60,90,.08);--card-shadow-hover:0 4px 22px rgba(30,60,90,.12),0 0 30px rgba(8,145,178,.05);
---sidebar-bg:rgba(238,244,250,.92);--tree-line:rgba(8,145,178,.4);--muted-strong:rgba(15,32,48,.98)}
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;overflow-y:auto}
-body{min-height:calc(100dvh + 1px)}
-body{overflow-x:hidden;overflow-y:auto;font-family:var(--font-ui);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;transition:background .25s ease,color .25s ease}
-::-webkit-scrollbar{width:5px;height:5px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(37,210,255,.25);border-radius:4px}
-.theme-light ::-webkit-scrollbar-thumb{background:rgba(8,145,178,.35)}
-:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
-.mono{font-family:var(--font-mono);font-weight:700;font-size:11px}
-
-/* ============ TACTILE PRESS (wizualny odpowiednik haptyki, jak w NEXUS App Deck) ============ */
-.nav-item,.nav-group-head,.nav-subitem-launch,.icon-btn,.topbar-icon-btn,.collapse-btn,
-.sidebar-fab,.src-btn,.itab,.imodal-btn,.item-act-btn,.manage-item,.manage-toggle,
-.source-toggle,.tool-only-btn,.switch{
-  transition:background .15s,color .15s,border-color .15s,transform .12s cubic-bezier(.4,0,.2,1);
+/* ============================================================
+   PANEL NARZĘDZI — Fleet & Docs Suite
+   Warstwa wizualna: konsola przyrządowa / szafa rack z
+   bursztynowym podświetleniem (annunciator lamp).
+   ============================================================ */
+:root{
+  --bg:#07090B;
+  --bg-2:#0B0E12;
+  --panel:#0E1217;
+  --panel-2:#12171E;
+  --line:#1C232C;
+  --line-2:#26303B;
+  --txt:#D7DEE6;
+  --txt-dim:#8D97A3;
+  --txt-faint:#5F6A76;
+  --primary:#F5A924;
+  --primary-lt:#FFC978;
+  --primary-dk:#A8701A;
+  --primary-soft:rgba(245,169,36,.12);
+  --primary-glow:rgba(245,169,36,.35);
+  --accent:#41D6C3;
+  --green:#2FD36A;
+  --danger:#FF5F56;
+  --grid-line:rgba(255,255,255,.032);
+  --vig:rgba(0,0,0,.60);
+  --scanline:rgba(255,255,255,.024);
+  --noise-op:.055;
+  --shadow:0 18px 50px rgba(0,0,0,.55);
+  --sans:'Space Grotesk',system-ui,-apple-system,Segoe UI,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --rail:300px;
+  --bar:44px;
 }
-.nav-item:active,.nav-group-head:active,.nav-subitem-launch:active,.icon-btn:active,
-.topbar-icon-btn:active,.collapse-btn:active,.sidebar-fab:active,.src-btn:active,
-.itab:active,.imodal-btn:active,.item-act-btn:active,.manage-item:active,
-.manage-toggle:active,.source-toggle:active,.tool-only-btn:active,.switch:active{
-  transform:scale(.95);
+body.theme-light{
+  --bg:#EFECE4;
+  --bg-2:#F6F4EE;
+  --panel:#FBFAF6;
+  --panel-2:#FFFFFF;
+  --line:#DED7C9;
+  --line-2:#C8BFAE;
+  --txt:#1B1E22;
+  --txt-dim:#5D6470;
+  --txt-faint:#8B9199;
+  --primary:#9A5A00;
+  --primary-lt:#7A4600;
+  --primary-dk:#D9902A;
+  --primary-soft:rgba(179,106,0,.10);
+  --primary-glow:rgba(179,106,0,.22);
+  --accent:#0F8F80;
+  --green:#0E7C44;
+  --grid-line:rgba(0,0,0,.055);
+  --vig:rgba(40,32,18,.24);
+  --scanline:rgba(0,0,0,.030);
+  --noise-op:.028;
+  --shadow:0 18px 44px rgba(60,48,26,.18);
 }
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--txt);
+  font-family:var(--sans);font-size:14px;line-height:1.5;
+  overflow:hidden;overscroll-behavior:none;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+}
+button,input,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0}
+/* Ulepszenia wydajności: izolacja ciężkich warstw i szacunek dla ustawień ruchu. */
+.nav-item,.nav-group{contain:layout style;content-visibility:auto;contain-intrinsic-size:42px;}
+.frame-area{contain:layout paint;}
+.page-hidden .orb{animation-play-state:paused!important;}
+.page-hidden .ambient-glow{visibility:hidden;}
 @media (prefers-reduced-motion: reduce){
-  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important;}
 }
+::selection{background:var(--primary);color:#0A0B0D}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
 
-#app{position:fixed;inset:0;height:100dvh;overflow:hidden}
-
-/* ============ MODERN AMBIENT FLOURISH ============ */
+/* ---------- skan szklany / winieta / ziarno / listwa akcentu ---------- */
 .accent-line{
-  position:fixed;top:0;left:0;right:0;height:2px;z-index:300;pointer-events:none;
-  background:linear-gradient(90deg,transparent,var(--primary),var(--violet),var(--sky),transparent);
-  background-size:200% 100%;
-  animation:accentShift 6s linear infinite;
-  opacity:.75;
+  position:fixed;top:0;left:0;right:0;height:2px;z-index:97;pointer-events:none;
+  background:linear-gradient(90deg,transparent 0%,var(--primary-dk) 12%,var(--primary) 38%,var(--primary-lt) 50%,var(--primary) 62%,var(--primary-dk) 88%,transparent 100%);
+  box-shadow:0 0 14px var(--primary-glow);
 }
-@keyframes accentShift{0%{background-position:0% 0}100%{background-position:200% 0}}
+/* Nakładka HUD (winieta z cieniami + ziarno/skan jako tekstura) usunięta
+   na prośbę użytkownika — zostały tylko czysta powierzchnia i listwa akcentu. */
 
-/* ---- HUD overlays (skanlinie / winieta / szum — jak w NEXUS App Deck) ---- */
-#hud-scan{position:fixed;inset:0;z-index:250;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.022) 0 1px,transparent 1px 3px);mix-blend-mode:overlay}
-#hud-vig{position:fixed;inset:0;z-index:249;pointer-events:none;background:radial-gradient(120% 90% at 50% 40%,transparent 55%,rgba(0,0,0,.42) 100%)}
-#hud-noise{position:fixed;inset:0;z-index:248;pointer-events:none;opacity:.045;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")}
-.theme-light #hud-scan,.theme-light #hud-vig,.theme-light #hud-noise{opacity:0}
-
-.ambient-glow{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-.orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.28;will-change:transform}
-.orb1{width:420px;height:420px;background:radial-gradient(circle,var(--primary),transparent 70%);top:-120px;left:10%;animation:float1 22s ease-in-out infinite}
-.orb2{width:360px;height:360px;background:radial-gradient(circle,var(--violet),transparent 70%);bottom:-140px;right:8%;animation:float2 26s ease-in-out infinite}
-.orb3{width:280px;height:280px;background:radial-gradient(circle,var(--sky),transparent 70%);top:40%;right:28%;animation:float3 30s ease-in-out infinite}
-.theme-light .orb{opacity:.09}
-@keyframes float1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(60px,50px) scale(1.12)}}
-@keyframes float2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-50px,-40px) scale(1.08)}}
-@keyframes float3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-30px,60px) scale(1.15)}}
-
+/* ---------- tło: siatka + poświaty ---------- */
+#app{position:relative;height:100%;isolation:isolate}
 .bg-grid{
-  position:fixed;inset:0;z-index:1;pointer-events:none;
-  background-image:linear-gradient(var(--card-border) 1px,transparent 1px),linear-gradient(90deg,var(--card-border) 1px,transparent 1px);
-  background-size:48px 48px;
-  -webkit-mask-image:radial-gradient(ellipse 70% 60% at 50% 30%,#000 30%,transparent 75%);
-  mask-image:radial-gradient(ellipse 70% 60% at 50% 30%,#000 30%,transparent 75%);
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(to right,var(--grid-line) 1px,transparent 1px),
+    linear-gradient(to bottom,var(--grid-line) 1px,transparent 1px);
+  background-size:56px 56px;
+  -webkit-mask-image:radial-gradient(ellipse at 55% 40%,#000 20%,transparent 88%);
+  mask-image:radial-gradient(ellipse at 55% 40%,#000 20%,transparent 88%);
+}
+.ambient-glow{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(78px);opacity:.30;mix-blend-mode:screen}
+body.theme-light .orb{opacity:.22;mix-blend-mode:multiply}
+.orb1{width:44vw;height:44vw;left:-8vw;top:-10vw;background:radial-gradient(circle,var(--primary) 0%,transparent 68%);animation:drift1 26s ease-in-out infinite alternate}
+.orb2{width:36vw;height:36vw;right:-6vw;top:26vh;background:radial-gradient(circle,#2E6BFF 0%,transparent 68%);opacity:.16;animation:drift2 32s ease-in-out infinite alternate}
+.orb3{width:30vw;height:30vw;left:34vw;bottom:-12vw;background:radial-gradient(circle,var(--accent) 0%,transparent 70%);opacity:.13;animation:drift3 28s ease-in-out infinite alternate}
+@keyframes drift1{to{transform:translate3d(6vw,5vh,0) scale(1.12)}}
+@keyframes drift2{to{transform:translate3d(-7vw,-6vh,0) scale(1.08)}}
+@keyframes drift3{to{transform:translate3d(4vw,-7vh,0) scale(1.14)}}
+
+/* ---------- SZYNA BOCZNA ---------- */
+.sidebar{
+  position:fixed;top:0;left:0;bottom:0;width:var(--rail);z-index:40;
+  display:flex;flex-direction:column;background:var(--panel);
+  border-right:1px solid var(--line);
+  box-shadow:1px 0 0 rgba(255,255,255,.02) inset;
+  transform:translateX(0);transition:transform .38s cubic-bezier(.4,0,.2,1);
+}
+body.sidebar-collapsed .sidebar{transform:translateX(-101%)}
+.sidebar::after{
+  content:"";position:absolute;top:0;right:-1px;bottom:0;width:1px;
+  background:linear-gradient(180deg,transparent,var(--primary-dk) 12%,transparent 55%);
+  opacity:.7;
+}
+/* Nagłówek szyny = dokładnie ta sama wysokość co górny pasek aplikacji (--bar) */
+.sidebar-logo{display:flex;align-items:center;gap:10px;height:var(--bar);padding:0 10px;border-bottom:1px solid var(--line);position:relative}
+.sidebar-logo::before{content:"";position:absolute;left:12px;right:12px;bottom:-1px;height:1px;background:repeating-linear-gradient(90deg,var(--line-2) 0 4px,transparent 4px 8px)}
+.sidebar-logo svg{color:var(--primary);filter:drop-shadow(0 0 6px var(--primary-glow))}
+.sidebar-logo-text{min-width:0;flex:1}
+.sidebar-logo-text h2{margin:0;font-size:12.5px;letter-spacing:.17em;text-transform:uppercase;font-weight:700}
+.logo-sub{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--txt-faint);text-transform:uppercase;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.collapse-btn{width:26px;height:26px;flex-shrink:0;border:1px solid var(--line-2);border-radius:3px;color:var(--txt-dim);display:grid;place-items:center;transition:.18s}
+.collapse-btn svg{width:14px;height:14px}
+.collapse-btn:hover{color:var(--primary);border-color:var(--primary-dk);background:var(--primary-soft)}
+.collapse-btn:active{transform:scale(.92)}
+/* lupka przełączająca pasek wyszukiwania w nagłówku szyny */
+.search-toggle{margin-right:4px;transition:.18s}
+.search-toggle svg{transition:.18s}
+.search-toggle.on{
+  /* Stan aktywny sygnalizujemy subtelnie — bez zalewania całego przycisku kolorem. */
+  color:var(--primary);background:var(--primary-soft);border-color:var(--primary-dk);
+  box-shadow:0 0 7px rgba(245,169,36,.16);
+}
+.search-toggle.on svg{filter:drop-shadow(0 0 4px var(--primary-glow))}
+
+.source-toggle{display:flex;gap:2px;padding:3px;background:var(--panel-2);border:1px solid var(--line);border-radius:5px}
+.src-btn{
+  flex:1;padding:7px 4px;border-radius:3px;font-family:var(--mono);font-size:9.5px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--txt-dim);transition:.16s;
+  border:1px solid transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.src-btn:hover{color:var(--txt);background:rgba(255,255,255,.03)}
+.src-btn.active{background:var(--primary);color:#0A0B0D;font-weight:600;box-shadow:0 0 14px var(--primary-glow)}
+body.theme-light .src-btn:hover{background:rgba(0,0,0,.04)}
+
+/* Limit API — CAŁOŚĆ W JEDNYM WIERSZU: etykieta · pasek · wartość zapytań */
+.api-limit{
+  display:flex;align-items:center;gap:8px;overflow:hidden;
+  border:1px solid var(--line);border-radius:5px;padding:5px 8px;background:var(--panel-2);
+}
+.api-limit-label{
+  flex:0 0 auto;font-family:var(--mono);font-size:9px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--txt-faint);white-space:nowrap;
+}
+.api-limit-bar{flex:1 1 auto;min-width:30px;height:3px;background:var(--line);border-radius:2px;margin:0;overflow:hidden}
+.api-limit-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.api-limit-fill.mid{background:var(--primary)}
+.api-limit-fill.low{background:var(--danger)}
+.api-limit-val{
+  flex:0 0 auto;font-family:var(--mono);font-size:9.5px;color:var(--txt-dim);
+  letter-spacing:.03em;white-space:nowrap;font-variant-numeric:tabular-nums;
+}
+
+.search-wrap{padding:10px 10px 0}
+.search-wrap input{width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:4px;padding:8px 10px;font-family:var(--mono);font-size:12px;outline:none;transition:.18s}
+.search-wrap input:focus{border-color:var(--primary-dk);box-shadow:0 0 0 3px var(--primary-soft)}
+.search-wrap input::placeholder{color:var(--txt-faint)}
+
+#navRoot{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:10px 8px 14px;scrollbar-width:thin;scrollbar-color:var(--line-2) transparent}
+#navRoot::-webkit-scrollbar{width:7px}
+#navRoot::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:4px}
+#navRoot::-webkit-scrollbar-track{background:transparent}
+
+.nav-item{position:relative;margin-bottom:2px}
+.nav-item-launch,.nav-subitem-launch{
+  display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  padding:9px 10px 9px 11px;border-left:2px solid transparent;border-radius:0 4px 4px 0;
+  color:var(--txt);transition:background .16s,border-color .16s,color .16s;
+}
+.nav-item-launch:hover{background:var(--primary-soft);border-left-color:var(--primary-dk)}
+.nav-item.active>.nav-item-launch,
+.nav-subitem.active>.nav-subitem-launch{
+  background:linear-gradient(90deg,var(--primary-soft),transparent 92%);
+  border-left-color:var(--primary);
+}
+.nav-item.active>.nav-item-launch .label{color:var(--primary-lt)}
+.nav-item.active>.nav-item-launch .appicon{color:var(--primary);filter:drop-shadow(0 0 5px var(--primary-glow))}
+.nav-item-launch .label,.nav-subitem-launch .label{flex:1;min-width:0;font-size:13.2px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.005em}
+.appicon,.chev,.folder,.dot2{flex-shrink:0}
+.appicon{width:16px;height:16px;color:var(--txt-faint);transition:color .16s}
+.nav-item-launch:hover .appicon,.nav-subitem-launch:hover .appicon{color:var(--primary)}
+.chev{width:13px;height:13px;color:var(--txt-faint);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.folder{width:16px;height:16px;color:var(--txt-faint)}
+.dot2{width:6px;height:6px;border-radius:50%;background:var(--line-2);margin:0 5px 0 5px;box-shadow:0 0 0 3px rgba(255,255,255,.02)}
+.nav-subitem.active .dot2{background:var(--primary);box-shadow:0 0 8px var(--primary-glow)}
+.nav-badge{
+  font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--txt-faint);border:1px solid var(--line);border-radius:2px;padding:2px 5px;
+  white-space:nowrap;flex-shrink:0;
+}
+.nav-badge.src-idb{color:var(--accent);border-color:rgba(65,214,195,.35);background:rgba(65,214,195,.08)}
+
+/* Delikatna pulsująca zielona kropka na końcu wiersza — zakładka „Skanuj”:
+   nowa aplikacja (nieobecna w zakładce GitHub) albo nowa wersja pliku.
+   Analogiczna do bursztynowej lampki aktywnej pozycji, ale w kolorze zielonym. */
+.new-dot{
+  width:6px;height:6px;flex-shrink:0;align-self:center;
+  margin-left:7px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 8px rgba(47,211,106,.7);opacity:.9;
+  animation:newPulse 2.1s ease-in-out infinite;
+}
+.new-dot:hover{animation-duration:.8s;opacity:1}
+@keyframes newPulse{
+  0%,100%{opacity:1;transform:scale(1);box-shadow:0 0 8px rgba(47,211,106,.7)}
+  50%{opacity:.32;transform:scale(.68);box-shadow:0 0 3px rgba(47,211,106,.35)}
+}
+
+/* Pozycje dodane w bieżącej sesji, których jeszcze NIE ma w kodzie HTML
+   (lista „GitHub” lub „Wbudowane”) — podświetlone na zielono do momentu
+   „Zapisz panel + aplikacje”, potem zrzut list jest aktualizowany i kolor znika. */
+.nav-item.pending-save>.nav-item-launch,
+.nav-subitem.pending-save>.nav-subitem-launch{
+  border-left-color:var(--green);
+  background:linear-gradient(90deg,rgba(47,211,106,.11),transparent 92%);
+}
+.nav-item.pending-save>.nav-item-launch .label,
+.nav-subitem.pending-save>.nav-subitem-launch .label{color:var(--green);font-weight:600}
+.nav-item.pending-save>.nav-item-launch .nav-badge,
+.nav-subitem.pending-save>.nav-subitem-launch .nav-badge{
+  color:var(--green);border-color:rgba(47,211,106,.45);background:rgba(47,211,106,.09);
+}
+.nav-item.pending-save>.nav-item-launch .appicon,
+.nav-subitem.pending-save>.nav-subitem-launch .appicon{color:var(--green)}
+
+
+.nav-group{margin-bottom:4px}
+.nav-group-head{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px 9px 11px;border-left:2px solid transparent;border-radius:0 4px 4px 0;transition:.16s;text-align:left}
+.nav-group-head:hover{background:rgba(255,255,255,.03);border-left-color:var(--line-2)}
+body.theme-light .nav-group-head:hover{background:rgba(0,0,0,.035)}
+.nav-group-head .label{flex:1;min-width:0;font-family:var(--mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--txt-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-group-head:hover .label{color:var(--txt)}
+.nav-group.open>.nav-group-head .chev{transform:rotate(90deg);color:var(--primary)}
+.nav-group.has-active>.nav-group-head{background:var(--primary-soft);border-left-color:var(--primary-dk)}
+.nav-group-body{max-height:0;overflow:hidden;transition:max-height .34s cubic-bezier(.4,0,.2,1)}
+.nav-group.open>.nav-group-body{max-height:3000px}
+.tree{padding:2px 0 6px}
+.tree-row{position:relative;padding-left:16px}
+.tree-row::before{content:"";position:absolute;left:9px;top:0;bottom:0;width:1px;background:repeating-linear-gradient(180deg,var(--line-2) 0 3px,transparent 3px 7px)}
+.tree-row:last-child::before{bottom:50%}
+.nav-subitem{position:relative;display:flex;align-items:center}
+.nav-subitem-launch{padding:7px 10px 7px 6px;gap:8px}
+.nav-subitem-launch .label{font-size:12.6px;font-weight:400;color:var(--txt-dim)}
+.nav-subitem:hover .label,.nav-subitem.active .label{color:var(--txt)}
+
+.item-actions{display:none;gap:4px;padding:0 8px 8px 30px;flex-wrap:wrap}
+body.edit-mode .item-actions{display:flex}
+.item-act-btn{width:24px;height:24px;border:1px solid var(--line-2);border-radius:3px;color:var(--txt-dim);display:grid;place-items:center;transition:.16s}
+.item-act-btn svg{width:13px;height:13px}
+.item-act-btn:hover{color:var(--primary);border-color:var(--primary-dk);background:var(--primary-soft)}
+.item-act-btn.danger:hover{color:var(--danger);border-color:rgba(255,95,86,.5);background:rgba(255,95,86,.10)}
+.group-actions{padding:2px 8px 8px 30px}
+
+.empty-list,.scan-loading,.scan-error{
+  font-family:var(--mono);font-size:11px;line-height:1.6;padding:14px 12px;
+  border:1px dashed var(--line-2);border-radius:5px;color:var(--txt-dim);
+}
+.scan-loading{border-style:solid;border-color:var(--line);color:var(--primary);animation:pulseOp 1.4s ease-in-out infinite}
+.scan-error{border-color:rgba(255,95,86,.4);color:var(--danger)}
+@keyframes pulseOp{50%{opacity:.45}}
+
+.sidebar-footer{border-top:1px solid var(--line);padding:10px;background:linear-gradient(180deg,transparent,rgba(255,255,255,.015))}
+body.theme-light .sidebar-footer{background:linear-gradient(180deg,transparent,rgba(0,0,0,.02))}
+.sidebar-footer-row{display:flex;align-items:center}
+.manage-wrap{position:relative;display:flex;align-items:center;gap:8px;min-width:0}
+.manage-toggle{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:9px 10px;border:1px solid var(--line-2);border-radius:4px;font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--txt-dim);transition:.16s}
+.manage-toggle svg{width:14px;height:14px}
+.manage-toggle:hover{color:var(--primary);border-color:var(--primary-dk);background:var(--primary-soft)}
+.manage-pop{
+  position:absolute;bottom:calc(100% + 8px);left:0;width:268px;padding:6px;
+  background:var(--panel-2);border:1px solid var(--line-2);border-radius:6px;box-shadow:var(--shadow);
+  opacity:0;transform:translateY(8px);pointer-events:none;transition:.22s cubic-bezier(.4,0,.2,1);z-index:60;
+}
+.manage-wrap.open .manage-pop{opacity:1;transform:translateY(0);pointer-events:auto}
+.manage-item{display:flex;align-items:center;gap:9px;width:100%;padding:8px 9px;border-radius:4px;font-size:12.6px;color:var(--txt);transition:.14s;text-align:left}
+.manage-item svg{width:14px;height:14px;color:var(--txt-faint);flex-shrink:0}
+.manage-item:hover{background:var(--primary-soft);color:var(--primary-lt)}
+.manage-item:hover svg{color:var(--primary)}
+.manage-sep{height:1px;background:var(--line);margin:6px 4px}
+.m-state{margin-left:auto;font-family:var(--mono);font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--line-2);border-radius:2px;padding:1px 5px;color:var(--txt-faint)}
+.manage-item[aria-pressed="true"]{background:var(--primary-soft);color:var(--primary-lt)}
+.manage-item[aria-pressed="true"] .m-state{border-color:var(--primary-dk);color:var(--primary)}
+.manage-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 9px;font-size:12.2px;color:var(--txt-dim);line-height:1.35}
+.switch{position:relative;display:inline-block;width:34px;height:18px;flex-shrink:0}
+.switch input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:2}
+.switch-track{position:absolute;inset:0;background:var(--line-2);border-radius:999px;transition:.2s}
+.switch-thumb{position:absolute;top:3px;left:3px;width:12px;height:12px;border-radius:50%;background:var(--txt-dim);transition:.2s cubic-bezier(.4,0,.2,1);pointer-events:none}
+.switch input:checked~.switch-track{background:var(--primary);box-shadow:0 0 12px var(--primary-glow)}
+.switch input:checked~.switch-thumb{transform:translateX(16px);background:#0A0B0D}
+.switch input:focus-visible~.switch-track{outline:2px solid var(--primary);outline-offset:2px}
+.dark-toggle-btn{width:34px;height:34px;flex-shrink:0;border:1px solid var(--line-2);border-radius:4px;color:var(--txt-dim);display:grid;place-items:center;transition:.16s}
+.dark-toggle-btn svg{width:16px;height:16px}
+.dark-toggle-btn:hover{color:var(--primary);border-color:var(--primary-dk);background:var(--primary-soft)}
+.version{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--txt-dim);margin-top:10px}
+.engine{font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:var(--txt-faint);margin-top:3px}
+
+/* Przełącznik panelu — wbudowany w header (nie pływa już nad treścią). */
+.sidebar-fab{
+  position:static;width:28px;height:28px;flex-shrink:0;
+  background:transparent;border:1px solid var(--line-2);border-radius:4px;
+  color:var(--txt-dim);display:grid;place-items:center;
+  transition:.16s cubic-bezier(.4,0,.2,1);
+}
+.sidebar-fab svg{width:14px;height:14px;transition:transform .38s cubic-bezier(.4,0,.2,1)}
+body:not(.sidebar-collapsed) .sidebar-fab{color:var(--primary);border-color:var(--primary-dk);background:var(--primary-soft)}
+body:not(.sidebar-collapsed) .sidebar-fab svg{transform:rotate(180deg)}
+.sidebar-fab:hover{background:var(--primary);border-color:var(--primary);color:#0A0B0D}
+.sidebar-fab:active{transform:scale(.94)}
+.sidebar-backdrop{
+  /* zaczyna się pod headerem — dzięki temu przełącznik w pasku górnym
+     pozostaje klikalny, gdy szuflada panelu jest wysunięta */
+  position:fixed;top:var(--bar);left:0;right:0;bottom:0;z-index:38;background:rgba(4,6,8,.55);
+  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+body:not(.sidebar-collapsed) .sidebar-backdrop{opacity:1;pointer-events:auto}
+
+/* ---------- GÓRNY PASEK ---------- */
+.topbar-wrap{
+  position:fixed;top:0;left:0;right:0;height:var(--bar);z-index:30;
+  background:color-mix(in srgb,var(--bg) 86%,transparent);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);
+}
+@supports not (background:color-mix(in srgb,red 50%,blue)){.topbar-wrap{background:rgba(7,9,11,.88)}}
+@supports not (background:color-mix(in srgb,red 50%,blue)){.toast{background:rgba(14,18,23,.82);border-color:rgba(38,48,59,.82)}}
+body.theme-light .topbar-wrap{background:rgba(239,236,228,.92)}
+/* HEADER — wariant minimal: 44 px, bez poświat, mniejsze kontrolki. */
+.topbar{
+  height:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:0 12px 0 calc(var(--rail) + 14px);
+  transition:padding-left .38s cubic-bezier(.4,0,.2,1);
+}
+body.sidebar-collapsed .topbar{padding-left:14px}
+.topbar-left{display:flex;align-items:center;gap:10px;min-width:0}
+.topbar-title{
+  /* Tytuł otwartej aplikacji ma być czytelny i bardziej naturalny niż techniczny mono. */
+  font-family:var(--sans);font-size:12.5px;font-weight:500;letter-spacing:.035em;
+  text-transform:none;color:var(--primary-lt);white-space:nowrap;text-shadow:none;
+  max-width:38vw;overflow:hidden;text-overflow:ellipsis;
+}
+.topbar-breadcrumb{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;color:var(--txt-dim);min-width:0}
+.topbar-breadcrumb svg{width:12px;height:12px;color:var(--txt-faint);flex-shrink:0}
+.topbar-breadcrumb span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:34vw}
+.topbar-right{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.topbar-icon-btn{width:28px;height:28px;border:1px solid var(--line-2);border-radius:4px;color:var(--txt-dim);display:grid;place-items:center;transition:.16s}
+.topbar-icon-btn svg{width:14px;height:14px}
+.topbar-icon-btn:hover{color:var(--primary);border-color:var(--primary-dk);background:var(--primary-soft)}
+.tool-only-btn{display:none}
+body.has-tool .tool-only-btn{display:grid}
+body:not(.source-remote) #shareBtn{display:none!important}
+.topbar-sep{width:1px;height:16px;background:var(--line)}
+#clock{font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;color:var(--primary);font-variant-numeric:tabular-nums;min-width:58px;text-align:right}
+
+/* ---------- GŁÓWNA WIDOCZNOŚĆ ---------- */
+.main{
+  position:relative;z-index:10;height:100%;padding-top:var(--bar);
+  margin-left:var(--rail);display:flex;flex-direction:column;overflow:hidden;
+  transition:margin-left .38s cubic-bezier(.4,0,.2,1);
+}
+body.sidebar-collapsed .main{margin-left:0}
+
+/* --- ekran powitalny: asymetryczny, lewy szkielet --- */
+.welcome{
+  flex:1;min-height:0;overflow-y:auto;display:grid;align-content:center;justify-items:start;
+  padding:44px clamp(22px,6vw,72px);position:relative;
+}
+.welcome-kicker{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--primary);margin-bottom:22px}
+.welcome-kicker::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--primary);box-shadow:0 0 10px var(--primary-glow);animation:blink 2.4s ease-in-out infinite}
+.welcome-kicker::after{content:"";width:74px;height:1px;background:repeating-linear-gradient(90deg,var(--primary-dk) 0 5px,transparent 5px 10px)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.28}}
+.icon-big{
+  width:74px;height:74px;display:grid;place-items:center;margin-bottom:26px;
+  border:1px solid var(--line-2);border-radius:6px;color:var(--primary);
+  background:linear-gradient(160deg,var(--primary-soft),transparent 70%);
+  box-shadow:0 0 0 1px rgba(255,255,255,.02) inset,0 12px 34px rgba(0,0,0,.4);
+}
+.icon-big svg{width:34px;height:34px;filter:drop-shadow(0 0 8px var(--primary-glow))}
+.welcome h2{
+  margin:0 0 16px;font-size:clamp(2.1rem,5.4vw,3.7rem);line-height:1.03;
+  font-weight:700;letter-spacing:-.028em;max-width:14ch;
+}
+.welcome h2 .accent{color:var(--primary);position:relative;display:inline-block}
+.welcome h2 .accent::after{
+  content:"";position:absolute;left:0;right:0;bottom:.06em;height:3px;
+  background:var(--primary);opacity:.35;transform-origin:left;animation:swipe 1.1s .25s cubic-bezier(.4,0,.2,1) both;
+}
+@keyframes swipe{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.welcome p{margin:0 0 28px;max-width:58ch;color:var(--txt-dim);font-size:15.5px;line-height:1.65}
+.welcome-meta{display:flex;flex-wrap:wrap;gap:8px 26px;font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt-faint);border-top:1px solid var(--line);padding-top:16px;max-width:640px}
+.welcome-meta strong{color:var(--txt);font-weight:500}
+.meta-mark{color:var(--primary);margin-right:4px}
+.welcome::after{
+  content:"FLEET & DOCS SUITE · SINGLE-FILE · OFFLINE · IZOLOWANY SANDBOX";
+  position:absolute;right:clamp(14px,3vw,42px);top:50%;transform:translateY(-50%);
+  writing-mode:vertical-rl;font-family:var(--mono);font-size:10px;letter-spacing:.42em;
+  text-transform:uppercase;color:var(--txt-faint);opacity:.5;white-space:nowrap;pointer-events:none;
+}
+
+/* --- obszar ramki narzędzia --- */
+.frame-area{flex:1;min-height:0;position:relative;display:none;background:var(--bg-2);border-top:1px solid var(--line)}
+.frame-area.show{display:block}
+/* Po uruchomieniu aplikacji iframe ma pełną kontrolę nad kliknięciami i gestami.
+   Nakładka sidebaru nie może przechwytywać przycisków formularzy ani przewijania. */
+body.has-tool .sidebar-backdrop{opacity:0!important;pointer-events:none!important}
+#toolFrame{position:absolute;inset:0;width:100%;height:100%;border:0;background:var(--panel-2);display:block;z-index:1;pointer-events:auto}
+.loading-overlay{
+  position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
+  background:color-mix(in srgb,var(--bg) 92%,transparent);
+  -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+  opacity:0;pointer-events:none;transition:opacity .28s;
+}
+@supports not (background:color-mix(in srgb,red 50%,blue)){.loading-overlay{background:rgba(7,9,11,.94)}}
+.loading-overlay.show{opacity:1;pointer-events:auto}
+.loading-overlay::before{
+  content:"";position:absolute;inset:0;
+  background:repeating-linear-gradient(to bottom,var(--scanline) 0 1px,transparent 1px 3px);
+}
+.deploy-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.34em;text-transform:uppercase;color:var(--txt-faint);margin-bottom:14px}
+.deploy-name{
+  font-family:var(--mono);font-size:clamp(1.3rem,3.6vw,2.3rem);font-weight:500;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--primary);text-shadow:0 0 22px var(--primary-glow);
+  margin-bottom:24px;text-align:center;max-width:90vw;word-break:break-word;min-height:1.2em;
+}
+.deploy-bar{width:min(420px,72vw);height:3px;background:var(--line);border-radius:2px;overflow:hidden;position:relative}
+.deploy-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--primary-dk),var(--primary) 60%,var(--primary-lt));border-radius:2px;box-shadow:0 0 12px var(--primary-glow);transition:width .9s cubic-bezier(.4,0,.2,1)}
+.deploy-sub{font-family:var(--mono);font-size:9px;letter-spacing:.2em;color:var(--txt-faint);margin-top:16px;text-align:center;padding:0 16px}
+
+/* ---------- MODAL UDOSTĘPNIANIA ---------- */
+.modal-bg{
+  position:fixed;inset:0;z-index:120;display:none;place-items:center;padding:20px;
+  background:rgba(4,6,8,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+}
+.modal-bg.open{display:grid}
+.modal-box{
+  position:relative;width:min(400px,100%);background:var(--panel);border:1px solid var(--line-2);
+  border-radius:8px;padding:24px 22px 20px;box-shadow:var(--shadow);animation:popIn .26s cubic-bezier(.4,0,.2,1);
+}
+@keyframes popIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+.modal-box h3{margin:0 0 16px;font-size:15px;letter-spacing:.02em}
+.mx{position:absolute;top:12px;right:12px;width:26px;height:26px;border:1px solid var(--line);border-radius:4px;color:var(--txt-dim);display:grid;place-items:center;font-size:12px;transition:.16s}
+.mx:hover{color:var(--danger);border-color:rgba(255,95,86,.5);background:rgba(255,95,86,.1)}
+.share-url-row{display:flex;gap:7px}
+.share-url-row input{flex:1;min-width:0;background:var(--panel-2);border:1px solid var(--line);border-radius:4px;padding:8px 9px;font-family:var(--mono);font-size:11px;outline:none}
+.share-url-row input:focus{border-color:var(--primary-dk)}
+.share-url-row button{padding:0 14px;background:var(--primary);color:#0A0B0D;border-radius:4px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;transition:.16s}
+.share-url-row button:hover{background:var(--primary-lt);box-shadow:0 0 16px var(--primary-glow)}
+.share-qr-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:16px;padding:14px;border:1px solid var(--line);border-radius:6px;background:#fff}
+.share-qr-wrap canvas{display:block;width:160px;height:160px;image-rendering:pixelated}
+.share-qr-wrap span{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#6b7280}
+.share-note{font-family:var(--mono);font-size:10px;color:var(--txt-faint);margin-top:10px;line-height:1.5}
+
+/* ---------- MODALE SYSTEMOWE (import / ikony) ---------- */
+.modal-backdrop{
+  position:fixed;inset:0;z-index:130;display:none;place-items:center;padding:18px;
+  background:rgba(4,6,8,.74);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+}
+.modal-backdrop.open{display:grid}
+.imodal{
+  width:min(580px,100%);max-height:92vh;display:flex;flex-direction:column;
+  background:var(--panel);border:1px solid var(--line-2);border-radius:9px;box-shadow:var(--shadow);
+  animation:popIn .26s cubic-bezier(.4,0,.2,1);overflow:hidden;
+}
+.imodal-head{display:flex;align-items:flex-start;gap:14px;padding:20px 20px 16px;border-bottom:1px solid var(--line);position:relative}
+.imodal-head h3{margin:0 0 5px;font-size:15.5px;letter-spacing:.01em}
+.imodal-head p{margin:0;font-size:12.6px;color:var(--txt-dim);line-height:1.55;max-width:56ch}
+.imodal-head .mx{position:static;flex-shrink:0;margin-left:auto}
+.imodal-body{padding:18px 20px;display:flex;flex-direction:column;gap:15px;overflow-y:auto;flex:1;min-height:0}
+.imodal-foot{display:flex;justify-content:flex-end;gap:9px;padding:14px 20px;border-top:1px solid var(--line);background:var(--panel-2)}
+.ifield label{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt-faint);margin-bottom:6px}
+.ifield input[type=text],.ifield textarea{
+  width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:4px;
+  padding:9px 10px;font-size:13.4px;outline:none;transition:.18s;
+}
+.ifield textarea{font-family:var(--mono);font-size:12px;min-height:160px;resize:vertical;line-height:1.55}
+.ifield input:focus,.ifield textarea:focus{border-color:var(--primary-dk);box-shadow:0 0 0 3px var(--primary-soft)}
+.ifield input::placeholder,.ifield textarea::placeholder{color:var(--txt-faint)}
+.itabs{display:flex;gap:3px;padding:3px;background:var(--panel-2);border:1px solid var(--line);border-radius:5px}
+.itab{flex:1;padding:8px 6px;border-radius:3px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt-dim);transition:.16s;border:1px solid transparent}
+.itab:hover{color:var(--txt);background:rgba(255,255,255,.03)}
+body.theme-light .itab:hover{background:rgba(0,0,0,.04)}
+.itab.active{background:var(--primary);color:#0A0B0D;font-weight:600;box-shadow:0 0 14px var(--primary-glow)}
+.ipanel{display:none;flex-direction:column;gap:12px}
+.ipanel.active{display:flex}
+.idrop{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  padding:28px 16px;border:1px dashed var(--line-2);border-radius:6px;color:var(--txt-dim);
+  cursor:pointer;transition:.2s;text-align:center;background:repeating-linear-gradient(45deg,transparent 0 10px,rgba(255,255,255,.012) 10px 20px);
+}
+.idrop svg{width:26px;height:26px;color:var(--primary);margin-bottom:4px}
+.idrop strong{font-size:13.4px;color:var(--txt);font-weight:500}
+.idrop span{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt-faint)}
+.idrop:hover,.idrop.dragover{border-color:var(--primary);background:var(--primary-soft);color:var(--primary)}
+.ifile-status{display:none;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;color:var(--accent);word-break:break-all}
+.ifile-status.show{display:flex}
+.ifile-status svg{flex-shrink:0}
+.ighresults{max-height:190px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;border:1px solid transparent}
+.ighresults:empty{display:none}
+.ighresults:not(:empty){border-color:var(--line);border-radius:5px;padding:4px;background:var(--panel-2)}
+.ighrow{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:7px 9px;border-radius:3px;border-left:2px solid transparent;font-family:var(--mono);font-size:11.4px;color:var(--txt-dim);text-align:left;transition:.14s}
+.ighrow .path{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.ighrow .sz{color:var(--txt-faint);flex-shrink:0;font-size:10px}
+.ighrow:hover{background:rgba(255,255,255,.04);color:var(--txt)}
+body.theme-light .ighrow:hover{background:rgba(0,0,0,.04)}
+.ighrow.selected{background:var(--primary-soft);border-left-color:var(--primary);color:var(--primary-lt)}
+.igh-loading,.igh-empty,.igh-error{font-family:var(--mono);font-size:11px;padding:10px;color:var(--txt-dim)}
+.igh-loading{color:var(--primary)}
+.igh-error{color:var(--danger)}
+.imodal-btn{padding:10px 18px;border-radius:4px;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;transition:.16s;border:1px solid transparent}
+.imodal-btn.confirm{background:var(--primary);color:#0A0B0D;font-weight:600;box-shadow:0 0 18px var(--primary-glow)}
+.imodal-btn.confirm:hover{background:var(--primary-lt)}
+.imodal-btn.cancel{border-color:var(--line-2);color:var(--txt-dim)}
+.imodal-btn.cancel:hover{color:var(--txt);border-color:var(--txt-faint)}
+.imodal-btn:disabled{opacity:.35;pointer-events:none;box-shadow:none}
+.ghnote{font-size:12.2px;line-height:1.55;color:var(--txt-dim);background:var(--primary-soft);border-left:2px solid var(--primary);padding:9px 11px;border-radius:0 4px 4px 0}
+.icon-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(50px,1fr));gap:7px}
+.icon-opt{aspect-ratio:1;display:grid;place-items:center;border:1px solid var(--line);border-radius:5px;color:var(--txt-dim);background:var(--panel-2);transition:.16s}
+.icon-opt svg{width:20px;height:20px}
+.icon-opt:hover{color:var(--primary);border-color:var(--primary-dk);transform:translateY(-2px)}
+.icon-opt.selected{color:#0A0B0D;background:var(--primary);border-color:var(--primary);box-shadow:0 0 16px var(--primary-glow)}
+
+/* ---------- TOAST ---------- */
+.toast{
+  position:fixed;left:50%;bottom:26px;z-index:140;transform:translate(-50%,24px);
+  opacity:0;pointer-events:none;display:flex;align-items:center;gap:9px;
+  max-width:min(560px,92vw);padding:10px 14px;
+  background:color-mix(in srgb,var(--panel-2) 58%,transparent);
+  border:1px solid color-mix(in srgb,var(--line-2) 72%,transparent);
+  border-radius:6px;box-shadow:0 10px 30px rgba(0,0,0,.22),0 0 0 1px rgba(255,255,255,.025) inset;
+  -webkit-backdrop-filter:blur(14px) saturate(125%);backdrop-filter:blur(14px) saturate(125%);
+  font-family:var(--sans);font-size:12px;line-height:1.45;color:var(--txt);
+  transition:opacity .26s,transform .26s cubic-bezier(.4,0,.2,1);
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast-mark{width:7px;height:7px;flex-shrink:0;background:var(--primary);transform:rotate(45deg);box-shadow:0 0 9px var(--primary-glow)}
+.toast.err{border-color:rgba(255,95,86,.55);color:#FFB3AE}
+.toast.err .toast-mark{background:var(--danger);box-shadow:0 0 9px rgba(255,95,86,.6)}
+
+/* ---------- SKALE ---------- */
+@media (max-width:900px){
+  :root{--rail:min(282px,86vw)}
+  .sidebar{box-shadow:12px 0 38px rgba(0,0,0,.38)}
+  .sidebar-backdrop{-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+  .main{margin-left:0}
+  .topbar,body.sidebar-collapsed .topbar{padding-left:14px}
+  .welcome::after{display:none}
+  .topbar-breadcrumb{display:none}
+}
+@media (min-width:901px){
+  /* Pulpit: podkładka jest PEŁNA, ale przezroczysta — nie przyciemnia treści,
+     a mimo to łapie każde kliknięcie (także wewnątrz iframe narzędzia),
+     żeby kliknięcie w dowolne miejsce poza panelem zamykało szynę. */
+  .sidebar-backdrop{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
+}
+@media (max-width:640px){
+  .topbar,body.sidebar-collapsed .topbar{padding:0 10px 0 12px;gap:8px}
+  .topbar-left{gap:8px}
+  #clock{min-width:0;font-size:11px}
+  .topbar-sep{display:none}
+  .welcome{padding:28px 20px 40px;align-content:start;padding-top:38px}
+  .welcome h2{font-size:clamp(1.8rem,8vw,2.6rem);max-width:100%}
+  .welcome p{font-size:14.4px}
+  .icon-big{width:60px;height:60px;margin-bottom:20px}
+  .icon-big svg{width:28px;height:28px}
+  .welcome-meta{gap:6px 16px;font-size:9.5px}
+  .imodal-body{padding:15px 15px}
+  .imodal-head{padding:16px 15px 13px}
+  .imodal-foot{padding:12px 15px}
+  .deploy-name{font-size:clamp(1.1rem,7vw,1.7rem)}
+  .toast{bottom:16px;font-size:11px}
+}
+@media (max-height:560px){
+  .welcome{align-content:start}
+  .icon-big{display:none}
+}
+
+/* ---------- DOSTĘPNOŚĆ RUCHU ---------- */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.08s!important}
+  #hud-scan::after{display:none}
+  #hud-noise{animation:none}
+  .orb{animation:none}
+}
+/* ============================================================
+   WARSTWA 2 — PEŁNA STYLIZACJA
+   Stany (focus/hover/active/disabled), tekstury powierzchni,
+   detal HUD (narożniki, linijki, lampki), scrollbar, kontrast.
+   ============================================================ */
+
+/* ---------- stany podstawowe / dostępność ---------- */
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:3px}
+button:disabled,[disabled],.imodal-btn:disabled{cursor:not-allowed}
+input:disabled,textarea:disabled{cursor:not-allowed;opacity:.55}
+a{color:var(--primary);text-underline-offset:3px}
+img,svg{max-width:100%}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:6px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:var(--primary-dk);background-clip:padding-box;border:2px solid transparent}
+*{scrollbar-width:thin;scrollbar-color:var(--line-2) transparent}
+
+/* ---------- bezel przyrządu: narożniki i linijka krawędzi ---------- */
+body::before{
+  content:"";position:fixed;inset:13px;z-index:96;pointer-events:none;opacity:.5;
+  background:
+    linear-gradient(var(--primary-dk),var(--primary-dk)) left top/20px 1px no-repeat,
+    linear-gradient(var(--primary-dk),var(--primary-dk)) left top/1px 20px no-repeat,
+    linear-gradient(var(--primary-dk),var(--primary-dk)) right top/20px 1px no-repeat,
+    linear-gradient(var(--primary-dk),var(--primary-dk)) right top/1px 20px no-repeat,
+    linear-gradient(var(--primary-dk),var(--primary-dk)) left bottom/20px 1px no-repeat,
+    linear-gradient(var(--primary-dk),var(--primary-dk)) left bottom/1px 20px no-repeat,
+    linear-gradient(var(--primary-dk),var(--primary-dk)) right bottom/20px 1px no-repeat,
+    linear-gradient(var(--primary-dk),var(--primary-dk)) right bottom/1px 20px no-repeat;
+}
+body::after{
+  content:"";position:fixed;top:64px;right:0;bottom:64px;width:7px;z-index:96;pointer-events:none;opacity:.4;
+  background:repeating-linear-gradient(180deg,var(--primary-dk) 0 1px,transparent 1px 9px);
+}
+body.theme-light::before,body.theme-light::after{opacity:.32}
+
+/* ---------- szyna: faktura panelu i mikro-etykiety ---------- */
+.sidebar{
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.035),transparent 140px),
+    repeating-linear-gradient(180deg,rgba(255,255,255,.014) 0 1px,transparent 1px 4px),
+    var(--panel);
+}
+body.theme-light .sidebar{
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.03),transparent 140px),
+    repeating-linear-gradient(180deg,rgba(0,0,0,.018) 0 1px,transparent 1px 4px),
+    var(--panel);
+}
+.sidebar-logo{background:linear-gradient(180deg,rgba(245,169,36,.05),transparent)}
+body.theme-light .sidebar-logo{background:linear-gradient(180deg,rgba(154,90,0,.06),transparent)}
+.sidebar::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:3px;pointer-events:none;
+  background:linear-gradient(180deg,var(--primary) 0,transparent 22%,transparent 78%,var(--primary-dk) 100%);
   opacity:.5;
 }
-
-/* ============ SIDEBAR (floating overlay, collapsible) ============ */
-.sidebar{
-  position:fixed;top:0;left:0;height:100dvh;width:var(--sidebar-w);
-  background:var(--sidebar-bg);backdrop-filter:blur(10px) saturate(150%);-webkit-backdrop-filter:blur(10px) saturate(150%);
-  border-right:1px solid var(--card-border);
-  display:flex;flex-direction:column;overflow:hidden;
-  z-index:200;box-shadow:4px 0 30px rgba(0,0,0,.35);
-  transform:translateX(0);transition:transform .28s cubic-bezier(.4,0,.2,1);
+.src-btn{position:relative;overflow:hidden}
+.src-btn.active::after{
+  content:"";position:absolute;left:50%;bottom:3px;transform:translateX(-50%);
+  width:14px;height:2px;background:#0A0B0D;opacity:.55;border-radius:2px;
 }
-body.sidebar-collapsed .sidebar{transform:translateX(-100%)}
-
-.sidebar-backdrop{
-  position:fixed;inset:0;background:transparent;z-index:150;
-  opacity:0;pointer-events:none;
+.sidebar-footer::before{
+  content:"PULPIT STEROWANIA";display:block;margin-bottom:9px;
+  font-family:var(--mono);font-size:8.5px;letter-spacing:.26em;color:var(--txt-faint);
+  padding-bottom:7px;border-bottom:1px dashed var(--line);
 }
-body:not(.sidebar-collapsed) .sidebar-backdrop{pointer-events:auto}
+.version{display:flex;align-items:center;gap:7px}
+.version::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 7px var(--accent);flex-shrink:0}
 
-.sidebar-logo{padding:16px 16px 14px;border-bottom:1px solid var(--card-border);display:flex;align-items:center;gap:10px;flex:none;background:rgba(4,7,13,.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-.theme-light .sidebar-logo{background:rgba(255,255,255,.75)}
-.sidebar-logo-text{flex:1;min-width:0}
-.sidebar-logo h2{font-size:13.5px;font-weight:700;letter-spacing:.05em;color:var(--primary);display:flex;align-items:center;gap:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sidebar-logo h2 svg{width:17px;height:17px;flex-shrink:0}
-.logo-sub{font-size:9.5px;color:var(--muted);margin-top:3px;letter-spacing:.03em}
-.collapse-btn{width:26px;height:26px;border-radius:6px;border:1px solid var(--card-border);background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s}
-.collapse-btn:hover{background:var(--primary-dim);color:var(--primary);border-color:rgba(37,210,255,.3)}
-.collapse-btn svg{width:13px;height:13px}
-
-.search-wrap{padding:10px 12px 4px;flex:none}
-.search-wrap input{width:100%;padding:7px 9px;background:var(--bg3);border:1px solid var(--card-border);border-radius:6px;color:var(--text);font-family:var(--font-ui);font-size:12px}
-.search-wrap input:focus{outline:none;border-color:var(--primary)}
-
-#navRoot{flex:1;overflow-y:auto;padding:8px 10px 12px}
-
-.nav-item{display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;border-radius:var(--r);cursor:pointer;transition:background .15s,color .15s,transform .15s,box-shadow .15s;font-size:12.5px;font-family:var(--font-ui);color:var(--muted);margin-bottom:2px;position:relative;background:rgba(4,7,13,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:none;border-bottom:1px solid var(--list-divider);text-align:left}
-.theme-light .nav-item{background:rgba(255,255,255,.8)}
-.nav-item:hover{background:var(--primary-dim);color:var(--text);transform:translateX(3px)}
-.nav-item.active{background:var(--primary-dim);color:var(--primary);font-weight:600;box-shadow:inset 0 0 22px -12px var(--primary-glow)}
-.nav-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:16px;background:var(--primary);border-radius:0 3px 3px 0;box-shadow:0 0 8px var(--primary-glow)}
-.nav-item svg{width:14px;height:14px;flex-shrink:0}
-.nav-item .label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.nav-badge{font-family:var(--font-mono);font-size:8.5px;padding:1px 5px;border-radius:4px;background:rgba(37,210,255,.18);color:#7fe6ff;border:1px solid rgba(37,210,255,.35);white-space:nowrap;flex-shrink:0}
-.theme-light .nav-badge{background:rgba(8,145,178,.22);border-color:rgba(8,145,178,.5);color:#025372}
-
-/* ---- GROUPS / TREE ---- */
-.nav-group{margin-bottom:3px}
-.nav-group-head{display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;border-radius:var(--r);cursor:pointer;background:rgba(4,7,13,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:none;text-align:left;font-family:var(--font-ui);font-size:12.5px;color:var(--text);font-weight:600;transition:background .15s}
-.theme-light .nav-group-head{background:rgba(255,255,255,.8)}
-.nav-group-head:hover{background:var(--primary-dim)}
-.nav-group-head svg.folder{width:14px;height:14px;flex-shrink:0;color:var(--sky)}
-.nav-group-head .label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.nav-group-head svg.chev{width:11px;height:11px;flex-shrink:0;transition:transform .2s;color:var(--muted)}
-.nav-group.open .nav-group-head svg.chev{transform:rotate(90deg)}
-.nav-group.has-active .nav-group-head{color:var(--primary)}
-
-.nav-group-body{max-height:0;overflow:hidden;transition:max-height .28s ease}
-.nav-group.open .nav-group-body{max-height:480px}
-
-.tree{position:relative;margin-left:17px;padding-left:14px;border-left:1px dashed var(--tree-line)}
-.tree-row{position:relative;padding:5px 0}
-.tree-row::before{
-  content:'';position:absolute;left:-14px;top:16px;width:12px;height:1px;
-  background:var(--tree-line);
+/* ---------- lista modułów: precyzja wierszy ---------- */
+.nav-item-launch,.nav-subitem-launch,.nav-group-head{will-change:transform}
+.nav-item-launch,.nav-subitem-launch{transition:background .16s,border-color .16s,color .16s,transform .16s cubic-bezier(.4,0,.2,1)}
+.nav-item-launch:hover,.nav-subitem-launch:hover{transform:translateX(3px)}
+.nav-item-launch:active,.nav-subitem-launch:active,.nav-group-head:active{transform:translateX(3px) scale(.995)}
+.nav-item.active>.nav-item-launch::after{
+  content:"";width:5px;height:5px;border-radius:50%;flex-shrink:0;
+  background:var(--primary);box-shadow:0 0 9px var(--primary-glow);
+  animation:blink 2.6s ease-in-out infinite;
 }
-.tree-row:last-child{margin-bottom:-1px}
+.nav-item-launch .label,.nav-subitem-launch .label{transition:color .16s}
+.nav-badge{font-variant-numeric:tabular-nums;transition:.16s}
+.nav-item-launch:hover .nav-badge{border-color:var(--primary-dk);color:var(--primary)}
+.nav-group-head{transition:background .16s,border-color .16s,transform .16s}
+.nav-group-head .chev{margin-left:2px}
+.tree-row:last-child .nav-subitem-launch{padding-bottom:9px}
+.item-actions{border-top:1px dashed var(--line);margin-top:2px;padding-top:8px}
+body.edit-mode .nav-item,body.edit-mode .nav-subitem{background:rgba(245,169,36,.035)}
+body.edit-mode .item-act-btn{animation:popIn .22s cubic-bezier(.4,0,.2,1) both}
+.item-act-btn:active{transform:scale(.9)}
 
-.nav-subitem{display:flex;align-items:center;gap:7px;width:100%;padding:6px 8px;border-radius:6px;cursor:pointer;background:rgba(4,7,13,.48);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);border:none;border-bottom:1px solid var(--list-divider);text-align:left;font-family:var(--font-ui);font-size:11.5px;color:var(--muted);position:relative;transition:background .15s,color .15s,transform .15s,box-shadow .15s}
-.theme-light .nav-subitem{background:rgba(255,255,255,.74)}
-.nav-subitem:hover{background:var(--primary-dim);color:var(--text);transform:translateX(3px)}
-.nav-subitem.active{background:var(--primary-dim);color:var(--primary);font-weight:600;box-shadow:inset 0 0 18px -12px var(--primary-glow)}
-.nav-subitem .dot2{width:5px;height:5px;border-radius:50%;background:var(--muted);flex-shrink:0}
-.nav-subitem.active .dot2{background:var(--primary);box-shadow:0 0 6px var(--primary-glow)}
-.nav-subitem .label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-
-.sidebar-footer{flex:none;padding:12px 16px;border-top:1px solid var(--card-border);background:rgba(4,7,13,.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-.theme-light .sidebar-footer{background:rgba(255,255,255,.75)}
-.sidebar-footer-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
-.sidebar-footer-label{font-size:9.5px;color:var(--muted)}
-.source-toggle{display:flex;gap:4px;margin-bottom:10px}
-.src-btn{flex:1;font-family:var(--font-mono);font-size:8.5px;letter-spacing:.1em;padding:6px 4px;border-radius:7px;border:1px solid var(--card-border);background:var(--card);color:var(--muted);cursor:pointer;transition:all .2s ease;text-align:center;white-space:nowrap}
-.src-btn:hover{color:var(--text);border-color:var(--primary)}
-.src-btn.active{background:var(--primary);color:#04070d;border-color:var(--primary);font-weight:700;box-shadow:0 0 14px -4px var(--primary-glow)}
-.scan-loading,.scan-error{padding:20px 14px;font-size:11px;color:var(--muted);text-align:center}
-.scan-error{color:#ff6b6b}
-.api-limit{margin-bottom:10px;padding:8px 9px;background:rgba(0,0,0,.25);border:1px solid var(--card-border);border-radius:8px}
-.api-limit-label{font-size:9px;color:var(--muted);display:block;margin-bottom:5px}
-.api-limit-bar{height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;margin-bottom:4px}
-.api-limit-fill{height:100%;border-radius:2px;background:var(--emerald);transition:width .4s ease,background .4s ease;width:100%}
-.api-limit-fill.mid{background:var(--amber)}
-.api-limit-fill.low{background:var(--rose)}
-.api-limit-val{font-size:9px;color:var(--muted);font-family:var(--font-mono)}
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:900;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px)}
-.modal-bg.open{display:flex}
-.modal-box{background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:24px;max-width:340px;width:100%;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.5)}
-.modal-box h3{font-size:14px;margin-bottom:14px;padding-right:24px}
-.modal-box .mx{position:absolute;top:12px;right:12px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px}
-.modal-box .mx:hover{color:var(--text)}
-.share-url-row{display:flex;gap:6px;margin-bottom:16px}
-.share-url-row input{flex:1;background:rgba(0,0,0,.3);border:1px solid var(--card-border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:10.5px;font-family:var(--font-mono);min-width:0}
-.share-url-row button{background:var(--primary);color:#04070d;border:none;padding:8px 14px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap}
-.share-qr-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px;background:#fff;border-radius:10px}
-.share-qr-wrap span{font-size:9.5px;color:#666;font-family:var(--font-mono)}
-.share-note{margin-top:12px;font-size:10px;color:var(--muted);text-align:center}
-.version{font-family:var(--font-mono);font-size:8.5px;letter-spacing:.14em;color:var(--primary);opacity:.9;border:1px solid var(--card-border);padding:3px 8px;border-radius:5px;background:rgba(37,210,255,.04)}
-.engine{font-size:8.5px;color:var(--muted);opacity:.85;margin-top:3px}
-.switch{position:relative;width:34px;height:19px;cursor:pointer;display:inline-block;flex:none}
-.switch input{display:none}
-.switch-track{position:absolute;inset:0;background:rgba(148,163,184,.3);border-radius:10px;transition:background .2s}
-.switch input:checked+.switch-track{background:var(--primary)}
-.switch-thumb{position:absolute;top:2.5px;left:2.5px;width:14px;height:14px;background:#fff;border-radius:50%;transition:transform .2s}
-.switch input:checked~.switch-thumb{transform:translateX(15px)}
-
-/* ============ FLOATING TOGGLE (visible when collapsed) ============ */
-.sidebar-fab{
-  position:fixed;top:6px;left:10px;z-index:220;width:30px;height:30px;border-radius:7px;
-  background:var(--sidebar-bg);backdrop-filter:blur(14px);border:1px solid var(--card-border);
-  color:var(--primary);display:flex;align-items:center;justify-content:center;cursor:pointer;
-  box-shadow:0 4px 16px rgba(0,0,0,.3);transition:opacity .2s,left .28s;
+/* ---------- górny pasek: lampka stanu i przyciski ---------- */
+/* Bez cienia — nagłówek nie może rzucać cienia na otwierane narzędzie. */
+.topbar-wrap{box-shadow:none}
+.topbar-title::before{
+  content:"";display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:var(--accent);box-shadow:0 0 8px var(--accent);
+  margin-right:9px;vertical-align:middle;animation:blink 3.2s ease-in-out infinite;
 }
-.sidebar-fab svg{width:14px;height:14px}
-body:not(.sidebar-collapsed) .sidebar-fab{opacity:0;pointer-events:none}
-
-/* ============ TOPBAR ============ */
-.topbar-wrap{position:absolute;top:0;left:0;right:0;z-index:20;transition:left .28s}
-.topbar{height:var(--header-h);background:color-mix(in srgb, var(--bg) 78%, transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--card-border);padding:0 20px 0 60px;display:flex;align-items:center;justify-content:space-between;transition:background .25s ease,border-color .25s ease}
-.topbar-left{display:flex;align-items:center;gap:12px;min-width:0}
-.topbar-title{font-size:13px;font-weight:600;color:var(--text);letter-spacing:.04em;white-space:nowrap;opacity:.9}
-.topbar-breadcrumb{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.topbar-breadcrumb svg{width:11px;height:11px;opacity:.4;flex:none}
-.topbar-right{display:flex;align-items:center;gap:10px;font-family:var(--font-mono);font-size:11px;color:var(--muted);opacity:.75}
-.topbar-sep{width:1px;height:14px;background:var(--card-border)}
-.topbar-icon-btn{width:32px;height:32px;border-radius:7px;border:1px solid transparent;background:transparent;color:var(--muted-strong);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
-.topbar-icon-btn:hover{background:var(--primary-dim);color:var(--primary);border-color:rgba(37,210,255,.2)}
-.topbar-icon-btn svg{width:13px;height:13px}
-.tool-only-btn{display:none}
-body.has-tool .tool-only-btn{display:flex}
-/* Udostępnianie ma sens tylko dla narzędzi pochodzących z GitHub (realny, trwały link) —
-   przy danych wbudowanych (base64) przycisk jest ukryty, nawet gdy narzędzie jest aktywne. */
-#shareBtn{display:none!important}
-body.has-tool.source-remote #shareBtn{display:flex!important}
-
-/* ============ MAIN (full width, sidebar overlays it) ============ */
-.main{position:absolute;top:var(--header-h);left:0;right:0;bottom:0;z-index:2;background:transparent;overflow:hidden}
-
-.welcome{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0;padding:24px 24px 24px 76px;text-align:center}
-.welcome-kicker{display:inline-flex;align-items:center;gap:8px;margin-bottom:22px;color:var(--primary);font-family:var(--font-mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase}
-.welcome-kicker::before,.welcome-kicker::after{content:'';width:25px;height:1px;background:var(--primary);opacity:.42}
-.welcome .icon-big{position:relative;display:grid;place-items:center;width:84px;height:84px;margin:0 auto 26px;color:var(--primary);border:1px solid rgba(37,210,255,.52);border-radius:22px;background:linear-gradient(145deg,rgba(37,210,255,.12),rgba(37,210,255,.025));box-shadow:inset 0 0 28px rgba(37,210,255,.06),0 0 45px rgba(37,210,255,.08)}
-.theme-light .welcome .icon-big{border-color:rgba(8,145,178,.5);background:linear-gradient(145deg,rgba(8,145,178,.14),rgba(8,145,178,.02));box-shadow:inset 0 0 28px rgba(8,145,178,.08),0 0 45px rgba(8,145,178,.08)}
-.welcome .icon-big svg{width:36px;height:36px;position:relative;z-index:2;opacity:.9}
-.welcome .icon-big::before,.welcome .icon-big::after{
-  content:'';position:absolute;inset:8px;border-radius:25px;border:1px solid var(--primary);opacity:0;
-  animation:ringPulse 3.2s ease-out infinite;
-}
-.welcome .icon-big::after{animation-delay:1.6s}
-@keyframes ringPulse{0%{opacity:.55;transform:scale(.66)}75%,100%{opacity:0;transform:scale(1.65)}}
-.welcome h2{margin:0;font-size:clamp(22px,3.4vw,34px);font-weight:600;letter-spacing:-.03em;line-height:1.1;color:var(--text)}
-.welcome h2 .accent{color:var(--primary)}
-.welcome p{margin-top:14px;font-size:12.5px;line-height:1.55;color:var(--muted);max-width:420px}
-.welcome-meta{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:22px;margin-top:28px;color:var(--muted);font-family:var(--font-mono);font-size:8px;letter-spacing:.05em;text-transform:uppercase}
-.welcome-meta span{display:inline-flex;align-items:center;gap:6px}
-.welcome-meta strong{color:var(--muted-strong);font-weight:400}
-.welcome-meta .meta-mark{color:var(--primary);font-size:11px}
-
-.frame-area{position:absolute;inset:0;display:none}
-.frame-area.show{display:block}
-.frame-area iframe{position:absolute;inset:0;width:100%;height:100%;border:none;display:block;background:#fff}
-
-.loading-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(4,7,12,.94);backdrop-filter:blur(3px);color:var(--text);font-family:var(--font-mono);font-size:12px;z-index:5;flex-direction:column;gap:0;text-align:center;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s,visibility .22s}
-.loading-overlay.show{opacity:1;visibility:visible;pointer-events:auto}
-.deploy-tag{font-size:8.5px;letter-spacing:.4em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
-.deploy-name{font-size:24px;font-weight:800;letter-spacing:.22em;color:var(--primary);text-shadow:0 0 24px rgba(37,210,255,.7);min-height:30px}
-.deploy-bar{width:300px;max-width:70vw;height:2px;background:rgba(37,210,255,.12);margin:22px auto 12px;position:relative;overflow:hidden}
-.deploy-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--primary);box-shadow:0 0 12px var(--primary);transition:width .55s cubic-bezier(.2,.8,.2,1)}
-.deploy-sub{font-size:8px;letter-spacing:.26em;color:rgba(186,199,217,.5)}
-.theme-light .deploy-sub{color:rgba(15,32,48,.45)}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-.toast{
-  position:fixed;right:20px;bottom:26px;transform:translateX(20px);
-  max-width:min(340px, calc(100vw - 40px));padding:12px 16px;border-radius:10px;z-index:400;
-  background:rgba(8,14,26,.9);backdrop-filter:blur(10px);border:1px solid var(--card-border);border-left:2px solid var(--primary);
-  color:var(--text);font-size:11.5px;font-family:var(--font-mono);letter-spacing:.02em;line-height:1.5;box-shadow:0 8px 30px rgba(0,0,0,.4),0 0 20px -8px var(--primary-glow);
-  opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;
-}
-.theme-light .toast{background:rgba(255,255,255,.94)}
-.toast.show{opacity:1;transform:translateX(0);pointer-events:auto}
-.toast.err{border-color:var(--card-border);border-left-color:var(--rose);color:#fecdd3}
-.toast .toast-mark{display:inline-block;width:6px;height:6px;margin-right:8px;border-radius:999px;background:var(--primary);box-shadow:0 0 8px var(--primary-glow);vertical-align:middle}
-.toast.err .toast-mark{background:var(--rose);box-shadow:0 0 8px rgba(255,59,92,.5)}
-
-@media(max-width:900px) and (orientation:portrait){
-  :root{--sidebar-w:clamp(220px, 62vw, 300px)}
-}
-@media(max-width:900px) and (orientation:landscape){
-  :root{--sidebar-w:clamp(230px, 30vw, 280px)}
+.topbar-breadcrumb span{transition:color .16s}
+.topbar-icon-btn{transition:.16s cubic-bezier(.4,0,.2,1)}
+.topbar-icon-btn:active{transform:translateY(0) scale(.93)}
+#clock{position:relative;padding-bottom:2px}
+#clock::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:1px;
+  background:linear-gradient(90deg,var(--primary),transparent);opacity:.6;
 }
 
-/* ============ MANAGE (import / save / edit mode) + IDB źródło ============ */
-.manage-wrap{position:relative;margin-top:8px}
-.manage-toggle{width:100%;display:flex;align-items:center;justify-content:center;gap:6px;padding:7px 8px;border-radius:6px;border:1px solid var(--card-border);background:transparent;color:var(--muted);font-family:var(--font-ui);font-size:11px;cursor:pointer;transition:all .15s}
-.manage-toggle:hover,.manage-wrap.open .manage-toggle{color:var(--primary);border-color:rgba(37,210,255,.35);background:var(--primary-dim)}
-.manage-toggle svg{width:13px;height:13px}
-.manage-pop{position:absolute;left:0;right:0;bottom:calc(100% + 6px);display:none;flex-direction:column;gap:2px;padding:5px;border:1px solid var(--card-border);border-radius:9px;background:var(--bg2);box-shadow:0 16px 40px rgba(0,0,0,.5);z-index:60}
-.manage-wrap.open .manage-pop{display:flex}
-.manage-item{display:flex;align-items:center;gap:8px;width:100%;padding:8px 9px;border-radius:7px;border:0;background:transparent;color:var(--text);font-family:var(--font-ui);font-size:11.5px;text-align:left;cursor:pointer;transition:background .15s,color .15s}
-.manage-item:hover{background:var(--primary-dim);color:var(--primary)}
-.manage-item svg{width:13px;height:13px;flex-shrink:0;opacity:.85}
-.manage-item[aria-pressed="true"]{color:var(--rose)}
-.manage-item .m-state{margin-left:auto;font-family:var(--font-mono);font-size:8px;padding:1px 5px;border:1px solid var(--card-border);border-radius:4px;color:var(--muted)}
-.manage-sep{height:1px;margin:3px 4px;background:var(--card-border)}
-.manage-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:8px 9px;border-radius:7px;color:var(--text);font-family:var(--font-ui);font-size:11px}
-.manage-toggle-row:hover{background:var(--primary-dim)}
-.manage-toggle-row .switch{flex-shrink:0}
-.dark-toggle-btn{flex:0 0 auto;width:32px;height:32px;border-radius:7px;border:1px solid var(--card-border);background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer}
-.dark-toggle-btn svg{width:15px;height:15px}
-.dark-toggle-btn:hover{color:var(--primary);border-color:rgba(37,210,255,.35);background:var(--primary-dim)}
-.theme-light .dark-toggle-btn{color:#0a4660}
+/* ---------- ekran powitalny: rytm edytorski ---------- */
+.welcome{position:relative}
+.welcome h2::before{
+  content:"01 — START Systemu";display:block;margin-bottom:14px;
+  font-family:var(--mono);font-size:10px;font-weight:400;letter-spacing:.3em;
+  text-transform:uppercase;color:var(--txt-faint);
+}
+.welcome h2::after{
+  content:"";display:block;width:64px;height:2px;margin-top:22px;
+  background:linear-gradient(90deg,var(--primary),transparent);
+}
+.icon-big{
+  background:
+    linear-gradient(160deg,var(--primary-soft),transparent 70%),
+    linear-gradient(var(--primary-dk),var(--primary-dk)) left 6px top 6px/10px 1px no-repeat,
+    linear-gradient(var(--primary-dk),var(--primary-dk)) left 6px top 6px/1px 10px no-repeat,
+    linear-gradient(var(--primary-dk),var(--primary-dk)) right 6px bottom 6px/10px 1px no-repeat,
+    linear-gradient(var(--primary-dk),var(--primary-dk)) right 6px bottom 6px/1px 10px no-repeat;
+}
+.welcome::before{
+  content:"";position:absolute;left:clamp(22px,6vw,72px);right:clamp(22px,6vw,72px);bottom:26px;height:9px;
+  background:repeating-linear-gradient(90deg,var(--line-2) 0 1px,transparent 1px 14px);
+  opacity:.7;pointer-events:none;
+}
+.welcome-meta{transition:border-color .3s}
+.welcome-meta .meta-mark{display:inline-block;transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.welcome-meta span:hover .meta-mark{transform:rotate(90deg);color:var(--primary-lt)}
 
-/* Item action icons shown next to nav rows while edit mode is active */
-.item-actions{display:none;align-items:center;gap:3px;flex-shrink:0}
-body.edit-mode .item-actions{display:flex}
-body.edit-mode .nav-item,body.edit-mode .nav-subitem{padding-right:6px}
-.item-act-btn{width:20px;height:20px;border-radius:5px;border:1px solid var(--card-border);background:rgba(4,7,13,.4);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s}
-.item-act-btn svg{width:11px;height:11px}
-.item-act-btn:hover{color:var(--primary);border-color:rgba(37,210,255,.4);background:var(--primary-dim)}
-.item-act-btn.danger{color:var(--rose);border-color:rgba(255,59,92,.35);background:rgba(255,59,92,.1)}
-.item-act-btn.danger:hover{color:#fff;border-color:var(--rose);background:var(--rose)}
-/* Tryb jasny: ciemne tło .item-act-btn (rgba(4,7,13,.4)) było skopiowane z trybu ciemnego
-   i nie miało odpowiednika w .theme-light — przyciski wyglądały jak ciemnoszare plamy
-   o niskim kontraście na jasnym tle. */
-.theme-light .item-act-btn{background:rgba(8,145,178,.08);border-color:rgba(10,70,100,.22);color:#0a4660}
-.theme-light .item-act-btn:hover{color:var(--primary);border-color:rgba(8,145,178,.45);background:rgba(8,145,178,.16)}
-.theme-light .item-act-btn.danger{color:#be123c;border-color:rgba(225,29,72,.35);background:rgba(225,29,72,.1)}
-.theme-light .item-act-btn.danger:hover{color:#fff;border-color:#be123c;background:#be123c}
-.nav-badge.src-idb{background:rgba(167,139,250,.18);border-color:rgba(167,139,250,.4);color:#c9b8ff}
-.nav-item-launch,.nav-subitem-launch{display:flex;align-items:center;gap:8px;flex:1;min-width:0;background:none;border:0;padding:0;text-align:left;color:inherit;font:inherit;cursor:pointer}
-.empty-list{padding:22px 10px;text-align:center;color:var(--muted);font-size:11px;line-height:1.6}
-.nav-subitem svg{width:12px;height:12px;flex-shrink:0}
-.nav-group-head svg.appicon{width:14px;height:14px;flex-shrink:0;color:var(--sky)}
-.group-actions{padding:0 12px 8px}
-.icon-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.icon-opt{aspect-ratio:1;border:1px solid var(--card-border);border-radius:9px;background:rgba(4,7,13,.4);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;color:var(--muted)}
-.theme-light .icon-opt{background:rgba(8,145,178,.08);border-color:rgba(10,70,100,.22);color:#0a4660}
-.theme-light .icon-opt:hover,.theme-light .icon-opt.selected{background:rgba(8,145,178,.18);border-color:rgba(8,145,178,.5);color:var(--primary)}
-.icon-opt svg{width:19px;height:19px}
-.icon-opt:hover{border-color:rgba(37,210,255,.4);background:var(--primary-dim);color:var(--primary)}
-.icon-opt.selected{border-color:var(--primary);background:var(--primary-dim);color:var(--primary)}
+/* ---------- obszar narzędzia i moment "deploy" ---------- */
+/* brak cienia/insetu — obszar narzędzia pozostaje płaski, bez winiety */
+.loading-overlay::after{
+  content:"";position:absolute;inset:26px;pointer-events:none;opacity:.55;
+  background:
+    linear-gradient(var(--primary),var(--primary)) left top/26px 1px no-repeat,
+    linear-gradient(var(--primary),var(--primary)) left top/1px 26px no-repeat,
+    linear-gradient(var(--primary),var(--primary)) right top/26px 1px no-repeat,
+    linear-gradient(var(--primary),var(--primary)) right top/1px 26px no-repeat,
+    linear-gradient(var(--primary),var(--primary)) left bottom/26px 1px no-repeat,
+    linear-gradient(var(--primary),var(--primary)) left bottom/1px 26px no-repeat,
+    linear-gradient(var(--primary),var(--primary)) right bottom/26px 1px no-repeat,
+    linear-gradient(var(--primary),var(--primary)) right bottom/1px 26px no-repeat;
+}
+.deploy-tag::before{content:"[ "}
+.deploy-tag::after{content:" ]"}
+.deploy-name::after{
+  content:"▌";margin-left:.12em;color:var(--primary);opacity:.85;
+  animation:blink 1s steps(1) infinite;
+}
+.deploy-bar{box-shadow:0 0 0 1px var(--line)}
+.deploy-sub{letter-spacing:.16em;color:var(--txt-faint);opacity:.85}
 
-/* ---- Import modal ---- */
-.modal-backdrop{position:fixed;inset:0;z-index:500;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(2,6,12,.68);backdrop-filter:blur(6px)}
-.modal-backdrop.open{display:flex}
-.imodal{width:min(520px,100%);max-height:88dvh;overflow:auto;border:1px solid rgba(37,210,255,.3);border-radius:14px;background:linear-gradient(160deg,var(--bg2),var(--bg));box-shadow:0 30px 80px rgba(0,0,0,.5)}
-.imodal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:18px 18px 12px;border-bottom:1px solid var(--card-border)}
-.imodal-head h3{font-size:15px;font-weight:700;color:var(--text)}
-.imodal-head p{margin-top:5px;font-size:11px;color:var(--muted);line-height:1.5}
-.imodal-body{padding:16px 18px;display:grid;gap:13px}
-.ifield label{display:block;margin-bottom:5px;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
-.ifield input,.ifield textarea{width:100%;padding:9px 11px;color:var(--text);border:1px solid var(--card-border);border-radius:7px;background:var(--bg3);font-family:var(--font-ui);font-size:12px}
-.ifield textarea{min-height:120px;resize:vertical;font-family:var(--font-mono);font-size:10px;line-height:1.5}
-.ifield input:focus,.ifield textarea:focus{outline:none;border-color:var(--primary)}
-.itabs{display:flex;gap:5px;padding:3px;border:1px solid var(--card-border);border-radius:8px;background:var(--bg3)}
-.itab{flex:1;height:30px;border:0;border-radius:6px;background:transparent;color:var(--muted);font-family:var(--font-ui);font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
-.itab.active{background:var(--primary);color:#04101c}
-.ipanel{display:none}
-.ipanel.active{display:block}
-.idrop{display:grid;place-items:center;gap:8px;padding:22px 16px;text-align:center;border:1.5px dashed rgba(37,210,255,.4);border-radius:10px;background:var(--primary-dim);cursor:pointer}
-.idrop:hover{border-color:var(--primary)}
-.idrop svg{width:26px;height:26px;color:var(--primary)}
-.idrop strong{font-size:11.5px;color:var(--text)}
-.idrop span{font-size:9.5px;color:var(--muted)}
-.ifile-status{margin-top:8px;display:none;align-items:center;gap:7px;padding:8px 10px;border:1px solid rgba(52,211,153,.4);border-radius:7px;background:rgba(52,211,153,.1);color:var(--emerald);font-family:var(--font-mono);font-size:9.5px}
-.ifile-status.show{display:flex}
-.imodal-foot{display:flex;align-items:center;justify-content:flex-end;gap:9px;padding:12px 18px 18px;border-top:1px solid var(--card-border)}
-.imodal-btn{height:36px;padding:0 16px;border-radius:8px;font-family:var(--font-ui);font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;transition:all .15s}
-.imodal-btn.cancel{color:var(--muted);border:1px solid var(--card-border);background:transparent}
-.imodal-btn.cancel:hover{color:var(--text);border-color:var(--muted)}
-.imodal-btn.confirm{color:#04101c;border:0;background:linear-gradient(135deg,var(--primary),var(--sky))}
-.imodal-btn.confirm:disabled{opacity:.4;cursor:not-allowed}
-.ghnote{font-size:10px;color:var(--amber);line-height:1.5;padding:9px 10px;border:1px dashed rgba(251,191,36,.4);border-radius:7px;background:rgba(251,191,36,.06)}
-.ighresults{max-height:190px;overflow:auto;border:1px solid var(--card-border);border-radius:8px;margin-top:9px}
-.ighresults:empty{display:none;border:0;margin:0}
-.ighrow{display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;border:0;border-bottom:1px solid var(--card-border);background:transparent;color:var(--text);font-family:var(--font-ui);font-size:10.5px;text-align:left;cursor:pointer}
-.ighrow:last-child{border-bottom:0}
-.ighrow:hover{background:var(--primary-dim);color:var(--primary)}
-.ighrow.selected{background:var(--primary-dim);color:var(--primary);font-weight:700}
-.ighrow .path{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ighrow .sz{font-family:var(--font-mono);font-size:9px;color:var(--muted);flex-shrink:0}
-.igh-empty,.igh-loading,.igh-error{padding:14px;text-align:center;font-size:10.5px;color:var(--muted)}
-.igh-error{color:var(--rose)}
+/* ---------- modale: skanowane szkło i nagłówek ---------- */
+.modal-bg,.modal-backdrop{background:rgba(4,6,8,.74)}
+.imodal-head{background:linear-gradient(180deg,rgba(245,169,36,.055),transparent)}
+body.theme-light .imodal-head{background:linear-gradient(180deg,rgba(154,90,0,.06),transparent)}
+.imodal-head::after{
+  content:"";position:absolute;left:20px;right:20px;bottom:-1px;height:1px;
+  background:linear-gradient(90deg,var(--primary),transparent 70%);
+}
+.imodal-head h3{letter-spacing:.04em}
+.imodal-head h3::before{content:"◆ ";color:var(--primary);font-size:11px;vertical-align:2px}
+.ifield input[type=text]:hover,.ifield textarea:hover,.search-wrap input:hover,.share-url-row input:hover{border-color:var(--line-2)}
+.itab{position:relative;overflow:hidden}
+.itab.active::after{
+  content:"";position:absolute;left:50%;bottom:3px;transform:translateX(-50%);
+  width:12px;height:2px;background:#0A0B0D;opacity:.5;border-radius:2px;
+}
+.idrop:focus-visible{border-style:solid;border-color:var(--primary);background:var(--primary-soft)}
+.ighrow:active{transform:scale(.995)}
+.imodal-foot{background:linear-gradient(180deg,transparent,rgba(255,255,255,.02))}
+body.theme-light .imodal-foot{background:linear-gradient(180deg,transparent,rgba(0,0,0,.03))}
+.imodal-btn.confirm:active{transform:translateY(1px)}
+.icon-opt:active{transform:translateY(0) scale(.95)}
+
+/* ---------- toast: pasek czasu życia ---------- */
+.toast{overflow:hidden;align-items:flex-start}
+.toast::after{
+  content:"";position:absolute;left:0;bottom:0;height:2px;width:100%;
+  background:linear-gradient(90deg,var(--primary-dk),var(--primary));transform:scaleX(0);transform-origin:left;
+}
+.toast.show::after{animation:toastLife 2.5s linear forwards}
+.toast.err::after{background:linear-gradient(90deg,#7a2b27,var(--danger))}
+@keyframes toastLife{to{transform:scaleX(1)}}
+
+/* ---------- dodatkowe stany i środowiska ---------- */
+@media (hover:none){
+  .nav-item-launch:hover,.nav-subitem-launch:hover,.topbar-icon-btn:hover{transform:none}
+  .nav-item-launch:hover{background:transparent}
+}
+@media (prefers-contrast:more){
+  :root{--txt-dim:#C3CCD6;--txt-faint:#9AA5B1;--line:#39434F;--line-2:#4C5866}
+}
+@media print{
+  .accent-line,.ambient-glow,.bg-grid,.sidebar-backdrop,.sidebar-fab{display:none!important}
+  body{overflow:auto;background:#fff;color:#000}
+  .sidebar{position:static;width:100%;transform:none;box-shadow:none;background:#fff;border:1px solid #ccc}
+  .main{margin-left:0;padding-top:0}
+  .topbar-wrap{position:static;background:#fff;box-shadow:none}
+}
+/* ---------- DOMYŚLNY ROZMIAR SVG (bezpieczeństwo dla ikon bez klasy) ----------
+   ICON_FILE w wierszach listy nie ma klasy "appicon" — bez tej reguły
+   przeglądarka renderuje go w domyślnym rozmiarze elementu zastępczego. */
+svg{width:16px;height:16px;display:inline-block;vertical-align:middle}
+.nav-item-launch>svg,.nav-subitem-launch>svg,.nav-group-head>svg{
+  flex-shrink:0;color:var(--txt-faint);transition:color .16s,filter .16s;
+}
+.nav-item-launch:hover>svg,.nav-subitem-launch:hover>svg{color:var(--primary)}
+.nav-item.active>.nav-item-launch>svg,
+.nav-subitem.active>.nav-subitem-launch>svg{color:var(--primary);filter:drop-shadow(0 0 5px var(--primary-glow))}
+
+/* ---------- detale, które dotąd ginęły w powierzchni ---------- */
+.nav-group-head{border-bottom:1px solid transparent}
+.nav-group.open>.nav-group-head{border-bottom-color:var(--line);border-radius:4px 4px 0 0}
+.nav-group.open>.nav-group-body{border-left:1px solid var(--line);margin-left:11px;padding-left:4px}
+.nav-group.open{background:linear-gradient(90deg,rgba(255,255,255,.02),transparent 80%)}
+body.theme-light .nav-group.open{background:linear-gradient(90deg,rgba(0,0,0,.025),transparent 80%)}
+.search-wrap input:focus,.ifield input:focus,.ifield textarea:focus{outline:none}
+.nav-item-launch:focus-visible,.nav-subitem-launch:focus-visible,.nav-group-head:focus-visible{outline-offset:-2px}
+.welcome h2 .accent{text-shadow:0 0 26px var(--primary-glow)}
+.engine::before{content:"■ ";color:var(--primary-dk);font-size:8px}
+.api-limit{position:relative;overflow:hidden}
+.api-limit::after{
+  content:"";position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.5;
+}
+.manage-wrap.open .manage-toggle{color:var(--primary);border-color:var(--primary-dk);background:var(--primary-soft)}
+.dark-toggle-btn[aria-pressed="true"]{color:var(--primary);border-color:var(--primary-dk);background:var(--primary-soft)}
+/* ---------- przełącznik „Zarządzaj” → dyskretne trzy kropki ---------- */
+.manage-toggle{
+  width:34px;height:34px;padding:0;gap:0;justify-content:center;
+  border-radius:4px;letter-spacing:normal;font-size:inherit;
+}
+.manage-toggle svg{width:16px;height:16px}
+.manage-wrap.open .manage-toggle{
+  color:var(--primary);border-color:var(--primary-dk);background:var(--primary-soft);
+}
+.manage-wrap.open .manage-toggle svg{filter:drop-shadow(0 0 5px var(--primary-glow))}
+
+/* ---------- przycisk „Zakończ edycję” na dole panelu ---------- */
+/* Widoczny wyłącznie w trybie edycji (body.edit-mode) — stały, pełnej szerokości,
+   żeby wyjście z edycji nie wymagało otwierania menu z trzech kropek. */
+.edit-done-btn{
+  display:none;align-items:center;justify-content:center;gap:7px;
+  width:auto;flex:0 0 auto;white-space:nowrap;
+  margin-top:0;padding:9px 13px;
+  background:var(--primary);color:#0A0B0D;
+  border:1px solid var(--primary);border-radius:5px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;font-weight:600;
+  transition:.16s cubic-bezier(.4,0,.2,1);
+}
+.edit-done-btn svg{width:15px;height:15px;flex-shrink:0}
+.edit-done-btn:hover{background:var(--primary-lt);box-shadow:0 0 18px var(--primary-glow)}
+.edit-done-btn:active{transform:translateY(1px);box-shadow:none}
+body.edit-mode .edit-done-btn{display:flex}
+body.edit-mode .sidebar-footer{border-top-color:var(--primary-dk);background:linear-gradient(180deg,rgba(245,169,36,.05),transparent)}
+body.theme-light body.edit-mode .sidebar-footer{background:linear-gradient(180deg,rgba(154,90,0,.06),transparent)}
 </style>
-</head>
-<body class="">
+</head><body>
+
 <div class="accent-line"></div>
-<div id="hud-scan" aria-hidden="true"></div>
-<div id="hud-vig" aria-hidden="true"></div>
-<div id="hud-noise" aria-hidden="true"></div>
 <div id="app">
 
   <div class="ambient-glow"><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div></div>
@@ -387,6 +898,7 @@ body.edit-mode .nav-item,body.edit-mode .nav-subitem{padding-right:6px}
         <h2>PANEL NARZĘDZI</h2>
         <div class="logo-sub">Fleet &amp; Docs Suite · Offline</div>
       </div>
+      <button class="collapse-btn search-toggle" id="searchToggle" type="button" title="Pokaż wyszukiwarkę" aria-label="Pokaż wyszukiwarkę" aria-pressed="false" aria-controls="searchWrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="20.5" y1="20.5" x2="16.2" y2="16.2"></line></svg></button>
       <button class="collapse-btn" id="collapseBtn" title="Schowaj panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="11 17 6 12 11 7"></polyline><polyline points="18 17 13 12 18 7"></polyline></svg></button>
     </div>
 
@@ -395,10 +907,10 @@ body.edit-mode .nav-item,body.edit-mode .nav-subitem{padding-right:6px}
       <button class="src-btn active" data-src="github" title="Lista na sztywno, uruchamiana z GitHub">GitHub</button>
       <button class="src-btn" data-src="scan" title="Skanuj repozytorium GitHub w poszukiwaniu narzędzi">Skanuj</button>
     </div>
-    <div class="api-limit" id="apiLimit" style="display: none; margin:8px 10px 0">
-      <span class="api-limit-label">Limit API GitHub</span>
-      <div class="api-limit-bar"><div class="api-limit-fill" id="apiLimitFill" style="width: 98%;"></div></div>
-      <span class="api-limit-val" id="apiLimitVal">59/60 zapytań</span>
+    <div class="api-limit" id="apiLimit" style="margin: 8px 10px 0px; display: none;">
+      <span class="api-limit-label">Limit API</span>
+      <div class="api-limit-bar"><div class="api-limit-fill" id="apiLimitFill" style="width:98%"></div></div>
+      <span class="api-limit-val" id="apiLimitVal">50/60 zapytań</span>
     </div>
 
     <div class="search-wrap" id="searchWrap" style="display:none"><input id="search" type="text" placeholder="Szukaj narzędzia…"></div>
@@ -408,7 +920,12 @@ body.edit-mode .nav-item,body.edit-mode .nav-subitem{padding-right:6px}
     <div class="sidebar-footer">
       <div class="sidebar-footer-row" style="gap:8px">
         <div class="manage-wrap" id="manageWrap" style="flex:1;margin-top:0">
-          <button class="manage-toggle" id="manageToggle" type="button"><svg viewBox="0 0 16 16" fill="none"><circle cx="3" cy="8" r="1.3" fill="currentColor"></circle><circle cx="8" cy="8" r="1.3" fill="currentColor"></circle><circle cx="13" cy="8" r="1.3" fill="currentColor"></circle></svg>Zarządzaj</button>
+          <button class="manage-toggle" id="manageToggle" type="button" title="Zarządzaj" aria-label="Zarządzaj" aria-expanded="true" aria-haspopup="true"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor"></circle><circle cx="8" cy="8" r="1.4" fill="currentColor"></circle><circle cx="13" cy="8" r="1.4" fill="currentColor"></circle></svg></button>
+          <!-- Obok „...”: wyjście z trybu edycji (widoczne tylko przy body.edit-mode) -->
+          <button class="edit-done-btn" id="editDoneBtn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Zakończ edycję</span>
+          </button>
           <div class="manage-pop" id="managePop">
             <button class="manage-item" id="importBtn" type="button"><svg viewBox="0 0 16 16" fill="none"><path d="M8 2.5v7M5 6.5 8 9.5l3-3M3 12.5h10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path></svg>Importuj aplikację</button>
             <button class="manage-item" id="saveBtn" type="button"><svg viewBox="0 0 16 16" fill="none"><path d="M3 2.5h8l2.5 2.5v8.5H3z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"></path><path d="M5.5 2.5v3h4v-3M5.5 13.5V9.5h5v4" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"></path></svg>Zapisz panel + aplikacje</button>
@@ -416,26 +933,24 @@ body.edit-mode .nav-item,body.edit-mode .nav-subitem{padding-right:6px}
             <button class="manage-item" id="editModeBtn" type="button" aria-pressed="false"><svg viewBox="0 0 16 16" fill="none"><path d="M9.2 3.2 12.8 6.8 5.6 14H2v-3.6z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"></path><path d="M8 4.4 11.6 8" stroke="currentColor" stroke-width="1.2"></path></svg><span id="editModeLabel">Tryb edycji</span><span class="m-state" id="editModeState">off</span></button>
             <div class="manage-sep"></div>
             <div class="manage-toggle-row" title="Dotyczy zakładek „GitHub” i „Skanuj”. Pierwsze otwarcie apki zapisuje jej kod w IndexedDB — kolejne otwarcia są błyskawiczne i działają nawet bez internetu. „Przeładuj” zawsze wymusza świeże pobranie z sieci."><span>Cache GitHub/Skanuj (offline)</span><label class="switch"><input type="checkbox" id="swCacheGh" checked=""><span class="switch-track"></span><span class="switch-thumb"></span></label></div>
-            <div class="manage-toggle-row"><span>Pokaż wyszukiwarkę</span><label class="switch"><input type="checkbox" id="swShowSearch"><span class="switch-track"></span><span class="switch-thumb"></span></label></div>
+
           </div>
         </div>
-        <button class="dark-toggle-btn" id="darkModeBtn" type="button" title="Dark Mode" aria-pressed="true">
+        <button class="dark-toggle-btn" id="darkModeBtn" type="button" title="Wyłącz Dark Mode (jasny motyw)" aria-pressed="true">
           <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
           <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
         </button>
       </div>
 
       <div class="version" id="verLine">13 aplikacji · lista GitHub</div>
-      <div class="engine">Każde narzędzie w izolowanym iframe (Blob)</div>
     </div>
   </aside>
-
-  <button class="sidebar-fab" id="sidebarFab" title="Pokaż panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline></svg></button>
 
   <!-- ============ TOPBAR ============ -->
   <div class="topbar-wrap">
     <header class="topbar">
       <div class="topbar-left">
+        <button class="sidebar-fab" id="sidebarFab" title="Pokaż / schowaj panel" aria-label="Pokaż lub schowaj panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline></svg></button>
         <span class="topbar-title" id="topTitle">FLMANAGER</span>
         <div class="topbar-breadcrumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg><span id="crumb">flmanager.html</span></div>
       </div>
@@ -571,6 +1086,9 @@ body.edit-mode .nav-item,body.edit-mode .nav-subitem{padding-right:6px}
 
 </div>
 
+<!-- Powiadomienia: element MUSI istnieć w DOM PRZED skryptem, inaczej pierwsze
+     showToast() utworzyłoby drugi #toast (i eksportowałoby zdublowany element). -->
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script>
 
 function esc(str){
@@ -578,8 +1096,24 @@ function esc(str){
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 function isSafeUrl(url){
-  try { const u = new URL(url, window.location.href); return u.protocol === 'https:' || u.protocol === 'http:' || u.protocol === 'blob:'; }
-  catch { return false; }
+  try {
+    const u = new URL(url, window.location.href);
+    // Narzędzia zdalne są dozwolone wyłącznie po HTTPS; blob: pozostaje
+    // lokalnym artefaktem generowanym przez panel dla plików wbudowanych.
+    if (u.protocol === 'blob:') return true;
+    if (u.protocol !== 'https:' || u.username || u.password || u.port) return false;
+    const host = u.hostname.toLowerCase();
+    const allowed = host === 'github.com' || host === 'api.github.com' ||
+      host === 'raw.githubusercontent.com' || host === 'raw.githack.com' ||
+      host.endsWith('.github.io');
+    return allowed;
+  } catch { return false; }
+}
+function fetchWithTimeout(url, options = {}, timeoutMs = 12000){
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(url, {...options, signal: controller.signal})
+    .finally(() => clearTimeout(timer));
 }
 // Wykrywanie podejrzanych wzorców w importowanym kodzie (ostrzega, nie blokuje —
 // to narzędzie jednoosobowe/zaufane, decyzję zawsze podejmuje użytkownik).
@@ -604,9 +1138,39 @@ let dataSource = 'github'; // 'local' | 'github' | 'scan'
 // Lista dla trybu "GitHub" — 1:1 zgodna z D[] w aktualnej aplikacji launchera (MyGitRepo),
 // NIEZALEŻNA od listy narzędzi wbudowanych (base64) powyżej. To ona decyduje, jakie pliki
 // są pobierane z repozytorium GitHub, gdy wybrane jest źródło "GitHub".
-const GH_LIST = [{"type":"single","id":"flmanager","label":"FLMANAGER","file":"flmanager.html","icon":"star"},{"type":"single","id":"psf","label":"PSF Import","file":"PSFimport.html","icon":"star"},{"type":"single","id":"gsp","label":"GSP Import","file":"GSPimport.html","icon":"star"},{"type":"single","id":"zbycie","label":"Zbycie","file":"Zbycie.html","icon":"star"},{"type":"single","id":"pdf_lock","label":"PDF_Lock","file":"PDF_Lock.html","icon":"box"},{"type":"single","id":"gh-mt42vf9a5msk","label":"XLSXCompresor","file":"XLSXCompresor.html","icon":"box"},{"type":"single","id":"xlscale","label":"XL Scale 8.3","file":"xlscale8.3.html"},{"type":"single","id":"konwenter","label":"Konwenter","file":"konwenter.html"},{"type":"single","id":"opony","label":"Opony 2026","file":"opony2026.html"},{"type":"single","id":"sales_analytics","label":"Analiza Sprzedaży Pojazdów","file":"vehicle-sales-analytics.html"},{"type":"single","id":"pojazdy_pk","label":"Pojazdy P&K","file":"PojazdyP&K.html"},{"type":"single","id":"Menu","label":"Launcher","file":"launcher.html"},{"type":"single","id":"index","label":"Index","file":"index.html"}];
+const GH_LIST = [{"type":"single","id":"flmanager","label":"FLMANAGER","file":"flmanager.html","icon":"star"},{"type":"single","id":"psf","label":"PSF Import","file":"PSFimport.html","icon":"star"},{"type":"single","id":"gsp","label":"GSP Import","file":"GSPimport.html","icon":"star"},{"type":"single","id":"zbycie","label":"Zbycie","file":"Zbycie.html","icon":"star"},{"type":"single","id":"pdf_lock","label":"PDF_Lock","file":"PDF_Lock.html","icon":"box"},{"type":"single","id":"gh-mt42vf9a5msk","label":"XLSXCompresor","file":"XLSXCompresor.html","icon":"box"},{"type":"single","id":"xlscale","label":"XL Scale 8.3","file":"xlscale8.3.html"},{"type":"single","id":"konwenter","label":"Konwenter","file":"konwenter.html"},{"type":"single","id":"sales_analytics","label":"Analiza Sprzedaży Pojazdów","file":"vehicle-sales-analytics.html"},{"type":"single","id":"pojazdy_pk","label":"Pojazdy P&K","file":"PojazdyP&K.html"},{"type":"single","id":"Menu","label":"Launcher","file":"launcher.html"},{"type":"single","id":"index","label":"Index","file":"index.html"},{"type":"single","id":"gh-mu0at7tie1lb","label":"Extraktor","file":"Extraktor.html"},{"type":"single","id":"gh-muijjrb18yge","label":"FLManager_v4.77&TCO","file":"FLManager_v4.77&TCO.html"},{"type":"single","id":"gh-muitlbwgup1u","label":"Fleet_Panel","file":"Fleet_Panel.html"},{"type":"single","id":"gh-muitld8mve0n","label":"Opony","file":"Opony.html"},{"type":"single","id":"gh-muiwk02nzl7c","label":"PPv.5","file":"PPv.5.html"},{"type":"single","id":"gh-muiu1vegkiip","label":"PPv.6_QR","file":"PPv.6_QR.html"}];
 let scannedApps = null;
+// Pliiki wykryte przy ostatnim skanowaniu, których NIE ma na liście „GitHub”
+// albo których treść zmieniła się od ostatniego skanu -> delikatna zielona kropka.
+// Mapa: ścieżka pliku -> 'nowa' | 'wersja'.
+let scanNovel = new Map();
 let currentToolFile = null;
+
+// ---- Zrzut list zapisanych w TYM pliku HTML (sprzed jakichkolwiek zmian w bieżącej sesji) ----
+// Pozycje dodane po starcie (import do „Wbudowanych”, dopisanie do listy „GitHub”,
+// przeniesienie z IDB) istnieją tylko w pamięci trwającej sesji i w IndexedDB —
+// w kodzie strony pojawią się dopiero po „Zapisz panel + aplikacje”. Do tego momentu
+// są podświetlane na zielono w obu zakładkach, żeby było widać, że nie są jeszcze
+// wpisane do HTML. Po eksporcie zrzuty są aktualizowane i podświetlenie znika.
+let SAVED_NAV_IDS = new Set(NAV.map(a => a.id));
+// SAVED_GH_IDS utrzymane (aktualizowane przy eksporcie), ale NIE służy do podświetlania:
+// zakładka „GitHub” celowo jest wolna od zielonego oznaczenia — lista jest tam odtwarzana
+// z IndexedDB i zrzut z HTML potrafi się z nią rozjeżdżać, dając wieczne podświetlenie.
+let SAVED_GH_IDS = new Set(GH_LIST.map(a => a.id));
+let SAVED_IDB_IDS = new Set(); // uzupełniane przy odczycie #idb-seed
+
+function isPendingSave(n){
+  if (!n) return false;
+  // ZAKŁADKA „GitHub” — NIE podświetlamy na zielono. Lista bywa podmieniana z IndexedDB
+  // (loadGhListFromIDB) niezależnie od zawartości HTML, więc zrzut z literału potrafi się
+  // z nią rozjechać i pozycje świeciłyby na zielono także po zapisaniu pliku.
+  if (dataSource === 'github') return false;
+  if (dataSource === 'scan') return false; // tam obowiązuje zielona kropka nowości
+  // ZAKŁADKA „Wbudowane” — podświetlenie zostaje: te wpisy istnieją wyłącznie w sesji,
+  // dopóki nie trafią do kodu strony (NAV + <script id="data-..."> / #idb-seed).
+  if (n._imported) return !SAVED_IDB_IDS.has(n.id); // wpisy lokalne z IDB
+  return !SAVED_NAV_IDS.has(n.id);                  // wpisy base64 z NAV
+}
 
 // ============ ŹRÓDŁO 4: aplikacje zaimportowane, przechowywane lokalnie w IndexedDB ============
 let idbApps = [];               // {id, label, file, code(base64), size, added}
@@ -673,6 +1237,17 @@ function idbPut(app){
     tx.onerror = () => reject(tx.error);
   }));
 }
+function idbPutMany(apps){
+  if (!apps || !apps.length) return Promise.resolve();
+  return openIDB().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    const store = tx.objectStore(IDB_STORE);
+    apps.forEach(app => store.put(app));
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error || new Error('IndexedDB transaction aborted'));
+  }));
+}
 function idbDelete(id){
   return openIDB().then(db => new Promise((resolve, reject) => {
     const tx = db.transaction(IDB_STORE, 'readwrite');
@@ -732,11 +1307,17 @@ async function loadIdbApps(){
     if (Array.isArray(s)) seed = s;
   } catch(e) {}
   const map = new Map();
-  seed.forEach(a => map.set(a.id, a));
+  seed.forEach(a => { map.set(a.id, a); SAVED_IDB_IDS.add(a.id); }); // seed = zawartość #idb-seed, czyli HTML
   stored.forEach(a => map.set(a.id, a));
   idbApps = Array.from(map.values());
-  for (const a of idbApps) { try { await idbPut(a); } catch(e) {} }
-  if (dataSource === 'local') { renderNav(searchBox.value); updateCountDisplay(); }
+  // Jedna transakcja zamiast osobnego await dla każdej aplikacji — szybszy start
+  // przy większych panelach i mniejsze obciążenie IndexedDB.
+  try { await idbPutMany(idbApps); } catch(e) { console.warn('Nie udało się zsynchronizować seeda IndexedDB:', e); }
+  // Render ZAWSZE po odczycie seeda — SAVED_IDB_IDS (z #idb-seed) musi być kompletne
+  // jeszcze zanim użytkownik przełączy się na zakładkę „Wbudowane”, inaczej wszystkie
+  // wpisy błysnęłyby na zielono jako „niezapisane”.
+  renderNav(searchBox.value);
+  updateCountDisplay();
 }
 
 // ============ HAPTYKA (wibracje) + DŹWIĘKI (Web Audio, generowane, bez plików) ============
@@ -983,9 +1564,62 @@ function moveInArray(arr, id, dir){
   return true;
 }
 
+// ---- Zapis bieżących list do ŻYWEGO dokumentu ---------------------------------
+// exportPanel() podmienia NAV / GH_LIST tylko w klonowanym dokumencie. Gdy panel
+// zapisywany jest inną drogą (szybki edytor → „zapisz”, Ctrl+S, „zapisz stronę”),
+// w pliku zostawał STARY kod: dodane aplikacje widniały wyłącznie dzięki IndexedDB,
+// a w HTML nadal ich nie było — stąd wieczne zielone podświetlenie „niezapisane”.
+// syncListsIntoDocument() wstrzykuje aktualne listy, kod aplikacji base64 i ziarno
+// IDB do żywego DOM, dzięki czemu KAŻDA metoda zapisu pliku jest kompletna.
+function syncListsIntoDocument(){
+  try {
+    // główny skrypt = ten, który zawiera literał `const NAV = [` (bez type/src)
+    let main = null;
+    document.querySelectorAll('script:not([type]):not([src])').forEach(s => {
+      if (!main && s.textContent.indexOf('const NAV = [') !== -1) main = s;
+    });
+    if (main){
+      const navJson = 'const NAV = ' + JSON.stringify(NAV) + ';';
+      const ghJson = 'const GH_LIST = ' + JSON.stringify(GH_LIST) + ';';
+      const src = main.textContent;
+      // funkcje jako zamiennik — unikają interpretacji `$&`, `$'` itd. w treści list
+      const next = src.replace(/const NAV = \[[\s\S]*?\];/, () => navJson)
+                      .replace(/const GH_LIST = \[[\s\S]*?\];/, () => ghJson);
+      if (next !== src) main.textContent = next;
+    }
+  } catch(e){}
+  try {
+    // kod aplikacji z zakładki „Wbudowane” żyje tylko w pamięci — dopisujemy go na żywo,
+    // żeby zapisana strona od razu uruchamiała te aplikacje (bez IDB)
+    Object.keys(embeddedExtraCode).forEach(id => {
+      if (!document.getElementById('data-' + id)){
+        const s = document.createElement('script');
+        s.setAttribute('type', 'text/plain');
+        s.id = 'data-' + id;
+        s.textContent = embeddedExtraCode[id];
+        document.body.appendChild(s);
+      }
+    });
+  } catch(e){}
+  try {
+    if (idbApps.length){
+      const seed = document.getElementById('idb-seed');
+      const json = JSON.stringify(idbApps.filter(a => a.source !== 'ghcache'));
+      if (seed && seed.textContent !== json) seed.textContent = json;
+    }
+  } catch(e){}
+}
+let listSyncTimer = null;
+function scheduleListSync(){
+  clearTimeout(listSyncTimer);
+  listSyncTimer = setTimeout(syncListsIntoDocument, 250);
+}
+
 function renderNav(filter){
+  scheduleListSync(); // każda zmiana listy → aktualizacja kodu w żywym DOM
   const f = (filter||'').toLowerCase().trim();
-  navRoot.innerHTML = '';
+  navRoot.replaceChildren();
+  const fragment = document.createDocumentFragment();
 
   const idbAsSingle = idbApps.filter(a => a.source !== 'ghcache').map(a => ({ type:'single', id:a.id, label:a.label, file:a.file || (slugify(a.label)+'.html'), size:a.size, _imported:true }));
   const list = dataSource === 'scan' ? (scannedApps || [])
@@ -1002,11 +1636,24 @@ function renderNav(filter){
       const show = matchesFilter(n.label, f) || matchesFilter(n.file, f);
       if(!show) return;
       const btn = document.createElement('div');
-      btn.className = 'nav-item' + (n.id === activeId ? ' active' : '');
+      btn.className = 'nav-item' + (n.id === activeId ? ' active' : '') + (isPendingSave(n) ? ' pending-save' : '');
       const launch = document.createElement('button');
       launch.type = 'button';
       launch.className = 'nav-item-launch';
-      launch.innerHTML = `${iconMarkup(n, ICON_FILE)}<span class="label">${esc(n.label)}</span><span class="nav-badge${n._imported ? ' src-idb' : ''}">${fmtSize(n.size)}</span>`;
+      // Zakładka „Skanuj”: delikatna pulsująca zielona kropka na końcu wiersza dla
+      // aplikacji, których nie ma na liście „GitHub”, albo które mają nową wersję pliku
+      // (analogicznie do bursztynowej lampki aktywnej pozycji w zakładce „GitHub”).
+      let noveltyDot = '';
+      if (dataSource === 'scan'){
+        const why = scanNovel.get(n.file);
+        if (why){
+          const whyText = why === 'nowa'
+            ? 'Nowa aplikacja — nie występuje na liście w zakładce GitHub'
+            : 'Nowa wersja pliku — treść zmieniła się od ostatniego skanu';
+          noveltyDot = `<span class="new-dot" title="${whyText}"></span>`;
+        }
+      }
+      launch.innerHTML = `${iconMarkup(n, ICON_FILE)}<span class="label">${esc(n.label)}</span><span class="nav-badge${n._imported ? ' src-idb' : ''}">${fmtSize(n.size)}</span>${noveltyDot}`;
       launch.onclick = () => { loadTool(n.id, n.label, n.file, n); };
       btn.appendChild(launch);
 
@@ -1044,7 +1691,7 @@ function renderNav(filter){
         acts.appendChild(itemActionBtn('Usuń z listy GitHub', SVG_TRASH, true, () => removeGithubApp(n)));
         btn.appendChild(acts);
       }
-      navRoot.appendChild(btn);
+      fragment.appendChild(btn);
     } else {
       const subMatches = n.items.filter(it => matchesFilter(it.label, f) || matchesFilter(it.file, f) || matchesFilter(n.label, f));
       if(f && subMatches.length === 0) return;
@@ -1075,7 +1722,7 @@ function renderNav(filter){
         const row = document.createElement('div');
         row.className = 'tree-row';
         const sub = document.createElement('div');
-        sub.className = 'nav-subitem' + (it.id === activeId ? ' active' : '');
+        sub.className = 'nav-subitem' + (it.id === activeId ? ' active' : '') + (isPendingSave(it) ? ' pending-save' : '');
         const subLaunch = document.createElement('button');
         subLaunch.type = 'button';
         subLaunch.className = 'nav-subitem-launch';
@@ -1096,14 +1743,25 @@ function renderNav(filter){
       });
       body.appendChild(tree);
       wrap.appendChild(body);
-      navRoot.appendChild(wrap);
+      fragment.appendChild(wrap);
     }
   });
+  navRoot.appendChild(fragment);
 }
 
 // Scentralizowane tworzenie/aktualizacja iframe narzędzia — jedno miejsce dla sandboxa/
 // obsługi onload, zamiast duplikowania go w loadTool()/loadToolFromGitHub() (łatwiej
 // nie zapomnieć o zabezpieczeniach przy przyszłych zmianach).
+function prepareRemoteHtml(html, pagesUrl){
+  if (typeof html !== 'string') return html;
+  try {
+    const base = new URL('.', pagesUrl).href;
+    const tag = '<base href="' + esc(base) + '">';
+    if (/<head\b[^>]*>/i.test(html)) return html.replace(/<head\b[^>]*>/i, match => match + tag);
+    return '<head>' + tag + '</head>' + html;
+  } catch { return html; }
+}
+
 function mountIframe(srcUrl, srcDocHtml = null) {
   // Zawsze tworzymy NOWY element <iframe> zamiast podmieniać srcdoc/src na starym.
   // Powód: w niektórych przeglądarkach podmiana srcdoc na już załadowanym iframie
@@ -1118,6 +1776,9 @@ function mountIframe(srcUrl, srcDocHtml = null) {
   // działa w tym samym origin co ta strona (może odczytać jej localStorage/DOM). Świadomy
   // kompromis — narzędzia tu ładowane są własne/zaufane i wymagają localStorage.
   iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals allow-downloads');
+  iframe.setAttribute('loading', 'eager');
+  iframe.setAttribute('referrerpolicy', 'no-referrer');
+  iframe.setAttribute('title', 'Podgląd wybranego narzędzia');
   iframe.onload = () => hideDeployOverlay();
   if (srcDocHtml !== null) {
     frameArea.appendChild(iframe);
@@ -1147,7 +1808,10 @@ function loadTool(id, label, file, meta){
   // czyli w momencie faktycznego wyboru aplikacji — nie samego przełączenia zakładki.
   // Udostępnianie (QR/link) ma sens tylko dla listy "na sztywno" z GitHub — pozostałe
   // źródła (wbudowane, skanowane, lokalne/IDB) mają tylko sandbox/nową kartę/pobieranie.
-  document.body.classList.toggle('source-remote', dataSource === 'github');
+  // Udostępnianie (QR/link) ma sens dla obu źródeł pobieranych z repo:
+  // listy „na sztywno” (github) ORAZ wyników skanowania (scan) — skanowane pliki
+  // i tak leżą w tym samym repozytorium, więc ghPages(file) jest poprawnym adresem.
+  document.body.classList.toggle('source-remote', dataSource === 'github' || dataSource === 'scan');
 
   // panel chowa się automatycznie po wybraniu narzędzia
   collapseSidebar(true);
@@ -1226,38 +1890,29 @@ async function loadToolFromGitHub(file, myGen){
   const explicitUrl = (currentToolItem && currentToolItem.url) || null;
   const pagesUrl = explicitUrl || ghPages(file);
   const rawUrl = explicitUrl || ghRaw(file);
-  currentBlobUrl = null; // blob nieużywany w tym trybie
-  currentRemoteUrl = pagesUrl; // czysty link — używany do "Otwórz w nowej karcie" i Udostępnij
+  currentBlobUrl = null;
+  currentRemoteUrl = pagesUrl;
 
-  const liveNavigate = () => {
-    // znacznik czasu tylko w adresie iframe, żeby wymusić świeże wczytanie —
-    // link widoczny w "Udostępnij"/"Otwórz w nowej karcie" (currentRemoteUrl) pozostaje czysty
-    mountIframe(pagesUrl + (pagesUrl.includes('?') ? '&' : '?') + '_r=' + Date.now());
-  };
-
-  if (!isGithubCacheEnabled()) { liveNavigate(); return; }
-
-  const cacheKey = 'ghcache:' + rawUrl;
-  const cached = idbApps.find(a => a.id === cacheKey);
-
-  if (cached) {
-    mountIframe(null, fromB64(cached.code)); // natychmiastowa ścieżka offline z cache
-    refreshGithubCacheInBackground(rawUrl, cacheKey, file);
+  // Zdalne aplikacje otwieramy bezpośrednio w iframe, a nie przez srcdoc.
+  // Dzięki temu zachowują własny origin, historię, formularze, przewijanie,
+  // ścieżki względne i skrypty — dokładnie tak jak po wejściu na plik GitHub Pages.
+  // srcdoc było przyczyną różnic w PWA: kliknięcie „przewiń” lub wypełnienie
+  // formularza mogło uruchamiać nawigację/reset aplikacji zamiast kodu narzędzia.
+  if (!isGithubCacheEnabled()) {
+    showToast('Otwieranie „' + file + '” bezpośrednio z GitHub Pages');
+    mountIframe(pagesUrl);
     return;
   }
 
-  try {
-    const res = await fetch(rawUrl, { cache: 'no-store' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const html = await res.text();
-    if (myGen !== deployGen) return; // w międzyczasie otwarto inną apkę — nie nadpisuj jej widoku
-    const entry = { id: cacheKey, name: file, code: toB64(html), added: new Date().toISOString().slice(0, 10), source: 'ghcache' };
-    idbApps.push(entry);
-    idbPut(entry).catch(() => {});
-    mountIframe(null, html);
-  } catch (e) {
-    liveNavigate(); // brak CORS na raw / brak pliku w gałęzi raw / offline i brak cache — działaj jak dotychczas
-  }
+  const cacheKey = 'ghcache:' + rawUrl;
+  const cached = idbApps.find(a => a.id === cacheKey);
+  if (cached) showToast('Otwieranie „' + file + '” z GitHub Pages — cache pozostaje dostępny offline');
+  else showToast('Otwieranie „' + file + '” z GitHub Pages…');
+
+  // Cache służy jako lokalny zapis/odświeżanie, ale nie zastępuje bezpośredniego
+  // iframe dla aplikacji interaktywnych. To gwarantuje poprawne formularze i scroll.
+  mountIframe(pagesUrl);
+  refreshGithubCacheInBackground(rawUrl, cacheKey, file);
 }
 
 // Ciche odświeżenie cache w tle po pokazaniu wersji z IDB — błąd sieci tutaj nie ma
@@ -1301,12 +1956,39 @@ function updateCountDisplay(){
   if (metaApps) metaApps.textContent = n + ' aplikacji';
 }
 
+// Porównuje wyniki skanu z zakładką „GitHub” oraz ze zrzutem rozmiarów z poprzedniego
+// skanu (IDB, klucz "scan_sig") i buduje mapę nowości dla zielonej kropki:
+//  - 'nowa'  — pliku nie ma na liście GH_LIST (aplikacja nieobecna w zakładce GitHub),
+//  - 'wersja' — plik jest na liście, ale jego rozmiar zmienił się od ostatniego skanu,
+//              czyli w repo pojawiła się nowa wersja.
+// Po porównaniu zrzut rozmiarów jest aktualizowany, żeby ta sama zmiana nie migotała
+// przy każdym kolejnym skanowaniu (kropka znika przy następnym skanie).
+async function markScanNovelties(files){
+  const novel = new Map();
+  try {
+    const rec = await idbMetaGet('scan_sig');
+    const prev = (rec && rec.sigs) || {};
+    const next = {};
+    files.forEach(f => {
+      next[f.file] = f.size;
+      if (!GH_LIST.some(g => g.file === f.file)) novel.set(f.file, 'nowa');
+      else if (prev[f.file] !== undefined && prev[f.file] !== f.size) novel.set(f.file, 'wersja');
+    });
+    scanNovel = novel;
+    await idbMetaPut({ id: 'scan_sig', sigs: next });
+  } catch (e) {
+    // Bez IDB zostaje samo porównanie z listą „GitHub” (nowe pozycje) — bez wersji.
+    files.forEach(f => { if (!GH_LIST.some(g => g.file === f.file)) novel.set(f.file, 'nowa'); });
+    scanNovel = novel;
+  }
+}
+
 // Skanowanie repozytorium GitHub w poszukiwaniu wszystkich plików .html + odczyt limitu API
 async function scanGitHubRepos(){
   navRoot.innerHTML = '<div class="scan-loading">Skanowanie repozytorium ' + esc(GH_USER) + '/' + esc(GH_REPO) + '…</div>';
   updateCountDisplay();
   try {
-    const res = await fetch(`${GH_API}/repos/${GH_USER}/${GH_REPO}/git/trees/main?recursive=1`);
+    const res = await fetchWithTimeout(`${GH_API}/repos/${GH_USER}/${GH_REPO}/git/trees/main?recursive=1`, {}, 15000);
     showApiLimit(res);
     if (res.status === 403 || res.status === 429) throw new Error('Limit GitHub API — spróbuj później');
     if (!res.ok) throw new Error('API: ' + res.status);
@@ -1319,6 +2001,7 @@ async function scanGitHubRepos(){
       file: f.path,
       size: f.size || 0
     }));
+    await markScanNovelties(scannedApps); // ustawia zielone kropki nowości przed renderem
     renderNav(searchBox.value);
     updateCountDisplay();
     showToast('Znaleziono ' + scannedApps.length + ' plików .html w repozytorium');
@@ -1336,7 +2019,7 @@ function showApiLimit(res){
   const rst = parseInt(res.headers.get('X-RateLimit-Reset') || '0');
   const box = document.getElementById('apiLimit');
   if (rem < 0) { box.style.display = 'none'; return; }
-  box.style.display = 'block';
+  box.style.display = ''; // '' → wraca do display:flex z CSS (jeden wiersz)
   const pct = Math.max(0, Math.round(rem / lim * 100));
   const fill = document.getElementById('apiLimitFill');
   fill.style.width = pct + '%';
@@ -1358,7 +2041,7 @@ document.getElementById('sourceToggle').addEventListener('click', (e) => {
   btn.classList.add('active');
   feedbackClick();
   dataSource = src;
-  document.getElementById('apiLimit').style.display = src === 'scan' ? 'block' : 'none';
+  document.getElementById('apiLimit').style.display = src === 'scan' ? '' : 'none';
   if (src === 'scan') {
     scanGitHubRepos();
   } else {
@@ -1375,7 +2058,8 @@ updateCountDisplay();
 
 document.getElementById('shareBtn').onclick = () => {
   feedbackClick();
-  if (dataSource !== 'github' || !currentToolFile) { showToast('Udostępnianie (QR/link) dostępne jest tylko dla listy „na sztywno” z GitHub.'); return; }
+  const shareable = dataSource === 'github' || dataSource === 'scan';
+  if (!shareable || !currentToolFile) { showToast('Udostępnianie (QR/link) dostępne jest dla źródeł „GitHub” i „Skanuj”.'); return; }
   const url = (currentToolItem && currentToolItem.url) ? currentToolItem.url : ghPages(currentToolFile);
   document.getElementById('shareTitle').textContent = 'Udostępnij: ' + activeLabel;
   document.getElementById('shareUrlInput').value = url;
@@ -1418,7 +2102,7 @@ document.getElementById('newTabBtn').onclick = () => {
 document.getElementById('downloadBtn').onclick = async () => {
   feedbackClick();
   if (dataSource === 'local') {
-    if (!currentBlobUrl) return;
+    if (!currentBlobUrl) { showToast('Brak danych do pobrania — najpierw otwórz tę aplikację', true); return; }
     const a = document.createElement('a');
     a.href = currentBlobUrl;
     a.download = crumb.textContent || 'narzedzie.html';
@@ -1439,7 +2123,7 @@ document.getElementById('downloadBtn').onclick = async () => {
       : [ghRaw(currentToolFile), ghGithack(currentToolFile)];
     for (const url of candidates) {
       try {
-        const res = await fetch(url);
+        const res = await fetchWithTimeout(url, {}, 12000);
         if (!res.ok) continue;
         const text = await res.text();
         if (text.includes('<') && text.length > 100) { html = text; break; }
@@ -1477,7 +2161,11 @@ function showToast(msg, isErr){
   toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
   if (isErr) feedbackError(); else feedbackClick();
 }
-searchBox.addEventListener('input', () => renderNav(searchBox.value));
+let searchRenderTimer = null;
+searchBox.addEventListener('input', () => {
+  clearTimeout(searchRenderTimer);
+  searchRenderTimer = setTimeout(() => renderNav(searchBox.value), 90);
+});
 
 // ---- Dark Mode: przycisk z ikoną (obok "Zarządzaj"), z zapamiętaniem wyboru ----
 const THEME_KEY = 'fp_theme_light';
@@ -1509,21 +2197,37 @@ swCacheGh.addEventListener('change', () => {
 });
 function isGithubCacheEnabled(){ return localStorage.getItem(CACHE_GH_KEY) !== '0'; }
 
-// ---- ustawienie: pokaż pasek wyszukiwarki apek (domyślnie WYŁĄCZONE/ukryty) ----
+// ---- wyszukiwarka: przełączana LUPKĄ w nagłówku szyny (obok przycisku chowania) ----
+// Przełącznik „Pokaż wyszukiwarkę” z menu „Zarządzaj” został usunięty — pasek wyszukiwania
+// otwiera się i zamyka jednym kliknięciem na lupkę, a stan jest zapamiętywany lokalnie.
 const SHOW_SEARCH_KEY = 'fp_show_search';
-const swShowSearch = document.getElementById('swShowSearch');
+const searchToggleBtn = document.getElementById('searchToggle');
 const searchWrap = document.getElementById('searchWrap');
 function applyShowSearch(show){
   searchWrap.style.display = show ? '' : 'none';
-  if (!show && searchBox.value) { searchBox.value = ''; renderNav(''); } // czyścimy filtr, żeby lista nie została ukryta "w locie"
+  if (show){
+    setTimeout(() => { try { searchBox.focus(); searchBox.select(); } catch(e){} }, 30);
+  } else if (searchBox.value) {
+    searchBox.value = ''; renderNav(''); // czyścimy filtr, żeby lista nie została ukryta "w locie"
+  }
+  if (searchToggleBtn){
+    searchToggleBtn.classList.toggle('on', !!show);
+    searchToggleBtn.setAttribute('aria-pressed', String(!!show));
+    const t = show ? 'Ukryj wyszukiwarkę' : 'Pokaż wyszukiwarkę';
+    searchToggleBtn.title = t;
+    searchToggleBtn.setAttribute('aria-label', t);
+  }
 }
-swShowSearch.checked = localStorage.getItem(SHOW_SEARCH_KEY) === '1'; // brak wpisu = domyślnie ukryta
-applyShowSearch(swShowSearch.checked);
-swShowSearch.addEventListener('change', () => {
-  feedbackToggle();
-  localStorage.setItem(SHOW_SEARCH_KEY, swShowSearch.checked ? '1' : '0');
-  applyShowSearch(swShowSearch.checked);
-});
+if (searchToggleBtn){
+  searchToggleBtn.addEventListener('click', () => {
+    feedbackClick();
+    const open = searchWrap.style.display === 'none';
+    try { localStorage.setItem(SHOW_SEARCH_KEY, open ? '1' : '0'); } catch(e){}
+    applyShowSearch(open);
+  });
+}
+// brak wpisu = domyślnie ukryta
+applyShowSearch((() => { try { return localStorage.getItem(SHOW_SEARCH_KEY) === '1'; } catch(e){ return false; } })());
 
 // ---- sidebar collapse logic ----
 // Gdy pasek jest otwarty, przezroczysta nakładka (#sidebarBackdrop) przykrywa
@@ -1531,25 +2235,58 @@ swShowSearch.addEventListener('change', () => {
 // zamykając pasek. Dzięki temu działa to również dla kliknięć wewnątrz
 // otwartego narzędzia, które normalnie nie docierałyby do tego dokumentu.
 function collapseSidebar(collapsed){
-  document.body.classList.toggle('sidebar-collapsed', collapsed);
+  // Sidebar może być otwierany także nad aktywną aplikacją.
+  // Interakcje iframe są odseparowane CSS-em, więc nie trzeba wymuszać
+  // stanu „zwinięty” po każdym kliknięciu przycisku.
+  document.body.classList.toggle('sidebar-collapsed', !!collapsed);
 }
 document.getElementById('collapseBtn').onclick = (e) => { e.stopPropagation(); feedbackClick(); collapseSidebar(true); };
-document.getElementById('sidebarFab').onclick = (e) => { e.stopPropagation(); feedbackClick(); collapseSidebar(false); };
+document.getElementById('sidebarFab').onclick = (e) => { e.stopPropagation(); feedbackClick(); collapseSidebar(!document.body.classList.contains('sidebar-collapsed')); };
 document.getElementById('sidebarBackdrop').onclick = () => { feedbackClick(); collapseSidebar(true); };
 
-function tickClock(){
-  const d = new Date();
-  document.getElementById('clock').textContent = d.toLocaleTimeString('pl-PL', {hour12:false});
-}
+const clockEl = document.getElementById('clock');
+const clockFormatter = new Intl.DateTimeFormat('pl-PL', {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false});
+function tickClock(){ clockEl.textContent = clockFormatter.format(new Date()); }
 tickClock();
-setInterval(tickClock, 1000);
+let clockTimer = setInterval(tickClock, 1000);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { clearInterval(clockTimer); clockTimer = null; }
+  else if (!clockTimer) { tickClock(); clockTimer = setInterval(tickClock, 1000); }
+});
 
 // ============ ZARZĄDZANIE: import / zapisz panel / tryb edycji ============
 const manageWrap = document.getElementById('manageWrap');
 document.getElementById('manageToggle').addEventListener('click', (e) => {
   e.stopPropagation(); feedbackClick(); manageWrap.classList.toggle('open');
 });
-document.addEventListener('click', (e) => { if (!manageWrap.contains(e.target)) manageWrap.classList.remove('open'); });
+document.addEventListener('click', (e) => {
+  if (!manageWrap.contains(e.target)) manageWrap.classList.remove('open');
+  // Kliknięcia w osadzonym narzędziu nie sterują panelem nadrzędnym.
+  if (document.body.classList.contains('has-tool') && document.getElementById('frameArea')?.contains(e.target)) return;
+
+  // ZAMYKANIE SZYNY: kliknięcie w KAŻDE miejsce poza panelem (treść, nagłówek,
+  // podkładka nad iframe) chowa szynę. Wyjątek: otwarte okno modalne — tam kliknięcie
+  // należy do okna, nie do panelu; oraz stan już zwinięty (bez zbędnych wywołań).
+  if (!document.body.classList.contains('sidebar-collapsed')
+      && !document.querySelector('.modal-bg.open, .modal-backdrop.open')){
+    const sb = document.getElementById('sidebar');
+    if (sb && !sb.contains(e.target)) collapseSidebar(true);
+  }
+});
+
+// aria-expanded aktualizowane niezależnie od tego, kto zmienia klasę .open
+// (przycisk, kliknięcie poza menu, „Importuj”/„Zapisz”, „Tryb edycji”).
+new MutationObserver(() => {
+  const mt = document.getElementById('manageToggle');
+  if (mt) mt.setAttribute('aria-expanded', String(manageWrap.classList.contains('open')));
+}).observe(manageWrap, { attributes: true, attributeFilter: ['class'] });
+
+// Przycisk końca edycji na dole panelu — ekspresowe wyjście z trybu edycji,
+// bez otwierania menu z trzech kropek. Widoczny tylko przy body.edit-mode (CSS).
+document.getElementById('editDoneBtn').addEventListener('click', () => {
+  manageWrap.classList.remove('open');
+  setEditMode(false);
+});
 
 function setEditMode(on){
   editMode = on;
@@ -1684,7 +2421,7 @@ async function scanGithubForImport(){
   importGhScanBtn.disabled = true;
   importGhScanBtn.textContent = 'Skanowanie…';
   try {
-    const res = await fetch(`${GH_API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/trees/${encodeURIComponent(branch)}?recursive=1`);
+    const res = await fetchWithTimeout(`${GH_API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/trees/${encodeURIComponent(branch)}?recursive=1`, {}, 15000);
     if (res.status === 403 || res.status === 429) throw new Error('Limit GitHub API — spróbuj później');
     if (!res.ok) throw new Error('API: ' + res.status);
     const data = await res.json();
@@ -1812,7 +2549,7 @@ function removeEmbeddedApp(n){
   // Kluczowe: samo usunięcie z NAV nie usuwa faktycznych danych — kod (base64) aplikacji
   // leży w osobnym <script type="text/plain" id="data-...">, który trzeba skasować z DOM,
   // inaczej "osierocony" wpis nadal zostanie sklonowany przy "Zapisz panel + aplikacje"
-  // i wyeksportowany plik wcale się nie zmniejszy (a wręcz urośnie o nowo importowane apki).
+  // i wyeksportowany plik wcale się nie zmniejszy (a wręcz urośnie o nowo importowane apki.
   const dataEl = document.getElementById('data-' + n.id);
   if (dataEl) dataEl.remove();
   if (activeId === n.id) resetView();
@@ -1896,11 +2633,12 @@ async function promoteToGithub(app){
 }
 
 // Dodaje plik znaleziony przy skanowaniu repozytorium bezpośrednio do listy „na sztywno”
-// (plik już istnieje w repo, więc żadne dodatkowe pobieranie/wgrywanie nie jest potrzebne).
+// (plik już istnieje w repo, więc żadne dodatkowe pobranie/wgrywanie nie jest potrzebne).
 function addScanToGithub(item){
   if (GH_LIST.some(g => g.file === item.file)) { showToast('„' + item.label + '” jest już na liście GitHub'); return; }
   GH_LIST.push({ type: 'single', id: uid('gh'), label: item.label, file: item.file });
   saveGhListToIDB();
+  scanNovel.delete(item.file); // plik jest już na liście „GitHub” — kropka nowości znika
   renderNav(searchBox.value);
   showToast('Dodano „' + item.label + '” do listy GitHub — zapisane na tym urządzeniu.');
 }
@@ -1932,21 +2670,86 @@ async function embedScanItem(item){
 }
 
 // ============ ZAPISZ PANEL + APLIKACJE (eksport samodzielnego pliku HTML) ============
-function exportPanel(){
-  const clone = document.documentElement.cloneNode(true);
+// Eksport klonuje ŻYWY DOM, a ten zawiera już elementy wstrzyknięte w czasie działania:
+//  • 25 przycisków ikon w #iconGrid (skrypt wyboru ikony wypełnia go przy starcie),
+//  • skrypty i kontenery diagnostyczne środowiska, gdy panel odpalany jest w szybkim
+//    edytorze i „uruchom w przeglądarce” — np. Eruda wstrzykiwana przez podgląd.
+// Bez tej sanacji TRAFIAŁBY DO KAŻDEGO eksportu, nawet gdy niczego nie zmieniano.
+// Oryginalny plik nie ma ANI JEDNEGO zewnętrznego <script src>, więc wycięcie wszystkich
+// takich skryptów jest bezpieczne i dodatkowo ratuje sytuację, w której podgląd dodałby
+// własny <script src> PRZED skryptem panelu — wtedy `find(s => !s.getAttribute('type'))`
+// wskazywałby na niego i podmiana NAV/GH_LIST trafiłaby w zły element.
+// --- diagnostyka wstrzykiwana przez środowisko (quick edit / „uruchom w przeglądarce”) ---
+// Eruda i VConsole zakładają: własny <script src>, kontener #eruda / #vconsole oraz <style>
+// ze swoim CSS. Panel nie korzysta z ANI jednego zewnętrznego skryptu, więc przy eksporcie
+// tniemy wszystkie <script src> (plik musi być samodzielny), a przy sprzątaniu NA ŻYWO
+// wyłącznie sygnatury diagnostyczne — żeby nie ruszyć skryptów samego edytora.
+const ENV_DIAG_SELECTOR = '#eruda,#vconsole,.eruda,.vconsole,[data-eruda],[data-vconsole],[id*="eruda" i],[class*="eruda" i],[id*="vconsole" i]';
+function stripEnvDiag(scope, dropExternalScripts){
+  if (!scope) return;
+  try {
+    scope.querySelectorAll((dropExternalScripts ? 'script[src],' : '') + ENV_DIAG_SELECTOR)
+      .forEach(el => el.remove());
+  } catch(e){ /* stary parser selektorów — pomijamy */ }
+  try {
+    // arkusz panelu nie zawiera tych nazw, więc trafiamy tylko w style diagnostyczne
+    scope.querySelectorAll('style').forEach(s => {
+      if (/(eruda|vconsole)/i.test(s.textContent || '')) s.remove();
+    });
+  } catch(e){}
+}
 
-  // Reset stanu dynamicznego UI w klonie, tak aby eksportowany plik startował "na czysto"
-  const cNav = clone.querySelector('#navRoot'); if (cNav) cNav.innerHTML = '';
-  const cFrame = clone.querySelector('#toolFrame'); if (cFrame) cFrame.remove();
-  const cWelcome = clone.querySelector('#welcome'); if (cWelcome) cWelcome.style.display = '';
-  const cFrameArea = clone.querySelector('#frameArea'); if (cFrameArea) cFrameArea.classList.remove('show');
-  const cLoading = clone.querySelector('#loadingOverlay'); if (cLoading) cLoading.classList.remove('show');
-  const cShareModal = clone.querySelector('#shareModal'); if (cShareModal) cShareModal.classList.remove('open');
-  const cImportModal = clone.querySelector('#importModal'); if (cImportModal) cImportModal.classList.remove('open');
-  const cManageWrap = clone.querySelector('#manageWrap'); if (cManageWrap) cManageWrap.classList.remove('open');
-  const cApiLimit = clone.querySelector('#apiLimit'); if (cApiLimit) cApiLimit.style.display = 'none';
-  const cBody = clone.querySelector('body');
-  if (cBody) cBody.classList.remove('sidebar-collapsed', 'has-tool', 'source-remote', 'edit-mode');
+// Sprzątanie NA ŻYWO tu po załadowaniu strony: jeśli panel otwarty jest w szybkim edytorze,
+// a ten zapisuje z powrotem żywy DOM (zamiast korzystać z exportPanel), to i tak nie
+// zostanie w pliku Eruda ani żaden inny element podglądu.
+window.addEventListener('load', () => setTimeout(() => stripEnvDiag(document, false), 400));
+
+function cleanPanelClone(clone){
+  const q = sel => clone.querySelector(sel);
+
+  // --- elementy spoza pliku: środowisko / quick edit / Eruda ---
+  stripEnvDiag(clone, true);
+
+  // --- elementy wygenerowane przez JS w tej sesji ---
+  const cIconGrid = q('#iconGrid'); if (cIconGrid) cIconGrid.innerHTML = ''; // 25 ikon
+  const cNav = q('#navRoot'); if (cNav) cNav.innerHTML = '';
+  const cFrame = q('#toolFrame'); if (cFrame) cFrame.remove();
+  const cWelcome = q('#welcome'); if (cWelcome) cWelcome.style.display = '';
+  const cFrameArea = q('#frameArea'); if (cFrameArea) cFrameArea.classList.remove('show');
+  const cLoading = q('#loadingOverlay'); if (cLoading) cLoading.classList.remove('show');
+  const cDeployFill = q('#deployFill'); if (cDeployFill) cDeployFill.removeAttribute('style');
+  ['shareModal', 'importModal', 'iconModal'].forEach(id => {
+    const el = q('#' + id); if (el) el.classList.remove('open');
+  });
+  const cManageWrap = q('#manageWrap'); if (cManageWrap) cManageWrap.classList.remove('open');
+  const cSearchWrap = q('#searchWrap'); if (cSearchWrap) cSearchWrap.setAttribute('style', 'display:none');
+  const cSearchBtn = q('#searchToggle');
+  if (cSearchBtn){ cSearchBtn.classList.remove('on'); cSearchBtn.setAttribute('aria-pressed', 'false'); cSearchBtn.setAttribute('title', 'Pokaż wyszukiwarkę'); }
+  const cEditBtn = q('#editModeBtn'); if (cEditBtn) cEditBtn.setAttribute('aria-pressed', 'false');
+  const cApiLimit = q('#apiLimit'); if (cApiLimit) cApiLimit.style.display = 'none';
+  const cApiFill = q('#apiLimitFill');
+  if (cApiFill){ cApiFill.setAttribute('style', 'width:98%'); cApiFill.className = 'api-limit-fill'; }
+
+  // --- teksty nadpisane w tej sesji → wartości z oryginalnego szablonu ---
+  const setText = (sel, txt) => { const el = q(sel); if (el) el.textContent = txt; };
+  setText('#topTitle', 'FLMANAGER');
+  setText('#crumb', 'flmanager.html');
+  setText('#deployName', '—');
+  setText('#editModeLabel', 'Tryb edycji');
+  setText('#editModeState', 'off');
+  setText('#clock', '09:51:50');
+  setText('#verLine', '13 aplikacji · lista GitHub');
+  setText('#metaApps', '— aplikacji');
+  const cToast = q('#toast'); if (cToast){ cToast.textContent = ''; cToast.className = 'toast'; }
+
+  const cBody = q('body');
+  if (cBody) cBody.classList.remove('sidebar-collapsed', 'has-tool', 'source-remote', 'edit-mode', 'theme-light');
+
+  return clone;
+}
+
+function exportPanel(){
+  const clone = cleanPanelClone(document.documentElement.cloneNode(true));
 
   // Podmień literały NAV / GH_LIST w głównym skrypcie na aktualny stan (łącznie z
   // wpisami dodanymi przez "Przenieś do wbudowanych" / "Dodaj do listy GitHub").
@@ -1954,8 +2757,10 @@ function exportPanel(){
   const mainScript = scripts.find(s => !s.getAttribute('type'));
   if (mainScript){
     let src = mainScript.textContent;
-    src = src.replace(/const NAV = \[[\s\S]*?\];/, 'const NAV = ' + JSON.stringify(NAV) + ';');
-    src = src.replace(/const GH_LIST = \[[\s\S]*?\];/, 'const GH_LIST = ' + JSON.stringify(GH_LIST) + ';');
+    // zamiennik jako FUNKCJA — inaczej `$&`, `$'` itd. w nazwach/plikach aplikacji
+    // byłyby interpretowane jako wzorce podmiany i uszkadzały zapisywany kod
+    src = src.replace(/const NAV = \[[\s\S]*?\];/, () => 'const NAV = ' + JSON.stringify(NAV) + ';');
+    src = src.replace(/const GH_LIST = \[[\s\S]*?\];/, () => 'const GH_LIST = ' + JSON.stringify(GH_LIST) + ';');
     mainScript.textContent = src;
   }
 
@@ -1995,31 +2800,53 @@ function exportPanel(){
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+  // Wszystko, co było dopiero w sesji, trafiło właśnie do HTML — aktualizujemy zrzuty,
+  // żeby zielone podświetlenie „niezapisane” zniknęło z listy (aż do kolejnych zmian).
+  SAVED_NAV_IDS = new Set(NAV.map(a => a.id));
+  SAVED_GH_IDS = new Set(GH_LIST.map(a => a.id));
+  SAVED_IDB_IDS = new Set(idbApps.filter(a => a.source !== 'ghcache').map(a => a.id));
+  renderNav(searchBox.value);
+
   showToast('Zapisano panel z ' + countForSource() + ' aplikacjami w bieżącym źródle (plik do pobrania).');
 }
 
 // ============ WYBÓR IKONY APLIKACJI (tryb edycji) ============
 const iconModal = document.getElementById('iconModal');
 const iconGrid = document.getElementById('iconGrid');
-Object.keys(APP_ICONS).forEach(key => {
-  const b = document.createElement('button');
-  b.type = 'button'; b.className = 'icon-opt'; b.dataset.iconKey = key;
-  b.innerHTML = APP_ICONS[key];
-  b.onclick = () => applyIcon(key);
-  iconGrid.appendChild(b);
-});
+// Siatka ikon budowana jest DOPiero przy otwarciu modala i opróżniana przy zamknięciu.
+// Na starcie żywy DOM nie zawiera więc 25 przycisków z SVG — a to one (obok elementów
+// środowiska) trafiały wcześniej do pliku zapisywanego z poziomu zewnętrznego edytora.
+let iconGridBuilt = false;
+function ensureIconGrid(){
+  if (iconGridBuilt) return;
+  iconGridBuilt = true;
+  Object.keys(APP_ICONS).forEach(key => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'icon-opt'; b.dataset.iconKey = key;
+    b.innerHTML = APP_ICONS[key];
+    b.onclick = () => applyIcon(key);
+    iconGrid.appendChild(b);
+  });
+}
 let iconPickerTarget = null;
 let iconPickerPersist = null;
 // target: obiekt aplikacji/grupy (mutowany bezpośrednio — dla NAV/GH_LIST to prawdziwa referencja,
 // dla aplikacji zaimportowanych (IDB) trzeba przekazać rzeczywisty wpis z idbApps).
 // persistFn: opcjonalna funkcja wywoływana po zmianie (np. zapis do IndexedDB dla aplikacji lokalnych).
 function openIconPicker(target, persistFn){
+  ensureIconGrid();
   iconPickerTarget = target;
   iconPickerPersist = persistFn || null;
   iconGrid.querySelectorAll('.icon-opt').forEach(b => b.classList.toggle('selected', b.dataset.iconKey === target.icon));
   iconModal.classList.add('open');
 }
-function closeIconPicker(){ iconModal.classList.remove('open'); iconPickerTarget = null; iconPickerPersist = null; }
+function closeIconPicker(){
+  iconModal.classList.remove('open');
+  iconPickerTarget = null; iconPickerPersist = null;
+  iconGrid.innerHTML = ''; // żywy DOM wraca do stanu „pusty div” jak w oryginalnym pliku
+  iconGridBuilt = false;
+}
 function applyIcon(icon){
   if (!iconPickerTarget) return;
   if (icon) iconPickerTarget.icon = icon; else delete iconPickerTarget.icon;
@@ -2046,5 +2873,47 @@ function nudgeScrollForToolbar(){
 window.addEventListener('load', nudgeScrollForToolbar);
 window.addEventListener('orientationchange', () => setTimeout(nudgeScrollForToolbar, 250));
 setTimeout(nudgeScrollForToolbar, 300);
+
+(function(){
+  let scrollOwner = null;
+  function findScrollOwner(node){
+    while(node && node !== document.documentElement){
+      const s = window.getComputedStyle(node);
+      if((s.overflowY === 'auto' || s.overflowY === 'scroll') && node.scrollHeight > node.clientHeight + 1) return node;
+      node = node.parentElement;
+    }
+    return null;
+  }
+  document.addEventListener('touchstart', e => { scrollOwner = findScrollOwner(e.target); }, {passive:true});
+  document.addEventListener('touchend', () => { scrollOwner = null; }, {passive:true});
+  document.addEventListener('touchcancel', () => { scrollOwner = null; }, {passive:true});
+  document.addEventListener('touchmove', e => {
+    // Obliczamy właściciela scrolla tylko raz na początek gestu, nie przy każdym ruchu.
+    if (!scrollOwner) e.preventDefault();
+  }, {passive:false});
+})();
+
+document.addEventListener('visibilitychange', () => {
+  document.documentElement.classList.toggle('page-hidden', document.hidden);
+});
+
+// PWA: rejestracja lokalnego service workera jest bezpieczna tylko na HTTPS
+// (w tym na localhost); po instalacji panel uruchamia się bez paska Chrome.
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js', {scope: '/', updateViaCache: 'none'}).catch(() => {}));
+}
+
+// Diagnostyka runtime: nie przechwytuje błędów narzędzi w sandboxie, ale pokazuje
+// błędy samego panelu zamiast pozostawiać użytkownika z cichym uszkodzeniem UI.
+window.addEventListener('error', (event) => {
+  console.error('Fleet Panel error:', event.error || event.message);
+  if (typeof showToast === 'function') showToast('Wystąpił błąd panelu — sprawdź konsolę przeglądarki', true);
+});
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Fleet Panel unhandled rejection:', event.reason);
+  if (typeof showToast === 'function') showToast('Nieoczekiwany błąd operacji panelu', true);
+});
 </script>
-<div id="toast" class="toast">Zmieniono ikonę</div></body></html>
+
+
+</body></html>
