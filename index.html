@@ -1,0 +1,2919 @@
+<!DOCTYPE html>
+<html lang="pl"><head>
+
+
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07090B">
+<meta name="description" content="Fleet & Docs Suite — szybki, izolowany panel narzędzi i dokumentów.">
+<link rel="dns-prefetch" href="https://api.github.com">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<title>PANEL NARZĘDZI · Fleet &amp; Docs Suite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   PANEL NARZĘDZI — Fleet & Docs Suite
+   Warstwa wizualna: konsola przyrządowa / szafa rack z
+   bursztynowym podświetleniem (annunciator lamp).
+   ============================================================ */
+:root{
+  --bg:#07090B;
+  --bg-2:#0B0E12;
+  --panel:#0E1217;
+  --panel-2:#12171E;
+  --line:#1C232C;
+  --line-2:#26303B;
+  --txt:#D7DEE6;
+  --txt-dim:#8D97A3;
+  --txt-faint:#5F6A76;
+  --primary:#F5A924;
+  --primary-lt:#FFC978;
+  --primary-dk:#A8701A;
+  --primary-soft:rgba(245,169,36,.12);
+  --primary-glow:rgba(245,169,36,.35);
+  --accent:#41D6C3;
+  --green:#2FD36A;
+  --danger:#FF5F56;
+  --grid-line:rgba(255,255,255,.032);
+  --vig:rgba(0,0,0,.60);
+  --scanline:rgba(255,255,255,.024);
+  --noise-op:.055;
+  --shadow:0 18px 50px rgba(0,0,0,.55);
+  --sans:'Space Grotesk',system-ui,-apple-system,Segoe UI,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --rail:300px;
+  --bar:44px;
+}
+body.theme-light{
+  --bg:#EFECE4;
+  --bg-2:#F6F4EE;
+  --panel:#FBFAF6;
+  --panel-2:#FFFFFF;
+  --line:#DED7C9;
+  --line-2:#C8BFAE;
+  --txt:#1B1E22;
+  --txt-dim:#5D6470;
+  --txt-faint:#8B9199;
+  --primary:#9A5A00;
+  --primary-lt:#7A4600;
+  --primary-dk:#D9902A;
+  --primary-soft:rgba(179,106,0,.10);
+  --primary-glow:rgba(179,106,0,.22);
+  --accent:#0F8F80;
+  --green:#0E7C44;
+  --grid-line:rgba(0,0,0,.055);
+  --vig:rgba(40,32,18,.24);
+  --scanline:rgba(0,0,0,.030);
+  --noise-op:.028;
+  --shadow:0 18px 44px rgba(60,48,26,.18);
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--txt);
+  font-family:var(--sans);font-size:14px;line-height:1.5;
+  overflow:hidden;overscroll-behavior:none;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+}
+button,input,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0}
+/* Ulepszenia wydajności: izolacja ciężkich warstw i szacunek dla ustawień ruchu. */
+.nav-item,.nav-group{contain:layout style;content-visibility:auto;contain-intrinsic-size:42px;}
+.frame-area{contain:layout paint;}
+.page-hidden .orb{animation-play-state:paused!important;}
+.page-hidden .ambient-glow{visibility:hidden;}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important;}
+}
+::selection{background:var(--primary);color:#0A0B0D}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* ---------- skan szklany / winieta / ziarno / listwa akcentu ---------- */
+.accent-line{
+  position:fixed;top:0;left:0;right:0;height:2px;z-index:97;pointer-events:none;
+  background:linear-gradient(90deg,transparent 0%,var(--primary-dk) 12%,var(--primary) 38%,var(--primary-lt) 50%,var(--primary) 62%,var(--primary-dk) 88%,transparent 100%);
+  box-shadow:0 0 14px var(--primary-glow);
+}
+/* Nakładka HUD (winieta z cieniami + ziarno/skan jako tekstura) usunięta
+   na prośbę użytkownika — zostały tylko czysta powierzchnia i listwa akcentu. */
+
+/* ---------- tło: siatka + poświaty ---------- */
+#app{position:relative;height:100%;isolation:isolate}
+.bg-grid{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(to right,var(--grid-line) 1px,transparent 1px),
+    linear-gradient(to bottom,var(--grid-line) 1px,transparent 1px);
+  background-size:56px 56px;
+  -webkit-mask-image:radial-gradient(ellipse at 55% 40%,#000 20%,transparent 88%);
+  mask-image:radial-gradient(ellipse at 55% 40%,#000 20%,transparent 88%);
+}
+.ambient-glow{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(78px);opacity:.30;mix-blend-mode:screen}
+body.theme-light .orb{opacity:.22;mix-blend-mode:multiply}
+.orb1{width:44vw;height:44vw;left:-8vw;top:-10vw;background:radial-gradient(circle,var(--primary) 0%,transparent 68%);animation:drift1 26s ease-in-out infinite alternate}
+.orb2{width:36vw;height:36vw;right:-6vw;top:26vh;background:radial-gradient(circle,#2E6BFF 0%,transparent 68%);opacity:.16;animation:drift2 32s ease-in-out infinite alternate}
+.orb3{width:30vw;height:30vw;left:34vw;bottom:-12vw;background:radial-gradient(circle,var(--accent) 0%,transparent 70%);opacity:.13;animation:drift3 28s ease-in-out infinite alternate}
+@keyframes drift1{to{transform:translate3d(6vw,5vh,0) scale(1.12)}}
+@keyframes drift2{to{transform:translate3d(-7vw,-6vh,0) scale(1.08)}}
+@keyframes drift3{to{transform:translate3d(4vw,-7vh,0) scale(1.14)}}
+
+/* ---------- SZYNA BOCZNA ---------- */
+.sidebar{
+  position:fixed;top:0;left:0;bottom:0;width:var(--rail);z-index:40;
+  display:flex;flex-direction:column;background:var(--panel);
+  border-right:1px solid var(--line);
+  box-shadow:1px 0 0 rgba(255,255,255,.02) inset;
+  transform:translateX(0);transition:transform .38s cubic-bezier(.4,0,.2,1);
+}
+body.sidebar-collapsed .sidebar{transform:translateX(-101%)}
+.sidebar::after{
+  content:"";position:absolute;top:0;right:-1px;bottom:0;width:1px;
+  background:linear-gradient(180deg,transparent,var(--primary-dk) 12%,transparent 55%);
+  opacity:.7;
+}
+/* Nagłówek szyny = dokładnie ta sama wysokość co górny pasek aplikacji (--bar) */
+.sidebar-logo{display:flex;align-items:center;gap:10px;height:var(--bar);padding:0 10px;border-bottom:1px solid var(--line);position:relative}
+.sidebar-logo::before{content:"";position:absolute;left:12px;right:12px;bottom:-1px;height:1px;background:repeating-linear-gradient(90deg,var(--line-2) 0 4px,transparent 4px 8px)}
+.sidebar-logo svg{color:var(--primary);filter:drop-shadow(0 0 6px var(--primary-glow))}
+.sidebar-logo-text{min-width:0;flex:1}
+.sidebar-logo-text h2{margin:0;font-size:12.5px;letter-spacing:.17em;text-transform:uppercase;font-weight:700}
+.logo-sub{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--txt-faint);text-transform:uppercase;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.collapse-btn{width:26px;height:26px;flex-shrink:0;border:1px solid var(--line-2);border-radius:3px;color:var(--txt-dim);display:grid;place-items:center;transition:.18s}
+.collapse-btn svg{width:14px;height:14px}
+.collapse-btn:hover{color:var(--primary);border-color:var(--primary-dk);background:var(--primary-soft)}
+.collapse-btn:active{transform:scale(.92)}
+/* lupka przełączająca pasek wyszukiwania w nagłówku szyny */
+.search-toggle{margin-right:4px;transition:.18s}
+.search-toggle svg{transition:.18s}
+.search-toggle.on{
+  /* Stan aktywny sygnalizujemy subtelnie — bez zalewania całego przycisku kolorem. */
+  color:var(--primary);background:var(--primary-soft);border-color:var(--primary-dk);
+  box-shadow:0 0 7px rgba(245,169,36,.16);
+}
+.search-toggle.on svg{filter:drop-shadow(0 0 4px var(--primary-glow))}
+
+.source-toggle{display:flex;gap:2px;padding:3px;background:var(--panel-2);border:1px solid var(--line);border-radius:5px}
+.src-btn{
+  flex:1;padding:7px 4px;border-radius:3px;font-family:var(--mono);font-size:9.5px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--txt-dim);transition:.16s;
+  border:1px solid transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.src-btn:hover{color:var(--txt);background:rgba(255,255,255,.03)}
+.src-btn.active{background:var(--primary);color:#0A0B0D;font-weight:600;box-shadow:0 0 14px var(--primary-glow)}
+body.theme-light .src-btn:hover{background:rgba(0,0,0,.04)}
+
+/* Limit API — CAŁOŚĆ W JEDNYM WIERSZU: etykieta · pasek · wartość zapytań */
+.api-limit{
+  display:flex;align-items:center;gap:8px;overflow:hidden;
+  border:1px solid var(--line);border-radius:5px;padding:5px 8px;background:var(--panel-2);
+}
+.api-limit-label{
+  flex:0 0 auto;font-family:var(--mono);font-size:9px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--txt-faint);white-space:nowrap;
+}
+.api-limit-bar{flex:1 1 auto;min-width:30px;height:3px;background:var(--line);border-radius:2px;margin:0;overflow:hidden}
+.api-limit-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.api-limit-fill.mid{background:var(--primary)}
+.api-limit-fill.low{background:var(--danger)}
+.api-limit-val{
+  flex:0 0 auto;font-family:var(--mono);font-size:9.5px;color:var(--txt-dim);
+  letter-spacing:.03em;white-space:nowrap;font-variant-numeric:tabular-nums;
+}
+
+.search-wrap{padding:10px 10px 0}
+.search-wrap input{width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:4px;padding:8px 10px;font-family:var(--mono);font-size:12px;outline:none;transition:.18s}
+.search-wrap input:focus{border-color:var(--primary-dk);box-shadow:0 0 0 3px var(--primary-soft)}
+.search-wrap input::placeholder{color:var(--txt-faint)}
+
+#navRoot{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:10px 8px 14px;scrollbar-width:thin;scrollbar-color:var(--line-2) transparent}
+#navRoot::-webkit-scrollbar{width:7px}
+#navRoot::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:4px}
+#navRoot::-webkit-scrollbar-track{background:transparent}
+
+.nav-item{position:relative;margin-bottom:2px}
+.nav-item-launch,.nav-subitem-launch{
+  display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  padding:9px 10px 9px 11px;border-left:2px solid transparent;border-radius:0 4px 4px 0;
+  color:var(--txt);transition:background .16s,border-color .16s,color .16s;
+}
+.nav-item-launch:hover{background:var(--primary-soft);border-left-color:var(--primary-dk)}
+.nav-item.active>.nav-item-launch,
+.nav-subitem.active>.nav-subitem-launch{
+  background:linear-gradient(90deg,var(--primary-soft),transparent 92%);
+  border-left-color:var(--primary);
+}
+.nav-item.active>.nav-item-launch .label{color:var(--primary-lt)}
+.nav-item.active>.nav-item-launch .appicon{color:var(--primary);filter:drop-shadow(0 0 5px var(--primary-glow))}
+.nav-item-launch .label,.nav-subitem-launch .label{flex:1;min-width:0;font-size:13.2px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.005em}
+.appicon,.chev,.folder,.dot2{flex-shrink:0}
+.appicon{width:16px;height:16px;color:var(--txt-faint);transition:color .16s}
+.nav-item-launch:hover .appicon,.nav-subitem-launch:hover .appicon{color:var(--primary)}
+.chev{width:13px;height:13px;color:var(--txt-faint);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.folder{width:16px;height:16px;color:var(--txt-faint)}
+.dot2{width:6px;height:6px;border-radius:50%;background:var(--line-2);margin:0 5px 0 5px;box-shadow:0 0 0 3px rgba(255,255,255,.02)}
+.nav-subitem.active .dot2{background:var(--primary);box-shadow:0 0 8px var(--primary-glow)}
+.nav-badge{
+  font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--txt-faint);border:1px solid var(--line);border-radius:2px;padding:2px 5px;
+  white-space:nowrap;flex-shrink:0;
+}
+.nav-badge.src-idb{color:var(--accent);border-color:rgba(65,214,195,.35);background:rgba(65,214,195,.08)}
+
+/* Delikatna pulsująca zielona kropka na końcu wiersza — zakładka „Skanuj”:
+   nowa aplikacja (nieobecna w zakładce GitHub) albo nowa wersja pliku.
+   Analogiczna do bursztynowej lampki aktywnej pozycji, ale w kolorze zielonym. */
+.new-dot{
+  width:6px;height:6px;flex-shrink:0;align-self:center;
+  margin-left:7px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 8px rgba(47,211,106,.7);opacity:.9;
+  animation:newPulse 2.1s ease-in-out infinite;
+}
+.new-dot:hover{animation-duration:.8s;opacity:1}
+@keyframes newPulse{
+  0%,100%{opacity:1;transform:scale(1);box-shadow:0 0 8px rgba(47,211,106,.7)}
+  50%{opacity:.32;transform:scale(.68);box-shadow:0 0 3px rgba(47,211,106,.35)}
+}
+
+/* Pozycje dodane w bieżącej sesji, których jeszcze NIE ma w kodzie HTML
+   (lista „GitHub” lub „Wbudowane”) — podświetlone na zielono do momentu
+   „Zapisz panel + aplikacje”, potem zrzut list jest aktualizowany i kolor znika. */
+.nav-item.pending-save>.nav-item-launch,
+.nav-subitem.pending-save>.nav-subitem-launch{
+  border-left-color:var(--green);
+  background:linear-gradient(90deg,rgba(47,211,106,.11),transparent 92%);
+}
+.nav-item.pending-save>.nav-item-launch .label,
+.nav-subitem.pending-save>.nav-subitem-launch .label{color:var(--green);font-weight:600}
+.nav-item.pending-save>.nav-item-launch .nav-badge,
+.nav-subitem.pending-save>.nav-subitem-launch .nav-badge{
+  color:var(--green);border-color:rgba(47,211,106,.45);background:rgba(47,211,106,.09);
+}
+.nav-item.pending-save>.nav-item-launch .appicon,
+.nav-subitem.pending-save>.nav-subitem-launch .appicon{color:var(--green)}
+
+
+.nav-group{margin-bottom:4px}
+.nav-group-head{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px 9px 11px;border-left:2px solid transparent;border-radius:0 4px 4px 0;transition:.16s;text-align:left}
+.nav-group-head:hover{background:rgba(255,255,255,.03);border-left-color:var(--line-2)}
+body.theme-light .nav-group-head:hover{background:rgba(0,0,0,.035)}
+.nav-group-head .label{flex:1;min-width:0;font-family:var(--mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--txt-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-group-head:hover .label{color:var(--txt)}
+.nav-group.open>.nav-group-head .chev{transform:rotate(90deg);color:var(--primary)}
+.nav-group.has-active>.nav-group-head{background:var(--primary-soft);border-left-color:var(--primary-dk)}
+.nav-group-body{max-height:0;overflow:hidden;transition:max-height .34s cubic-bezier(.4,0,.2,1)}
+.nav-group.open>.nav-group-body{max-height:3000px}
+.tree{padding:2px 0 6px}
+.tree-row{position:relative;padding-left:16px}
+.tree-row::before{content:"";position:absolute;left:9px;top:0;bottom:0;width:1px;background:repeating-linear-gradient(180deg,var(--line-2) 0 3px,transparent 3px 7px)}
+.tree-row:last-child::before{bottom:50%}
+.nav-subitem{position:relative;display:flex;align-items:center}
+.nav-subitem-launch{padding:7px 10px 7px 6px;gap:8px}
+.nav-subitem-launch .label{font-size:12.6px;font-weight:400;color:var(--txt-dim)}
+.nav-subitem:hover .label,.nav-subitem.active .label{color:var(--txt)}
+
+.item-actions{display:none;gap:4px;padding:0 8px 8px 30px;flex-wrap:wrap}
+body.edit-mode .item-actions{display:flex}
+.item-act-btn{width:24px;height:24px;border:1px solid var(--line-2);border-radius:3px;color:var(--txt-dim);display:grid;place-items:center;transition:.16s}
+.item-act-btn svg{width:13px;height:13px}
+.item-act-btn:hover{color:var(--primary);border-color:var(--primary-dk);background:var(--primary-soft)}
+.item-act-btn.danger:hover{color:var(--danger);border-color:rgba(255,95,86,.5);background:rgba(255,95,86,.10)}
+.group-actions{padding:2px 8px 8px 30px}
+
+.empty-list,.scan-loading,.scan-error{
+  font-family:var(--mono);font-size:11px;line-height:1.6;padding:14px 12px;
+  border:1px dashed var(--line-2);border-radius:5px;color:var(--txt-dim);
+}
+.scan-loading{border-style:solid;border-color:var(--line);color:var(--primary);animation:pulseOp 1.4s ease-in-out infinite}
+.scan-error{border-color:rgba(255,95,86,.4);color:var(--danger)}
+@keyframes pulseOp{50%{opacity:.45}}
+
+.sidebar-footer{border-top:1px solid var(--line);padding:10px;background:linear-gradient(180deg,transparent,rgba(255,255,255,.015))}
+body.theme-light .sidebar-footer{background:linear-gradient(180deg,transparent,rgba(0,0,0,.02))}
+.sidebar-footer-row{display:flex;align-items:center}
+.manage-wrap{position:relative;display:flex;align-items:center;gap:8px;min-width:0}
+.manage-toggle{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:9px 10px;border:1px solid var(--line-2);border-radius:4px;font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--txt-dim);transition:.16s}
+.manage-toggle svg{width:14px;height:14px}
+.manage-toggle:hover{color:var(--primary);border-color:var(--primary-dk);background:var(--primary-soft)}
+.manage-pop{
+  position:absolute;bottom:calc(100% + 8px);left:0;width:268px;padding:6px;
+  background:var(--panel-2);border:1px solid var(--line-2);border-radius:6px;box-shadow:var(--shadow);
+  opacity:0;transform:translateY(8px);pointer-events:none;transition:.22s cubic-bezier(.4,0,.2,1);z-index:60;
+}
+.manage-wrap.open .manage-pop{opacity:1;transform:translateY(0);pointer-events:auto}
+.manage-item{display:flex;align-items:center;gap:9px;width:100%;padding:8px 9px;border-radius:4px;font-size:12.6px;color:var(--txt);transition:.14s;text-align:left}
+.manage-item svg{width:14px;height:14px;color:var(--txt-faint);flex-shrink:0}
+.manage-item:hover{background:var(--primary-soft);color:var(--primary-lt)}
+.manage-item:hover svg{color:var(--primary)}
+.manage-sep{height:1px;background:var(--line);margin:6px 4px}
+.m-state{margin-left:auto;font-family:var(--mono);font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--line-2);border-radius:2px;padding:1px 5px;color:var(--txt-faint)}
+.manage-item[aria-pressed="true"]{background:var(--primary-soft);color:var(--primary-lt)}
+.manage-item[aria-pressed="true"] .m-state{border-color:var(--primary-dk);color:var(--primary)}
+.manage-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 9px;font-size:12.2px;color:var(--txt-dim);line-height:1.35}
+.switch{position:relative;display:inline-block;width:34px;height:18px;flex-shrink:0}
+.switch input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:2}
+.switch-track{position:absolute;inset:0;background:var(--line-2);border-radius:999px;transition:.2s}
+.switch-thumb{position:absolute;top:3px;left:3px;width:12px;height:12px;border-radius:50%;background:var(--txt-dim);transition:.2s cubic-bezier(.4,0,.2,1);pointer-events:none}
+.switch input:checked~.switch-track{background:var(--primary);box-shadow:0 0 12px var(--primary-glow)}
+.switch input:checked~.switch-thumb{transform:translateX(16px);background:#0A0B0D}
+.switch input:focus-visible~.switch-track{outline:2px solid var(--primary);outline-offset:2px}
+.dark-toggle-btn{width:34px;height:34px;flex-shrink:0;border:1px solid var(--line-2);border-radius:4px;color:var(--txt-dim);display:grid;place-items:center;transition:.16s}
+.dark-toggle-btn svg{width:16px;height:16px}
+.dark-toggle-btn:hover{color:var(--primary);border-color:var(--primary-dk);background:var(--primary-soft)}
+.version{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--txt-dim);margin-top:10px}
+.engine{font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:var(--txt-faint);margin-top:3px}
+
+/* Przełącznik panelu — wbudowany w header (nie pływa już nad treścią). */
+.sidebar-fab{
+  position:static;width:28px;height:28px;flex-shrink:0;
+  background:transparent;border:1px solid var(--line-2);border-radius:4px;
+  color:var(--txt-dim);display:grid;place-items:center;
+  transition:.16s cubic-bezier(.4,0,.2,1);
+}
+.sidebar-fab svg{width:14px;height:14px;transition:transform .38s cubic-bezier(.4,0,.2,1)}
+body:not(.sidebar-collapsed) .sidebar-fab{color:var(--primary);border-color:var(--primary-dk);background:var(--primary-soft)}
+body:not(.sidebar-collapsed) .sidebar-fab svg{transform:rotate(180deg)}
+.sidebar-fab:hover{background:var(--primary);border-color:var(--primary);color:#0A0B0D}
+.sidebar-fab:active{transform:scale(.94)}
+.sidebar-backdrop{
+  /* zaczyna się pod headerem — dzięki temu przełącznik w pasku górnym
+     pozostaje klikalny, gdy szuflada panelu jest wysunięta */
+  position:fixed;top:var(--bar);left:0;right:0;bottom:0;z-index:38;background:rgba(4,6,8,.55);
+  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+body:not(.sidebar-collapsed) .sidebar-backdrop{opacity:1;pointer-events:auto}
+
+/* ---------- GÓRNY PASEK ---------- */
+.topbar-wrap{
+  position:fixed;top:0;left:0;right:0;height:var(--bar);z-index:30;
+  background:color-mix(in srgb,var(--bg) 86%,transparent);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);
+}
+@supports not (background:color-mix(in srgb,red 50%,blue)){.topbar-wrap{background:rgba(7,9,11,.88)}}
+@supports not (background:color-mix(in srgb,red 50%,blue)){.toast{background:rgba(14,18,23,.82);border-color:rgba(38,48,59,.82)}}
+body.theme-light .topbar-wrap{background:rgba(239,236,228,.92)}
+/* HEADER — wariant minimal: 44 px, bez poświat, mniejsze kontrolki. */
+.topbar{
+  height:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:0 12px 0 calc(var(--rail) + 14px);
+  transition:padding-left .38s cubic-bezier(.4,0,.2,1);
+}
+body.sidebar-collapsed .topbar{padding-left:14px}
+.topbar-left{display:flex;align-items:center;gap:10px;min-width:0}
+.topbar-title{
+  /* Tytuł otwartej aplikacji ma być czytelny i bardziej naturalny niż techniczny mono. */
+  font-family:var(--sans);font-size:12.5px;font-weight:500;letter-spacing:.035em;
+  text-transform:none;color:var(--primary-lt);white-space:nowrap;text-shadow:none;
+  max-width:38vw;overflow:hidden;text-overflow:ellipsis;
+}
+.topbar-breadcrumb{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;color:var(--txt-dim);min-width:0}
+.topbar-breadcrumb svg{width:12px;height:12px;color:var(--txt-faint);flex-shrink:0}
+.topbar-breadcrumb span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:34vw}
+.topbar-right{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.topbar-icon-btn{width:28px;height:28px;border:1px solid var(--line-2);border-radius:4px;color:var(--txt-dim);display:grid;place-items:center;transition:.16s}
+.topbar-icon-btn svg{width:14px;height:14px}
+.topbar-icon-btn:hover{color:var(--primary);border-color:var(--primary-dk);background:var(--primary-soft)}
+.tool-only-btn{display:none}
+body.has-tool .tool-only-btn{display:grid}
+body:not(.source-remote) #shareBtn{display:none!important}
+.topbar-sep{width:1px;height:16px;background:var(--line)}
+#clock{font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;color:var(--primary);font-variant-numeric:tabular-nums;min-width:58px;text-align:right}
+
+/* ---------- GŁÓWNA WIDOCZNOŚĆ ---------- */
+.main{
+  position:relative;z-index:10;height:100%;padding-top:var(--bar);
+  margin-left:var(--rail);display:flex;flex-direction:column;overflow:hidden;
+  transition:margin-left .38s cubic-bezier(.4,0,.2,1);
+}
+body.sidebar-collapsed .main{margin-left:0}
+
+/* --- ekran powitalny: asymetryczny, lewy szkielet --- */
+.welcome{
+  flex:1;min-height:0;overflow-y:auto;display:grid;align-content:center;justify-items:start;
+  padding:44px clamp(22px,6vw,72px);position:relative;
+}
+.welcome-kicker{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--primary);margin-bottom:22px}
+.welcome-kicker::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--primary);box-shadow:0 0 10px var(--primary-glow);animation:blink 2.4s ease-in-out infinite}
+.welcome-kicker::after{content:"";width:74px;height:1px;background:repeating-linear-gradient(90deg,var(--primary-dk) 0 5px,transparent 5px 10px)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.28}}
+.icon-big{
+  width:74px;height:74px;display:grid;place-items:center;margin-bottom:26px;
+  border:1px solid var(--line-2);border-radius:6px;color:var(--primary);
+  background:linear-gradient(160deg,var(--primary-soft),transparent 70%);
+  box-shadow:0 0 0 1px rgba(255,255,255,.02) inset,0 12px 34px rgba(0,0,0,.4);
+}
+.icon-big svg{width:34px;height:34px;filter:drop-shadow(0 0 8px var(--primary-glow))}
+.welcome h2{
+  margin:0 0 16px;font-size:clamp(2.1rem,5.4vw,3.7rem);line-height:1.03;
+  font-weight:700;letter-spacing:-.028em;max-width:14ch;
+}
+.welcome h2 .accent{color:var(--primary);position:relative;display:inline-block}
+.welcome h2 .accent::after{
+  content:"";position:absolute;left:0;right:0;bottom:.06em;height:3px;
+  background:var(--primary);opacity:.35;transform-origin:left;animation:swipe 1.1s .25s cubic-bezier(.4,0,.2,1) both;
+}
+@keyframes swipe{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.welcome p{margin:0 0 28px;max-width:58ch;color:var(--txt-dim);font-size:15.5px;line-height:1.65}
+.welcome-meta{display:flex;flex-wrap:wrap;gap:8px 26px;font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt-faint);border-top:1px solid var(--line);padding-top:16px;max-width:640px}
+.welcome-meta strong{color:var(--txt);font-weight:500}
+.meta-mark{color:var(--primary);margin-right:4px}
+.welcome::after{
+  content:"FLEET & DOCS SUITE · SINGLE-FILE · OFFLINE · IZOLOWANY SANDBOX";
+  position:absolute;right:clamp(14px,3vw,42px);top:50%;transform:translateY(-50%);
+  writing-mode:vertical-rl;font-family:var(--mono);font-size:10px;letter-spacing:.42em;
+  text-transform:uppercase;color:var(--txt-faint);opacity:.5;white-space:nowrap;pointer-events:none;
+}
+
+/* --- obszar ramki narzędzia --- */
+.frame-area{flex:1;min-height:0;position:relative;display:none;background:var(--bg-2);border-top:1px solid var(--line)}
+.frame-area.show{display:block}
+/* Po uruchomieniu aplikacji iframe ma pełną kontrolę nad kliknięciami i gestami.
+   Nakładka sidebaru nie może przechwytywać przycisków formularzy ani przewijania. */
+body.has-tool .sidebar-backdrop{opacity:0!important;pointer-events:none!important}
+#toolFrame{position:absolute;inset:0;width:100%;height:100%;border:0;background:var(--panel-2);display:block;z-index:1;pointer-events:auto}
+.loading-overlay{
+  position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
+  background:color-mix(in srgb,var(--bg) 92%,transparent);
+  -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+  opacity:0;pointer-events:none;transition:opacity .28s;
+}
+@supports not (background:color-mix(in srgb,red 50%,blue)){.loading-overlay{background:rgba(7,9,11,.94)}}
+.loading-overlay.show{opacity:1;pointer-events:auto}
+.loading-overlay::before{
+  content:"";position:absolute;inset:0;
+  background:repeating-linear-gradient(to bottom,var(--scanline) 0 1px,transparent 1px 3px);
+}
+.deploy-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.34em;text-transform:uppercase;color:var(--txt-faint);margin-bottom:14px}
+.deploy-name{
+  font-family:var(--mono);font-size:clamp(1.3rem,3.6vw,2.3rem);font-weight:500;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--primary);text-shadow:0 0 22px var(--primary-glow);
+  margin-bottom:24px;text-align:center;max-width:90vw;word-break:break-word;min-height:1.2em;
+}
+.deploy-bar{width:min(420px,72vw);height:3px;background:var(--line);border-radius:2px;overflow:hidden;position:relative}
+.deploy-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--primary-dk),var(--primary) 60%,var(--primary-lt));border-radius:2px;box-shadow:0 0 12px var(--primary-glow);transition:width .9s cubic-bezier(.4,0,.2,1)}
+.deploy-sub{font-family:var(--mono);font-size:9px;letter-spacing:.2em;color:var(--txt-faint);margin-top:16px;text-align:center;padding:0 16px}
+
+/* ---------- MODAL UDOSTĘPNIANIA ---------- */
+.modal-bg{
+  position:fixed;inset:0;z-index:120;display:none;place-items:center;padding:20px;
+  background:rgba(4,6,8,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+}
+.modal-bg.open{display:grid}
+.modal-box{
+  position:relative;width:min(400px,100%);background:var(--panel);border:1px solid var(--line-2);
+  border-radius:8px;padding:24px 22px 20px;box-shadow:var(--shadow);animation:popIn .26s cubic-bezier(.4,0,.2,1);
+}
+@keyframes popIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+.modal-box h3{margin:0 0 16px;font-size:15px;letter-spacing:.02em}
+.mx{position:absolute;top:12px;right:12px;width:26px;height:26px;border:1px solid var(--line);border-radius:4px;color:var(--txt-dim);display:grid;place-items:center;font-size:12px;transition:.16s}
+.mx:hover{color:var(--danger);border-color:rgba(255,95,86,.5);background:rgba(255,95,86,.1)}
+.share-url-row{display:flex;gap:7px}
+.share-url-row input{flex:1;min-width:0;background:var(--panel-2);border:1px solid var(--line);border-radius:4px;padding:8px 9px;font-family:var(--mono);font-size:11px;outline:none}
+.share-url-row input:focus{border-color:var(--primary-dk)}
+.share-url-row button{padding:0 14px;background:var(--primary);color:#0A0B0D;border-radius:4px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;transition:.16s}
+.share-url-row button:hover{background:var(--primary-lt);box-shadow:0 0 16px var(--primary-glow)}
+.share-qr-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:16px;padding:14px;border:1px solid var(--line);border-radius:6px;background:#fff}
+.share-qr-wrap canvas{display:block;width:160px;height:160px;image-rendering:pixelated}
+.share-qr-wrap span{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#6b7280}
+.share-note{font-family:var(--mono);font-size:10px;color:var(--txt-faint);margin-top:10px;line-height:1.5}
+
+/* ---------- MODALE SYSTEMOWE (import / ikony) ---------- */
+.modal-backdrop{
+  position:fixed;inset:0;z-index:130;display:none;place-items:center;padding:18px;
+  background:rgba(4,6,8,.74);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+}
+.modal-backdrop.open{display:grid}
+.imodal{
+  width:min(580px,100%);max-height:92vh;display:flex;flex-direction:column;
+  background:var(--panel);border:1px solid var(--line-2);border-radius:9px;box-shadow:var(--shadow);
+  animation:popIn .26s cubic-bezier(.4,0,.2,1);overflow:hidden;
+}
+.imodal-head{display:flex;align-items:flex-start;gap:14px;padding:20px 20px 16px;border-bottom:1px solid var(--line);position:relative}
+.imodal-head h3{margin:0 0 5px;font-size:15.5px;letter-spacing:.01em}
+.imodal-head p{margin:0;font-size:12.6px;color:var(--txt-dim);line-height:1.55;max-width:56ch}
+.imodal-head .mx{position:static;flex-shrink:0;margin-left:auto}
+.imodal-body{padding:18px 20px;display:flex;flex-direction:column;gap:15px;overflow-y:auto;flex:1;min-height:0}
+.imodal-foot{display:flex;justify-content:flex-end;gap:9px;padding:14px 20px;border-top:1px solid var(--line);background:var(--panel-2)}
+.ifield label{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt-faint);margin-bottom:6px}
+.ifield input[type=text],.ifield textarea{
+  width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:4px;
+  padding:9px 10px;font-size:13.4px;outline:none;transition:.18s;
+}
+.ifield textarea{font-family:var(--mono);font-size:12px;min-height:160px;resize:vertical;line-height:1.55}
+.ifield input:focus,.ifield textarea:focus{border-color:var(--primary-dk);box-shadow:0 0 0 3px var(--primary-soft)}
+.ifield input::placeholder,.ifield textarea::placeholder{color:var(--txt-faint)}
+.itabs{display:flex;gap:3px;padding:3px;background:var(--panel-2);border:1px solid var(--line);border-radius:5px}
+.itab{flex:1;padding:8px 6px;border-radius:3px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt-dim);transition:.16s;border:1px solid transparent}
+.itab:hover{color:var(--txt);background:rgba(255,255,255,.03)}
+body.theme-light .itab:hover{background:rgba(0,0,0,.04)}
+.itab.active{background:var(--primary);color:#0A0B0D;font-weight:600;box-shadow:0 0 14px var(--primary-glow)}
+.ipanel{display:none;flex-direction:column;gap:12px}
+.ipanel.active{display:flex}
+.idrop{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  padding:28px 16px;border:1px dashed var(--line-2);border-radius:6px;color:var(--txt-dim);
+  cursor:pointer;transition:.2s;text-align:center;background:repeating-linear-gradient(45deg,transparent 0 10px,rgba(255,255,255,.012) 10px 20px);
+}
+.idrop svg{width:26px;height:26px;color:var(--primary);margin-bottom:4px}
+.idrop strong{font-size:13.4px;color:var(--txt);font-weight:500}
+.idrop span{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt-faint)}
+.idrop:hover,.idrop.dragover{border-color:var(--primary);background:var(--primary-soft);color:var(--primary)}
+.ifile-status{display:none;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;color:var(--accent);word-break:break-all}
+.ifile-status.show{display:flex}
+.ifile-status svg{flex-shrink:0}
+.ighresults{max-height:190px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;border:1px solid transparent}
+.ighresults:empty{display:none}
+.ighresults:not(:empty){border-color:var(--line);border-radius:5px;padding:4px;background:var(--panel-2)}
+.ighrow{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:7px 9px;border-radius:3px;border-left:2px solid transparent;font-family:var(--mono);font-size:11.4px;color:var(--txt-dim);text-align:left;transition:.14s}
+.ighrow .path{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.ighrow .sz{color:var(--txt-faint);flex-shrink:0;font-size:10px}
+.ighrow:hover{background:rgba(255,255,255,.04);color:var(--txt)}
+body.theme-light .ighrow:hover{background:rgba(0,0,0,.04)}
+.ighrow.selected{background:var(--primary-soft);border-left-color:var(--primary);color:var(--primary-lt)}
+.igh-loading,.igh-empty,.igh-error{font-family:var(--mono);font-size:11px;padding:10px;color:var(--txt-dim)}
+.igh-loading{color:var(--primary)}
+.igh-error{color:var(--danger)}
+.imodal-btn{padding:10px 18px;border-radius:4px;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;transition:.16s;border:1px solid transparent}
+.imodal-btn.confirm{background:var(--primary);color:#0A0B0D;font-weight:600;box-shadow:0 0 18px var(--primary-glow)}
+.imodal-btn.confirm:hover{background:var(--primary-lt)}
+.imodal-btn.cancel{border-color:var(--line-2);color:var(--txt-dim)}
+.imodal-btn.cancel:hover{color:var(--txt);border-color:var(--txt-faint)}
+.imodal-btn:disabled{opacity:.35;pointer-events:none;box-shadow:none}
+.ghnote{font-size:12.2px;line-height:1.55;color:var(--txt-dim);background:var(--primary-soft);border-left:2px solid var(--primary);padding:9px 11px;border-radius:0 4px 4px 0}
+.icon-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(50px,1fr));gap:7px}
+.icon-opt{aspect-ratio:1;display:grid;place-items:center;border:1px solid var(--line);border-radius:5px;color:var(--txt-dim);background:var(--panel-2);transition:.16s}
+.icon-opt svg{width:20px;height:20px}
+.icon-opt:hover{color:var(--primary);border-color:var(--primary-dk);transform:translateY(-2px)}
+.icon-opt.selected{color:#0A0B0D;background:var(--primary);border-color:var(--primary);box-shadow:0 0 16px var(--primary-glow)}
+
+/* ---------- TOAST ---------- */
+.toast{
+  position:fixed;left:50%;bottom:26px;z-index:140;transform:translate(-50%,24px);
+  opacity:0;pointer-events:none;display:flex;align-items:center;gap:9px;
+  max-width:min(560px,92vw);padding:10px 14px;
+  background:color-mix(in srgb,var(--panel-2) 58%,transparent);
+  border:1px solid color-mix(in srgb,var(--line-2) 72%,transparent);
+  border-radius:6px;box-shadow:0 10px 30px rgba(0,0,0,.22),0 0 0 1px rgba(255,255,255,.025) inset;
+  -webkit-backdrop-filter:blur(14px) saturate(125%);backdrop-filter:blur(14px) saturate(125%);
+  font-family:var(--sans);font-size:12px;line-height:1.45;color:var(--txt);
+  transition:opacity .26s,transform .26s cubic-bezier(.4,0,.2,1);
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast-mark{width:7px;height:7px;flex-shrink:0;background:var(--primary);transform:rotate(45deg);box-shadow:0 0 9px var(--primary-glow)}
+.toast.err{border-color:rgba(255,95,86,.55);color:#FFB3AE}
+.toast.err .toast-mark{background:var(--danger);box-shadow:0 0 9px rgba(255,95,86,.6)}
+
+/* ---------- SKALE ---------- */
+@media (max-width:900px){
+  :root{--rail:min(282px,86vw)}
+  .sidebar{box-shadow:12px 0 38px rgba(0,0,0,.38)}
+  .sidebar-backdrop{-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+  .main{margin-left:0}
+  .topbar,body.sidebar-collapsed .topbar{padding-left:14px}
+  .welcome::after{display:none}
+  .topbar-breadcrumb{display:none}
+}
+@media (min-width:901px){
+  /* Pulpit: podkładka jest PEŁNA, ale przezroczysta — nie przyciemnia treści,
+     a mimo to łapie każde kliknięcie (także wewnątrz iframe narzędzia),
+     żeby kliknięcie w dowolne miejsce poza panelem zamykało szynę. */
+  .sidebar-backdrop{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
+}
+@media (max-width:640px){
+  .topbar,body.sidebar-collapsed .topbar{padding:0 10px 0 12px;gap:8px}
+  .topbar-left{gap:8px}
+  #clock{min-width:0;font-size:11px}
+  .topbar-sep{display:none}
+  .welcome{padding:28px 20px 40px;align-content:start;padding-top:38px}
+  .welcome h2{font-size:clamp(1.8rem,8vw,2.6rem);max-width:100%}
+  .welcome p{font-size:14.4px}
+  .icon-big{width:60px;height:60px;margin-bottom:20px}
+  .icon-big svg{width:28px;height:28px}
+  .welcome-meta{gap:6px 16px;font-size:9.5px}
+  .imodal-body{padding:15px 15px}
+  .imodal-head{padding:16px 15px 13px}
+  .imodal-foot{padding:12px 15px}
+  .deploy-name{font-size:clamp(1.1rem,7vw,1.7rem)}
+  .toast{bottom:16px;font-size:11px}
+}
+@media (max-height:560px){
+  .welcome{align-content:start}
+  .icon-big{display:none}
+}
+
+/* ---------- DOSTĘPNOŚĆ RUCHU ---------- */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.08s!important}
+  #hud-scan::after{display:none}
+  #hud-noise{animation:none}
+  .orb{animation:none}
+}
+/* ============================================================
+   WARSTWA 2 — PEŁNA STYLIZACJA
+   Stany (focus/hover/active/disabled), tekstury powierzchni,
+   detal HUD (narożniki, linijki, lampki), scrollbar, kontrast.
+   ============================================================ */
+
+/* ---------- stany podstawowe / dostępność ---------- */
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:3px}
+button:disabled,[disabled],.imodal-btn:disabled{cursor:not-allowed}
+input:disabled,textarea:disabled{cursor:not-allowed;opacity:.55}
+a{color:var(--primary);text-underline-offset:3px}
+img,svg{max-width:100%}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:6px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:var(--primary-dk);background-clip:padding-box;border:2px solid transparent}
+*{scrollbar-width:thin;scrollbar-color:var(--line-2) transparent}
+
+/* ---------- bezel przyrządu: narożniki i linijka krawędzi ---------- */
+body::before{
+  content:"";position:fixed;inset:13px;z-index:96;pointer-events:none;opacity:.5;
+  background:
+    linear-gradient(var(--primary-dk),var(--primary-dk)) left top/20px 1px no-repeat,
+    linear-gradient(var(--primary-dk),var(--primary-dk)) left top/1px 20px no-repeat,
+    linear-gradient(var(--primary-dk),var(--primary-dk)) right top/20px 1px no-repeat,
+    linear-gradient(var(--primary-dk),var(--primary-dk)) right top/1px 20px no-repeat,
+    linear-gradient(var(--primary-dk),var(--primary-dk)) left bottom/20px 1px no-repeat,
+    linear-gradient(var(--primary-dk),var(--primary-dk)) left bottom/1px 20px no-repeat,
+    linear-gradient(var(--primary-dk),var(--primary-dk)) right bottom/20px 1px no-repeat,
+    linear-gradient(var(--primary-dk),var(--primary-dk)) right bottom/1px 20px no-repeat;
+}
+body::after{
+  content:"";position:fixed;top:64px;right:0;bottom:64px;width:7px;z-index:96;pointer-events:none;opacity:.4;
+  background:repeating-linear-gradient(180deg,var(--primary-dk) 0 1px,transparent 1px 9px);
+}
+body.theme-light::before,body.theme-light::after{opacity:.32}
+
+/* ---------- szyna: faktura panelu i mikro-etykiety ---------- */
+.sidebar{
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.035),transparent 140px),
+    repeating-linear-gradient(180deg,rgba(255,255,255,.014) 0 1px,transparent 1px 4px),
+    var(--panel);
+}
+body.theme-light .sidebar{
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.03),transparent 140px),
+    repeating-linear-gradient(180deg,rgba(0,0,0,.018) 0 1px,transparent 1px 4px),
+    var(--panel);
+}
+.sidebar-logo{background:linear-gradient(180deg,rgba(245,169,36,.05),transparent)}
+body.theme-light .sidebar-logo{background:linear-gradient(180deg,rgba(154,90,0,.06),transparent)}
+.sidebar::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:3px;pointer-events:none;
+  background:linear-gradient(180deg,var(--primary) 0,transparent 22%,transparent 78%,var(--primary-dk) 100%);
+  opacity:.5;
+}
+.src-btn{position:relative;overflow:hidden}
+.src-btn.active::after{
+  content:"";position:absolute;left:50%;bottom:3px;transform:translateX(-50%);
+  width:14px;height:2px;background:#0A0B0D;opacity:.55;border-radius:2px;
+}
+.sidebar-footer::before{
+  content:"PULPIT STEROWANIA";display:block;margin-bottom:9px;
+  font-family:var(--mono);font-size:8.5px;letter-spacing:.26em;color:var(--txt-faint);
+  padding-bottom:7px;border-bottom:1px dashed var(--line);
+}
+.version{display:flex;align-items:center;gap:7px}
+.version::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 7px var(--accent);flex-shrink:0}
+
+/* ---------- lista modułów: precyzja wierszy ---------- */
+.nav-item-launch,.nav-subitem-launch,.nav-group-head{will-change:transform}
+.nav-item-launch,.nav-subitem-launch{transition:background .16s,border-color .16s,color .16s,transform .16s cubic-bezier(.4,0,.2,1)}
+.nav-item-launch:hover,.nav-subitem-launch:hover{transform:translateX(3px)}
+.nav-item-launch:active,.nav-subitem-launch:active,.nav-group-head:active{transform:translateX(3px) scale(.995)}
+.nav-item.active>.nav-item-launch::after{
+  content:"";width:5px;height:5px;border-radius:50%;flex-shrink:0;
+  background:var(--primary);box-shadow:0 0 9px var(--primary-glow);
+  animation:blink 2.6s ease-in-out infinite;
+}
+.nav-item-launch .label,.nav-subitem-launch .label{transition:color .16s}
+.nav-badge{font-variant-numeric:tabular-nums;transition:.16s}
+.nav-item-launch:hover .nav-badge{border-color:var(--primary-dk);color:var(--primary)}
+.nav-group-head{transition:background .16s,border-color .16s,transform .16s}
+.nav-group-head .chev{margin-left:2px}
+.tree-row:last-child .nav-subitem-launch{padding-bottom:9px}
+.item-actions{border-top:1px dashed var(--line);margin-top:2px;padding-top:8px}
+body.edit-mode .nav-item,body.edit-mode .nav-subitem{background:rgba(245,169,36,.035)}
+body.edit-mode .item-act-btn{animation:popIn .22s cubic-bezier(.4,0,.2,1) both}
+.item-act-btn:active{transform:scale(.9)}
+
+/* ---------- górny pasek: lampka stanu i przyciski ---------- */
+/* Bez cienia — nagłówek nie może rzucać cienia na otwierane narzędzie. */
+.topbar-wrap{box-shadow:none}
+.topbar-title::before{
+  content:"";display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:var(--accent);box-shadow:0 0 8px var(--accent);
+  margin-right:9px;vertical-align:middle;animation:blink 3.2s ease-in-out infinite;
+}
+.topbar-breadcrumb span{transition:color .16s}
+.topbar-icon-btn{transition:.16s cubic-bezier(.4,0,.2,1)}
+.topbar-icon-btn:active{transform:translateY(0) scale(.93)}
+#clock{position:relative;padding-bottom:2px}
+#clock::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:1px;
+  background:linear-gradient(90deg,var(--primary),transparent);opacity:.6;
+}
+
+/* ---------- ekran powitalny: rytm edytorski ---------- */
+.welcome{position:relative}
+.welcome h2::before{
+  content:"01 — START Systemu";display:block;margin-bottom:14px;
+  font-family:var(--mono);font-size:10px;font-weight:400;letter-spacing:.3em;
+  text-transform:uppercase;color:var(--txt-faint);
+}
+.welcome h2::after{
+  content:"";display:block;width:64px;height:2px;margin-top:22px;
+  background:linear-gradient(90deg,var(--primary),transparent);
+}
+.icon-big{
+  background:
+    linear-gradient(160deg,var(--primary-soft),transparent 70%),
+    linear-gradient(var(--primary-dk),var(--primary-dk)) left 6px top 6px/10px 1px no-repeat,
+    linear-gradient(var(--primary-dk),var(--primary-dk)) left 6px top 6px/1px 10px no-repeat,
+    linear-gradient(var(--primary-dk),var(--primary-dk)) right 6px bottom 6px/10px 1px no-repeat,
+    linear-gradient(var(--primary-dk),var(--primary-dk)) right 6px bottom 6px/1px 10px no-repeat;
+}
+.welcome::before{
+  content:"";position:absolute;left:clamp(22px,6vw,72px);right:clamp(22px,6vw,72px);bottom:26px;height:9px;
+  background:repeating-linear-gradient(90deg,var(--line-2) 0 1px,transparent 1px 14px);
+  opacity:.7;pointer-events:none;
+}
+.welcome-meta{transition:border-color .3s}
+.welcome-meta .meta-mark{display:inline-block;transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.welcome-meta span:hover .meta-mark{transform:rotate(90deg);color:var(--primary-lt)}
+
+/* ---------- obszar narzędzia i moment "deploy" ---------- */
+/* brak cienia/insetu — obszar narzędzia pozostaje płaski, bez winiety */
+.loading-overlay::after{
+  content:"";position:absolute;inset:26px;pointer-events:none;opacity:.55;
+  background:
+    linear-gradient(var(--primary),var(--primary)) left top/26px 1px no-repeat,
+    linear-gradient(var(--primary),var(--primary)) left top/1px 26px no-repeat,
+    linear-gradient(var(--primary),var(--primary)) right top/26px 1px no-repeat,
+    linear-gradient(var(--primary),var(--primary)) right top/1px 26px no-repeat,
+    linear-gradient(var(--primary),var(--primary)) left bottom/26px 1px no-repeat,
+    linear-gradient(var(--primary),var(--primary)) left bottom/1px 26px no-repeat,
+    linear-gradient(var(--primary),var(--primary)) right bottom/26px 1px no-repeat,
+    linear-gradient(var(--primary),var(--primary)) right bottom/1px 26px no-repeat;
+}
+.deploy-tag::before{content:"[ "}
+.deploy-tag::after{content:" ]"}
+.deploy-name::after{
+  content:"▌";margin-left:.12em;color:var(--primary);opacity:.85;
+  animation:blink 1s steps(1) infinite;
+}
+.deploy-bar{box-shadow:0 0 0 1px var(--line)}
+.deploy-sub{letter-spacing:.16em;color:var(--txt-faint);opacity:.85}
+
+/* ---------- modale: skanowane szkło i nagłówek ---------- */
+.modal-bg,.modal-backdrop{background:rgba(4,6,8,.74)}
+.imodal-head{background:linear-gradient(180deg,rgba(245,169,36,.055),transparent)}
+body.theme-light .imodal-head{background:linear-gradient(180deg,rgba(154,90,0,.06),transparent)}
+.imodal-head::after{
+  content:"";position:absolute;left:20px;right:20px;bottom:-1px;height:1px;
+  background:linear-gradient(90deg,var(--primary),transparent 70%);
+}
+.imodal-head h3{letter-spacing:.04em}
+.imodal-head h3::before{content:"◆ ";color:var(--primary);font-size:11px;vertical-align:2px}
+.ifield input[type=text]:hover,.ifield textarea:hover,.search-wrap input:hover,.share-url-row input:hover{border-color:var(--line-2)}
+.itab{position:relative;overflow:hidden}
+.itab.active::after{
+  content:"";position:absolute;left:50%;bottom:3px;transform:translateX(-50%);
+  width:12px;height:2px;background:#0A0B0D;opacity:.5;border-radius:2px;
+}
+.idrop:focus-visible{border-style:solid;border-color:var(--primary);background:var(--primary-soft)}
+.ighrow:active{transform:scale(.995)}
+.imodal-foot{background:linear-gradient(180deg,transparent,rgba(255,255,255,.02))}
+body.theme-light .imodal-foot{background:linear-gradient(180deg,transparent,rgba(0,0,0,.03))}
+.imodal-btn.confirm:active{transform:translateY(1px)}
+.icon-opt:active{transform:translateY(0) scale(.95)}
+
+/* ---------- toast: pasek czasu życia ---------- */
+.toast{overflow:hidden;align-items:flex-start}
+.toast::after{
+  content:"";position:absolute;left:0;bottom:0;height:2px;width:100%;
+  background:linear-gradient(90deg,var(--primary-dk),var(--primary));transform:scaleX(0);transform-origin:left;
+}
+.toast.show::after{animation:toastLife 2.5s linear forwards}
+.toast.err::after{background:linear-gradient(90deg,#7a2b27,var(--danger))}
+@keyframes toastLife{to{transform:scaleX(1)}}
+
+/* ---------- dodatkowe stany i środowiska ---------- */
+@media (hover:none){
+  .nav-item-launch:hover,.nav-subitem-launch:hover,.topbar-icon-btn:hover{transform:none}
+  .nav-item-launch:hover{background:transparent}
+}
+@media (prefers-contrast:more){
+  :root{--txt-dim:#C3CCD6;--txt-faint:#9AA5B1;--line:#39434F;--line-2:#4C5866}
+}
+@media print{
+  .accent-line,.ambient-glow,.bg-grid,.sidebar-backdrop,.sidebar-fab{display:none!important}
+  body{overflow:auto;background:#fff;color:#000}
+  .sidebar{position:static;width:100%;transform:none;box-shadow:none;background:#fff;border:1px solid #ccc}
+  .main{margin-left:0;padding-top:0}
+  .topbar-wrap{position:static;background:#fff;box-shadow:none}
+}
+/* ---------- DOMYŚLNY ROZMIAR SVG (bezpieczeństwo dla ikon bez klasy) ----------
+   ICON_FILE w wierszach listy nie ma klasy "appicon" — bez tej reguły
+   przeglądarka renderuje go w domyślnym rozmiarze elementu zastępczego. */
+svg{width:16px;height:16px;display:inline-block;vertical-align:middle}
+.nav-item-launch>svg,.nav-subitem-launch>svg,.nav-group-head>svg{
+  flex-shrink:0;color:var(--txt-faint);transition:color .16s,filter .16s;
+}
+.nav-item-launch:hover>svg,.nav-subitem-launch:hover>svg{color:var(--primary)}
+.nav-item.active>.nav-item-launch>svg,
+.nav-subitem.active>.nav-subitem-launch>svg{color:var(--primary);filter:drop-shadow(0 0 5px var(--primary-glow))}
+
+/* ---------- detale, które dotąd ginęły w powierzchni ---------- */
+.nav-group-head{border-bottom:1px solid transparent}
+.nav-group.open>.nav-group-head{border-bottom-color:var(--line);border-radius:4px 4px 0 0}
+.nav-group.open>.nav-group-body{border-left:1px solid var(--line);margin-left:11px;padding-left:4px}
+.nav-group.open{background:linear-gradient(90deg,rgba(255,255,255,.02),transparent 80%)}
+body.theme-light .nav-group.open{background:linear-gradient(90deg,rgba(0,0,0,.025),transparent 80%)}
+.search-wrap input:focus,.ifield input:focus,.ifield textarea:focus{outline:none}
+.nav-item-launch:focus-visible,.nav-subitem-launch:focus-visible,.nav-group-head:focus-visible{outline-offset:-2px}
+.welcome h2 .accent{text-shadow:0 0 26px var(--primary-glow)}
+.engine::before{content:"■ ";color:var(--primary-dk);font-size:8px}
+.api-limit{position:relative;overflow:hidden}
+.api-limit::after{
+  content:"";position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.5;
+}
+.manage-wrap.open .manage-toggle{color:var(--primary);border-color:var(--primary-dk);background:var(--primary-soft)}
+.dark-toggle-btn[aria-pressed="true"]{color:var(--primary);border-color:var(--primary-dk);background:var(--primary-soft)}
+/* ---------- przełącznik „Zarządzaj” → dyskretne trzy kropki ---------- */
+.manage-toggle{
+  width:34px;height:34px;padding:0;gap:0;justify-content:center;
+  border-radius:4px;letter-spacing:normal;font-size:inherit;
+}
+.manage-toggle svg{width:16px;height:16px}
+.manage-wrap.open .manage-toggle{
+  color:var(--primary);border-color:var(--primary-dk);background:var(--primary-soft);
+}
+.manage-wrap.open .manage-toggle svg{filter:drop-shadow(0 0 5px var(--primary-glow))}
+
+/* ---------- przycisk „Zakończ edycję” na dole panelu ---------- */
+/* Widoczny wyłącznie w trybie edycji (body.edit-mode) — stały, pełnej szerokości,
+   żeby wyjście z edycji nie wymagało otwierania menu z trzech kropek. */
+.edit-done-btn{
+  display:none;align-items:center;justify-content:center;gap:7px;
+  width:auto;flex:0 0 auto;white-space:nowrap;
+  margin-top:0;padding:9px 13px;
+  background:var(--primary);color:#0A0B0D;
+  border:1px solid var(--primary);border-radius:5px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;font-weight:600;
+  transition:.16s cubic-bezier(.4,0,.2,1);
+}
+.edit-done-btn svg{width:15px;height:15px;flex-shrink:0}
+.edit-done-btn:hover{background:var(--primary-lt);box-shadow:0 0 18px var(--primary-glow)}
+.edit-done-btn:active{transform:translateY(1px);box-shadow:none}
+body.edit-mode .edit-done-btn{display:flex}
+body.edit-mode .sidebar-footer{border-top-color:var(--primary-dk);background:linear-gradient(180deg,rgba(245,169,36,.05),transparent)}
+body.theme-light body.edit-mode .sidebar-footer{background:linear-gradient(180deg,rgba(154,90,0,.06),transparent)}
+</style>
+</head><body>
+
+<div class="accent-line"></div>
+<div id="app">
+
+  <div class="ambient-glow"><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div></div>
+  <div class="bg-grid"></div>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--primary);width:18px;height:18px;flex-shrink:0"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+      <div class="sidebar-logo-text">
+        <h2>PANEL NARZĘDZI</h2>
+        <div class="logo-sub">Fleet &amp; Docs Suite · Offline</div>
+      </div>
+      <button class="collapse-btn search-toggle" id="searchToggle" type="button" title="Pokaż wyszukiwarkę" aria-label="Pokaż wyszukiwarkę" aria-pressed="false" aria-controls="searchWrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="20.5" y1="20.5" x2="16.2" y2="16.2"></line></svg></button>
+      <button class="collapse-btn" id="collapseBtn" title="Schowaj panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="11 17 6 12 11 7"></polyline><polyline points="18 17 13 12 18 7"></polyline></svg></button>
+    </div>
+
+    <div class="source-toggle" id="sourceToggle" style="margin:10px 10px 0">
+      <button class="src-btn" data-src="local" title="Dane wbudowane w plik jako base64 (offline)">Wbudowane</button>
+      <button class="src-btn active" data-src="github" title="Lista na sztywno, uruchamiana z GitHub">GitHub</button>
+      <button class="src-btn" data-src="scan" title="Skanuj repozytorium GitHub w poszukiwaniu narzędzi">Skanuj</button>
+    </div>
+    <div class="api-limit" id="apiLimit" style="margin: 8px 10px 0px; display: none;">
+      <span class="api-limit-label">Limit API</span>
+      <div class="api-limit-bar"><div class="api-limit-fill" id="apiLimitFill" style="width:98%"></div></div>
+      <span class="api-limit-val" id="apiLimitVal">50/60 zapytań</span>
+    </div>
+
+    <div class="search-wrap" id="searchWrap" style="display:none"><input id="search" type="text" placeholder="Szukaj narzędzia…"></div>
+
+    <div id="navRoot"></div>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-row" style="gap:8px">
+        <div class="manage-wrap" id="manageWrap" style="flex:1;margin-top:0">
+          <button class="manage-toggle" id="manageToggle" type="button" title="Zarządzaj" aria-label="Zarządzaj" aria-expanded="true" aria-haspopup="true"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor"></circle><circle cx="8" cy="8" r="1.4" fill="currentColor"></circle><circle cx="13" cy="8" r="1.4" fill="currentColor"></circle></svg></button>
+          <!-- Obok „...”: wyjście z trybu edycji (widoczne tylko przy body.edit-mode) -->
+          <button class="edit-done-btn" id="editDoneBtn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Zakończ edycję</span>
+          </button>
+          <div class="manage-pop" id="managePop">
+            <button class="manage-item" id="importBtn" type="button"><svg viewBox="0 0 16 16" fill="none"><path d="M8 2.5v7M5 6.5 8 9.5l3-3M3 12.5h10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path></svg>Importuj aplikację</button>
+            <button class="manage-item" id="saveBtn" type="button"><svg viewBox="0 0 16 16" fill="none"><path d="M3 2.5h8l2.5 2.5v8.5H3z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"></path><path d="M5.5 2.5v3h4v-3M5.5 13.5V9.5h5v4" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"></path></svg>Zapisz panel + aplikacje</button>
+            <div class="manage-sep"></div>
+            <button class="manage-item" id="editModeBtn" type="button" aria-pressed="false"><svg viewBox="0 0 16 16" fill="none"><path d="M9.2 3.2 12.8 6.8 5.6 14H2v-3.6z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"></path><path d="M8 4.4 11.6 8" stroke="currentColor" stroke-width="1.2"></path></svg><span id="editModeLabel">Tryb edycji</span><span class="m-state" id="editModeState">off</span></button>
+            <div class="manage-sep"></div>
+            <div class="manage-toggle-row" title="Dotyczy zakładek „GitHub” i „Skanuj”. Pierwsze otwarcie apki zapisuje jej kod w IndexedDB — kolejne otwarcia są błyskawiczne i działają nawet bez internetu. „Przeładuj” zawsze wymusza świeże pobranie z sieci."><span>Cache GitHub/Skanuj (offline)</span><label class="switch"><input type="checkbox" id="swCacheGh" checked=""><span class="switch-track"></span><span class="switch-thumb"></span></label></div>
+
+          </div>
+        </div>
+        <button class="dark-toggle-btn" id="darkModeBtn" type="button" title="Wyłącz Dark Mode (jasny motyw)" aria-pressed="true">
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+        </button>
+      </div>
+
+      <div class="version" id="verLine">13 aplikacji · lista GitHub</div>
+    </div>
+  </aside>
+
+  <!-- ============ TOPBAR ============ -->
+  <div class="topbar-wrap">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="sidebar-fab" id="sidebarFab" title="Pokaż / schowaj panel" aria-label="Pokaż lub schowaj panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline></svg></button>
+        <span class="topbar-title" id="topTitle">FLMANAGER</span>
+        <div class="topbar-breadcrumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg><span id="crumb">flmanager.html</span></div>
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-icon-btn" id="reloadBtn" title="Przeładuj"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+        <button class="topbar-icon-btn tool-only-btn" id="newTabBtn" title="Otwórz w nowej karcie (podgląd, blob)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></button>
+        <button class="topbar-icon-btn tool-only-btn" id="downloadBtn" title="Pobierz i otwórz jako zwykły plik lokalny"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></button>
+        <button class="topbar-icon-btn tool-only-btn" id="shareBtn" title="Udostępnij link z GitHub + kod QR"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg></button>
+        <div class="topbar-sep"></div>
+        <span id="clock" class="mono">09:51:50</span>
+      </div>
+    </header>
+  </div>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+    <div class="welcome" id="welcome" style="">
+      <div class="welcome-kicker"><span>system ready</span></div>
+      <div class="icon-big" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></div>
+      <h2>Twoje narzędzia, <span class="accent">w jednym pliku.</span></h2>
+      <p>Wybierz aplikację z panelu bocznego. Nic nie łączy się z internetem — wszystko działa lokalnie w Twojej przeglądarce.</p>
+      <div class="welcome-meta">
+        <span><span class="meta-mark">+</span> <strong id="metaApps">— aplikacji</strong></span>
+        <span><span class="meta-mark">+</span> <strong>single-file</strong></span>
+        <span><span class="meta-mark">+</span> <strong>tryb offline</strong></span>
+      </div>
+    </div>
+    <div class="frame-area" id="frameArea">
+      <div class="loading-overlay" id="loadingOverlay">
+        <div class="deploy-tag">Uruchamianie modułu</div>
+        <div class="deploy-name" id="deployName">—</div>
+        <div class="deploy-bar"><div class="deploy-fill" id="deployFill"></div></div>
+        <div class="deploy-sub">SANDBOX: STRICT · INJECTION: SRCDOC · ORIGIN: NULL</div>
+      </div>
+    </div>
+  </main>
+
+  <div class="modal-bg" id="shareModal">
+    <div class="modal-box">
+      <button class="mx" id="shareModalClose" aria-label="Zamknij">✕</button>
+      <h3 id="shareTitle">Udostępnij</h3>
+      <div class="share-url-row"><input id="shareUrlInput" readonly="" onclick="this.select()"><button id="shareCopyBtn">Kopiuj</button></div>
+      <div class="share-qr-wrap"><canvas id="shareQr" width="160" height="160"></canvas><span>Zeskanuj, aby otworzyć</span></div>
+      <div class="share-note" id="shareNote"></div>
+    </div>
+  </div>
+
+  <!-- ============ IMPORT MODAL (dodawanie nowej aplikacji do źródła "Lokalne" / IDB) ============ -->
+  <div class="modal-backdrop" id="importModal">
+    <div class="imodal" role="dialog" aria-modal="true">
+      <div class="imodal-head">
+        <div>
+          <h3>Importuj aplikację</h3>
+          <p>Wgraj plik, wklej kod lub wskaż plik w repozytorium GitHub — a następnie wybierz, gdzie ma trafić.</p>
+        </div>
+        <button class="mx" id="importModalClose" aria-label="Zamknij">✕</button>
+      </div>
+      <div class="imodal-body">
+        <div class="ifield">
+          <label for="importName">Nazwa aplikacji</label>
+          <input id="importName" type="text" placeholder="np. Generator faktur" maxlength="60" autocomplete="off">
+        </div>
+        <div class="itabs" id="importFormatToggle">
+          <button class="itab active" type="button" data-itab="upload">Wgraj plik</button>
+          <button class="itab" type="button" data-itab="paste">Wklej kod</button>
+          <button class="itab" type="button" data-itab="ghurl">Z GitHub</button>
+        </div>
+        <div class="ipanel active" data-ipanel="upload">
+          <div class="idrop" id="importDrop" tabindex="0" role="button" aria-label="Wybierz lub upuść plik .html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11M8 8l4-4 4 4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"></path></svg>
+            <strong>Upuść plik .html tutaj</strong>
+            <span>lub kliknij, aby wybrać</span>
+          </div>
+          <input id="importFileInput" type="file" accept=".html,.htm,text/html" hidden="">
+          <div class="ifile-status" id="importFileStatus"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="importFileStatusText"></span></div>
+        </div>
+        <div class="ipanel" data-ipanel="paste">
+          <div class="ifield">
+            <label for="importCode">Kod źródłowy HTML</label>
+            <textarea id="importCode" placeholder="&lt;!doctype html&gt;
+&lt;html&gt;...&lt;/html&gt;" spellcheck="false"></textarea>
+          </div>
+        </div>
+        <div class="ipanel" data-ipanel="ghurl">
+          <div class="ifield" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div><label for="importGhOwner">Właściciel</label><input id="importGhOwner" type="text" placeholder="mmaarreekkxx" autocomplete="off"></div>
+            <div><label for="importGhRepoName">Repozytorium</label><input id="importGhRepoName" type="text" placeholder="flmanager" autocomplete="off"></div>
+          </div>
+          <div class="ifield">
+            <label for="importGhBranch">Gałąź</label>
+            <input id="importGhBranch" type="text" placeholder="main" autocomplete="off">
+          </div>
+          <button class="imodal-btn confirm" id="importGhScanBtn" type="button" style="width:100%">Skanuj repozytorium</button>
+          <div class="ighresults" id="importGhResults"></div>
+          <div class="ifile-status" id="importGhStatus"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg><span id="importGhStatusText"></span></div>
+        </div>
+        <div class="ifield" id="importDestField">
+          <label>Dodaj do</label>
+          <div class="itabs" id="importDestToggle">
+            <button class="itab active" type="button" data-idest="embed">Wbudowane (base64)</button>
+            <button class="itab" type="button" data-idest="github">Lista GitHub (na sztywno)</button>
+          </div>
+          <div class="ghnote" id="importGhNote" style="display:none;margin-top:9px">Wpis trafi do listy GitHub z bezpośrednim linkiem do tego pliku w repozytorium — bez potrzeby ręcznego wgrywania czegokolwiek.</div>
+        </div>
+        <div class="ghnote" id="importEmbedOnlyNote" style="display:none">Import pliku i wklejonego kodu trafia zawsze do aplikacji wbudowanych (base64) — do listy GitHub „na sztywno” można dodać tylko plik, który faktycznie już znajduje się w repozytorium (zakładka „Z GitHub”).</div>
+      </div>
+      <div class="imodal-foot">
+        <button class="imodal-btn cancel" id="importCancelBtn" type="button">Anuluj</button>
+        <button class="imodal-btn confirm" id="importConfirmBtn" type="button" disabled="">Importuj</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MODAL WYBORU IKONY (tryb edycji) ============ -->
+  <div class="modal-backdrop" id="iconModal">
+    <div class="imodal" role="dialog" aria-modal="true" style="width:min(360px,100%)">
+      <div class="imodal-head">
+        <div><h3>Wybierz ikonę</h3><p>Zestaw ikon dopasowany do stylu panelu.</p></div>
+        <button class="mx" id="iconModalClose" aria-label="Zamknij">✕</button>
+      </div>
+      <div class="imodal-body">
+        <div class="icon-grid" id="iconGrid"></div>
+      </div>
+      <div class="imodal-foot">
+        <button class="imodal-btn cancel" id="iconResetBtn" type="button">Domyślna</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ziarno lokalnych aplikacji (IDB) — wypełniane przy „Zapisz panel + aplikacje”,
+       tak aby eksportowany plik od razu odtworzył lokalną listę bez czekania na IndexedDB. -->
+  <script type="text/plain" id="idb-seed">[]</script>
+
+</div>
+
+<!-- Powiadomienia: element MUSI istnieć w DOM PRZED skryptem, inaczej pierwsze
+     showToast() utworzyłoby drugi #toast (i eksportowałoby zdublowany element). -->
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script>
+
+function esc(str){
+  if (typeof str !== 'string') return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function isSafeUrl(url){
+  try {
+    const u = new URL(url, window.location.href);
+    // Narzędzia zdalne są dozwolone wyłącznie po HTTPS; blob: pozostaje
+    // lokalnym artefaktem generowanym przez panel dla plików wbudowanych.
+    if (u.protocol === 'blob:') return true;
+    if (u.protocol !== 'https:' || u.username || u.password || u.port) return false;
+    const host = u.hostname.toLowerCase();
+    const allowed = host === 'github.com' || host === 'api.github.com' ||
+      host === 'raw.githubusercontent.com' || host === 'raw.githack.com' ||
+      host.endsWith('.github.io');
+    return allowed;
+  } catch { return false; }
+}
+function fetchWithTimeout(url, options = {}, timeoutMs = 12000){
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(url, {...options, signal: controller.signal})
+    .finally(() => clearTimeout(timer));
+}
+// Wykrywanie podejrzanych wzorców w importowanym kodzie (ostrzega, nie blokuje —
+// to narzędzie jednoosobowe/zaufane, decyzję zawsze podejmuje użytkownik).
+function detectSuspiciousContent(str){
+  if (typeof str !== 'string') return [];
+  const flags = [];
+  if (/<script[^>]*\ssrc=["'](?!https:\/\/)/i.test(str)) flags.push('skrypt z nietypowego źródła');
+  if (/document\.write\s*\(/i.test(str)) flags.push('document.write');
+  if (/\bnew\s+Function\s*\(/i.test(str)) flags.push('dynamiczne tworzenie funkcji (new Function)');
+  return flags;
+}
+function looksLikeBinary(str){ return typeof str === 'string' && str.indexOf('\u0000') !== -1; }
+
+const NAV = [];
+
+// ============ ŹRÓDŁO DANYCH: wbudowane (base64) / GitHub (pobieranie na żądanie) / skanowanie repo ============
+const GH_USER = 'mmaarreekkxx', GH_REPO = 'flmanager', GH_API = 'https://api.github.com';
+function ghPages(file){ return `https://${GH_USER}.github.io/${GH_REPO}/${file}`; }
+function ghRaw(file){ return `https://raw.githubusercontent.com/${GH_USER}/${GH_REPO}/main/${file}`; }
+function ghGithack(file){ return `https://raw.githack.com/${GH_USER}/${GH_REPO}/main/${file}`; }
+let dataSource = 'github'; // 'local' | 'github' | 'scan'
+// Lista dla trybu "GitHub" — 1:1 zgodna z D[] w aktualnej aplikacji launchera (MyGitRepo),
+// NIEZALEŻNA od listy narzędzi wbudowanych (base64) powyżej. To ona decyduje, jakie pliki
+// są pobierane z repozytorium GitHub, gdy wybrane jest źródło "GitHub".
+const GH_LIST = [{"type":"single","id":"flmanager","label":"FLMANAGER","file":"flmanager.html","icon":"star"},{"type":"single","id":"psf","label":"PSF Import","file":"PSFimport.html","icon":"star"},{"type":"single","id":"gsp","label":"GSP Import","file":"GSPimport.html","icon":"star"},{"type":"single","id":"zbycie","label":"Zbycie","file":"Zbycie.html","icon":"star"},{"type":"single","id":"pdf_lock","label":"PDF_Lock","file":"PDF_Lock.html","icon":"box"},{"type":"single","id":"gh-mt42vf9a5msk","label":"XLSXCompresor","file":"XLSXCompresor.html","icon":"box"},{"type":"single","id":"xlscale","label":"XL Scale 8.3","file":"xlscale8.3.html"},{"type":"single","id":"konwenter","label":"Konwenter","file":"konwenter.html"},{"type":"single","id":"sales_analytics","label":"Analiza Sprzedaży Pojazdów","file":"vehicle-sales-analytics.html"},{"type":"single","id":"pojazdy_pk","label":"Pojazdy P&K","file":"PojazdyP&K.html"},{"type":"single","id":"Menu","label":"Launcher","file":"launcher.html"},{"type":"single","id":"index","label":"Index","file":"index.html"},{"type":"single","id":"gh-mu0at7tie1lb","label":"Extraktor","file":"Extraktor.html"},{"type":"single","id":"gh-muijjrb18yge","label":"FLManager_v4.77&TCO","file":"FLManager_v4.77&TCO.html"},{"type":"single","id":"gh-muitlbwgup1u","label":"Fleet_Panel","file":"Fleet_Panel.html"},{"type":"single","id":"gh-muitld8mve0n","label":"Opony","file":"Opony.html"},{"type":"single","id":"gh-muiwk02nzl7c","label":"PPv.5","file":"PPv.5.html"},{"type":"single","id":"gh-muiu1vegkiip","label":"PPv.6_QR","file":"PPv.6_QR.html"}];
+let scannedApps = null;
+// Pliiki wykryte przy ostatnim skanowaniu, których NIE ma na liście „GitHub”
+// albo których treść zmieniła się od ostatniego skanu -> delikatna zielona kropka.
+// Mapa: ścieżka pliku -> 'nowa' | 'wersja'.
+let scanNovel = new Map();
+let currentToolFile = null;
+
+// ---- Zrzut list zapisanych w TYM pliku HTML (sprzed jakichkolwiek zmian w bieżącej sesji) ----
+// Pozycje dodane po starcie (import do „Wbudowanych”, dopisanie do listy „GitHub”,
+// przeniesienie z IDB) istnieją tylko w pamięci trwającej sesji i w IndexedDB —
+// w kodzie strony pojawią się dopiero po „Zapisz panel + aplikacje”. Do tego momentu
+// są podświetlane na zielono w obu zakładkach, żeby było widać, że nie są jeszcze
+// wpisane do HTML. Po eksporcie zrzuty są aktualizowane i podświetlenie znika.
+let SAVED_NAV_IDS = new Set(NAV.map(a => a.id));
+// SAVED_GH_IDS utrzymane (aktualizowane przy eksporcie), ale NIE służy do podświetlania:
+// zakładka „GitHub” celowo jest wolna od zielonego oznaczenia — lista jest tam odtwarzana
+// z IndexedDB i zrzut z HTML potrafi się z nią rozjeżdżać, dając wieczne podświetlenie.
+let SAVED_GH_IDS = new Set(GH_LIST.map(a => a.id));
+let SAVED_IDB_IDS = new Set(); // uzupełniane przy odczycie #idb-seed
+
+function isPendingSave(n){
+  if (!n) return false;
+  // ZAKŁADKA „GitHub” — NIE podświetlamy na zielono. Lista bywa podmieniana z IndexedDB
+  // (loadGhListFromIDB) niezależnie od zawartości HTML, więc zrzut z literału potrafi się
+  // z nią rozjechać i pozycje świeciłyby na zielono także po zapisaniu pliku.
+  if (dataSource === 'github') return false;
+  if (dataSource === 'scan') return false; // tam obowiązuje zielona kropka nowości
+  // ZAKŁADKA „Wbudowane” — podświetlenie zostaje: te wpisy istnieją wyłącznie w sesji,
+  // dopóki nie trafią do kodu strony (NAV + <script id="data-..."> / #idb-seed).
+  if (n._imported) return !SAVED_IDB_IDS.has(n.id); // wpisy lokalne z IDB
+  return !SAVED_NAV_IDS.has(n.id);                  // wpisy base64 z NAV
+}
+
+// ============ ŹRÓDŁO 4: aplikacje zaimportowane, przechowywane lokalnie w IndexedDB ============
+let idbApps = [];               // {id, label, file, code(base64), size, added}
+let embeddedExtraCode = {};     // id -> base64, dla aplikacji "przeniesionych" do wbudowanych (base64),
+                                 // ale jeszcze nie zapisanych (wyeksportowanych) do kodu głównego pliku
+let editMode = false;
+
+function toB64(str){ return btoa(unescape(encodeURIComponent(str))); }
+function fromB64(b64){ return decodeURIComponent(escape(atob(b64))); }
+function slugify(name){
+  return (name || 'app').toLowerCase().trim()
+    .replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 50) || 'app';
+}
+function uid(prefix){ return (prefix||'app') + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+const IDB_NAME = 'panel-narzedzi-idb', IDB_STORE = 'apps', IDB_META_STORE = 'meta';
+let idbPromise = null;
+function openIDB(){
+  if (idbPromise) return idbPromise;
+  idbPromise = new Promise((resolve, reject) => {
+    if (!window.indexedDB) { reject(new Error('no-idb')); return; }
+    // wersja 2: dokłada magazyn "meta" (stan listy GitHub) obok istniejącego "apps" —
+    // przeglądarka sama uruchomi onupgradeneeded też dla osób z już istniejącą bazą w wersji 1,
+    // bez utraty ich zapisanych apek.
+    const req = indexedDB.open(IDB_NAME, 2);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE, { keyPath: 'id' });
+      if (!db.objectStoreNames.contains(IDB_META_STORE)) db.createObjectStore(IDB_META_STORE, { keyPath: 'id' });
+    };
+    req.onsuccess = () => {
+      const db = req.result;
+      // Jeśli GDZIEKOLWIEK indziej (inna karta/okno z tym samym plikiem) otworzy bazę
+      // w NOWSZEJ wersji niż ta, przeglądarka poprosi tę kartę o zamknięcie połączenia —
+      // bez tej obsługi baza zostaje otwarta na starej wersji i blokuje tamto uaktualnienie
+      // w nieskończoność (a co za tym idzie — również jego zapisy). Reagujemy automatycznie.
+      db.onversionchange = () => { db.close(); idbPromise = null; };
+      resolve(db);
+    };
+    req.onerror = () => reject(req.error);
+    // Blokada występuje, gdy INNA już otwarta karta/okno z tym samym plikiem trzyma
+    // połączenie na starszej wersji bazy — nowe żądanie wtedy wisi bez końca, bez błędu.
+    // Bez tej obsługi zapisy (np. lista GitHub) po cichu nigdy by się nie wykonały.
+    req.onblocked = () => {
+      console.warn('IndexedDB („' + IDB_NAME + '”) zablokowane przez inne otwarte okno/kartę z tym panelem — zamknij pozostałe karty i odśwież tę stronę.');
+      if (typeof showToast === 'function') showToast('Zamknij inne otwarte karty z tym panelem i odśwież stronę (baza danych jest zablokowana)', true);
+    };
+  });
+  return idbPromise;
+}
+function idbGetAll(){
+  return openIDB().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  }));
+}
+function idbPut(app){
+  return openIDB().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).put(app);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  }));
+}
+function idbPutMany(apps){
+  if (!apps || !apps.length) return Promise.resolve();
+  return openIDB().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    const store = tx.objectStore(IDB_STORE);
+    apps.forEach(app => store.put(app));
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error || new Error('IndexedDB transaction aborted'));
+  }));
+}
+function idbDelete(id){
+  return openIDB().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).delete(id);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  }));
+}
+// ---- Magazyn "meta": trwały stan listy GitHub (GH_LIST) — osobny od apek, żeby nigdy
+// nie mieszał się z listą "Wbudowane" ani eksportem (ten sam problem, co wcześniej z cache). ----
+function idbMetaGet(id){
+  return openIDB().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_META_STORE, 'readonly');
+    const req = tx.objectStore(IDB_META_STORE).get(id);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  }));
+}
+function idbMetaPut(rec){
+  return openIDB().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_META_STORE, 'readwrite');
+    tx.objectStore(IDB_META_STORE).put(rec);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  }));
+}
+function saveGhListToIDB(){
+  idbMetaPut({ id: 'gh_list', list: GH_LIST }).catch(e => {
+    console.error('Nie udało się zapisać listy GitHub w IndexedDB:', e);
+    showToast('Nie udało się zapisać listy GitHub w pamięci przeglądarki', true);
+  });
+}
+async function loadGhListFromIDB(){
+  try {
+    const rec = await idbMetaGet('gh_list');
+    if (rec && Array.isArray(rec.list) && rec.list.length){
+      // W IDB jest już zapisany (wcześniej zmieniany) stan listy — użyj go zamiast
+      // wbudowanej (zaszytej w kodzie) listy startowej.
+      GH_LIST.length = 0; // GH_LIST jest const — mutujemy zawartość, nie przypisujemy nowej tablicy
+      rec.list.forEach(a => GH_LIST.push(a));
+    } else {
+      // Pierwsze uruchomienie tego pliku w tej przeglądarce — w IDB jeszcze nic nie ma.
+      // Od razu zapisujemy wbudowaną listę startową, żeby lista GitHub była w IDB
+      // już po pierwszym otwarciu panelu, a nie dopiero po pierwszej ręcznej zmianie.
+      saveGhListToIDB();
+    }
+  } catch(e) { console.error('Nie udało się wczytać listy GitHub z IndexedDB:', e); }
+  if (dataSource === 'github') { renderNav(searchBox.value); updateCountDisplay(); }
+}
+async function loadIdbApps(){
+  let stored = [];
+  try { stored = await idbGetAll() || []; } catch(e) { stored = []; }
+  let seed = [];
+  try {
+    const seedEl = document.getElementById('idb-seed');
+    const s = JSON.parse((seedEl && seedEl.textContent) || '[]');
+    if (Array.isArray(s)) seed = s;
+  } catch(e) {}
+  const map = new Map();
+  seed.forEach(a => { map.set(a.id, a); SAVED_IDB_IDS.add(a.id); }); // seed = zawartość #idb-seed, czyli HTML
+  stored.forEach(a => map.set(a.id, a));
+  idbApps = Array.from(map.values());
+  // Jedna transakcja zamiast osobnego await dla każdej aplikacji — szybszy start
+  // przy większych panelach i mniejsze obciążenie IndexedDB.
+  try { await idbPutMany(idbApps); } catch(e) { console.warn('Nie udało się zsynchronizować seeda IndexedDB:', e); }
+  // Render ZAWSZE po odczycie seeda — SAVED_IDB_IDS (z #idb-seed) musi być kompletne
+  // jeszcze zanim użytkownik przełączy się na zakładkę „Wbudowane”, inaczej wszystkie
+  // wpisy błysnęłyby na zielono jako „niezapisane”.
+  renderNav(searchBox.value);
+  updateCountDisplay();
+}
+
+// ============ HAPTYKA (wibracje) + DŹWIĘKI (Web Audio, generowane, bez plików) ============
+let audioCtx = null;
+function ensureAudio(){
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch(e) { return null; }
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function playTone(freq, dur, delay, type, peak){
+  const ctx = ensureAudio();
+  if (!ctx) return;
+  const t0 = ctx.currentTime + (delay || 0);
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = type || 'sine';
+  osc.frequency.setValueAtTime(freq, t0);
+  gain.gain.setValueAtTime(0, t0);
+  gain.gain.linearRampToValueAtTime(peak || 0.05, t0 + 0.006);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + (dur || 0.05));
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(t0);
+  osc.stop(t0 + (dur || 0.05) + 0.02);
+}
+
+function vibrate(pattern){
+  if (navigator.vibrate) { try { navigator.vibrate(pattern); } catch(e) {} }
+  // UWAGA: Safari na iOS/iPadOS w ogóle nie implementuje Vibration API (navigator.vibrate
+  // jest tam zawsze `undefined`) — to ograniczenie systemowe Apple, nie da się go obejść
+  // z poziomu strony WWW. Wibracje działają w Chrome/przeglądarkach na Androidzie.
+}
+
+// Odblokowanie dźwięku na najwcześniejszym możliwym geście użytkownika (dotyk/klik
+// gdziekolwiek na stronie). Niektóre przeglądarki mobilne (zwłaszcza w widokach
+// osadzonych/webview) honorują "odblokowanie" audio tylko, gdy AudioContext zostanie
+// utworzony/wznowiony SYNCHRONICZNIE w samym uchwycie zdarzenia pierwszego gestu —
+// bez tego pierwsze próby feedbackClick()/feedbackSelect() mogą nie wydać dźwięku,
+// mimo że kod jest wywoływany poprawnie.
+function unlockAudioOnce(){
+  ensureAudio();
+  window.removeEventListener('pointerdown', unlockAudioOnce);
+  window.removeEventListener('touchstart', unlockAudioOnce);
+  window.removeEventListener('keydown', unlockAudioOnce);
+}
+window.addEventListener('pointerdown', unlockAudioOnce, { once: true, passive: true });
+window.addEventListener('touchstart', unlockAudioOnce, { once: true, passive: true });
+window.addEventListener('keydown', unlockAudioOnce, { once: true });
+
+// Delikatne kliknięcie (przyciski, zwijanie/rozwijanie grup, przełączniki)
+function feedbackClick(){
+  vibrate(8);
+  playTone(680, 0.045, 0, 'sine', 0.045);
+}
+
+// Wybór narzędzia (bardziej wyraźny, dwutonowy "confirm")
+function feedbackSelect(){
+  vibrate([10, 25, 10]);
+  playTone(520, 0.06, 0, 'sine', 0.06);
+  playTone(840, 0.08, 0.05, 'sine', 0.05);
+}
+
+// Błąd / ostrzeżenie (jak w NEXUS App Deck: dłuższa wibracja + opadający ton piłokształtny)
+function feedbackError(){
+  vibrate([30, 40, 30]);
+  playTone(300, 0.07, 0, 'sawtooth', 0.05);
+  playTone(200, 0.08, 0.07, 'sawtooth', 0.05);
+}
+
+// Przełącznik (checkbox/switch) — krótsza, "tęższa" wibracja niż zwykły klik
+function feedbackToggle(){
+  vibrate(12);
+  playTone(440, 0.05, 0, 'sine', 0.045);
+}
+
+let currentBlobUrl = null;
+let currentRemoteUrl = null;
+let activeId = null;
+
+// Scentralizowany reset widoku — używany przy usuwaniu aktywnie otwartego narzędzia.
+// W poprzedniej wersji 4 miejsca duplikowały tę logikę częściowo, zostawiając w DOM
+// osierocony <iframe>, nieaktualny tytuł/breadcrumb i klasę "source-remote".
+function resetView() {
+  activeId = null;
+  currentToolFile = null;
+  currentToolItem = null;
+  welcome.style.display = 'grid';
+  frameArea.classList.remove('show');
+  document.body.classList.remove('has-tool', 'source-remote');
+  const iframe = document.getElementById('toolFrame');
+  if (iframe) iframe.remove();
+  topTitle.textContent = 'Panel Narzędzi';
+  crumb.textContent = 'Wybierz narzędzie';
+}
+let activeLabel = '';
+let currentToolItem = null; // pełny obiekt aplikacji z listy GitHub/Skanuj (może zawierać zewnętrzny "url")
+
+const navRoot = document.getElementById('navRoot');
+const searchBox = document.getElementById('search');
+const welcome = document.getElementById('welcome');
+const frameArea = document.getElementById('frameArea');
+const loadingOverlay = document.getElementById('loadingOverlay');
+const deployNameEl = document.getElementById('deployName');
+const deployFillEl = document.getElementById('deployFill');
+
+// Efekt "deszyfrowania" nazwy przy uruchamianiu narzędzia (jak w NEXUS App Deck) —
+// tekst startuje jako losowe znaki i stopniowo "odkrywa" właściwą nazwę od lewej.
+// Parametr `gen` to "numer serii" bieżącego uruchomienia — jeśli w międzyczasie
+// wystartuje nowe uruchomienie (np. szybkie kliknięcie innej apki / Przeładuj),
+// stara pętla rozpoznaje, że jest nieaktualna, i przestaje nadpisywać tekst.
+const SCRAMBLE_CHARS = '!<>-_\\/[]{}—=+*^?#';
+function scrambleText(el, txt, dur, gen){
+  if (!el) return;
+  const len = txt.length, t0 = performance.now();
+  (function tick(t){
+    if (gen !== deployGen) return; // nieaktualna seria — przerwij
+    const p = Math.min(1, (t - t0) / dur);
+    const n = Math.floor(p * len);
+    let out = txt.slice(0, n);
+    for (let i = n; i < len; i++) out += txt[i] === ' ' ? ' ' : SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
+    el.textContent = out;
+    if (p < 1) requestAnimationFrame(tick);
+  })(t0);
+}
+
+const DEPLOY_MIN_MS = 640;
+let deployStartTime = 0;
+let deployGen = 0; // rosnący numer serii — chroni przed przedwczesnym/nakładającym się chowaniem overlayu
+
+function showDeployOverlay(label){
+  deployGen++;
+  const myGen = deployGen;
+  deployStartTime = performance.now();
+  loadingOverlay.classList.add('show');
+  feedbackSelect(); // wibracja + dźwięk potwierdzające start uruchamiania
+  if (deployNameEl) scrambleText(deployNameEl, (label || '').toUpperCase(), 480, myGen);
+  if (deployFillEl){
+    deployFillEl.style.transition = 'none';
+    deployFillEl.style.width = '0%';
+    void deployFillEl.offsetWidth; // wymuszenie reflow, żeby restart animacji zadziałał
+    deployFillEl.style.transition = '';
+    requestAnimationFrame(() => { if (deployGen === myGen) deployFillEl.style.width = '100%'; });
+  }
+  return myGen;
+}
+// Chowa overlay "deploy" dopiero po upłynięciu minimalnego czasu (jak stałe 640ms w
+// oryginale NEXUS) — bez tego, przy lokalnych apkach (srcdoc ładuje się niemal
+// natychmiast) animacja odszyfrowywania nazwy/paska ucinała się w połowie.
+// Sprawdzenie `gen` chroni przed sytuacją, w której stary, opóźniony timer chowający
+// POPRZEDNI overlay odpala się już PO starcie kolejnego uruchomienia i ucina jego animację.
+function hideDeployOverlay(){
+  const myGen = deployGen;
+  const elapsed = performance.now() - deployStartTime;
+  const remaining = DEPLOY_MIN_MS - elapsed;
+  const finish = () => {
+    if (myGen !== deployGen) return; // w międzyczasie wystartowało nowe uruchomienie — nie chowaj go
+    loadingOverlay.classList.remove('show');
+    feedbackClick(); // krótka wibracja + dźwięk potwierdzające gotowość narzędzia
+  };
+  if (remaining > 0) setTimeout(finish, remaining); else finish();
+}
+const topTitle = document.getElementById('topTitle');
+const crumb = document.getElementById('crumb');
+const verLine = document.getElementById('verLine');
+
+const ICON_FILE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+const ICON_FOLDER = '<svg class="folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>';
+const ICON_CHEV = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>';
+const ICON_DOT = '<span class="dot2"></span>';
+
+function fmtSize(bytes){
+  if(bytes == null || isNaN(bytes)) return 'GitHub';
+  if(bytes > 1024*1024) return (bytes/1024/1024).toFixed(2)+' MB';
+  return Math.round(bytes/1024)+' KB';
+}
+
+function matchesFilter(text, f){
+  return !f || text.toLowerCase().includes(f);
+}
+
+// Buduje mały przycisk-ikonę do wiersza aplikacji (widoczny tylko w trybie edycji)
+function itemActionBtn(title, svg, danger, onClick){
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'item-act-btn' + (danger ? ' danger' : '');
+  b.title = title;
+  b.innerHTML = svg;
+  b.onclick = (e) => { e.stopPropagation(); feedbackClick(); onClick(); };
+  return b;
+}
+const SVG_TRASH = '<svg viewBox="0 0 16 16" fill="none"><path d="M3 4.5h10M6 4.5V3h4v1.5M5 4.5l.6 8.5h4.8l.6-8.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const SVG_TO_B64 = '<svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.1"/><path d="M9 4.5h5M9 8h5M2 11h12" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>';
+const SVG_TO_GH = '<svg viewBox="0 0 16 16" fill="none"><path d="M10.3 14.7v-2.7a3.2 3.2 0 0 0-.7-2.3c2 0 4-1.3 4-3.7.05-.8-.18-1.65-.67-2.33.19-.77.19-1.57 0-2.34 0 0-.67 0-2 1a7.2 7.2 0 0 0-5.33 0c-1.33-1-2-1-2-1a4.9 4.9 0 0 0 0 2.34 3.6 3.6 0 0 0-.66 2.33c0 2.34 2 3.67 4 3.67-.26.33-.45.7-.57 1.1a2 2 0 0 1-2.5-.9M1.35 12c-3 1.34-3.33-1.33-4.67-1.33" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const SVG_PLUS = '<svg viewBox="0 0 16 16" fill="none"><path d="M8 2.5v11M2.5 8h11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
+const SVG_UP = '<svg viewBox="0 0 16 16" fill="none"><path d="M8 3.5v9M4 7.2 8 3.5l4 3.7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const SVG_DOWN = '<svg viewBox="0 0 16 16" fill="none"><path d="M8 3.5v9M4 8.8 8 12.5l4-3.7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const SVG_ICON_PICK = '<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.2"/><circle cx="6" cy="6.5" r=".9" fill="currentColor"/><circle cx="10" cy="6.5" r=".9" fill="currentColor"/><path d="M5.5 9.5c.6 1 1.4 1.5 2.5 1.5s1.9-.5 2.5-1.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>';
+
+// Ikony aplikacji do wyboru w trybie edycji — utrzymane w tym samym języku wizualnym co
+// reszta panelu (cienka linia, stroke="currentColor", brak wypełnienia), zamiast kolorowych emoji.
+const APP_ICONS = {
+  car: '<svg class="appicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="10" width="18" height="6" rx="2"/><circle cx="7.5" cy="18" r="1.6"/><circle cx="16.5" cy="18" r="1.6"/></svg>',
+  wrench: '<svg class="appicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2z"/></svg>',
+  tire: '<svg class="appicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.6"/><path d="M12 4v3M12 17v3M4 12h3M17 12h3"/></svg>',
+  fuel: '<svg class="appicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V7a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2v14"/><path d="M4 12h9"/><path d="M15 8h1.5a1.5 1.5 0 0 1 1.5 1.5V13l2 2v3.5a1.5 1.5 0 0 1-3 0V17"/><path d="M2 21h13"/></svg>',
+  doc: '<svg class="appicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h8M8 17h5"/></svg>',
+  clipboard: '<svg class="appicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="17" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M9 11h6M9 15h6"/></svg>',
+  chart: '<svg class="appicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7"/><line x1="2" y1="20" x2="22" y2="20"/></svg>',
+  map: '<svg class="appicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+  folder: '<svg class="appicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>',
+  tag: '<svg class="appicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 12.3 12.7 4.4a2 2 0 0 0-1.4-.6H5a2 2 0 0 0-2 2v6.3a2 2 0 0 0 .6 1.4l7.9 7.9a2 2 0 0 0 2.8 0l6.3-6.3a2 2 0 0 0 0-2.8z"/><circle cx="8" cy="8" r="1.2" fill="currentColor" stroke="none"/></svg>',
+  star: '<svg class="appicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.7 1.4 6.8L12 17.1l-6.1 3.4 1.4-6.8L2.2 9l6.9-.7z"/></svg>',
+  calendar: '<svg class="appicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+  shield: '<svg class="appicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5z"/></svg>',
+  gear: '<svg class="appicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M4.2 7.8l1.7 1M18 15.2l1.7 1M3 12h2M19 12h2M4.2 16.2l1.7-1M18 8.8l1.7-1M7.8 4.2l1 1.7M15.2 18l1 1.7"/></svg>',
+  box: '<svg class="appicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8V16.5a1 1 0 0 1-.5.9l-8 4.5a1 1 0 0 1-1 0l-8-4.5a1 1 0 0 1-.5-.9V8"/><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M12 13v9"/></svg>',
+  bolt: '<svg class="appicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>',
+  truck: '<svg class="appicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>',
+  building: '<svg class="appicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4M10 10h4M10 14h4M10 18h4"/></svg>',
+  users: '<svg class="appicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  card: '<svg class="appicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>',
+  bell: '<svg class="appicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>',
+  lock: '<svg class="appicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+  search: '<svg class="appicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+  printer: '<svg class="appicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>'
+};
+
+// Zwraca znacznik ikony aplikacji: wybraną w edycji ikonę SVG (spójną ze stylem panelu),
+// w przeciwnym razie domyślną ikonę (plik/folder/kropka).
+function iconMarkup(n, fallbackSvg){
+  return (n.icon && APP_ICONS[n.icon]) ? APP_ICONS[n.icon] : fallbackSvg;
+}
+// Zamienia miejscami element o danym id z sąsiadem (dir: -1 w górę, +1 w dół) w podanej tablicy.
+function moveInArray(arr, id, dir){
+  const idx = arr.findIndex(x => x.id === id);
+  if (idx < 0) return false;
+  const j = idx + dir;
+  if (j < 0 || j >= arr.length) return false;
+  const tmp = arr[idx]; arr[idx] = arr[j]; arr[j] = tmp;
+  return true;
+}
+
+// ---- Zapis bieżących list do ŻYWEGO dokumentu ---------------------------------
+// exportPanel() podmienia NAV / GH_LIST tylko w klonowanym dokumencie. Gdy panel
+// zapisywany jest inną drogą (szybki edytor → „zapisz”, Ctrl+S, „zapisz stronę”),
+// w pliku zostawał STARY kod: dodane aplikacje widniały wyłącznie dzięki IndexedDB,
+// a w HTML nadal ich nie było — stąd wieczne zielone podświetlenie „niezapisane”.
+// syncListsIntoDocument() wstrzykuje aktualne listy, kod aplikacji base64 i ziarno
+// IDB do żywego DOM, dzięki czemu KAŻDA metoda zapisu pliku jest kompletna.
+function syncListsIntoDocument(){
+  try {
+    // główny skrypt = ten, który zawiera literał `const NAV = [` (bez type/src)
+    let main = null;
+    document.querySelectorAll('script:not([type]):not([src])').forEach(s => {
+      if (!main && s.textContent.indexOf('const NAV = [') !== -1) main = s;
+    });
+    if (main){
+      const navJson = 'const NAV = ' + JSON.stringify(NAV) + ';';
+      const ghJson = 'const GH_LIST = ' + JSON.stringify(GH_LIST) + ';';
+      const src = main.textContent;
+      // funkcje jako zamiennik — unikają interpretacji `$&`, `$'` itd. w treści list
+      const next = src.replace(/const NAV = \[[\s\S]*?\];/, () => navJson)
+                      .replace(/const GH_LIST = \[[\s\S]*?\];/, () => ghJson);
+      if (next !== src) main.textContent = next;
+    }
+  } catch(e){}
+  try {
+    // kod aplikacji z zakładki „Wbudowane” żyje tylko w pamięci — dopisujemy go na żywo,
+    // żeby zapisana strona od razu uruchamiała te aplikacje (bez IDB)
+    Object.keys(embeddedExtraCode).forEach(id => {
+      if (!document.getElementById('data-' + id)){
+        const s = document.createElement('script');
+        s.setAttribute('type', 'text/plain');
+        s.id = 'data-' + id;
+        s.textContent = embeddedExtraCode[id];
+        document.body.appendChild(s);
+      }
+    });
+  } catch(e){}
+  try {
+    if (idbApps.length){
+      const seed = document.getElementById('idb-seed');
+      const json = JSON.stringify(idbApps.filter(a => a.source !== 'ghcache'));
+      if (seed && seed.textContent !== json) seed.textContent = json;
+    }
+  } catch(e){}
+}
+let listSyncTimer = null;
+function scheduleListSync(){
+  clearTimeout(listSyncTimer);
+  listSyncTimer = setTimeout(syncListsIntoDocument, 250);
+}
+
+function renderNav(filter){
+  scheduleListSync(); // każda zmiana listy → aktualizacja kodu w żywym DOM
+  const f = (filter||'').toLowerCase().trim();
+  navRoot.replaceChildren();
+  const fragment = document.createDocumentFragment();
+
+  const idbAsSingle = idbApps.filter(a => a.source !== 'ghcache').map(a => ({ type:'single', id:a.id, label:a.label, file:a.file || (slugify(a.label)+'.html'), size:a.size, _imported:true }));
+  const list = dataSource === 'scan' ? (scannedApps || [])
+    : dataSource === 'github' ? GH_LIST
+    : NAV.concat(idbAsSingle);
+
+  if (dataSource === 'scan' && scannedApps && !scannedApps.length){
+    navRoot.innerHTML = '<div class="empty-list">Nie znaleziono plików .html w repozytorium.</div>';
+    return;
+  }
+
+  list.forEach(n => {
+    if(n.type === 'single'){
+      const show = matchesFilter(n.label, f) || matchesFilter(n.file, f);
+      if(!show) return;
+      const btn = document.createElement('div');
+      btn.className = 'nav-item' + (n.id === activeId ? ' active' : '') + (isPendingSave(n) ? ' pending-save' : '');
+      const launch = document.createElement('button');
+      launch.type = 'button';
+      launch.className = 'nav-item-launch';
+      // Zakładka „Skanuj”: delikatna pulsująca zielona kropka na końcu wiersza dla
+      // aplikacji, których nie ma na liście „GitHub”, albo które mają nową wersję pliku
+      // (analogicznie do bursztynowej lampki aktywnej pozycji w zakładce „GitHub”).
+      let noveltyDot = '';
+      if (dataSource === 'scan'){
+        const why = scanNovel.get(n.file);
+        if (why){
+          const whyText = why === 'nowa'
+            ? 'Nowa aplikacja — nie występuje na liście w zakładce GitHub'
+            : 'Nowa wersja pliku — treść zmieniła się od ostatniego skanu';
+          noveltyDot = `<span class="new-dot" title="${whyText}"></span>`;
+        }
+      }
+      launch.innerHTML = `${iconMarkup(n, ICON_FILE)}<span class="label">${esc(n.label)}</span><span class="nav-badge${n._imported ? ' src-idb' : ''}">${fmtSize(n.size)}</span>${noveltyDot}`;
+      launch.onclick = () => { loadTool(n.id, n.label, n.file, n); };
+      btn.appendChild(launch);
+
+      if (n._imported){
+        const acts = document.createElement('div');
+        acts.className = 'item-actions';
+        const app = idbApps.find(a => a.id === n.id);
+        acts.appendChild(itemActionBtn('Przesuń w górę', SVG_UP, false, () => { if (moveInArray(idbApps, n.id, -1)) renderNav(searchBox.value); }));
+        acts.appendChild(itemActionBtn('Przesuń w dół', SVG_DOWN, false, () => { if (moveInArray(idbApps, n.id, 1)) renderNav(searchBox.value); }));
+        acts.appendChild(itemActionBtn('Zmień ikonę', SVG_ICON_PICK, false, () => openIconPicker(app, (a) => idbPut(a).catch(() => {}))));
+        acts.appendChild(itemActionBtn('Osadź w kodzie (base64)', SVG_TO_B64, false, () => promoteToEmbedded(app)));
+        acts.appendChild(itemActionBtn('Dodaj do listy GitHub', SVG_TO_GH, false, () => promoteToGithub(app)));
+        acts.appendChild(itemActionBtn('Usuń', SVG_TRASH, true, () => removeIdbApp(app)));
+        btn.appendChild(acts);
+      } else if (dataSource === 'scan'){
+        const acts = document.createElement('div');
+        acts.className = 'item-actions';
+        acts.appendChild(itemActionBtn('Osadź w kodzie (base64)', SVG_TO_B64, false, () => embedScanItem(n)));
+        acts.appendChild(itemActionBtn('Dodaj do listy GitHub (sztywnej)', SVG_PLUS, false, () => addScanToGithub(n)));
+        btn.appendChild(acts);
+      } else if (dataSource === 'local'){
+        const acts = document.createElement('div');
+        acts.className = 'item-actions';
+        acts.appendChild(itemActionBtn('Przesuń w górę', SVG_UP, false, () => { if (moveInArray(NAV, n.id, -1)) renderNav(searchBox.value); }));
+        acts.appendChild(itemActionBtn('Przesuń w dół', SVG_DOWN, false, () => { if (moveInArray(NAV, n.id, 1)) renderNav(searchBox.value); }));
+        acts.appendChild(itemActionBtn('Zmień ikonę', SVG_ICON_PICK, false, () => openIconPicker(n, null)));
+        acts.appendChild(itemActionBtn('Usuń z wbudowanych', SVG_TRASH, true, () => removeEmbeddedApp(n)));
+        btn.appendChild(acts);
+      } else if (dataSource === 'github'){
+        const acts = document.createElement('div');
+        acts.className = 'item-actions';
+        acts.appendChild(itemActionBtn('Przesuń w górę', SVG_UP, false, () => { if (moveInArray(GH_LIST, n.id, -1)) { renderNav(searchBox.value); saveGhListToIDB(); } }));
+        acts.appendChild(itemActionBtn('Przesuń w dół', SVG_DOWN, false, () => { if (moveInArray(GH_LIST, n.id, 1)) { renderNav(searchBox.value); saveGhListToIDB(); } }));
+        acts.appendChild(itemActionBtn('Zmień ikonę', SVG_ICON_PICK, false, () => openIconPicker(n, null)));
+        acts.appendChild(itemActionBtn('Usuń z listy GitHub', SVG_TRASH, true, () => removeGithubApp(n)));
+        btn.appendChild(acts);
+      }
+      fragment.appendChild(btn);
+    } else {
+      const subMatches = n.items.filter(it => matchesFilter(it.label, f) || matchesFilter(it.file, f) || matchesFilter(n.label, f));
+      if(f && subMatches.length === 0) return;
+      const hasActive = n.items.some(it => it.id === activeId);
+      const wrap = document.createElement('div');
+      wrap.className = 'nav-group' + ((hasActive || f) ? ' open' : '') + (hasActive ? ' has-active' : '');
+
+      const head = document.createElement('button');
+      head.className = 'nav-group-head';
+      head.innerHTML = `${iconMarkup(n, ICON_FOLDER)}<span class="label">${esc(n.label)}</span><span class="nav-badge">${n.items.length} wyd.</span>${ICON_CHEV}`;
+      head.onclick = () => { feedbackClick(); wrap.classList.toggle('open'); };
+      wrap.appendChild(head);
+
+      if (dataSource === 'local'){
+        const groupActs = document.createElement('div');
+        groupActs.className = 'item-actions group-actions';
+        groupActs.appendChild(itemActionBtn('Przesuń grupę w górę', SVG_UP, false, () => { if (moveInArray(NAV, n.id, -1)) renderNav(searchBox.value); }));
+        groupActs.appendChild(itemActionBtn('Przesuń grupę w dół', SVG_DOWN, false, () => { if (moveInArray(NAV, n.id, 1)) renderNav(searchBox.value); }));
+        groupActs.appendChild(itemActionBtn('Zmień ikonę grupy', SVG_ICON_PICK, false, () => openIconPicker(n, null)));
+        wrap.appendChild(groupActs);
+      }
+
+      const body = document.createElement('div');
+      body.className = 'nav-group-body';
+      const tree = document.createElement('div');
+      tree.className = 'tree';
+      (f ? subMatches : n.items).forEach(it => {
+        const row = document.createElement('div');
+        row.className = 'tree-row';
+        const sub = document.createElement('div');
+        sub.className = 'nav-subitem' + (it.id === activeId ? ' active' : '') + (isPendingSave(it) ? ' pending-save' : '');
+        const subLaunch = document.createElement('button');
+        subLaunch.type = 'button';
+        subLaunch.className = 'nav-subitem-launch';
+        subLaunch.innerHTML = `${iconMarkup(it, ICON_DOT)}<span class="label">${esc(it.label)}</span><span class="nav-badge">${fmtSize(it.size)}</span>`;
+        subLaunch.onclick = () => { loadTool(it.id, n.label + ' — ' + it.label, it.file, it); };
+        sub.appendChild(subLaunch);
+        if (dataSource === 'local'){
+          const acts = document.createElement('div');
+          acts.className = 'item-actions';
+          acts.appendChild(itemActionBtn('Przesuń w górę', SVG_UP, false, () => { if (moveInArray(n.items, it.id, -1)) renderNav(searchBox.value); }));
+          acts.appendChild(itemActionBtn('Przesuń w dół', SVG_DOWN, false, () => { if (moveInArray(n.items, it.id, 1)) renderNav(searchBox.value); }));
+          acts.appendChild(itemActionBtn('Zmień ikonę', SVG_ICON_PICK, false, () => openIconPicker(it, null)));
+          acts.appendChild(itemActionBtn('Usuń z wbudowanych', SVG_TRASH, true, () => removeEmbeddedGroupItem(n, it)));
+          sub.appendChild(acts);
+        }
+        row.appendChild(sub);
+        tree.appendChild(row);
+      });
+      body.appendChild(tree);
+      wrap.appendChild(body);
+      fragment.appendChild(wrap);
+    }
+  });
+  navRoot.appendChild(fragment);
+}
+
+// Scentralizowane tworzenie/aktualizacja iframe narzędzia — jedno miejsce dla sandboxa/
+// obsługi onload, zamiast duplikowania go w loadTool()/loadToolFromGitHub() (łatwiej
+// nie zapomnieć o zabezpieczeniach przy przyszłych zmianach).
+function prepareRemoteHtml(html, pagesUrl){
+  if (typeof html !== 'string') return html;
+  try {
+    const base = new URL('.', pagesUrl).href;
+    const tag = '<base href="' + esc(base) + '">';
+    if (/<head\b[^>]*>/i.test(html)) return html.replace(/<head\b[^>]*>/i, match => match + tag);
+    return '<head>' + tag + '</head>' + html;
+  } catch { return html; }
+}
+
+function mountIframe(srcUrl, srcDocHtml = null) {
+  // Zawsze tworzymy NOWY element <iframe> zamiast podmieniać srcdoc/src na starym.
+  // Powód: w niektórych przeglądarkach podmiana srcdoc na już załadowanym iframie
+  // wywołuje dodatkowe, przedwczesne zdarzenie "load" (dla pustej nawigacji
+  // przejściowej, zanim nowa treść zdąży się wczytać) — to ono przedwcześnie
+  // chowało/ucinało animację "deploy" w połowie, zanim realna treść była gotowa.
+  const old = document.getElementById('toolFrame');
+  if (old) old.remove();
+  const iframe = document.createElement('iframe');
+  iframe.id = 'toolFrame';
+  // UWAGA BEZPIECZEŃSTWA: allow-same-origin + allow-scripts razem oznaczają, że treść
+  // działa w tym samym origin co ta strona (może odczytać jej localStorage/DOM). Świadomy
+  // kompromis — narzędzia tu ładowane są własne/zaufane i wymagają localStorage.
+  iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals allow-downloads');
+  iframe.setAttribute('loading', 'eager');
+  iframe.setAttribute('referrerpolicy', 'no-referrer');
+  iframe.setAttribute('title', 'Podgląd wybranego narzędzia');
+  iframe.onload = () => hideDeployOverlay();
+  if (srcDocHtml !== null) {
+    frameArea.appendChild(iframe);
+    iframe.srcdoc = srcDocHtml;
+  } else {
+    if (!isSafeUrl(srcUrl)) { hideDeployOverlay(); alert('Zablokowano niebezpieczny adres narzędzia.'); return; }
+    iframe.onerror = () => { hideDeployOverlay(); alert('Nie udało się wczytać strony spod adresu:\n' + srcUrl); };
+    frameArea.appendChild(iframe);
+    iframe.src = srcUrl;
+  }
+}
+
+function loadTool(id, label, file, meta){
+  activeId = id;
+  activeLabel = label;
+  currentToolFile = file;
+  currentToolItem = meta || null;
+  renderNav(searchBox.value);
+
+  welcome.style.display = 'none';
+  frameArea.classList.add('show');
+  const myGen = showDeployOverlay(label);
+  topTitle.textContent = label;
+  crumb.textContent = file;
+  document.body.classList.add('has-tool');
+  // Górny pasek (m.in. przycisk "Udostępnij") odzwierciedla źródło DOPIERO teraz,
+  // czyli w momencie faktycznego wyboru aplikacji — nie samego przełączenia zakładki.
+  // Udostępnianie (QR/link) ma sens tylko dla listy "na sztywno" z GitHub — pozostałe
+  // źródła (wbudowane, skanowane, lokalne/IDB) mają tylko sandbox/nową kartę/pobieranie.
+  // Udostępnianie (QR/link) ma sens dla obu źródeł pobieranych z repo:
+  // listy „na sztywno” (github) ORAZ wyników skanowania (scan) — skanowane pliki
+  // i tak leżą w tym samym repozytorium, więc ghPages(file) jest poprawnym adresem.
+  document.body.classList.toggle('source-remote', dataSource === 'github' || dataSource === 'scan');
+
+  // panel chowa się automatycznie po wybraniu narzędzia
+  collapseSidebar(true);
+
+  // Realne ładowanie (dekodowanie base64 / ustawienie iframe) startuje DOPIERO PO
+  // pełnym odegraniu animacji "deploy" (DEPLOY_MIN_MS), a nie równolegle z nią.
+  // Powód: niektóre narzędzia (np. duże, jednoplikowe aplikacje z ciężkim payloadem,
+  // jak PSF Import) blokują wątek główny podczas dekodowania/parsowania na tyle długo,
+  // że "duszą" animację opartą o requestAnimationFrame/CSS-transition i wygląda ona na
+  // zerwaną w połowie. Odseparowanie w czasie gwarantuje, że animacja ZAWSZE dogrywa się
+  // w całości, zanim jakakolwiek ciężka praca zdąży zakłócić klatki.
+  // `myGen` chroni przed sytuacją, w której użytkownik zdąży przełączyć się na inną
+  // apkę w trakcie tego opóźnienia — wtedy nieaktualne wywołanie po prostu nic nie robi.
+  setTimeout(() => {
+    if (myGen !== deployGen) return;
+
+    if (dataSource === 'github' || dataSource === 'scan'){
+      loadToolFromGitHub(file, myGen);
+      return;
+    }
+
+    try {
+      let b64;
+      const importedApp = idbApps.find(a => a.id === id);
+      if (importedApp){
+        b64 = importedApp.code;
+      } else {
+        const el = document.getElementById('data-' + id);
+        b64 = el ? el.textContent : embeddedExtraCode[id];
+        if (!b64) throw new Error('Brak danych wbudowanej aplikacji o id ' + id);
+      }
+      const binary = atob(b64);
+      const len = binary.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i);
+
+      // Blob URL trzymany tylko na potrzeby "Nowa karta" / "Pobierz" (tam origin nie ma znaczenia)
+      const blob = new Blob([bytes], { type: 'text/html;charset=utf-8' });
+      if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
+      currentBlobUrl = URL.createObjectURL(blob);
+
+      // Wyświetlanie w panelu: srcdoc — dziedziczy stałe pochodzenie strony,
+      // dzięki czemu localStorage/sessionStorage narzędzia działa tak jak w zwykłym pliku.
+      const html = new TextDecoder('utf-8').decode(bytes);
+      mountIframe(null, html);
+    } catch (e) {
+      hideDeployOverlay();
+      alert('Błąd ładowania narzędzia: ' + e.message);
+    }
+  }, DEPLOY_MIN_MS);
+}
+
+// Ładowanie narzędzia z GitHub (tryb 'github' lub 'scan') — BEZ blobów/fetch.
+// Iframe wskazuje bezpośrednio na żywy adres — domyślnie GitHub Pages skonfigurowanego repo, np.
+// https://mmaarreekkxx.github.io/flmanager/flmanager.html, ale jeśli wpis ma własny "url"
+// (dodany np. przez import "Z GitHub" z innego repozytorium), używamy go bezpośrednio.
+//
+// Cache'owanie (domyślnie włączone, przełącznik "Cache GitHub/Skanuj (offline)" w menu
+// Zarządzaj) dotyczy OBU zakładek — "GitHub" (sztywna lista GH_LIST) i "Skanuj" — żeby apki
+// dało się uruchomić nawet bez połączenia z siecią. Wpisy cache (source: "ghcache") są
+// celowo trzymane w IDB oddzielnie od prawdziwych apek "Wbudowanych": nigdy nie pojawiają
+// się w liście "Wbudowane", w liczniku tej zakładki ani w eksportowanym pliku ("Zapisz
+// panel + aplikacje") — to czysto wewnętrzny, ulotny cache przeglądarki dla tej zakładki,
+// nie część panelu do dystrybucji.
+// Pierwsze otwarcie danej apki pobiera jej kod przez fetch() z raw.githubusercontent.com
+// (ma poprawne nagłówki CORS — w przeciwieństwie do zwykłych stron GitHub Pages, których
+// zwykle NIE da się pobrać przez fetch() z innej domeny) i zapisuje w IndexedDB pod kluczem
+// "ghcache:<url>". Kolejne otwarcia tej samej apki wczytują się od razu z IDB (offline,
+// błyskawicznie), a w tle po cichu odświeżają cache najnowszą wersją z sieci — bez
+// przerywania tego, co już jest wyświetlone. „Przeładuj” w topbarze zawsze kasuje wpis
+// z cache przed ponownym wywołaniem tej funkcji, więc wymusza świeże pobranie na żądanie.
+// Jeśli fetch się nie powiedzie (np. plik istnieje tylko na Pages, nie w gałęzi raw, albo
+// offline i BRAK jeszcze zapisanego cache) — bezpieczny fallback do starej metody: zwykłej
+// nawigacji iframe.src (nie wymaga CORS, ale nie da się z niej odczytać treści do cache).
+async function loadToolFromGitHub(file, myGen){
+  const explicitUrl = (currentToolItem && currentToolItem.url) || null;
+  const pagesUrl = explicitUrl || ghPages(file);
+  const rawUrl = explicitUrl || ghRaw(file);
+  currentBlobUrl = null;
+  currentRemoteUrl = pagesUrl;
+
+  // Zdalne aplikacje otwieramy bezpośrednio w iframe, a nie przez srcdoc.
+  // Dzięki temu zachowują własny origin, historię, formularze, przewijanie,
+  // ścieżki względne i skrypty — dokładnie tak jak po wejściu na plik GitHub Pages.
+  // srcdoc było przyczyną różnic w PWA: kliknięcie „przewiń” lub wypełnienie
+  // formularza mogło uruchamiać nawigację/reset aplikacji zamiast kodu narzędzia.
+  if (!isGithubCacheEnabled()) {
+    showToast('Otwieranie „' + file + '” bezpośrednio z GitHub Pages');
+    mountIframe(pagesUrl);
+    return;
+  }
+
+  const cacheKey = 'ghcache:' + rawUrl;
+  const cached = idbApps.find(a => a.id === cacheKey);
+  if (cached) showToast('Otwieranie „' + file + '” z GitHub Pages — cache pozostaje dostępny offline');
+  else showToast('Otwieranie „' + file + '” z GitHub Pages…');
+
+  // Cache służy jako lokalny zapis/odświeżanie, ale nie zastępuje bezpośredniego
+  // iframe dla aplikacji interaktywnych. To gwarantuje poprawne formularze i scroll.
+  mountIframe(pagesUrl);
+  refreshGithubCacheInBackground(rawUrl, cacheKey, file);
+}
+
+// Ciche odświeżenie cache w tle po pokazaniu wersji z IDB — błąd sieci tutaj nie ma
+// znaczenia (użytkownik i tak już widzi działającą, choć być może nieco starszą, wersję).
+function refreshGithubCacheInBackground(rawUrl, cacheKey, file){
+  fetch(rawUrl, { cache: 'no-store' })
+    .then(res => res.ok ? res.text() : Promise.reject(new Error('HTTP ' + res.status)))
+    .then(html => {
+      const entry = { id: cacheKey, name: file, code: toB64(html), added: new Date().toISOString().slice(0, 10), source: 'ghcache' };
+      const idx = idbApps.findIndex(a => a.id === cacheKey);
+      if (idx >= 0) idbApps[idx] = entry; else idbApps.push(entry);
+      return idbPut(entry);
+    })
+    .catch(() => {});
+}
+
+// Kasuje zapisany cache danej apki GitHub/Skanuj (używane przez "Przeładuj", żeby
+// zagwarantować świeże pobranie z sieci na żądanie, mimo włączonego cache'owania).
+function invalidateGithubCache(file){
+  const explicitUrl = (currentToolItem && currentToolItem.url) || null;
+  const rawUrl = explicitUrl || ghRaw(file);
+  const cacheKey = 'ghcache:' + rawUrl;
+  const idx = idbApps.findIndex(a => a.id === cacheKey);
+  if (idx >= 0) idbApps.splice(idx, 1);
+  idbDelete(cacheKey).catch(() => {});
+}
+
+// Liczba narzędzi zależna od aktywnej zakładki źródła
+function countForSource(){
+  if(dataSource === 'github') return GH_LIST.length;
+  if(dataSource === 'scan') return scannedApps ? scannedApps.length : 0;
+  return NAV.reduce((acc, n) => acc + (n.type === 'single' ? 1 : n.items.length), 0) + idbApps.filter(a => a.source !== 'ghcache').length;
+}
+function updateCountDisplay(){
+  const n = countForSource();
+  const label = dataSource === 'github' ? 'aplikacji · lista GitHub'
+    : dataSource === 'scan' ? (scannedApps ? 'aplikacji · zeskanowano z repo' : 'skanowanie…')
+    : 'aplikacji · single file';
+  verLine.textContent = (dataSource === 'scan' && !scannedApps) ? 'Skanowanie repozytorium…' : (n + ' ' + label);
+  const metaApps = document.getElementById('metaApps');
+  if (metaApps) metaApps.textContent = n + ' aplikacji';
+}
+
+// Porównuje wyniki skanu z zakładką „GitHub” oraz ze zrzutem rozmiarów z poprzedniego
+// skanu (IDB, klucz "scan_sig") i buduje mapę nowości dla zielonej kropki:
+//  - 'nowa'  — pliku nie ma na liście GH_LIST (aplikacja nieobecna w zakładce GitHub),
+//  - 'wersja' — plik jest na liście, ale jego rozmiar zmienił się od ostatniego skanu,
+//              czyli w repo pojawiła się nowa wersja.
+// Po porównaniu zrzut rozmiarów jest aktualizowany, żeby ta sama zmiana nie migotała
+// przy każdym kolejnym skanowaniu (kropka znika przy następnym skanie).
+async function markScanNovelties(files){
+  const novel = new Map();
+  try {
+    const rec = await idbMetaGet('scan_sig');
+    const prev = (rec && rec.sigs) || {};
+    const next = {};
+    files.forEach(f => {
+      next[f.file] = f.size;
+      if (!GH_LIST.some(g => g.file === f.file)) novel.set(f.file, 'nowa');
+      else if (prev[f.file] !== undefined && prev[f.file] !== f.size) novel.set(f.file, 'wersja');
+    });
+    scanNovel = novel;
+    await idbMetaPut({ id: 'scan_sig', sigs: next });
+  } catch (e) {
+    // Bez IDB zostaje samo porównanie z listą „GitHub” (nowe pozycje) — bez wersji.
+    files.forEach(f => { if (!GH_LIST.some(g => g.file === f.file)) novel.set(f.file, 'nowa'); });
+    scanNovel = novel;
+  }
+}
+
+// Skanowanie repozytorium GitHub w poszukiwaniu wszystkich plików .html + odczyt limitu API
+async function scanGitHubRepos(){
+  navRoot.innerHTML = '<div class="scan-loading">Skanowanie repozytorium ' + esc(GH_USER) + '/' + esc(GH_REPO) + '…</div>';
+  updateCountDisplay();
+  try {
+    const res = await fetchWithTimeout(`${GH_API}/repos/${GH_USER}/${GH_REPO}/git/trees/main?recursive=1`, {}, 15000);
+    showApiLimit(res);
+    if (res.status === 403 || res.status === 429) throw new Error('Limit GitHub API — spróbuj później');
+    if (!res.ok) throw new Error('API: ' + res.status);
+    const data = await res.json();
+    const files = (data.tree || []).filter(n => n.type === 'blob' && n.path.toLowerCase().endsWith('.html'));
+    scannedApps = files.map((f, i) => ({
+      type: 'single',
+      id: 'scan_' + i,
+      label: f.path.replace(/\.html$/i, ''),
+      file: f.path,
+      size: f.size || 0
+    }));
+    await markScanNovelties(scannedApps); // ustawia zielone kropki nowości przed renderem
+    renderNav(searchBox.value);
+    updateCountDisplay();
+    showToast('Znaleziono ' + scannedApps.length + ' plików .html w repozytorium');
+  } catch (e) {
+    navRoot.innerHTML = '<div class="scan-error">Błąd skanowania: ' + esc(e.message) + '</div>';
+    showToast('Błąd skanowania repozytorium', true);
+    updateCountDisplay();
+  }
+}
+
+// Wyświetla wykorzystanie limitu GitHub API (nagłówki X-RateLimit-*) — tylko dla trybu Skanuj
+function showApiLimit(res){
+  const rem = parseInt(res.headers.get('X-RateLimit-Remaining') || '-1');
+  const lim = parseInt(res.headers.get('X-RateLimit-Limit') || '60');
+  const rst = parseInt(res.headers.get('X-RateLimit-Reset') || '0');
+  const box = document.getElementById('apiLimit');
+  if (rem < 0) { box.style.display = 'none'; return; }
+  box.style.display = ''; // '' → wraca do display:flex z CSS (jeden wiersz)
+  const pct = Math.max(0, Math.round(rem / lim * 100));
+  const fill = document.getElementById('apiLimitFill');
+  fill.style.width = pct + '%';
+  fill.className = 'api-limit-fill' + (pct > 50 ? '' : pct > 15 ? ' mid' : ' low');
+  const valEl = document.getElementById('apiLimitVal');
+  if (rem < 10 && rst) {
+    const d = new Date(rst * 1000);
+    valEl.textContent = rem + '/' + lim + ' · reset ' + d.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
+  } else {
+    valEl.textContent = rem + '/' + lim + ' zapytań';
+  }
+}
+
+document.getElementById('sourceToggle').addEventListener('click', (e) => {
+  const btn = e.target.closest('.src-btn');
+  if (!btn) return;
+  const src = btn.dataset.src;
+  document.querySelectorAll('.src-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  feedbackClick();
+  dataSource = src;
+  document.getElementById('apiLimit').style.display = src === 'scan' ? '' : 'none';
+  if (src === 'scan') {
+    scanGitHubRepos();
+  } else {
+    if (src === 'local') scannedApps = null;
+    renderNav(searchBox.value);
+    updateCountDisplay();
+    showToast(
+      src === 'github' ? 'Źródło: GitHub (adres bezpośredni, z opcją udostępniania)'
+      : 'Źródło: dane wbudowane (offline, bez udostępniania)'
+    );
+  }
+});
+updateCountDisplay();
+
+document.getElementById('shareBtn').onclick = () => {
+  feedbackClick();
+  const shareable = dataSource === 'github' || dataSource === 'scan';
+  if (!shareable || !currentToolFile) { showToast('Udostępnianie (QR/link) dostępne jest dla źródeł „GitHub” i „Skanuj”.'); return; }
+  const url = (currentToolItem && currentToolItem.url) ? currentToolItem.url : ghPages(currentToolFile);
+  document.getElementById('shareTitle').textContent = 'Udostępnij: ' + activeLabel;
+  document.getElementById('shareUrlInput').value = url;
+  document.getElementById('shareNote').textContent = '';
+  const ctx = document.getElementById('shareQr').getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, 160, 160);
+  ctx.fillStyle = '#999'; ctx.font = '11px monospace'; ctx.textAlign = 'center';
+  ctx.fillText('Ładowanie QR…', 80, 85);
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, 160, 160); ctx.drawImage(img, 0, 0, 160, 160); };
+  img.onerror = () => { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, 160, 160); ctx.fillStyle = '#bbb'; ctx.textAlign = 'center'; ctx.fillText('QR niedostępny', 80, 85); };
+  img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=' + encodeURIComponent(url);
+  document.getElementById('shareModal').classList.add('open');
+};
+document.getElementById('shareModalClose').onclick = () => document.getElementById('shareModal').classList.remove('open');
+document.getElementById('shareModal').addEventListener('click', (e) => { if (e.target.id === 'shareModal') e.currentTarget.classList.remove('open'); });
+document.getElementById('shareCopyBtn').onclick = async () => {
+  const inp = document.getElementById('shareUrlInput');
+  try { await navigator.clipboard.writeText(inp.value); } catch (e) { inp.select(); document.execCommand('copy'); }
+  showToast('Skopiowano link');
+};
+
+document.getElementById('reloadBtn').onclick = () => {
+  if (!activeId) return;
+  // "Przeładuj" ma zawsze wymuszać świeże pobranie z sieci, nawet gdy cache jest włączony —
+  // bez tego użytkownik nie miałby żadnego sposobu, żeby ręcznie sprawdzić najnowszą wersję
+  // pliku w repo, dopóki cache nie odświeży się sam w tle.
+  if ((dataSource === 'github' || dataSource === 'scan') && currentToolFile) invalidateGithubCache(currentToolFile);
+  loadTool(activeId, activeLabel, crumb.textContent, currentToolItem);
+};
+document.getElementById('newTabBtn').onclick = () => {
+  feedbackClick();
+  if (dataSource === 'local') {
+    if (currentBlobUrl) window.open(currentBlobUrl, '_blank');
+  } else {
+    if (currentRemoteUrl) window.open(currentRemoteUrl, '_blank');
+  }
+};
+document.getElementById('downloadBtn').onclick = async () => {
+  feedbackClick();
+  if (dataSource === 'local') {
+    if (!currentBlobUrl) { showToast('Brak danych do pobrania — najpierw otwórz tę aplikację', true); return; }
+    const a = document.createElement('a');
+    a.href = currentBlobUrl;
+    a.download = crumb.textContent || 'narzedzie.html';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    showToast('Pobrano „' + (crumb.textContent || 'plik.html') + '”. Kliknij powiadomienie o pobraniu w przeglądarce (lub otwórz plik z folderu Pobrane), aby uruchomić go jak zwykły plik lokalny — z trwałym zapisem danych.');
+    return;
+  }
+  // Źródło GitHub/Skanuj: podgląd idzie po żywym adresie, ale pobranie i tak wymaga
+  // realnych bajtów pliku — pobieramy je dopiero teraz, tylko na potrzeby zapisu.
+  if (!currentToolFile) return;
+  showToast('Pobieranie „' + currentToolFile + '” z GitHub…');
+  try {
+    let html = null;
+    const candidates = (currentToolItem && currentToolItem.url)
+      ? [currentToolItem.url]
+      : [ghRaw(currentToolFile), ghGithack(currentToolFile)];
+    for (const url of candidates) {
+      try {
+        const res = await fetchWithTimeout(url, {}, 12000);
+        if (!res.ok) continue;
+        const text = await res.text();
+        if (text.includes('<') && text.length > 100) { html = text; break; }
+      } catch (e) { /* próbuj kolejne źródło */ }
+    }
+    if (!html) throw new Error('nie udało się pobrać pliku');
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = currentToolFile;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    showToast('Pobrano „' + currentToolFile + '” z GitHub.');
+  } catch (e) {
+    showToast('Błąd pobierania z GitHub: ' + e.message, true);
+  }
+};
+
+let toastTimer = null;
+function showToast(msg, isErr){
+  let t = document.getElementById('toast');
+  if(!t){
+    t = document.createElement('div');
+    t.id = 'toast';
+    t.className = 'toast';
+    document.body.appendChild(t);
+  }
+  t.innerHTML = '<span class="toast-mark"></span>' + esc(msg);
+  t.classList.add('show');
+  t.classList.toggle('err', !!isErr);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+  if (isErr) feedbackError(); else feedbackClick();
+}
+let searchRenderTimer = null;
+searchBox.addEventListener('input', () => {
+  clearTimeout(searchRenderTimer);
+  searchRenderTimer = setTimeout(() => renderNav(searchBox.value), 90);
+});
+
+// ---- Dark Mode: przycisk z ikoną (obok "Zarządzaj"), z zapamiętaniem wyboru ----
+const THEME_KEY = 'fp_theme_light';
+const darkModeBtn = document.getElementById('darkModeBtn');
+const darkIconMoon = darkModeBtn.querySelector('.icon-moon');
+const darkIconSun = darkModeBtn.querySelector('.icon-sun');
+function applyTheme(isLight){
+  document.body.classList.toggle('theme-light', isLight);
+  darkIconMoon.style.display = isLight ? 'none' : '';
+  darkIconSun.style.display = isLight ? '' : 'none';
+  darkModeBtn.setAttribute('aria-pressed', String(!isLight));
+  darkModeBtn.title = isLight ? 'Włącz Dark Mode' : 'Wyłącz Dark Mode (jasny motyw)';
+}
+applyTheme(localStorage.getItem(THEME_KEY) === '1');
+darkModeBtn.addEventListener('click', () => {
+  feedbackToggle();
+  const nowLight = !document.body.classList.contains('theme-light');
+  applyTheme(nowLight);
+  localStorage.setItem(THEME_KEY, nowLight ? '1' : '0');
+});
+
+// ---- ustawienie: cache'owanie apek GitHub/Skanuj do IndexedDB (domyślnie WŁĄCZONE) ----
+const CACHE_GH_KEY = 'fp_cache_github';
+const swCacheGh = document.getElementById('swCacheGh');
+swCacheGh.checked = localStorage.getItem(CACHE_GH_KEY) !== '0'; // brak wpisu = domyślnie włączone
+swCacheGh.addEventListener('change', () => {
+  feedbackToggle();
+  localStorage.setItem(CACHE_GH_KEY, swCacheGh.checked ? '1' : '0');
+});
+function isGithubCacheEnabled(){ return localStorage.getItem(CACHE_GH_KEY) !== '0'; }
+
+// ---- wyszukiwarka: przełączana LUPKĄ w nagłówku szyny (obok przycisku chowania) ----
+// Przełącznik „Pokaż wyszukiwarkę” z menu „Zarządzaj” został usunięty — pasek wyszukiwania
+// otwiera się i zamyka jednym kliknięciem na lupkę, a stan jest zapamiętywany lokalnie.
+const SHOW_SEARCH_KEY = 'fp_show_search';
+const searchToggleBtn = document.getElementById('searchToggle');
+const searchWrap = document.getElementById('searchWrap');
+function applyShowSearch(show){
+  searchWrap.style.display = show ? '' : 'none';
+  if (show){
+    setTimeout(() => { try { searchBox.focus(); searchBox.select(); } catch(e){} }, 30);
+  } else if (searchBox.value) {
+    searchBox.value = ''; renderNav(''); // czyścimy filtr, żeby lista nie została ukryta "w locie"
+  }
+  if (searchToggleBtn){
+    searchToggleBtn.classList.toggle('on', !!show);
+    searchToggleBtn.setAttribute('aria-pressed', String(!!show));
+    const t = show ? 'Ukryj wyszukiwarkę' : 'Pokaż wyszukiwarkę';
+    searchToggleBtn.title = t;
+    searchToggleBtn.setAttribute('aria-label', t);
+  }
+}
+if (searchToggleBtn){
+  searchToggleBtn.addEventListener('click', () => {
+    feedbackClick();
+    const open = searchWrap.style.display === 'none';
+    try { localStorage.setItem(SHOW_SEARCH_KEY, open ? '1' : '0'); } catch(e){}
+    applyShowSearch(open);
+  });
+}
+// brak wpisu = domyślnie ukryta
+applyShowSearch((() => { try { return localStorage.getItem(SHOW_SEARCH_KEY) === '1'; } catch(e){ return false; } })());
+
+// ---- sidebar collapse logic ----
+// Gdy pasek jest otwarty, przezroczysta nakładka (#sidebarBackdrop) przykrywa
+// całą resztę strony (łącznie z iframe narzędzia) i łapie każde kliknięcie,
+// zamykając pasek. Dzięki temu działa to również dla kliknięć wewnątrz
+// otwartego narzędzia, które normalnie nie docierałyby do tego dokumentu.
+function collapseSidebar(collapsed){
+  // Sidebar może być otwierany także nad aktywną aplikacją.
+  // Interakcje iframe są odseparowane CSS-em, więc nie trzeba wymuszać
+  // stanu „zwinięty” po każdym kliknięciu przycisku.
+  document.body.classList.toggle('sidebar-collapsed', !!collapsed);
+}
+document.getElementById('collapseBtn').onclick = (e) => { e.stopPropagation(); feedbackClick(); collapseSidebar(true); };
+document.getElementById('sidebarFab').onclick = (e) => { e.stopPropagation(); feedbackClick(); collapseSidebar(!document.body.classList.contains('sidebar-collapsed')); };
+document.getElementById('sidebarBackdrop').onclick = () => { feedbackClick(); collapseSidebar(true); };
+
+const clockEl = document.getElementById('clock');
+const clockFormatter = new Intl.DateTimeFormat('pl-PL', {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false});
+function tickClock(){ clockEl.textContent = clockFormatter.format(new Date()); }
+tickClock();
+let clockTimer = setInterval(tickClock, 1000);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { clearInterval(clockTimer); clockTimer = null; }
+  else if (!clockTimer) { tickClock(); clockTimer = setInterval(tickClock, 1000); }
+});
+
+// ============ ZARZĄDZANIE: import / zapisz panel / tryb edycji ============
+const manageWrap = document.getElementById('manageWrap');
+document.getElementById('manageToggle').addEventListener('click', (e) => {
+  e.stopPropagation(); feedbackClick(); manageWrap.classList.toggle('open');
+});
+document.addEventListener('click', (e) => {
+  if (!manageWrap.contains(e.target)) manageWrap.classList.remove('open');
+  // Kliknięcia w osadzonym narzędziu nie sterują panelem nadrzędnym.
+  if (document.body.classList.contains('has-tool') && document.getElementById('frameArea')?.contains(e.target)) return;
+
+  // ZAMYKANIE SZYNY: kliknięcie w KAŻDE miejsce poza panelem (treść, nagłówek,
+  // podkładka nad iframe) chowa szynę. Wyjątek: otwarte okno modalne — tam kliknięcie
+  // należy do okna, nie do panelu; oraz stan już zwinięty (bez zbędnych wywołań).
+  if (!document.body.classList.contains('sidebar-collapsed')
+      && !document.querySelector('.modal-bg.open, .modal-backdrop.open')){
+    const sb = document.getElementById('sidebar');
+    if (sb && !sb.contains(e.target)) collapseSidebar(true);
+  }
+});
+
+// aria-expanded aktualizowane niezależnie od tego, kto zmienia klasę .open
+// (przycisk, kliknięcie poza menu, „Importuj”/„Zapisz”, „Tryb edycji”).
+new MutationObserver(() => {
+  const mt = document.getElementById('manageToggle');
+  if (mt) mt.setAttribute('aria-expanded', String(manageWrap.classList.contains('open')));
+}).observe(manageWrap, { attributes: true, attributeFilter: ['class'] });
+
+// Przycisk końca edycji na dole panelu — ekspresowe wyjście z trybu edycji,
+// bez otwierania menu z trzech kropek. Widoczny tylko przy body.edit-mode (CSS).
+document.getElementById('editDoneBtn').addEventListener('click', () => {
+  manageWrap.classList.remove('open');
+  setEditMode(false);
+});
+
+function setEditMode(on){
+  editMode = on;
+  document.body.classList.toggle('edit-mode', on);
+  const btn = document.getElementById('editModeBtn');
+  btn.setAttribute('aria-pressed', String(on));
+  document.getElementById('editModeLabel').textContent = on ? 'Zakończ edycję' : 'Tryb edycji';
+  document.getElementById('editModeState').textContent = on ? 'on' : 'off';
+  renderNav(searchBox.value);
+  feedbackClick();
+}
+document.getElementById('editModeBtn').addEventListener('click', () => {
+  manageWrap.classList.remove('open');
+  setEditMode(!editMode);
+});
+document.getElementById('saveBtn').addEventListener('click', () => {
+  manageWrap.classList.remove('open');
+  exportPanel();
+});
+document.getElementById('importBtn').addEventListener('click', () => {
+  manageWrap.classList.remove('open');
+  openImportModal();
+});
+
+// ---- Modal importu (upload pliku / wklejenie kodu / plik z repozytorium GitHub) ----
+const importModal = document.getElementById('importModal');
+const importNameInput = document.getElementById('importName');
+const importCodeInput = document.getElementById('importCode');
+const importFileInput = document.getElementById('importFileInput');
+const importDrop = document.getElementById('importDrop');
+const importFileStatus = document.getElementById('importFileStatus');
+const importFileStatusText = document.getElementById('importFileStatusText');
+const importGhOwnerInput = document.getElementById('importGhOwner');
+const importGhRepoNameInput = document.getElementById('importGhRepoName');
+const importGhBranchInput = document.getElementById('importGhBranch');
+const importGhScanBtn = document.getElementById('importGhScanBtn');
+const importGhResults = document.getElementById('importGhResults');
+const importGhStatus = document.getElementById('importGhStatus');
+const importGhStatusText = document.getElementById('importGhStatusText');
+const importGhNote = document.getElementById('importGhNote');
+const importDestField = document.getElementById('importDestField');
+const importEmbedOnlyNote = document.getElementById('importEmbedOnlyNote');
+const importConfirmBtn = document.getElementById('importConfirmBtn');
+let importTab = 'upload';       // 'upload' | 'paste' | 'ghurl'
+let importDest = 'embed';       // 'embed' | 'github' — wybór możliwy tylko przy imporcie z GitHub
+let importPendingCode = '';     // treść wgranego pliku
+let importGhCode = '';          // treść wybranego pliku z zeskanowanego repozytorium
+let importGhRawUrl = '';        // rozpoznany adres "raw" wybranego pliku (adres zewnętrzny)
+
+function openImportModal(){
+  importModal.classList.add('open');
+  importNameInput.value = '';
+  importCodeInput.value = '';
+  importGhOwnerInput.value = GH_USER;
+  importGhRepoNameInput.value = GH_REPO;
+  importGhBranchInput.value = 'main';
+  importGhResults.innerHTML = '';
+  importPendingCode = '';
+  importGhCode = '';
+  importGhRawUrl = '';
+  importFileStatus.classList.remove('show');
+  importGhStatus.classList.remove('show');
+  switchImportDest('embed');
+  switchImportTab('upload');
+  setTimeout(() => importNameInput.focus(), 30);
+}
+function closeImportModal(){ importModal.classList.remove('open'); }
+function switchImportTab(tab){
+  importTab = tab;
+  document.querySelectorAll('#importFormatToggle .itab').forEach(t => t.classList.toggle('active', t.dataset.itab === tab));
+  document.querySelectorAll('.ipanel').forEach(p => p.classList.toggle('active', p.dataset.ipanel === tab));
+  // Do listy GitHub „na sztywno” można dodać tylko plik, który faktycznie już jest w repozytorium —
+  // czyli wyłącznie przy imporcie metodą "Z GitHub". Dla "Wgraj plik" / "Wklej kod" wymuszamy embed.
+  if (tab === 'ghurl'){
+    importDestField.style.display = '';
+    importEmbedOnlyNote.style.display = 'none';
+    if (!importGhResults.children.length) scanGithubForImport();
+  } else {
+    importDestField.style.display = 'none';
+    importEmbedOnlyNote.style.display = 'block';
+    switchImportDest('embed');
+  }
+  validateImport();
+}
+function switchImportDest(dest){
+  importDest = dest;
+  document.querySelectorAll('#importDestToggle .itab').forEach(t => t.classList.toggle('active', t.dataset.idest === dest));
+  importGhNote.style.display = (dest === 'github' && importTab === 'ghurl') ? 'block' : 'none';
+  validateImport();
+}
+function currentImportCode(){
+  if (importTab === 'upload') return importPendingCode;
+  if (importTab === 'ghurl') return importGhCode;
+  return importCodeInput.value;
+}
+function looksLikeHtml(str){ return /<html|<!doctype|<body|<head|<div|<script|<svg/i.test(str); }
+function validateImport(){
+  const hasCode = currentImportCode().trim().length > 20;
+  const hasName = importNameInput.value.trim().length > 0;
+  importConfirmBtn.disabled = !(hasCode && hasName);
+}
+const IMPORT_MAX_SIZE = 8 * 1024 * 1024; // 8 MB — rozsądny limit dla pojedynczego pliku HTML narzędzia
+function handleImportFile(file){
+  if (!file) return;
+  if (!/\.(html?|htm)$/i.test(file.name)){ showToast('Odrzucono: dozwolone są wyłącznie pliki .html/.htm', true); return; }
+  if (file.size > IMPORT_MAX_SIZE){ showToast('Plik zbyt duży (limit ' + Math.round(IMPORT_MAX_SIZE / 1024 / 1024) + ' MB)', true); return; }
+  const reader = new FileReader();
+  reader.onload = () => {
+    const text = String(reader.result || '');
+    if (looksLikeBinary(text)){ showToast('Odrzucono: plik wygląda na binarny, nie na tekst/HTML', true); return; }
+    importPendingCode = text;
+    importFileStatusText.textContent = file.name + ' · ' + Math.max(1, Math.round(file.size / 1024)) + ' KB';
+    importFileStatus.classList.add('show');
+    if (!importNameInput.value.trim()){
+      importNameInput.value = file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase()).slice(0, 60);
+    }
+    validateImport();
+  };
+  reader.onerror = () => showToast('Nie udało się odczytać pliku', true);
+  reader.readAsText(file);
+}
+
+// ---- "Z GitHub": skanowanie wskazanego repozytorium (domyślnie własnego) i wybór pliku ----
+// Działa na tej samej zasadzie co zakładka „Skanuj” — wyszukuje pliki .html w drzewie repo
+// przez GitHub API, ale pozwala podać innego właściciela/repo/gałąź niż domyślne.
+async function scanGithubForImport(){
+  const owner = (importGhOwnerInput.value || GH_USER).trim();
+  const repo = (importGhRepoNameInput.value || GH_REPO).trim();
+  const branch = (importGhBranchInput.value || 'main').trim();
+  importGhResults.innerHTML = '<div class="igh-loading">Skanowanie ' + esc(owner) + '/' + esc(repo) + '…</div>';
+  importGhStatus.classList.remove('show');
+  importGhScanBtn.disabled = true;
+  importGhScanBtn.textContent = 'Skanowanie…';
+  try {
+    const res = await fetchWithTimeout(`${GH_API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/trees/${encodeURIComponent(branch)}?recursive=1`, {}, 15000);
+    if (res.status === 403 || res.status === 429) throw new Error('Limit GitHub API — spróbuj później');
+    if (!res.ok) throw new Error('API: ' + res.status);
+    const data = await res.json();
+    const files = (data.tree || []).filter(n => n.type === 'blob' && n.path.toLowerCase().endsWith('.html'));
+    if (!files.length){ importGhResults.innerHTML = '<div class="igh-empty">Nie znaleziono plików .html w tym repozytorium.</div>'; return; }
+    importGhResults.innerHTML = '';
+    files.forEach(f => {
+      const row = document.createElement('button');
+      row.type = 'button';
+      row.className = 'ighrow';
+      row.innerHTML = `<span class="path">${esc(f.path)}</span><span class="sz">${fmtSize(f.size || 0)}</span>`;
+      row.onclick = () => selectGithubImportFile(owner, repo, branch, f.path, row);
+      importGhResults.appendChild(row);
+    });
+  } catch (e) {
+    importGhResults.innerHTML = '<div class="igh-error">Błąd skanowania: ' + esc(e.message) + '</div>';
+  } finally {
+    importGhScanBtn.disabled = false;
+    importGhScanBtn.textContent = 'Skanuj repozytorium';
+  }
+}
+async function selectGithubImportFile(owner, repo, branch, path, rowEl){
+  importGhResults.querySelectorAll('.ighrow').forEach(r => r.classList.remove('selected'));
+  rowEl.classList.add('selected');
+  importGhStatusText.textContent = 'Wczytywanie „' + path + '”…';
+  importGhStatus.classList.add('show');
+  const url = `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}/${path.split('/').map(encodeURIComponent).join('/')}`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    if (!text || text.length < 20) throw new Error('pusta odpowiedź');
+    importGhCode = text;
+    importGhRawUrl = url;
+    importGhStatusText.textContent = path + ' · ' + Math.max(1, Math.round(new Blob([text]).size / 1024)) + ' KB';
+    // Nazwa dokładnie taka, jak plik nazywa się w repozytorium GitHub (bez upiększania) —
+    // tak samo jak w zakładce „Skanuj”.
+    importNameInput.value = path.replace(/\.html?$/i, '').slice(0, 60);
+  } catch (e) {
+    importGhCode = '';
+    importGhRawUrl = '';
+    importGhStatusText.textContent = 'Błąd pobierania: ' + e.message;
+  } finally {
+    validateImport();
+  }
+}
+document.getElementById('importModalClose').addEventListener('click', closeImportModal);
+document.getElementById('importCancelBtn').addEventListener('click', closeImportModal);
+importModal.addEventListener('click', (e) => { if (e.target === importModal) closeImportModal(); });
+document.querySelectorAll('#importFormatToggle .itab').forEach(t => t.addEventListener('click', () => switchImportTab(t.dataset.itab)));
+document.querySelectorAll('#importDestToggle .itab').forEach(t => t.addEventListener('click', () => switchImportDest(t.dataset.idest)));
+importNameInput.addEventListener('input', validateImport);
+importCodeInput.addEventListener('input', validateImport);
+importDrop.addEventListener('click', () => importFileInput.click());
+importDrop.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); importFileInput.click(); } });
+importFileInput.addEventListener('change', () => handleImportFile(importFileInput.files[0]));
+['dragenter', 'dragover'].forEach(ev => importDrop.addEventListener(ev, (e) => { e.preventDefault(); importDrop.classList.add('dragover'); }));
+['dragleave', 'drop'].forEach(ev => importDrop.addEventListener(ev, (e) => { e.preventDefault(); importDrop.classList.remove('dragover'); }));
+importDrop.addEventListener('drop', (e) => { const f = e.dataTransfer.files[0]; if (f) handleImportFile(f); });
+importGhScanBtn.addEventListener('click', scanGithubForImport);
+[importGhOwnerInput, importGhRepoNameInput, importGhBranchInput].forEach(inp => {
+  inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); scanGithubForImport(); } });
+});
+
+importConfirmBtn.addEventListener('click', async () => {
+  const name = importNameInput.value.trim();
+  const code = currentImportCode().trim();
+  if (!name || code.length < 20) return;
+  if (importTab !== 'ghurl' && !looksLikeHtml(code) && !confirm('To nie wygląda na kod HTML. Zaimportować mimo to?')) return;
+  const susp = detectSuspiciousContent(code);
+  if (susp.length && !confirm('Wykryto podejrzane wzorce w kodzie (' + susp.join(', ') + '). Zaimportować mimo to?')) return;
+  const dupExists = NAV.concat(idbApps, GH_LIST).some(a => (a.label || '').trim().toLowerCase() === name.toLowerCase());
+  if (dupExists && !confirm('Aplikacja o nazwie „' + name + '” już istnieje. Zaimportować jako osobną pozycję?')) return;
+  closeImportModal();
+
+  if (importDest === 'embed'){
+    // Cel: Wbudowane (base64) — trafia bezpośrednio do NAV + osadzonego kodu.
+    const id = uid('emb');
+    embeddedExtraCode[id] = toB64(code);
+    NAV.push({ type: 'single', id, label: name, file: slugify(name) + '.html', size: new Blob([code]).size });
+    dataSource = 'local';
+    document.querySelectorAll('.src-btn').forEach(b => b.classList.toggle('active', b.dataset.src === 'local'));
+    document.getElementById('apiLimit').style.display = 'none';
+    scannedApps = null;
+    renderNav(searchBox.value);
+    updateCountDisplay();
+    showToast('Zaimportowano „' + name + '” do wbudowanych — kliknij „Zapisz panel + aplikacje”, aby zapisać na stałe.');
+  } else {
+    // Cel: Lista GitHub (na sztywno) — dostępny tylko przy imporcie "Z GitHub",
+    // więc treść na pewno pochodzi z realnego, zewnętrznego adresu (importGhRawUrl).
+    const file = slugify(name) + '.html';
+    const entry = { type: 'single', id: uid('gh'), label: name, file };
+    if (importGhRawUrl) entry.url = importGhRawUrl;
+    GH_LIST.push(entry);
+    saveGhListToIDB();
+    dataSource = 'github';
+    document.querySelectorAll('.src-btn').forEach(b => b.classList.toggle('active', b.dataset.src === 'github'));
+    document.getElementById('apiLimit').style.display = 'none';
+    scannedApps = null;
+    renderNav(searchBox.value);
+    updateCountDisplay();
+    showToast('Dodano „' + name + '” do listy GitHub (bezpośredni link zewnętrzny) — zapisane, kliknij „Zapisz panel + aplikacje”, jeśli chcesz to też utrwalić w pliku do dystrybucji.');
+  }
+});
+
+// ---- Usuwanie aplikacji z listy „na sztywno” (GitHub) — w trybie edycji ----
+// Usuwa tylko wpis z panelu; sam plik w repozytorium GitHub pozostaje nietknięty.
+function removeGithubApp(n){
+  if (!confirm('Usunąć „' + n.label + '” z listy GitHub (na sztywno)?\nPlik w repozytorium NIE zostanie usunięty — znika tylko wpis w panelu.')) return;
+  const idx = GH_LIST.findIndex(x => x.id === n.id);
+  if (idx > -1) GH_LIST.splice(idx, 1);
+  saveGhListToIDB();
+  if (activeId === n.id) resetView();
+  renderNav(searchBox.value);
+  updateCountDisplay();
+  showToast('Usunięto „' + n.label + '” z listy GitHub — zapisane, kliknij „Zapisz panel + aplikacje”, jeśli chcesz to też utrwalić w pliku do dystrybucji.');
+}
+
+// ---- Usuwanie pojedynczej wbudowanej (base64) aplikacji spoza grup — w trybie edycji ----
+function removeEmbeddedApp(n){
+  if (!confirm('Usunąć „' + n.label + '” z wbudowanych aplikacji panelu?')) return;
+  const idx = NAV.findIndex(x => x.type === 'single' && x.id === n.id);
+  if (idx > -1) NAV.splice(idx, 1);
+  delete embeddedExtraCode[n.id];
+  // Kluczowe: samo usunięcie z NAV nie usuwa faktycznych danych — kod (base64) aplikacji
+  // leży w osobnym <script type="text/plain" id="data-...">, który trzeba skasować z DOM,
+  // inaczej "osierocony" wpis nadal zostanie sklonowany przy "Zapisz panel + aplikacje"
+  // i wyeksportowany plik wcale się nie zmniejszy (a wręcz urośnie o nowo importowane apki.
+  const dataEl = document.getElementById('data-' + n.id);
+  if (dataEl) dataEl.remove();
+  if (activeId === n.id) resetView();
+  renderNav(searchBox.value);
+  updateCountDisplay();
+  showToast('Usunięto „' + n.label + '” z wbudowanych — kliknij „Zapisz panel + aplikacje”, aby utrwalić zmianę.');
+}
+
+// ---- Usuwanie pojedynczej pozycji wewnątrz grupy wbudowanych aplikacji — w trybie edycji ----
+function removeEmbeddedGroupItem(group, it){
+  if (!confirm('Usunąć „' + it.label + '” z grupy „' + group.label + '”?')) return;
+  const g = NAV.find(x => x.type === 'group' && x.id === group.id);
+  if (g){
+    const idx = g.items.findIndex(x => x.id === it.id);
+    if (idx > -1) g.items.splice(idx, 1);
+    if (!g.items.length){
+      const gi = NAV.findIndex(x => x.id === g.id);
+      if (gi > -1) NAV.splice(gi, 1);
+    }
+  }
+  delete embeddedExtraCode[it.id];
+  // Jak wyżej — usuń też faktyczny blok danych (base64), nie tylko wpis w NAV.
+  const dataEl = document.getElementById('data-' + it.id);
+  if (dataEl) dataEl.remove();
+  if (activeId === it.id) resetView();
+  renderNav(searchBox.value);
+  updateCountDisplay();
+  showToast('Usunięto „' + it.label + '” — kliknij „Zapisz panel + aplikacje”, aby utrwalić zmianę.');
+}
+
+// ---- Akcje na aplikacjach lokalnych (IDB) ----
+async function removeIdbApp(app){
+  if (!app) return;
+  if (!confirm('Usunąć „' + app.label + '” z lokalnych aplikacji?')) return;
+  idbApps = idbApps.filter(a => a.id !== app.id);
+  try { await idbDelete(app.id); } catch(e) {}
+  if (activeId === app.id) resetView();
+  renderNav(searchBox.value);
+  updateCountDisplay();
+  showToast('Usunięto „' + app.label + '”');
+}
+
+// Przenosi lokalną (IDB) aplikację do wbudowanych (base64) — trwale dopiero po
+// „Zapisz panel + aplikacje” (wtedy trafia do kodu jako nowy wpis NAV + <script data-*>).
+async function promoteToEmbedded(app){
+  if (!app) return;
+  const id = uid('emb');
+  embeddedExtraCode[id] = app.code;
+  NAV.push({ type: 'single', id, label: app.label, file: app.file, size: app.size });
+  idbApps = idbApps.filter(a => a.id !== app.id);
+  try { await idbDelete(app.id); } catch(e) {}
+  dataSource = 'local';
+  document.querySelectorAll('.src-btn').forEach(b => b.classList.toggle('active', b.dataset.src === 'local'));
+  document.getElementById('apiLimit').style.display = 'none';
+  renderNav(searchBox.value);
+  updateCountDisplay();
+  showToast('Dodano „' + app.label + '” do wbudowanych — kliknij „Zapisz panel + aplikacje”, aby zapisać na stałe.');
+}
+
+// Przenosi lokalną (IDB) aplikację do listy „na sztywno” (GitHub). Ponieważ ta lista
+// zakłada, że plik jest już dostępny pod adresem GitHub Pages repozytorium, pobieramy
+// od razu plik .html do wysłania ręcznie do repo, a wpis dodajemy do GH_LIST (trwale
+// po „Zapisz panel + aplikacje”).
+async function promoteToGithub(app){
+  if (!app) return;
+  const file = slugify(app.label) + '.html';
+  GH_LIST.push({ type: 'single', id: uid('gh'), label: app.label, file });
+  saveGhListToIDB();
+  const html = fromB64(app.code);
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = file;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+  idbApps = idbApps.filter(a2 => a2.id !== app.id);
+  try { await idbDelete(app.id); } catch(e) {}
+  renderNav(searchBox.value);
+  updateCountDisplay();
+  showToast('Dodano „' + app.label + '” do listy GitHub i pobrano plik „' + file + '” — wgraj go do repozytorium ' + GH_USER + '/' + GH_REPO + '. Wpis na liście jest już zapisany na tym urządzeniu.');
+}
+
+// Dodaje plik znaleziony przy skanowaniu repozytorium bezpośrednio do listy „na sztywno”
+// (plik już istnieje w repo, więc żadne dodatkowe pobranie/wgrywanie nie jest potrzebne).
+function addScanToGithub(item){
+  if (GH_LIST.some(g => g.file === item.file)) { showToast('„' + item.label + '” jest już na liście GitHub'); return; }
+  GH_LIST.push({ type: 'single', id: uid('gh'), label: item.label, file: item.file });
+  saveGhListToIDB();
+  scanNovel.delete(item.file); // plik jest już na liście „GitHub” — kropka nowości znika
+  renderNav(searchBox.value);
+  showToast('Dodano „' + item.label + '” do listy GitHub — zapisane na tym urządzeniu.');
+}
+
+// Pobiera plik znaleziony przy skanowaniu repozytorium GitHub i osadza go jako wbudowaną
+// aplikację (base64) — trwale dopiero po „Zapisz panel + aplikacje”.
+async function embedScanItem(item){
+  showToast('Pobieranie „' + item.label + '” z GitHub…');
+  try {
+    let html = null;
+    for (const url of [ghRaw(item.file), ghGithack(item.file)]) {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) continue;
+        const text = await res.text();
+        if (text.includes('<') && text.length > 50) { html = text; break; }
+      } catch (e) { /* próbuj kolejne źródło */ }
+    }
+    if (!html) throw new Error('nie udało się pobrać pliku');
+    const id = uid('emb');
+    embeddedExtraCode[id] = toB64(html);
+    NAV.push({ type: 'single', id, label: item.label, file: item.file, size: new Blob([html]).size });
+    renderNav(searchBox.value);
+    updateCountDisplay();
+    showToast('Osadzono „' + item.label + '” w wbudowanych — kliknij „Zapisz panel + aplikacje”, aby zapisać na stałe.');
+  } catch (e) {
+    showToast('Błąd pobierania: ' + e.message, true);
+  }
+}
+
+// ============ ZAPISZ PANEL + APLIKACJE (eksport samodzielnego pliku HTML) ============
+// Eksport klonuje ŻYWY DOM, a ten zawiera już elementy wstrzyknięte w czasie działania:
+//  • 25 przycisków ikon w #iconGrid (skrypt wyboru ikony wypełnia go przy starcie),
+//  • skrypty i kontenery diagnostyczne środowiska, gdy panel odpalany jest w szybkim
+//    edytorze i „uruchom w przeglądarce” — np. Eruda wstrzykiwana przez podgląd.
+// Bez tej sanacji TRAFIAŁBY DO KAŻDEGO eksportu, nawet gdy niczego nie zmieniano.
+// Oryginalny plik nie ma ANI JEDNEGO zewnętrznego <script src>, więc wycięcie wszystkich
+// takich skryptów jest bezpieczne i dodatkowo ratuje sytuację, w której podgląd dodałby
+// własny <script src> PRZED skryptem panelu — wtedy `find(s => !s.getAttribute('type'))`
+// wskazywałby na niego i podmiana NAV/GH_LIST trafiłaby w zły element.
+// --- diagnostyka wstrzykiwana przez środowisko (quick edit / „uruchom w przeglądarce”) ---
+// Eruda i VConsole zakładają: własny <script src>, kontener #eruda / #vconsole oraz <style>
+// ze swoim CSS. Panel nie korzysta z ANI jednego zewnętrznego skryptu, więc przy eksporcie
+// tniemy wszystkie <script src> (plik musi być samodzielny), a przy sprzątaniu NA ŻYWO
+// wyłącznie sygnatury diagnostyczne — żeby nie ruszyć skryptów samego edytora.
+const ENV_DIAG_SELECTOR = '#eruda,#vconsole,.eruda,.vconsole,[data-eruda],[data-vconsole],[id*="eruda" i],[class*="eruda" i],[id*="vconsole" i]';
+function stripEnvDiag(scope, dropExternalScripts){
+  if (!scope) return;
+  try {
+    scope.querySelectorAll((dropExternalScripts ? 'script[src],' : '') + ENV_DIAG_SELECTOR)
+      .forEach(el => el.remove());
+  } catch(e){ /* stary parser selektorów — pomijamy */ }
+  try {
+    // arkusz panelu nie zawiera tych nazw, więc trafiamy tylko w style diagnostyczne
+    scope.querySelectorAll('style').forEach(s => {
+      if (/(eruda|vconsole)/i.test(s.textContent || '')) s.remove();
+    });
+  } catch(e){}
+}
+
+// Sprzątanie NA ŻYWO tu po załadowaniu strony: jeśli panel otwarty jest w szybkim edytorze,
+// a ten zapisuje z powrotem żywy DOM (zamiast korzystać z exportPanel), to i tak nie
+// zostanie w pliku Eruda ani żaden inny element podglądu.
+window.addEventListener('load', () => setTimeout(() => stripEnvDiag(document, false), 400));
+
+function cleanPanelClone(clone){
+  const q = sel => clone.querySelector(sel);
+
+  // --- elementy spoza pliku: środowisko / quick edit / Eruda ---
+  stripEnvDiag(clone, true);
+
+  // --- elementy wygenerowane przez JS w tej sesji ---
+  const cIconGrid = q('#iconGrid'); if (cIconGrid) cIconGrid.innerHTML = ''; // 25 ikon
+  const cNav = q('#navRoot'); if (cNav) cNav.innerHTML = '';
+  const cFrame = q('#toolFrame'); if (cFrame) cFrame.remove();
+  const cWelcome = q('#welcome'); if (cWelcome) cWelcome.style.display = '';
+  const cFrameArea = q('#frameArea'); if (cFrameArea) cFrameArea.classList.remove('show');
+  const cLoading = q('#loadingOverlay'); if (cLoading) cLoading.classList.remove('show');
+  const cDeployFill = q('#deployFill'); if (cDeployFill) cDeployFill.removeAttribute('style');
+  ['shareModal', 'importModal', 'iconModal'].forEach(id => {
+    const el = q('#' + id); if (el) el.classList.remove('open');
+  });
+  const cManageWrap = q('#manageWrap'); if (cManageWrap) cManageWrap.classList.remove('open');
+  const cSearchWrap = q('#searchWrap'); if (cSearchWrap) cSearchWrap.setAttribute('style', 'display:none');
+  const cSearchBtn = q('#searchToggle');
+  if (cSearchBtn){ cSearchBtn.classList.remove('on'); cSearchBtn.setAttribute('aria-pressed', 'false'); cSearchBtn.setAttribute('title', 'Pokaż wyszukiwarkę'); }
+  const cEditBtn = q('#editModeBtn'); if (cEditBtn) cEditBtn.setAttribute('aria-pressed', 'false');
+  const cApiLimit = q('#apiLimit'); if (cApiLimit) cApiLimit.style.display = 'none';
+  const cApiFill = q('#apiLimitFill');
+  if (cApiFill){ cApiFill.setAttribute('style', 'width:98%'); cApiFill.className = 'api-limit-fill'; }
+
+  // --- teksty nadpisane w tej sesji → wartości z oryginalnego szablonu ---
+  const setText = (sel, txt) => { const el = q(sel); if (el) el.textContent = txt; };
+  setText('#topTitle', 'FLMANAGER');
+  setText('#crumb', 'flmanager.html');
+  setText('#deployName', '—');
+  setText('#editModeLabel', 'Tryb edycji');
+  setText('#editModeState', 'off');
+  setText('#clock', '09:51:50');
+  setText('#verLine', '13 aplikacji · lista GitHub');
+  setText('#metaApps', '— aplikacji');
+  const cToast = q('#toast'); if (cToast){ cToast.textContent = ''; cToast.className = 'toast'; }
+
+  const cBody = q('body');
+  if (cBody) cBody.classList.remove('sidebar-collapsed', 'has-tool', 'source-remote', 'edit-mode', 'theme-light');
+
+  return clone;
+}
+
+function exportPanel(){
+  const clone = cleanPanelClone(document.documentElement.cloneNode(true));
+
+  // Podmień literały NAV / GH_LIST w głównym skrypcie na aktualny stan (łącznie z
+  // wpisami dodanymi przez "Przenieś do wbudowanych" / "Dodaj do listy GitHub").
+  const scripts = Array.from(clone.querySelectorAll('script'));
+  const mainScript = scripts.find(s => !s.getAttribute('type'));
+  if (mainScript){
+    let src = mainScript.textContent;
+    // zamiennik jako FUNKCJA — inaczej `$&`, `$'` itd. w nazwach/plikach aplikacji
+    // byłyby interpretowane jako wzorce podmiany i uszkadzały zapisywany kod
+    src = src.replace(/const NAV = \[[\s\S]*?\];/, () => 'const NAV = ' + JSON.stringify(NAV) + ';');
+    src = src.replace(/const GH_LIST = \[[\s\S]*?\];/, () => 'const GH_LIST = ' + JSON.stringify(GH_LIST) + ';');
+    mainScript.textContent = src;
+  }
+
+  // Dopisz nowe <script type="text/plain" id="data-..."> dla aplikacji przeniesionych
+  // do wbudowanych (base64), jeśli jeszcze nie istnieją w dokumencie.
+  Object.keys(embeddedExtraCode).forEach(id => {
+    if (!clone.querySelector('#data-' + id)){
+      const s = document.createElement('script');
+      s.setAttribute('type', 'text/plain');
+      s.id = 'data-' + id;
+      s.textContent = embeddedExtraCode[id];
+      clone.querySelector('body').appendChild(s);
+    }
+  });
+
+  // Zapisz aktualną listę aplikacji lokalnych (IDB) jako ziarno — dzięki temu eksportowany
+  // plik odtwarza źródło "Lokalne" od razu po otwarciu, jeszcze zanim IndexedDB się zsynchronizuje.
+  // Wpisy cache GitHub/Skanuj (source: "ghcache") są celowo POMIJANE — to tylko doraźny,
+  // ulotny cache przeglądarki, nie część panelu do dystrybucji; ich dołączenie tylko
+  // bezużytecznie napęczniałoby zapisywany plik cudzym, tymczasowym kodem.
+  let seed = clone.querySelector('#idb-seed');
+  if (!seed){
+    seed = document.createElement('script');
+    seed.setAttribute('type', 'text/plain');
+    seed.id = 'idb-seed';
+    clone.querySelector('body').appendChild(seed);
+  }
+  seed.textContent = JSON.stringify(idbApps.filter(a => a.source !== 'ghcache'));
+
+  const html = '<!DOCTYPE html>\n' + clone.outerHTML;
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Panel_Narzedzi_Fleet_Docs_Suite.html';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+  // Wszystko, co było dopiero w sesji, trafiło właśnie do HTML — aktualizujemy zrzuty,
+  // żeby zielone podświetlenie „niezapisane” zniknęło z listy (aż do kolejnych zmian).
+  SAVED_NAV_IDS = new Set(NAV.map(a => a.id));
+  SAVED_GH_IDS = new Set(GH_LIST.map(a => a.id));
+  SAVED_IDB_IDS = new Set(idbApps.filter(a => a.source !== 'ghcache').map(a => a.id));
+  renderNav(searchBox.value);
+
+  showToast('Zapisano panel z ' + countForSource() + ' aplikacjami w bieżącym źródle (plik do pobrania).');
+}
+
+// ============ WYBÓR IKONY APLIKACJI (tryb edycji) ============
+const iconModal = document.getElementById('iconModal');
+const iconGrid = document.getElementById('iconGrid');
+// Siatka ikon budowana jest DOPiero przy otwarciu modala i opróżniana przy zamknięciu.
+// Na starcie żywy DOM nie zawiera więc 25 przycisków z SVG — a to one (obok elementów
+// środowiska) trafiały wcześniej do pliku zapisywanego z poziomu zewnętrznego edytora.
+let iconGridBuilt = false;
+function ensureIconGrid(){
+  if (iconGridBuilt) return;
+  iconGridBuilt = true;
+  Object.keys(APP_ICONS).forEach(key => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'icon-opt'; b.dataset.iconKey = key;
+    b.innerHTML = APP_ICONS[key];
+    b.onclick = () => applyIcon(key);
+    iconGrid.appendChild(b);
+  });
+}
+let iconPickerTarget = null;
+let iconPickerPersist = null;
+// target: obiekt aplikacji/grupy (mutowany bezpośrednio — dla NAV/GH_LIST to prawdziwa referencja,
+// dla aplikacji zaimportowanych (IDB) trzeba przekazać rzeczywisty wpis z idbApps).
+// persistFn: opcjonalna funkcja wywoływana po zmianie (np. zapis do IndexedDB dla aplikacji lokalnych).
+function openIconPicker(target, persistFn){
+  ensureIconGrid();
+  iconPickerTarget = target;
+  iconPickerPersist = persistFn || null;
+  iconGrid.querySelectorAll('.icon-opt').forEach(b => b.classList.toggle('selected', b.dataset.iconKey === target.icon));
+  iconModal.classList.add('open');
+}
+function closeIconPicker(){
+  iconModal.classList.remove('open');
+  iconPickerTarget = null; iconPickerPersist = null;
+  iconGrid.innerHTML = ''; // żywy DOM wraca do stanu „pusty div” jak w oryginalnym pliku
+  iconGridBuilt = false;
+}
+function applyIcon(icon){
+  if (!iconPickerTarget) return;
+  if (icon) iconPickerTarget.icon = icon; else delete iconPickerTarget.icon;
+  const persist = iconPickerPersist, target = iconPickerTarget;
+  closeIconPicker();
+  if (persist) persist(target);
+  renderNav(searchBox.value);
+  showToast(icon ? 'Zmieniono ikonę' : 'Przywrócono domyślną ikonę');
+}
+document.getElementById('iconModalClose').addEventListener('click', closeIconPicker);
+document.getElementById('iconResetBtn').addEventListener('click', () => applyIcon(''));
+iconModal.addEventListener('click', (e) => { if (e.target === iconModal) closeIconPicker(); });
+
+renderNav('');
+loadIdbApps();
+loadGhListFromIDB();
+
+// Nudge mobile browsers (Chrome/Safari) to collapse their own address/search bar.
+// Our layout uses fixed positioning with no real page scroll, so without this
+// the browser never receives the scroll signal it needs to hide its toolbar.
+function nudgeScrollForToolbar(){
+  if (window.scrollY < 2) window.scrollTo(0, 1);
+}
+window.addEventListener('load', nudgeScrollForToolbar);
+window.addEventListener('orientationchange', () => setTimeout(nudgeScrollForToolbar, 250));
+setTimeout(nudgeScrollForToolbar, 300);
+
+(function(){
+  let scrollOwner = null;
+  function findScrollOwner(node){
+    while(node && node !== document.documentElement){
+      const s = window.getComputedStyle(node);
+      if((s.overflowY === 'auto' || s.overflowY === 'scroll') && node.scrollHeight > node.clientHeight + 1) return node;
+      node = node.parentElement;
+    }
+    return null;
+  }
+  document.addEventListener('touchstart', e => { scrollOwner = findScrollOwner(e.target); }, {passive:true});
+  document.addEventListener('touchend', () => { scrollOwner = null; }, {passive:true});
+  document.addEventListener('touchcancel', () => { scrollOwner = null; }, {passive:true});
+  document.addEventListener('touchmove', e => {
+    // Obliczamy właściciela scrolla tylko raz na początek gestu, nie przy każdym ruchu.
+    if (!scrollOwner) e.preventDefault();
+  }, {passive:false});
+})();
+
+document.addEventListener('visibilitychange', () => {
+  document.documentElement.classList.toggle('page-hidden', document.hidden);
+});
+
+// PWA: rejestracja lokalnego service workera jest bezpieczna tylko na HTTPS
+// (w tym na localhost); po instalacji panel uruchamia się bez paska Chrome.
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js', {scope: './', updateViaCache: 'none'}).catch(() => {}));
+}
+
+// Diagnostyka runtime: nie przechwytuje błędów narzędzi w sandboxie, ale pokazuje
+// błędy samego panelu zamiast pozostawiać użytkownika z cichym uszkodzeniem UI.
+window.addEventListener('error', (event) => {
+  console.error('Fleet Panel error:', event.error || event.message);
+  if (typeof showToast === 'function') showToast('Wystąpił błąd panelu — sprawdź konsolę przeglądarki', true);
+});
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Fleet Panel unhandled rejection:', event.reason);
+  if (typeof showToast === 'function') showToast('Nieoczekiwany błąd operacji panelu', true);
+});
+</script>
+
+
+</body></html>
