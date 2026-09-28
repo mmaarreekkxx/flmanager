@@ -2094,29 +2094,20 @@ document.getElementById('reloadBtn').onclick = () => {
 };
 function openInBrowser(url){
   if (!url) return;
+  // Zachowujemy pierwotne zachowanie: nowa karta jest otwierana przez
+  // standardowy mechanizm przeglądarki. Nie używamy intent:// ani
+  // googlechrome://, ponieważ Android może wtedy przejąć adres przez PWA.
   try {
-    const u = new URL(url, location.href);
-    const isAndroid = /Android/i.test(navigator.userAgent);
-    const isStandalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
-    if (isAndroid && u.protocol === 'https:' && isStandalone) {
-      // W PWA zwykłe _blank może zostać przejęte przez tę samą aplikację.
-      // googlechrome:// kieruje adres do pełnego Chrome; intent jest fallbackiem.
-      const chromeUrl = 'googlechrome://navigate?url=' + encodeURIComponent(u.href);
-      const intentUrl = 'intent://' + u.host + u.pathname + u.search + u.hash +
-        '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' +
-        encodeURIComponent(u.href) + ';end';
-      let fallbackTimer = setTimeout(() => { window.location.href = intentUrl; }, 700);
-      const cancelFallback = () => { clearTimeout(fallbackTimer); };
-      window.addEventListener('pagehide', cancelFallback, {once:true});
-      window.location.href = chromeUrl;
-      return;
-    }
     const a = document.createElement('a');
-    a.href = u.href; a.target = '_blank'; a.rel = 'noopener noreferrer';
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
     a.style.display = 'none';
-    document.body.appendChild(a); a.click(); a.remove();
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   } catch(e) {
-    window.open(url, '_blank', 'noopener,noreferrer');
+    window.open(url, '_blank');
   }
 }
 document.getElementById('newTabBtn').onclick = () => {
