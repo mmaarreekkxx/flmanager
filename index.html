@@ -8,8 +8,8 @@
 <meta name="theme-color" content="#07090B">
 <meta name="description" content="Fleet & Docs Suite — szybki, izolowany panel narzędzi i dokumentów.">
 <link rel="dns-prefetch" href="https://api.github.com">
-<link rel="manifest" href="./manifest.webmanifest">
-<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
 <title>PANEL NARZĘDZI · Fleet &amp; Docs Suite</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
@@ -933,6 +933,7 @@ body.theme-light body.edit-mode .sidebar-footer{background:linear-gradient(180de
             <button class="manage-item" id="editModeBtn" type="button" aria-pressed="false"><svg viewBox="0 0 16 16" fill="none"><path d="M9.2 3.2 12.8 6.8 5.6 14H2v-3.6z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"></path><path d="M8 4.4 11.6 8" stroke="currentColor" stroke-width="1.2"></path></svg><span id="editModeLabel">Tryb edycji</span><span class="m-state" id="editModeState">off</span></button>
             <div class="manage-sep"></div>
             <div class="manage-toggle-row" title="Dotyczy zakładek „GitHub” i „Skanuj”. Pierwsze otwarcie apki zapisuje jej kod w IndexedDB — kolejne otwarcia są błyskawiczne i działają nawet bez internetu. „Przeładuj” zawsze wymusza świeże pobranie z sieci."><span>Cache GitHub/Skanuj (offline)</span><label class="switch"><input type="checkbox" id="swCacheGh" checked=""><span class="switch-track"></span><span class="switch-thumb"></span></label></div>
+            <button class="manage-item" id="clearGithubCacheBtn" type="button" title="Usuń zapisane kopie aplikacji GitHub z pamięci tej przeglądarki"><svg viewBox="0 0 16 16" fill="none"><path d="M3 4.5h10M6 4.5V3h4v1.5M5 4.5l.6 8.5h4.8l.6-8.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 6.5v4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Wyczyść cache GitHub</button>
 
           </div>
         </div>
@@ -2091,12 +2092,33 @@ document.getElementById('reloadBtn').onclick = () => {
   if ((dataSource === 'github' || dataSource === 'scan') && currentToolFile) invalidateGithubCache(currentToolFile);
   loadTool(activeId, activeLabel, crumb.textContent, currentToolItem);
 };
+function openInBrowser(url){
+  if (!url) return;
+  try {
+    const u = new URL(url, location.href);
+    // W Androidzie link do tego samego zakresu /flmanager/ bywa ponownie
+    // otwierany w oknie PWA. Intent kieruje go do zwykłego Chrome.
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    if (isAndroid && u.protocol === 'https:') {
+      const intent = 'intent://' + u.host + u.pathname + u.search + u.hash +
+        '#Intent;scheme=https;package=com.android.chrome;end';
+      window.location.href = intent;
+      return;
+    }
+    const a = document.createElement('a');
+    a.href = u.href; a.target = '_blank'; a.rel = 'noopener noreferrer';
+    a.style.display = 'none';
+    document.body.appendChild(a); a.click(); a.remove();
+  } catch(e) {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
+}
 document.getElementById('newTabBtn').onclick = () => {
   feedbackClick();
   if (dataSource === 'local') {
-    if (currentBlobUrl) window.open(currentBlobUrl, '_blank');
+    if (currentBlobUrl) openInBrowser(currentBlobUrl);
   } else {
-    if (currentRemoteUrl) window.open(currentRemoteUrl, '_blank');
+    if (currentRemoteUrl) openInBrowser(currentRemoteUrl);
   }
 };
 document.getElementById('downloadBtn').onclick = async () => {
@@ -2196,6 +2218,35 @@ swCacheGh.addEventListener('change', () => {
   localStorage.setItem(CACHE_GH_KEY, swCacheGh.checked ? '1' : '0');
 });
 function isGithubCacheEnabled(){ return localStorage.getItem(CACHE_GH_KEY) !== '0'; }
+async function clearGithubCache(){
+  const cached = idbApps.filter(app => app.source === 'ghcache');
+  if (!cached.length){ showToast('Cache GitHub jest już pusty'); return; }
+  if (!confirm('Usunąć ' + cached.length + ' zapisanych kopii aplikacji GitHub z tej przeglądarki?\nLista aplikacji pozostanie bez zmian.')) return;
+  try {
+    const db = await openIDB();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, 'readwrite');
+      const store = tx.objectStore(IDB_STORE);
+      cached.forEach(app => store.delete(app.id));
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error || new Error('IndexedDB transaction aborted'));
+    });
+    idbApps = idbApps.filter(app => app.source !== 'ghcache');
+    renderNav(searchBox.value);
+    updateCountDisplay();
+    showToast('Wyczyszczono cache GitHub (' + cached.length + ' kopii)');
+  } catch (e) {
+    console.error('Nie udało się wyczyścić cache GitHub:', e);
+    showToast('Nie udało się wyczyścić cache GitHub', true);
+  }
+}
+const clearGithubCacheBtn = document.getElementById('clearGithubCacheBtn');
+if (clearGithubCacheBtn) clearGithubCacheBtn.addEventListener('click', () => {
+  manageWrap.classList.remove('open');
+  feedbackClick();
+  clearGithubCache();
+});
 
 // ---- wyszukiwarka: przełączana LUPKĄ w nagłówku szyny (obok przycisku chowania) ----
 // Przełącznik „Pokaż wyszukiwarkę” z menu „Zarządzaj” został usunięty — pasek wyszukiwania
@@ -2900,7 +2951,7 @@ document.addEventListener('visibilitychange', () => {
 // PWA: rejestracja lokalnego service workera jest bezpieczna tylko na HTTPS
 // (w tym na localhost); po instalacji panel uruchamia się bez paska Chrome.
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js', {scope: './', updateViaCache: 'none'}).catch(() => {}));
+  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js', {scope: '/', updateViaCache: 'none'}).catch(() => {}));
 }
 
 // Diagnostyka runtime: nie przechwytuje błędów narzędzi w sandboxie, ale pokazuje
