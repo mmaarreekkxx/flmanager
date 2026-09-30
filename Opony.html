@@ -183,7 +183,21 @@ body {
 .header-right {
     display: flex;
     gap: 8px;
-    align-items: flex-start;
+    align-items: center;
+}
+
+/* Equal-height top toolbar controls, kept at the buttons' original compact size */
+.season-switcher .season-btn,
+.header-right > .btn,
+.header-right > .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 28px;
+    min-height: 28px;
+    padding: 4px 14px;
+    box-sizing: border-box;
 }
 
 .theme-toggle {
@@ -213,7 +227,36 @@ body {
                 inset -3px -3px 6px var(--shadow-inset-light);
 }
 
-.theme-icon { font-size: 16px; }
+.toolbar-icon,
+.theme-icon svg {
+    display: block;
+    width: 12px;
+    height: 12px;
+    flex: 0 0 12px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.theme-icon {
+    display: inline-flex;
+    width: 12px;
+    height: 12px;
+    flex: 0 0 12px;
+    color: var(--active-color);
+}
+
+#btnZima .toolbar-icon { color: #2563eb; }
+#btnLato .toolbar-icon { color: #d97706; }
+#showHistory .toolbar-icon { color: var(--active-color); }
+#showBackup .toolbar-icon { color: #059669; }
+
+.theme-icon .icon-moon { display: none; }
+[data-theme="dark"] .theme-icon .icon-sun { display: none; }
+[data-theme="dark"] .theme-icon .icon-moon { display: block; }
+
 .theme-label {
     font-size: 8px;
     font-weight: 700;
@@ -221,6 +264,32 @@ body {
     color: var(--text-secondary);
     letter-spacing: .5px;
 }
+
+.icon-holder {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+}
+.ui-icon {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vertical-align: -3px;
+    flex: 0 0 auto;
+}
+.ui-icon-sm { width: 8px; height: 8px; }
+.ui-icon-md { width: 12px; height: 12px; }
+.ui-icon-xl { width: 24px; height: 24px; }
+.empty-icon .ui-icon-xl { fill: currentColor; stroke: none; filter: drop-shadow(3px 3px 6px var(--shadow-dark)) drop-shadow(-3px -3px 6px var(--shadow-light)); }
+.chevron .ui-icon { width: 8px; height: 8px; vertical-align: middle; }
+.modal-close .ui-icon, .alert-close .ui-icon { width: 12px; height: 12px; vertical-align: middle; }
+.action-btns button .ui-icon { width: 10px; height: 10px; vertical-align: middle; }
+
 
 .content {
     flex: 1;
@@ -383,7 +452,7 @@ body {
 .filter button:focus,
 .filter input[type="text"]:focus {
     outline: none;
-    color: var(--active-color);
+    color: var(--text-secondary);
 }
 
 .btn:disabled {
@@ -1456,6 +1525,60 @@ tbody tr:hover { background: var(--shadow-inset-light); }
     .season-switcher { justify-content: center; }
     .season-btn { font-size: 10px; padding: 7px 14px; }
 }
+    
+
+/* Prevent browser tap/selection tint on interactive controls. */
+button,
+.btn,
+.season-btn,
+.theme-toggle,
+.filter select,
+.radio label,
+.panel-head,
+.modal-close,
+.alert-close,
+.action-btns button,
+.dt-button,
+.dropdown-item {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+button:focus,
+.btn:focus,
+.season-btn:focus,
+.theme-toggle:focus {
+    outline: none;
+}
+
+button:focus-visible,
+.btn:focus-visible,
+.season-btn:focus-visible,
+.theme-toggle:focus-visible {
+    outline: 2px solid var(--text-tertiary);
+    outline-offset: 2px;
+}
+
+/* Touch devices can keep :hover styles after a tap; keep that feedback neutral. */
+@media (hover: none) {
+    .btn:hover:not(:disabled):not(#clear):not(.delete):not(.success):not(.danger):not(.warning),
+    .filter select:hover,
+    .filter button:hover:not(.active),
+    .filter input[type="text"]:hover,
+    .radio label:hover,
+    .season-btn:hover:not(.cennik-active),
+    .action-btns button:hover:not(.delete),
+    .dropdown-item label:hover,
+    .panel-head:hover h3 {
+        color: var(--text-secondary);
+    }
+
+    .dt-button:hover {
+        color: var(--text-secondary) !important;
+    }
+}
+
     </style>
 </head>
 <body data-theme="light">
@@ -1465,15 +1588,16 @@ tbody tr:hover { background: var(--shadow-inset-light); }
                 <h1>Przegląd opon</h1>
                 <p>Importuj i analizuj pliki Excel/CSV z rozszerzonymi funkcjami</p>
             </div>
+            <!-- Lucide icons, ISC License -->
             <div class="season-switcher">
-                <button class="season-btn" id="btnZima" onclick="switchCennik('zima')">❄ ZIMA</button>
-                <button class="season-btn" id="btnLato" onclick="switchCennik('lato')">☀ LATO</button>
+                <button class="season-btn" id="btnZima" onclick="switchCennik('zima')"><svg class="toolbar-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m10 20-1.25-2.5L6 18"/><path d="M10 4 8.75 6.5 6 6"/><path d="m14 20 1.25-2.5L18 18"/><path d="m14 4 1.25 2.5L18 6"/><path d="m17 21-3-6h-4"/><path d="m17 3-3 6 1.5 3"/><path d="M2 12h6.5L10 9"/><path d="m20 10-1.5 2 1.5 2"/><path d="M22 12h-6.5L14 15"/><path d="m4 10 1.5 2L4 14"/><path d="m7 21 3-6-1.5-3"/><path d="m7 3 3 6h4"/></svg><span>ZIMA</span></button>
+                <button class="season-btn" id="btnLato" onclick="switchCennik('lato')"><svg class="toolbar-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg><span>LATO</span></button>
             </div>
             <div class="header-right">
-                <button id="showHistory" class="btn neu-raised" title="Historia importów">📜</button>
-                <button id="showBackup" class="btn neu-raised" title="Backup & Restore">💾</button>
+                <button id="showHistory" class="btn neu-raised" title="Historia importów" aria-label="Historia importów"><svg class="toolbar-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></button>
+                <button id="showBackup" class="btn neu-raised" title="Backup & Restore" aria-label="Backup i przywracanie"><svg class="toolbar-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg></button>
                 <div class="theme-toggle" id="themeToggle">
-                    <span class="theme-icon" id="themeIcon">☀️</span>
+                    <span class="theme-icon" id="themeIcon" aria-hidden="true"><svg class="icon-sun" viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg><svg class="icon-moon" viewBox="0 0 24 24" focusable="false"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg></span>
                     <span class="theme-label" id="themeLabel">Jasny</span>
                 </div>
             </div>
@@ -1488,7 +1612,7 @@ tbody tr:hover { background: var(--shadow-inset-light); }
                     <button id="showColsInfo" class="btn neu-raised" title="Wymagane kolumny w pliku Excel">ℹ Kolumny</button>
                 </div>
                 <div class="upload neu-inset">
-                    <label for="fileInput" class="btn neu-raised">⬆ Wybierz plik</label>
+                    <label for="fileInput" class="btn neu-raised"><span class="icon-holder" data-icon="upload" aria-hidden="true"></span> Wybierz plik</label>
                     <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
                     <span id="fileName">Nie wybrano pliku</span>
                 </div>
@@ -1499,23 +1623,23 @@ tbody tr:hover { background: var(--shadow-inset-light); }
             <div class="section">
                 <div class="panel-head" id="priceToggle">
                     <h3 class="title" style="margin: 0;">Cennik opon <span id="missingBadge" class="missing-badge hide"></span></h3>
-                    <span class="chevron">▼</span>
+                    <span class="chevron" data-icon="chevronDown" aria-hidden="true"></span>
                 </div>
                 <div class="panel-content hide">
                     <div class="catalog-bar">
                         <select id="catalogSelect" class="catalog-select"></select>
-                        <button id="cloneCatalog" class="btn neu-raised" title="Klonuj jako nowy cennik">📋 Klonuj</button>
-                        <button id="newFromExcel" class="btn success neu-raised" title="Importuj Excel jako nowy cennik">📥 Nowy z Excel</button>
+                        <button id="cloneCatalog" class="btn neu-raised" title="Klonuj jako nowy cennik"><span class="icon-holder" data-icon="clipboardCopy" aria-hidden="true"></span> Klonuj</button>
+                        <button id="newFromExcel" class="btn success neu-raised" title="Importuj Excel jako nowy cennik"><span class="icon-holder" data-icon="fileUp" aria-hidden="true"></span> Nowy z Excel</button>
                         <input type="file" id="newFromExcelInput" accept=".xlsx,.xls" style="display:none;">
-                        <button id="deleteCatalog" class="btn danger neu-raised" title="Usuń cennik">🗑</button>
+                        <button id="deleteCatalog" class="btn danger neu-raised" title="Usuń cennik" aria-label="Usuń cennik"><span class="icon-holder" data-icon="trash" aria-hidden="true"></span></button>
                     </div>
                     <div class="export" style="margin-bottom: 10px;">
-                        <button id="addPrice" class="btn success neu-raised">➕ Dodaj</button>
-                        <button id="exportPrices" class="btn neu-raised">📊 Eksport Excel</button>
-                        <button id="importPrices" class="btn neu-raised">📥 Zastąp z Excel</button>
+                        <button id="addPrice" class="btn success neu-raised"><span class="icon-holder" data-icon="plus" aria-hidden="true"></span> Dodaj</button>
+                        <button id="exportPrices" class="btn neu-raised"><span class="icon-holder" data-icon="fileSpreadsheet" aria-hidden="true"></span> Eksport Excel</button>
+                        <button id="importPrices" class="btn neu-raised"><span class="icon-holder" data-icon="fileUp" aria-hidden="true"></span> Zastąp z Excel</button>
                         <input type="file" id="priceFileInput" accept=".xlsx,.xls" style="display:none;">
-                        <button id="resetPrices" class="btn danger neu-raised">🔄 Reset</button>
-                        <button id="showMissing" class="btn warning neu-raised">⚠️ Brakujące</button>
+                        <button id="resetPrices" class="btn danger neu-raised"><span class="icon-holder" data-icon="refreshCw" aria-hidden="true"></span> Reset</button>
+                        <button id="showMissing" class="btn warning neu-raised"><span class="icon-holder" data-icon="triangleAlert" aria-hidden="true"></span> Brakujące</button>
                     </div>
                     <div class="table-wrap neu-inset">
                         <table id="priceTable" class="compact">
@@ -1540,7 +1664,7 @@ tbody tr:hover { background: var(--shadow-inset-light); }
                 <div class="title">Filtry</div>
                 <div class="filters">
                     <div class="filter">
-                        <label>🔍 Szybkie wyszukiwanie</label>
+                        <label><span class="icon-holder" data-icon="search" aria-hidden="true"></span> Szybkie wyszukiwanie</label>
                         <input type="text" id="quickSearch" placeholder="Numer rej" class="neu-raised">
                     </div>
                     <div class="filter">
@@ -1618,7 +1742,7 @@ tbody tr:hover { background: var(--shadow-inset-light); }
                 <div id="sizeBox" class="section hide">
                     <div class="panel-head" id="sizeToggle">
                         <h3>Podsumowanie rozmiaru</h3>
-                        <span class="chevron on">▼</span>
+                        <span class="chevron on" data-icon="chevronDown" aria-hidden="true"></span>
                     </div>
                     <div class="panel-content">
                         <div class="table-wrap neu-inset">
@@ -1632,7 +1756,7 @@ tbody tr:hover { background: var(--shadow-inset-light); }
                 <div id="detailBox" class="section hide">
                     <div class="panel-head" id="detailToggle">
                         <h3>Podsumowanie szczegółowe</h3>
-                        <span class="chevron on">▼</span>
+                        <span class="chevron on" data-icon="chevronDown" aria-hidden="true"></span>
                     </div>
                     <div class="panel-content">
                         <div class="controls">
@@ -1660,7 +1784,7 @@ tbody tr:hover { background: var(--shadow-inset-light); }
             <div class="section">
                 <div class="panel-head" id="dataToggle">
                     <h3 class="title" style="margin: 0;">Dane</h3>
-                    <span class="chevron on">▼</span>
+                    <span class="chevron on" data-icon="chevronDown" aria-hidden="true"></span>
                 </div>
                 <div class="panel-content">
                     <div id="loading" class="loading hide">
@@ -1668,7 +1792,7 @@ tbody tr:hover { background: var(--shadow-inset-light); }
                         <p style="margin-top: 15px; color: var(--text-tertiary); font-size: 8px;">Ładowanie...</p>
                     </div>
                     <div id="empty" class="empty">
-                        <div class="empty-icon">⬇</div>
+                        <div class="empty-icon" data-icon="emptyArrow" data-icon-size="48" aria-hidden="true"></div>
                         <p class="empty-title">BRAK DANYCH</p>
                         <p class="empty-text">Zaimportuj plik Excel/CSV</p>
                     </div>
@@ -1688,7 +1812,7 @@ tbody tr:hover { background: var(--shadow-inset-light); }
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modalTitle">Dodaj cenę opony</h3>
-                <button class="modal-close" id="closeModal">×</button>
+                <button class="modal-close" aria-label="Zamknij" id="closeModal"><span class="icon-holder" data-icon="x" data-icon-size="16" aria-hidden="true"></span></button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
@@ -1718,8 +1842,8 @@ tbody tr:hover { background: var(--shadow-inset-light); }
     <div id="historyModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>📜 Historia importów</h3>
-                <button class="modal-close" onclick="$('#historyModal').removeClass('on')">×</button>
+                <h3><span class="icon-holder" data-icon="clockArrowUp" aria-hidden="true"></span> Historia importów</h3>
+                <button class="modal-close" aria-label="Zamknij" onclick="$('#historyModal').removeClass('on')"><span class="icon-holder" data-icon="x" data-icon-size="16" aria-hidden="true"></span></button>
             </div>
             <div class="modal-body" id="historyList"></div>
         </div>
@@ -1728,14 +1852,14 @@ tbody tr:hover { background: var(--shadow-inset-light); }
     <div id="missingModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>⚠️ Brakujące opony w cenniku</h3>
-                <button class="modal-close" onclick="$('#missingModal').removeClass('on')">×</button>
+                <h3><span class="icon-holder" data-icon="triangleAlert" aria-hidden="true"></span> Brakujące opony w cenniku</h3>
+                <button class="modal-close" aria-label="Zamknij" onclick="$('#missingModal').removeClass('on')"><span class="icon-holder" data-icon="x" data-icon-size="16" aria-hidden="true"></span></button>
             </div>
             <div class="modal-body">
                 <div id="missingList"></div>
             </div>
             <div class="modal-footer">
-                <button class="btn success neu-raised" id="exportMissing">📊 Eksportuj listę</button>
+                <button class="btn success neu-raised" id="exportMissing"><span class="icon-holder" data-icon="fileSpreadsheet" aria-hidden="true"></span> Eksportuj listę</button>
                 <button class="btn neu-raised" onclick="$('#missingModal').removeClass('on')">Zamknij</button>
             </div>
         </div>
@@ -1744,19 +1868,19 @@ tbody tr:hover { background: var(--shadow-inset-light); }
     <div id="backupModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>💾 Backup & Restore</h3>
-                <button class="modal-close" onclick="$('#backupModal').removeClass('on')">×</button>
+                <h3><span class="icon-holder" data-icon="save" aria-hidden="true"></span> Backup &amp; Restore</h3>
+                <button class="modal-close" aria-label="Zamknij" onclick="$('#backupModal').removeClass('on')"><span class="icon-holder" data-icon="x" data-icon-size="16" aria-hidden="true"></span></button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
                     <label>Eksportuj całą konfigurację (cennik + historie)</label>
-                    <button class="btn success neu-raised" id="exportBackup">💾 Eksportuj backup</button>
+                    <button class="btn success neu-raised" id="exportBackup"><span class="icon-holder" data-icon="save" aria-hidden="true"></span> Eksportuj backup</button>
                 </div>
                 <div class="divider"></div>
                 <div class="form-group">
                     <label>Importuj backup</label>
                     <input type="file" id="backupFileInput" accept=".json" style="display:none;">
-                    <button class="btn neu-raised" id="importBackup">📥 Importuj backup</button>
+                    <button class="btn neu-raised" id="importBackup"><span class="icon-holder" data-icon="fileUp" aria-hidden="true"></span> Importuj backup</button>
                 </div>
             </div>
         </div>
@@ -1765,8 +1889,8 @@ tbody tr:hover { background: var(--shadow-inset-light); }
     <div id="colsModal" class="modal">
         <div class="modal-content" style="max-width:700px;">
             <div class="modal-header">
-                <h3>ℹ Wymagane kolumny w pliku Excel</h3>
-                <button class="modal-close" onclick="$('#colsModal').removeClass('on')">×</button>
+                <h3><span class="icon-holder" data-icon="info" aria-hidden="true"></span> Wymagane kolumny w pliku Excel</h3>
+                <button class="modal-close" aria-label="Zamknij" onclick="$('#colsModal').removeClass('on')"><span class="icon-holder" data-icon="x" data-icon-size="16" aria-hidden="true"></span></button>
             </div>
             <div class="modal-body">
 
@@ -1776,7 +1900,7 @@ tbody tr:hover { background: var(--shadow-inset-light); }
                 </p>
 
                 <p style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--title-color);letter-spacing:1px;margin-bottom:8px;">
-                    📄 Plik danych (główny import)
+                    <span class="icon-holder" data-icon="fileText" aria-hidden="true"></span> Plik danych (główny import)
                 </p>
 
                 <div class="table-wrap neu-inset" style="margin-bottom:18px;">
@@ -1791,10 +1915,10 @@ tbody tr:hover { background: var(--shadow-inset-light); }
                         </thead>
                         <tbody>
                             <tr>
-                                <td><strong>Rozmiar opony</strong> <span style="color:#dc2626;font-weight:700;" title="Kluczowa — uruchamia wyliczanie cen">★</span></td>
+                                <td><strong>Rozmiar opony</strong> <span style="color:#dc2626;font-weight:700;" title="Kluczowa — uruchamia wyliczanie cen"><span class="icon-holder" data-icon="star" data-icon-size="12" aria-hidden="true"></span></span></td>
                                 <td><code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">rozmiar</code> lub <code style="font-family:'Roboto Mono',monospace;font-size:8px;background:var(--header-bg);padding:2px 5px;border-radius:3px;">size</code></td>
                                 <td class="note">Rozmiar, Size</td>
-                                <td class="note">Kluczowa ★ — aktywuje wycenę z cennika</td>
+                                <td class="note">Kluczowa <span class="icon-holder" data-icon="star" data-icon-size="12" aria-hidden="true"></span> — aktywuje wycenę z cennika</td>
                             </tr>
                             <tr>
                                 <td>Nr rejestracyjny</td>
@@ -1879,11 +2003,11 @@ tbody tr:hover { background: var(--shadow-inset-light); }
                 </div>
 
                 <p style="font-size:8px;color:var(--text-muted);margin-bottom:14px;">
-                    <span style="color:#dc2626;font-weight:700;">★</span> Kolumna <strong>Rozmiar</strong> jest kluczowa — jej obecność aktywuje automatyczne pobieranie cen z cennika i obliczanie wartości zamówienia. Pozostałe kolumny są opcjonalne.
+                    <span style="color:#dc2626;font-weight:700;"><span class="icon-holder" data-icon="star" data-icon-size="12" aria-hidden="true"></span></span> Kolumna <strong>Rozmiar</strong> jest kluczowa — jej obecność aktywuje automatyczne pobieranie cen z cennika i obliczanie wartości zamówienia. Pozostałe kolumny są opcjonalne.
                 </p>
 
                 <p style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--title-color);letter-spacing:1px;margin-bottom:8px;">
-                    📊 Plik cennika (Import Excel w sekcji Cennik) — stała kolejność kolumn
+                    <span class="icon-holder" data-icon="fileSpreadsheet" aria-hidden="true"></span> Plik cennika (Import Excel w sekcji Cennik) — stała kolejność kolumn
                 </p>
 
                 <div class="table-wrap neu-inset">
@@ -1904,7 +2028,7 @@ tbody tr:hover { background: var(--shadow-inset-light); }
                     </table>
                 </div>
                 <p style="font-size:8px;color:var(--text-muted);margin-top:8px;">
-                    ⚠ W pliku cennika kolejność kolumn <strong>ma znaczenie</strong> — nagłówki są ignorowane, dane czytane są po pozycji.
+                    <span class="icon-holder" data-icon="triangleAlert" aria-hidden="true"></span> W pliku cennika kolejność kolumn <strong>ma znaczenie</strong> — nagłówki są ignorowane, dane czytane są po pozycji.
                 </p>
 
             </div>
@@ -1915,6 +2039,48 @@ tbody tr:hover { background: var(--shadow-inset-light); }
     </div>
 
 <script>
+// Inline Lucide SVG path registry (ISC License); all icons stay local and dependency-free.
+const ICON_PATHS = {
+ upload: '<path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>',
+ chevronDown: '<path d="m6 9 6 6 6-6"/>',
+ clipboardCopy: '<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><path d="M16 4h2a2 2 0 0 1 2 2v4"/><path d="M21 14H11"/><path d="m15 10-4 4 4 4"/>',
+ fileUp: '<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M12 12v6"/><path d="m15 15-3-3-3 3"/>',
+ trash: '<path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+ plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
+ chartBars: '<path d="M5 21v-6"/><path d="M12 21V9"/><path d="M19 21V3"/>',
+ refreshCw: '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
+ triangleAlert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+ search: '<path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/>',
+ arrowDown: '<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>',
+ emptyArrow: '<path d="M9 2h6v10h6L12 22 3 12h6z"/>',
+ x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+ clockArrowUp: '<path d="M12 6v6l1.56.78"/><path d="M13.227 21.925a10 10 0 1 1 8.767-9.588"/><path d="m14 18 4-4 4 4"/><path d="M18 22v-8"/>',
+ save: '<path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/>',
+ fileText: '<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+ star: '<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>',
+ folderOpen: '<path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/>',
+ pencil: '<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/>',
+ circleCheck: '<circle cx="12" cy="12" r="10"/><path d="m16 9-5.5 5.5L8 12"/>',
+ fileSpreadsheet: '<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M8 13h2"/><path d="M14 13h2"/><path d="M8 17h2"/><path d="M14 17h2"/>',
+ fileType: '<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M11 18h2"/><path d="M12 12v6"/><path d="M9 13v-.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v.5"/>',
+ carFront: '<path d="m21 8-2 2-1.5-3.7A2 2 0 0 0 15.646 5H8.4a2 2 0 0 0-1.903 1.257L5 10 3 8"/><path d="M7 14h.01"/><path d="M17 14h.01"/><rect width="18" height="8" x="3" y="10" rx="2"/><path d="M5 18v2"/><path d="M19 18v2"/>',
+ wrench: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"/>',
+ banknote: '<rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>',
+ userRound: '<circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/>',
+ mapPin: '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+ info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+ snowflake: '<path d="m10 20-1.25-2.5L6 18"/><path d="M10 4 8.75 6.5 6 6"/><path d="m14 20 1.25-2.5L18 18"/><path d="m14 4 1.25 2.5L18 6"/><path d="m17 21-3-6h-4"/><path d="m17 3-3 6 1.5 3"/><path d="M2 12h6.5L10 9"/><path d="m20 10-1.5 2 1.5 2"/><path d="M22 12h-6.5L14 15"/><path d="m4 10 1.5 2L4 14"/><path d="m7 21 3-6-1.5-3"/><path d="m7 3 3 6h4"/>',
+ sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>'
+};
+const iconSvg = (name, size = 14) => {
+    const paths = ICON_PATHS[name];
+    if (!paths) return '';
+    const sizeClass = size >= 40 ? ' ui-icon-xl' : size >= 16 ? ' ui-icon-md' : size <= 12 ? ' ui-icon-sm' : '';
+    return `<svg class="ui-icon${sizeClass}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${paths}</svg>`;
+};
+document.querySelectorAll('[data-icon]').forEach((element) => {
+    element.innerHTML = iconSvg(element.dataset.icon, Number(element.dataset.iconSize) || 14);
+});
 let _dtFilter = null;
 let S = {
     data: [], cols: [], heads: [], spec: {},
@@ -1950,6 +2116,26 @@ const BUILTIN_CATALOGS = {
             '235 55 R20':    { p: 'Bridgestone', b: 'BLIZZAK 6',     n: 905.11 },
             '235 60 R18':    { p: 'Bridgestone', b: 'BLIZZAK 6',     n: 487.38 },
             '245 45 R17':    { p: 'Bridgestone', b: 'BLIZZAK 6',     n: 665.87 },
+        }
+    },
+    'zima-psf-2026': {
+        id: 'zima-psf-2026', name: 'PSF Zima 2026', season: 'zima',
+        prices: {
+            '175 70 R14':    { p: 'Dębica',      b: 'Frigo2',                    n: 170.00 },
+            '185 60 R15':    { p: 'Dębica',       b: 'Frigo2',                    n: 169.00 },
+            '205 55 R16':    { p: 'Dębica',       b: 'Frigo HP2',                 n: 190.00 },
+            '205 55 R17':    { p: 'Dębica',       b: 'Frigo HP2',                 n: 294.00 },
+            '205 60 R16':    { p: 'Dębica',       b: 'Frigo HP2',                 n: 235.00 },
+            '215 55 R17':    { p: 'Dębica',       b: 'Frigo HP2',                 n: 308.00 },
+            '215 60 R17':    { p: 'Dębica',       b: 'Frigo SUV2',                n: 330.00 },
+            '215 60 R18':    { p: 'Semperit',     b: 'SPEED-GRIP 5',              n: 435.00 },
+            '215 65 R16':    { p: 'Kumho',        b: 'WINTERCRAFT WP52+',         n: 260.00 },
+            '215 75 R16C':   { p: 'Kumho',        b: 'PORTRAN WINTER CW51',       n: 384.00 },
+            '225 55 R18':    { p: 'Bridgestone',  b: 'Blizzak 6',                 n: 569.00 },
+            '235 55 R18':    { p: 'Yokohama',     b: 'BLUEARTH WINTER V906 XL',   n: 510.00 },
+            '235 55 R20':    { p: 'Yokohama',     b: 'BLUEARTH WINTER V906 SUV',  n: 700.00 },
+            '235 60 R18':    { p: 'Yokohama',     b: 'BLUEARTH WINTER V905 XL',   n: 440.00 },
+            '245 45 R17':    { p: 'Dunlop',       b: 'WINTER SPORT 5 XL FR',      n: 574.00 },
         }
     },
     'lato-handlopex-2025': {
@@ -2140,11 +2326,9 @@ const setTheme = (theme) => {
     const metaTheme = document.querySelector('meta[name="theme-color"]');
     
     if (theme === 'dark') {
-        $('#themeIcon').text('🌙');
         $('#themeLabel').text('Ciemny');
         if (metaTheme) metaTheme.setAttribute('content', '#2a2a2e');
     } else {
-        $('#themeIcon').text('☀️');
         $('#themeLabel').text('Jasny');
         if (metaTheme) metaTheme.setAttribute('content', '#e0e5ec');
     }
@@ -2215,8 +2399,8 @@ const renderHistory = () => {
                 </div>
             </div>
             <div class="action-btns">
-                <button onclick="loadFromHistory(${h.id})">📂 Wczytaj</button>
-                <button class="delete" onclick="deleteHistory(${h.id})">🗑️</button>
+                <button onclick="loadFromHistory(${h.id})"><span class="icon-holder" data-icon="folderOpen" aria-hidden="true"></span> Wczytaj</button>
+                <button class="delete" onclick="deleteHistory(${h.id})" title="Usuń historię" aria-label="Usuń historię">${iconSvg('trash')}</button>
             </div>
         </div>
     `).join(''));
@@ -2234,7 +2418,7 @@ const showAlert = (message, type = 'warning') => {
     const alert = $(`
         <div id="${id}" class="alert ${type}">
             <span>${message}</span>
-            <button class="alert-close" onclick="$('#${id}').remove()">×</button>
+            <button class="alert-close" aria-label="Zamknij" onclick="$('#${id}').remove()"><span class="icon-holder" data-icon="x" data-icon-size="16" aria-hidden="true"></span></button>
         </div>
     `);
     
@@ -2303,7 +2487,7 @@ const showMissingTires = () => {
                             <td>
                                 <button class="btn success neu-raised" style="font-size: 7px; padding: 4px 8px;" 
                                     onclick="addMissingToPrice('${size.replace(/'/g, "\\'")}')">
-                                    ➕ Dodaj
+                                    ${iconSvg('plus')} Dodaj
                                 </button>
                             </td>
                         </tr>
@@ -2486,8 +2670,8 @@ const renderPriceTable = () => {
             <td><span class="money">${item.n.toFixed(2)}</span></td>
             <td>
                 <div class="action-btns">
-                    <button onclick="editPrice('${key}')">✏️</button>
-                    <button class="delete" onclick="deletePrice('${key}')">🗑️</button>
+                    <button onclick="editPrice('${key}')" title="Edytuj" aria-label="Edytuj">${iconSvg('pencil')}</button>
+                    <button class="delete" onclick="deletePrice('${key}')" title="Usuń" aria-label="Usuń">${iconSvg('trash')}</button>
                 </div>
             </td>
         </tr>`;
@@ -2500,7 +2684,7 @@ const renderPriceTable = () => {
             <td colspan="3" style="color:var(--text-muted);font-style:italic;font-size:8px;">brak w cenniku</td>
             <td>
                 <div class="action-btns">
-                    <button class="missing-add-btn" onclick="addMissingToPrice('${safe}')" title="Dodaj do cennika">➕</button>
+                    <button class="missing-add-btn" onclick="addMissingToPrice('${safe}')" title="Dodaj do cennika" aria-label="Dodaj do cennika">${iconSvg('plus')}</button>
                 </div>
             </td>
         </tr>`;
@@ -2510,7 +2694,7 @@ const renderPriceTable = () => {
 
     // Badge z liczbą brakujących
     if (missing.length > 0) {
-        $('#missingBadge').text(`⚠ ${missing.length} brak`).removeClass('hide');
+        $('#missingBadge').html(`${iconSvg('triangleAlert')} ${missing.length} brak`).removeClass('hide');
         // Auto-otwórz panel jeśli był zamknięty
         const content = $('#priceToggle').next('.panel-content');
         const chevron = $('#priceToggle').find('.chevron');
@@ -2529,16 +2713,22 @@ const renderPriceTable = () => {
 };
 
 const openPriceModal = (key = null) => {
-    const catLabel = getCurrentCatalog()?.name || (activeCennik === 'zima' ? '❄ Zimowy' : '☀ Letni');
+    const catLabel = getCurrentCatalog()?.name || (activeCennik === 'zima' ? 'Zimowy' : 'Letni');
     S.editingKey = key;
+    const setModalTitle = (action) => {
+        const title = $('#modalTitle').empty();
+        title.append(document.createTextNode(`${action} — `));
+        title.append(iconSvg(activeCennik === 'zima' ? 'snowflake' : 'sun'));
+        title.append(document.createTextNode(` ${catLabel}`));
+    };
     if (key) {
-        $('#modalTitle').text(`Edytuj cenę — ${catLabel}`);
+        setModalTitle('Edytuj cenę');
         $('#editSize').val(key).prop('disabled', true);
         $('#editProducer').val(CAT[key].p);
         $('#editTread').val(CAT[key].b);
         $('#editPrice').val(CAT[key].n);
     } else {
-        $('#modalTitle').text(`Dodaj cenę — ${catLabel}`);
+        setModalTitle('Dodaj cenę');
         $('#editSize').val('').prop('disabled', false);
         $('#editProducer').val('');
         $('#editTread').val('');
@@ -2658,7 +2848,7 @@ window.switchCennik = (type) => {
     if (S.data.length > 0) {
         process(null, true);
         const cat = getCurrentCatalog();
-        showAlert(`${type === 'zima' ? '❄️' : '☀️'} Aktywny: ${cat ? cat.name : (type === 'zima' ? 'Zimowy' : 'Letni')}`, 'success');
+        showAlert(`${type === 'zima' ? iconSvg('snowflake') : iconSvg('sun')} Aktywny: ${cat ? cat.name : (type === 'zima' ? 'Zimowy' : 'Letni')}`, 'success');
     }
 };
 
@@ -2680,7 +2870,7 @@ const switchCatalog = (id) => {
     renderCatalogSelect();
     renderPriceTable();
     if (S.data.length > 0) process(null, true);
-    showAlert(`✅ Aktywny cennik: ${cat.name}`, 'success');
+    showAlert(`${iconSvg('circleCheck')} Aktywny cennik: ${cat.name}`, 'success');
 };
 
 // Klonuj bieżący cennik jako nowy cennik użytkownika
@@ -3045,9 +3235,9 @@ const initTable = () => {
         scrollX: true,
         dom: 'Bfrtip',
         buttons: [
-            { extend: 'excel', text: '📊 Excel', title: null, className: 'neu-raised' },
-            { extend: 'csv', text: '📄 CSV', title: null, className: 'neu-raised' },
-            { extend: 'pdf', text: '📑 PDF', title: 'Dane opon', orientation: 'landscape', className: 'neu-raised' }
+            { extend: 'excel', text: `${iconSvg('fileSpreadsheet')} Excel`, title: null, className: 'neu-raised' },
+            { extend: 'csv', text: `${iconSvg('fileText')} CSV`, title: null, className: 'neu-raised' },
+            { extend: 'pdf', text: `${iconSvg('fileType')} PDF`, title: 'Dane opon', orientation: 'landscape', className: 'neu-raised' }
         ],
         columnDefs: [
             { targets: bieznikIdx, className: 'col-bieznik' }
@@ -3304,9 +3494,9 @@ const showDetail = d => {
                             </div>` : '<div style="font-size: 8px; color: var(--clear-active); margin-top: 4px;">Brak w cenniku</div>'}
                         </div>
                         <div class="vehicle-size-meta">
-                            <span>🚗 Modele: <strong>${vehicleCount}</strong></span>
-                            <span>🔧 Opony: <strong>${group.totalQty}</strong></span>
-                            ${tire ? `<span>💰 Wartość: <strong>${(group.totalQty * tire.n).toFixed(2)} zł</strong></span>` : ''}
+                            <span>${iconSvg('carFront')} Modele: <strong>${vehicleCount}</strong></span>
+                            <span>${iconSvg('wrench')} Opony: <strong>${group.totalQty}</strong></span>
+                            ${tire ? `<span>${iconSvg('banknote')} Wartość: <strong>${(group.totalQty * tire.n).toFixed(2)} zł</strong></span>` : ''}
                         </div>
                     </div>
                     <div class="vehicle-list">
@@ -3377,7 +3567,7 @@ const showDetail = d => {
                             <tr class="group">
                                 <td colspan="11">
                                     <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-                                        <strong>🚗 ${mk}</strong>
+                                        <strong>${iconSvg('carFront')} ${mk}</strong>
                                         <div class="group-stats">
                                             <span>Pojazdy: <strong>${rs.length}</strong></span>
                                             <span>Opony: <strong>${tot}</strong></span>
@@ -3463,8 +3653,8 @@ const showDetail = d => {
                                 <td colspan="10">
                                     <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
                                         <div>
-                                            <strong>👤 ${k}</strong>
-                                            ${oddzialy ? `<span style="font-size:8px;color:var(--text-tertiary);margin-left:10px;">📍 ${oddzialy}</span>` : ''}
+                                            <strong>${iconSvg('userRound')} ${k}</strong>
+                                            ${oddzialy ? `<span style="font-size:8px;color:var(--text-tertiary);margin-left:10px;">${iconSvg('mapPin')} ${oddzialy}</span>` : ''}
                                         </div>
                                         <div class="group-stats">
                                             <span>Pojazdy: <strong>${rs.length}</strong></span>
