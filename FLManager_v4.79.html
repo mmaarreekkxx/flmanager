@@ -275,6 +275,29 @@ table.tco-t tr.tco-hl td{background:rgba(124,58,237,.07)!important;font-weight:7
 /* ─ END TCO CSS ─ */
 </style>
 <style id="shell-css">
+/* column dividers in table headers (screen only) */
+@media screen{
+html:root{--th-div:rgba(100,116,139,.85)}
+html:root body[data-theme="dark"]{--th-div:rgba(160,149,217,.75)}
+html:root table thead th:not(:last-child),html:root table tr>th:not(:last-child){border-right-color:transparent!important;box-shadow:none!important;background-image:linear-gradient(var(--th-div),var(--th-div))!important;background-repeat:no-repeat!important;background-size:1px 62%!important;background-position:right 0 center!important}
+}
+/* kpi icons fit tile */
+html:root .tile{overflow:hidden}
+html:root .tile>i{position:absolute!important;right:6px!important;bottom:auto!important;top:50%!important;transform:translateY(-50%)!important;font-size:var(--kpi-ic,1.6rem)!important;line-height:1!important;pointer-events:none;z-index:0}
+html:root .tile>.val,html:root .tile>.lbl{position:relative;z-index:1}
+/* dark navy palette */
+html:root body[data-theme="dark"],html:root[data-theme="dark"]{--bg-p:#101824;--bg-s:#081018;--bg-t:#1c2834;--bg-card:#141c28;--tx-p:#e2e8f0;--tx-s:#c8d4e0;--tx-m:#8392a5;--bd:#1c2834;--act:#a095d9;--sh-d:rgba(0,0,0,.55);--sh-l:rgba(255,255,255,.015);--hov:rgba(160,149,217,.08)}
+html:root body[data-theme="dark"]{background:#081018}
+html:root body[data-theme="dark"] .tabs-nav,html:root body[data-theme="dark"] .report-controls,html:root body[data-theme="dark"] .neu-card,html:root body[data-theme="dark"] .tile{background:#141c28;border-color:#1c2834}
+html:root body[data-theme="dark"] input,html:root body[data-theme="dark"] select,html:root body[data-theme="dark"] .tab-btn,html:root body[data-theme="dark"] .btn{background-color:#101824;border-color:#243040;color:#c8d4e0}
+html:root body[data-theme="dark"] .tab-btn.active{background-color:#141c28;border-color:#a095d9;color:#c8c0f0}
+html:root body[data-theme="dark"] #mainTable thead th{background:#1c2834;color:#c8d4e0;border-color:#243040}
+html:root body[data-theme="dark"] #mainTable tbody tr:nth-child(odd) td{background:#101c24;color:#c8d4e0}
+html:root body[data-theme="dark"] #mainTable tbody tr:nth-child(even) td{background:#141c28;color:#c8d4e0}
+html:root body[data-theme="dark"] #mainTable tbody tr td{border-color:#1c2834}
+html:root body[data-theme="dark"] #mainTable tbody tr.weekend td,html:root body[data-theme="dark"] #mainTable tbody tr.sunday td,html:root body[data-theme="dark"] #mainTable tbody tr.saturday td,html:root body[data-theme="dark"] #mainTable tbody tr[class*="wk"] td,html:root body[data-theme="dark"] #mainTable tbody tr[class*="wknd"] td{background:#1c1c28}
+html:root body[data-theme="dark"] .tab-analytics,html:root body[data-theme="dark"] .tab-analytics-head{background:#20243c;border-color:#5a4e9a}
+html:root body[data-theme="dark"] .tab-analytics-head{color:#a095d9}
 html{-webkit-text-size-adjust:100%!important;text-size-adjust:100%!important}
 @media screen{
 html:root #tab-main .pagination-controls{margin-top:3px!important;padding:0 4px!important;gap:4px!important;min-height:0!important;height:16px!important;line-height:1!important}
@@ -3178,5 +3201,11 @@ window.renderImpLog=function(){var el=document.getElementById('logiImpLog');if(!
 var rows=mem.slice().reverse().map(function(e){var op=e.restore?'Przywrócenie':e.imp?'Import':'Przeliczenie';return '<tr><td>'+op+'</td><td class="num" data-num>'+e.rows+'</td><td class="num" data-num><b>'+f(e.parse)+'</b></td><td class="num" data-num>'+f(e.proc)+'</td><td class="num" data-num><b>'+(e.mce==null?'wył.':f(e.mce))+'</b></td><td class="num" data-num>'+f(e.fin)+'</td><td class="num" data-num><b>'+f(e.total)+'</b></td></tr>'}).join('');
 el.innerHTML='<table class="data-table" style="font-size:.68rem;width:100%"><thead><tr><th>Operacja</th><th>Wiersze</th><th>Wczytanie</th><th>Przetw.</th><th>MCE</th><th>Finaliz.</th><th>Razem</th></tr></thead><tbody>'+rows+'</tbody></table>'};
 })();</script>
+<script>(function(){function fit(){document.querySelectorAll('.tile').forEach(function(t){var h=t.clientHeight;if(!h)return;var v=t.querySelector('.val'),l=t.querySelector('.lbl'),i=t.querySelector(':scope>i');if(!i)return;
+var fs=Math.floor(Math.min(h*0.62,t.clientWidth*0.28,48));fs=Math.max(fs,14);i.style.setProperty('--kpi-ic',fs+'px')})}
+var t;function q(){clearTimeout(t);t=setTimeout(fit,80)}
+window.addEventListener('resize',q);window.addEventListener('orientationchange',q);
+if(window.ResizeObserver){var ro=new ResizeObserver(q);var go=function(){document.querySelectorAll('.tile').forEach(function(e){ro.observe(e)})};go();setTimeout(go,1500);setTimeout(go,5000)}
+setTimeout(fit,300);setTimeout(fit,1500)})();</script>
 </body>
 </html>
