@@ -1093,6 +1093,20 @@ for(const dk of Object.keys(dayGroups)){
   const prevRaw=minTrIdx>0?tr[minTrIdx-1]._opt.rawMeter:null;
   const nextRaw=maxTrIdx<tr.length-1?tr[maxTrIdx+1]._opt.rawMeter:null;
   if(prevRaw>500 && nextRaw>500 && base<prevRaw*0.5 && base<nextRaw*0.5) continue;
+  /* Lokalny dołek: licznik sesji niższy niż OBA sąsiednie odczyty (licznik nie maleje)
+     -> literówka. Najpierw próbujemy naprawić jedną cyfrę tak, by odczyt zmieścił się
+     między sąsiadami (sesja zostaje chroniona); gdy się nie da — sesja wraca do zwykłej korekty. */
+  if(prevRaw>500 && (nextRaw==null||nextRaw>500) && base<prevRaw-CLUSTER_TOL && (nextRaw==null||base<nextRaw-CLUSTER_TOL)){
+    const hiB=nextRaw!=null?nextRaw:prevRaw+3000;
+    let fixedAll=prevRaw<=hiB;const fixes=[];
+    if(fixedAll)for(const e of baseCluster){const rawI=Math.round(e.r._opt.rawMeter),sv=String(rawI);let best=null;const consider=v=>{if(v>=prevRaw&&v<=hiB){const sc=nextRaw!=null?Math.abs(v-nextRaw):v-prevRaw;if(best===null||sc<best[1])best=[v,sc]}};
+      for(let ci=0;ci<sv.length;ci++)for(let cd=0;cd<=9;cd++){if(String(cd)===sv[ci]||(ci===0&&cd===0))continue;consider(parseInt(sv.slice(0,ci)+cd+sv.slice(ci+1),10))}
+      /* brakująca wiodąca cyfra/cyfry (np. 1224 zamiast 81224) */
+      {const pl=String(Math.round(prevRaw)).length,rl=sv.length,df=pl-rl;if(df>=1&&df<=2){const lead=Math.floor(prevRaw/Math.pow(10,pl-df));consider(lead*Math.pow(10,rl)+rawI)}}
+      if(best===null){fixedAll=false;break}fixes.push([e,best[0]])}
+    if(!fixedAll||!fixes.length) continue;
+    for(const [e,v] of fixes){e.r._opt.rawMeter=v;e.r._opt._leadingTypoFixed=true}
+  }
   for(const e of baseCluster) e.r._opt.isDualFuelSession=true;
   // Kolejne tankowania tego samego dnia (wyższy licznik): chronimy TYLKO jeśli
   // przyrost mieści się w realnym zakresie dziennego przebiegu. Poza tym zakresem
@@ -1166,7 +1180,10 @@ for(let k=0;k<tr.length;k++){
   }
   const okLow=r._opt.rawMeter>=prevM;
   const okHigh=nextRaw==null||r._opt.rawMeter<=nextRaw;
-  if(okLow&&okHigh&&r._opt.meter!==r._opt.rawMeter&&(k===0||_rawPlausibleAfterPrev(k))){
+  /* odczyt nie może „odskakiwać” w dół od następnego (skorygowanego) odczytu o dystans niemożliwy przy zużytym paliwie */
+  let _fwdOk=true;
+  for(let j=k+1;j<tr.length;j++){const nj=tr[j]._opt;if(nj.isAdBlue||nj.rawMeter<100)continue;const dist=nj.meter-r._opt.rawMeter;if(dist>0){const lit=_litBetween(r._opt.date,nj.date)||(nj.lit||0);if(lit>=1&&lit/dist*100<1)_fwdOk=false}break}
+  if(okLow&&okHigh&&_fwdOk&&r._opt.meter!==r._opt.rawMeter&&(k===0||_rawPlausibleAfterPrev(k))){
     r._opt.meter=r._opt.rawMeter;
     r._opt.isFixed=false;
   }
