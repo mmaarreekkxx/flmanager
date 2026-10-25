@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><meta name="theme-color" content="#1f2937">
 <meta name="description" content="FLMANAGER - Zaawansowany system zarządzania flotą pojazdów z MCE, analizą kosztów i raportowaniem">
-<title>FLMANAGER v4.79_IDB_TCO_Meter x</title>
+<title>FLMANAGER v4.82_IDB_TCO_Meter</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Roboto+Condensed:wght@400;600;700&family=Roboto+Mono:wght@400;500;600&family=Orbitron:wght@900&family=Chakra+Petch:wght@600&family=Inter:wght@400;500;600;700&display=swap">
@@ -275,6 +275,84 @@ table.tco-t tr.tco-hl td{background:rgba(124,58,237,.07)!important;font-weight:7
 /* ─ END TCO CSS ─ */
 </style>
 <style id="shell-css">
+/* zakładka Zestawienie */
+#tab-custom-sum .cs-sumlbl{font-size:.7rem;color:var(--tx-m);white-space:nowrap}
+#tab-custom-sum .cs-chk{display:inline-flex;align-items:center;gap:5px;font-size:.7rem;color:var(--tx-s);cursor:pointer;white-space:nowrap}
+#tab-custom-sum .cs-chk input{accent-color:var(--act)}
+#tab-custom-sum .cs-grid{display:grid;grid-template-columns:1.1fr 1.1fr .6fr;gap:8px;padding:8px 0 4px}
+@media(max-width:900px){#tab-custom-sum .cs-grid{grid-template-columns:1fr}}
+#tab-custom-sum .cs-box{padding:8px 10px;display:flex;flex-direction:column;gap:6px;min-width:0}
+#tab-custom-sum .cs-bh{display:flex;justify-content:space-between;align-items:center;font-size:.74rem;color:var(--tx-p);gap:8px}
+#tab-custom-sum .cs-bh i{color:var(--act);margin-right:4px}
+#tab-custom-sum .cs-cnt{font-size:.62rem;color:var(--tx-m);font-weight:600}
+#tab-custom-sum .cs-search{width:100%;box-sizing:border-box}
+#tab-custom-sum .cs-acts{display:flex;gap:5px;flex-wrap:wrap}
+#tab-custom-sum .cs-acts button{font-size:.62rem;padding:3px 8px;border-radius:6px;border:1px solid var(--bd);background:var(--bg-p);color:var(--tx-s);cursor:pointer;font-weight:600}
+#tab-custom-sum .cs-acts button:hover{border-color:var(--act);color:var(--act)}
+#tab-custom-sum .cs-list{max-height:210px;overflow:auto;border:1px solid var(--bd);border-radius:8px;padding:3px;background:var(--bg-s);overscroll-behavior:contain}
+#tab-custom-sum .cs-it{display:flex;align-items:center;gap:7px;padding:4px 6px;border-radius:5px;cursor:pointer;font-size:.72rem;color:var(--tx-s);line-height:1.2}
+#tab-custom-sum .cs-it:hover{background:var(--hov)}
+#tab-custom-sum .cs-it input{accent-color:var(--act);flex:none}
+#tab-custom-sum .cs-it .cs-n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#tab-custom-sum .cs-it .cs-m{flex:none;font-size:.62rem;color:var(--tx-m);font-family:var(--font-mono)}
+#tab-custom-sum .cs-years{display:flex;flex-wrap:wrap;gap:5px}
+#tab-custom-sum .cs-y{font-size:.7rem;padding:4px 10px;border-radius:999px;border:1px solid var(--bd);background:var(--bg-p);color:var(--tx-s);cursor:pointer;font-weight:600}
+#tab-custom-sum .cs-y.on{background:var(--act);border-color:var(--act);color:#fff}
+#tab-custom-sum .cs-res{margin-top:4px;max-height:calc(100dvh - 260px);min-height:160px}
+#tab-custom-sum .cs-empty{padding:26px 14px;text-align:center;color:var(--tx-m);font-size:.78rem}
+#tab-custom-sum .cs-sw{display:inline-flex;align-items:center;gap:5px;font-size:.62rem;font-weight:600;color:var(--tx-m);cursor:pointer;user-select:none;white-space:nowrap;position:relative}
+#tab-custom-sum .cs-sw input{position:absolute;opacity:0;width:0;height:0;pointer-events:none}
+#tab-custom-sum .cs-sw i{width:18px;height:10px;border-radius:6px;background:var(--bd);position:relative;transition:background .15s;flex:none}
+#tab-custom-sum .cs-sw i::after{content:"";position:absolute;top:1.5px;left:1.5px;width:7px;height:7px;border-radius:50%;background:#fff;transition:transform .15s;box-shadow:0 1px 1px rgba(0,0,0,.25)}
+#tab-custom-sum .cs-sw input:checked+i{background:var(--act)}
+#tab-custom-sum .cs-sw input:checked+i::after{transform:translateX(8px)}
+#tab-custom-sum .cs-sw input:checked~span{color:var(--tx-p)}
+#tab-custom-sum .cs-sw input:focus-visible+i{outline:2px solid var(--act);outline-offset:1px}
+#tab-custom-sum .cs-seg{display:inline-flex;border:1px solid var(--bd);border-radius:4px;overflow:hidden;flex:none}
+#tab-custom-sum .cs-seg button{border:0;background:transparent;color:var(--tx-m);font:600 .6rem var(--font-text);padding:0 7px;height:20px;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s}
+#tab-custom-sum .cs-seg button+button{border-left:1px solid var(--bd)}
+#tab-custom-sum .cs-seg button:hover:not(.on){background:var(--hov);color:var(--tx-p)}
+#tab-custom-sum .cs-seg button.on{background:var(--act);color:#fff}
+#tab-custom-sum.cs-fold .cs-res{max-height:calc(100dvh - 90px)}
+#tab-custom-sum .cs-t tr.cs-vh td{background:var(--bg-t);color:var(--act);font-weight:700;border-top:2px solid var(--act);text-align:left}
+#tab-custom-sum .cs-t tr.cs-sub2 td{font-style:italic;background:var(--bg-s)}
+#tab-custom-sum .cs-grid{display:flex;flex-wrap:wrap;align-items:flex-start;gap:6px;padding:6px 0 2px}
+#tab-custom-sum .cs-box{flex:1 1 230px;padding:4px 8px;gap:4px}
+#tab-custom-sum .cs-box.cs-yr{flex:0 1 150px}
+#tab-custom-sum .cs-box.cs-cl{flex:0 0 auto}
+#tab-custom-sum .cs-bh{cursor:pointer;user-select:none;font-size:.68rem;gap:10px}
+#tab-custom-sum .cs-hr{display:inline-flex;align-items:center;gap:6px}
+#tab-custom-sum .cs-ch{font-size:.55rem;color:var(--tx-m);transition:transform .15s}
+#tab-custom-sum .cs-cl .cs-ch{transform:rotate(180deg)}
+#tab-custom-sum .cs-cl .cs-bd{display:none}
+#tab-custom-sum .cs-bd{display:flex;flex-direction:column;gap:4px}
+#tab-custom-sum .cs-row{display:flex;gap:4px;align-items:center}
+#tab-custom-sum .cs-row .cs-search{flex:1;min-width:0;max-width:none;height:20px}
+#tab-custom-sum .cs-list{max-height:112px;padding:2px}
+#tab-custom-sum .cs-it{padding:2px 5px;font-size:.68rem}
+#tab-custom-sum .cs-t tr.cs-m td{color:var(--tx-m);font-size:.92em}
+#tab-custom-sum .dis{opacity:.35;pointer-events:none}
+#tab-custom-sum .cs-t tr.cs-svc td{background:rgba(245,158,11,.16);font-weight:700}
+#tab-custom-sum .cs-t tr.cs-svc td:first-child{box-shadow:inset 3px 0 0 #f59e0b}
+#tab-custom-sum .cs-t tr.cs-svc td.cs-w::before{content:'\1F527  ';font-weight:400}
+#tab-custom-sum .cs-dt{width:118px;height:22px;font-size:.62rem}
+#tab-custom-sum .cs-t td.cs-w{max-width:340px;white-space:normal;word-break:break-word;font-family:var(--font-text)}
+#tab-custom-sum .report-controls{flex-wrap:wrap;height:auto;padding:4px 6px;row-gap:4px;min-height:30px}
+#tab-custom-sum .rc-spacer{flex:1 1 8px}
+@media(max-height:520px){#tab-custom-sum .cs-grid{grid-template-columns:1fr 1fr 1fr}#tab-custom-sum .cs-list{max-height:120px}#tab-custom-sum .cs-res{max-height:none}}
+#tab-custom-sum .cs-y{font-size:.62rem;padding:2px 7px;border-radius:4px;font-weight:600}
+#tab-custom-sum .cs-acts button{border:0;background:transparent;padding:1px 4px;font-size:.6rem;color:var(--tx-m)}
+#tab-custom-sum .cs-acts button:hover{color:var(--act);text-decoration:underline}
+#tab-custom-sum .cs-t td:not(.l),#tab-custom-sum .cs-t th:not(.l){text-align:right}
+table.cs-t{width:100%;border-collapse:collapse;font-size:.7rem}
+table.cs-t th{text-align:right;padding:7px 8px;font-size:.58rem;text-transform:uppercase;letter-spacing:.4px;color:var(--tx-m);border-bottom:2px solid var(--act);font-weight:700;background:var(--bg-card);vertical-align:bottom;max-width:150px}
+table.cs-t th:first-child,table.cs-t th.l{text-align:left}
+table.cs-t td{padding:5px 8px;text-align:right;border-bottom:1px solid var(--bg-s);font-family:var(--font-mono);font-size:.7rem;white-space:nowrap}
+table.cs-t td.l{text-align:left;font-family:var(--font-text);font-weight:600}
+table.cs-t tbody tr:hover td{background:var(--hov)}
+table.cs-t tr.cs-sub td{font-weight:800;background:var(--bg-t);border-top:1px solid var(--bd)}
+table.cs-t tr.cs-tot td{font-weight:800;background:var(--bg-t);border-top:2px solid var(--act);border-bottom:none}
+table.cs-t td.cs-tc{font-weight:700;color:var(--act)}
 /* dialog eksportu DualFuel XLSX */
 #dfxDlg{position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);padding:16px}
 #dfxDlg.open{display:flex}
@@ -423,7 +501,7 @@ body{height:100dvh}
 
 <div id="vehicleModal" class="modal"><div class="modal-content modal-content-wide"><div class="modal-header"><button onclick="closeVehicleModal()" title="Zamknij" style="width:16px;height:16px;border-radius:50%;background:#ff5f57;border:1px solid rgba(0,0,0,.15);cursor:pointer;flex-shrink:0;padding:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:rgba(0,0,0,0);transition:color .1s" onmouseover="this.style.color='#4c0002'" onmouseout="this.style.color='rgba(0,0,0,0)'"><i class="fas fa-xmark" style="font-size:8px"></i></button><i class="fas fa-car" style="font-size:.85rem;opacity:.9;flex-shrink:0"></i><h3 id="vehicleModalTitle" class="modal-title"><span id="vehicleModalReg" onclick="closeVehicleModal()" title="Kliknij aby zamknąć" style="font-family:var(--font-mono);background:rgba(255,255,255,.18);padding:1px 8px;border-radius:5px;letter-spacing:1px;cursor:pointer;transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.32)'" onmouseout="this.style.background='rgba(255,255,255,.18)'">—</span><span id="vehicleModalMeta" style="font-size:.6rem;font-weight:400;opacity:.8;font-family:var(--font-text);margin-left:4px"></span><div id="customLegend" style="display:flex;gap:8px;overflow-x:auto;white-space:nowrap;margin-left:10px;scrollbar-width:none;flex-shrink:1;min-width:0"></div></h3><div style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto"><button id="vehicleModalPDF" onclick="exportVehicleModalPDF()" title="Eksport PDF" style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:5px;padding:3px 10px;font-size:.65rem;font-family:var(--font-text);font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:background .15s"><i class="fas fa-file-pdf"></i> PDF</button></div></div><div class="modal-body"><div class="chart-container"><canvas id="vehicleChart"></canvas></div><div id="vehicleSummary" style="padding:0 8px 12px"></div></div></div></div>
 <div class="app-container">
-<div class="header neu-card" style="padding:2px 12px;min-height:auto"><div class="app-title" style="gap:8px"><i class="fa-solid fa-truck-fast"></i><div style="display:flex;flex-direction:column;justify-content:center;line-height:1"><span style="font-size:.85rem;letter-spacing:.5px">FLMANAGER</span><span class="app-version" style="font-size:.55rem;font-weight:400;opacity:.7">v4.79_IDB_TCO_Meter</span></div></div><button id="densityBtn" onclick="cycleDensity()" class="theme-toggle-btn" title="Gęstość wierszy tabeli" style="margin-left:6px;flex-shrink:0"><i class="dens-num" id="densityIcon">2</i></button><button id="fsBtn" type="button" class="theme-toggle-btn" title="Pełny ekran" aria-label="Pełny ekran" style="margin-left:4px;flex-shrink:0;display:none"><i class="fas fa-expand" id="fsIcon"></i></button><div class="flex items-center gap-2"><span id="datasetName" class="dataset-name">Brak danych</span><div class="control-group mce-toggle-group"><label class="switch"><input type="checkbox" id="aiCorrectionToggle" checked onchange="recalcAll()"><span class="slider"></span></label><span class="mce-label">MCE</span></div><button class="neu-btn async-status async-status-btn" id="asyncStatus" onclick="testAsync()" title="Test animacji async"><span class="async-dot"></span> Async</button><input type="checkbox" id="themeToggle" style="display:none"><label for="themeToggle" class="theme-toggle-btn" title="Zmień motyw"><i id="themeIcon" class="fas fa-sun"></i></label><button id="ai-open-btn" class="theme-toggle-btn" title="Gemini AI — Analiza floty" style="border:1px solid rgba(124,58,237,.4);border-radius:6px;width:auto;height:28px;padding:0 10px;gap:5px;font-size:.7rem;font-weight:700;color:var(--act);font-family:var(--font-text);letter-spacing:.3px;background:rgba(124,58,237,.14);margin-left:12px"><i class="fas fa-robot" style="font-size:.85rem"></i><span id="ai-btn-label">AI</span></button></div></div>
+<div class="header neu-card" style="padding:2px 12px;min-height:auto"><div class="app-title" style="gap:8px"><i class="fa-solid fa-truck-fast"></i><div style="display:flex;flex-direction:column;justify-content:center;line-height:1"><span style="font-size:.85rem;letter-spacing:.5px">FLMANAGER</span><span class="app-version" style="font-size:.55rem;font-weight:400;opacity:.7">v4.82_IDB_TCO_Meter</span></div></div><button id="densityBtn" onclick="cycleDensity()" class="theme-toggle-btn" title="Gęstość wierszy tabeli" style="margin-left:6px;flex-shrink:0"><i class="dens-num" id="densityIcon">2</i></button><button id="fsBtn" type="button" class="theme-toggle-btn" title="Pełny ekran" aria-label="Pełny ekran" style="margin-left:4px;flex-shrink:0;display:none"><i class="fas fa-expand" id="fsIcon"></i></button><div class="flex items-center gap-2"><span id="datasetName" class="dataset-name">Brak danych</span><div class="control-group mce-toggle-group"><label class="switch"><input type="checkbox" id="aiCorrectionToggle" checked onchange="recalcAll()"><span class="slider"></span></label><span class="mce-label">MCE</span></div><button class="neu-btn async-status async-status-btn" id="asyncStatus" onclick="testAsync()" title="Test animacji async"><span class="async-dot"></span> Async</button><input type="checkbox" id="themeToggle" style="display:none"><label for="themeToggle" class="theme-toggle-btn" title="Zmień motyw"><i id="themeIcon" class="fas fa-sun"></i></label><button id="ai-open-btn" class="theme-toggle-btn" title="Gemini AI — Analiza floty" style="border:1px solid rgba(124,58,237,.4);border-radius:6px;width:auto;height:28px;padding:0 10px;gap:5px;font-size:.7rem;font-weight:700;color:var(--act);font-family:var(--font-text);letter-spacing:.3px;background:rgba(124,58,237,.14);margin-left:12px"><i class="fas fa-robot" style="font-size:.85rem"></i><span id="ai-btn-label">AI</span></button></div></div>
 <div class="neu-card upload-card"><div class="flex items-center gap-2 upload-controls"><input type="file" id="fileInput" multiple style="display:none" onchange="loadFiles()"><div id="dropZone" class="drop-zone" onclick="$('fileInput').click()"><i class="fa-solid fa-cloud-arrow-up upload-icon"></i><div class="upload-text-wrapper"><span>Wgraj pliki</span><span class="upload-subtext">Upuść lub kliknij</span></div></div><button class="neu-btn" id="fileListToggle" onclick="openFilesModal()" title="Zaimportowane pliki" style="display:none"><i class="fas fa-folder-open"></i><span id="fileCount" class="fc-n">0</span></button><div class="flex-spacer"></div><button class="neu-btn btn-demo" onclick="loadSampleData()"><i class="fas fa-database"></i> Demo</button><button class="neu-btn" onclick="openMeterHistModal()" title="Narzędzie: historia liczników (zapis / uzupełnianie / podgląd / kasowanie)"><i class="fas fa-tachometer-alt"></i> Liczniki</button><button class="neu-btn" onclick="openDatasetModal()" title="Narzędzie: zapisane bazy danych (przywracanie, wiele baz)"><i class="fas fa-layer-group"></i> Bazy</button><button class="neu-btn btn-danger" onclick="clearData()"><i class="fas fa-trash"></i></button></div></div>
 <div class="tabs-nav">
   <button class="imp-tg" id="impToggle" type="button" title="Pasek importu: pokaż / ukryj" aria-label="Pasek importu" aria-pressed="true"><i class="fa-solid fa-file-import"></i><i class="fa-solid fa-chevron-up imp-chev"></i></button>
@@ -435,6 +513,7 @@ body{height:100dvh}
   <button class="tab-btn" onclick="switchTab('ranking', this)"><i class="fa-solid fa-trophy"></i> Ranking</button>
   <button class="tab-btn" onclick="switchTab('dualfuel', this)"><i class="fa-solid fa-fire-flame-curved"></i> DualFuel</button>
   <button class="tab-btn" onclick="switchTab('weekend', this)"><i class="fa-solid fa-calendar-week"></i> Weekendy</button>
+  <button class="tab-btn" onclick="switchTab('custom-sum', this)"><i class="fa-solid fa-list-check"></i> Zestawienie</button>
   <button class="tab-btn" onclick="switchTab('mapping', this)"><i class="fa-solid fa-code-branch"></i> Mapowanie</button>
   <button class="tab-btn" onclick="switchTab('tco', this)"><i class="fa-solid fa-calculator"></i> TCO</button>
 </div>
@@ -735,6 +814,41 @@ body{height:100dvh}
     </h4>
     <div id="weekendTransactions" class="table-container weekend-table"></div>
   </div>
+</div>
+<div id="tab-custom-sum" class="tab-content">
+  <div class="report-controls">
+    <div class="rcg"><button type="button" class="rc-btn" id="csColBtn" title="Zwiń filtry"><i class="fas fa-chevron-up"></i></button><span class="cs-sumlbl" id="csSumLbl" style="margin-left:6px"></span></div>
+    <div class="rc-spacer"></div>
+    <div class="rcg"><div class="cs-seg" id="csLaySeg"><button type="button" data-lay="g" title="Wiersze: rok · kolumny: grupy kosztów">Rok·grupy</button><button type="button" data-lay="v" title="Osobny blok dla każdego pojazdu: lata w wierszach, grupy kosztów w kolumnach">Pojazdy</button><button type="button" data-lay="i" title="Blok na pojazd: grupy kosztów w wierszach, lata w kolumnach, przebieg roczny pod spodem">Pojazdy⇄</button><button type="button" data-lay="m" title="Wiersze: rok i pojazd · kolumny: miesiące">Pojazd·mies.</button><button type="button" data-lay="p" title="Rozliczenie po sprzedaży: lista transakcji pojazdu — data, grupa, dane kosztowe, wartość netto, przebieg (opcjonalnie od/do daty)">Po sprzedaży</button></div></div>
+    <div style="width:1px;height:14px;background:#c4c9d4;flex-shrink:0;margin:0 6px;display:block"></div>
+    <div class="rcg" id="csDtWrap" style="display:none;gap:4px"><span class="cs-sumlbl">Od</span><input type="date" id="csFrom" class="rc-input cs-dt" title="Od daty (np. data sprzedaży) — przy wybranym zakresie lata są pomijane"><span class="cs-sumlbl">Do</span><input type="date" id="csTo" class="rc-input cs-dt" title="Do daty"></div>
+    <div class="rcg"><div class="cs-seg" id="csPerSeg"><button type="button" data-per="y" title="Zestawienie roczne">Rok</button><button type="button" data-per="m" title="Roczne z podziałem na miesiące">Rok+mies.</button></div></div>
+    <div style="width:1px;height:14px;background:#c4c9d4;flex-shrink:0;margin:0 6px;display:block"></div>
+    <div class="rcg" style="gap:10px">
+      <label class="cs-sw" id="csSplitLb" style="display:none"><input type="checkbox" id="csSplit"><i></i><span>Pojazdy</span></label>
+      <label class="cs-sw" id="csFleetLb" title="Pokaż sumy łączące wszystkie pojazdy"><input type="checkbox" id="csFleet"><i></i><span>Suma floty</span></label>
+      <label class="cs-sw" id="csKonLb" title="Dodaj kontrahenta jako poziom podsumowania"><input type="checkbox" id="csKon"><i></i><span>Kontrahent</span></label>
+    </div>
+    <div style="width:1px;height:14px;background:#c4c9d4;flex-shrink:0;margin:0 6px;display:block"></div>
+    <div class="rcg">
+      <button type="button" class="rc-btn" id="csRegBtn" title="Wklej listę numerów rejestracyjnych"><i class="fas fa-car"></i></button>
+      <div id="csRegPanel" class="reg-list-panel"><div class="rlp-head"><i class="fas fa-car"></i><span class="rlp-head-title">Filtr rejestracji</span><button type="button" id="csRegClear" class="rlp-clear-btn"><i class="fas fa-times"></i> wyczyść</button></div><div class="rlp-body"><textarea id="csRegInput" class="rlp-textarea" placeholder="Wklej numery rejestracyjne&#10;(nowe linie, przecinki lub spacje):&#10;&#10;CMG1234A&#10;CMG5678B"></textarea></div><div class="rlp-footer"><button type="button" id="csRegApply" class="rlp-apply"><i class="fas fa-filter"></i> Zastosuj filtr</button><span id="csRegStatus" class="rlp-status"></span></div><div class="rlp-hint"><i class="fas fa-info-circle" style="color:#d97706;margin-right:3px"></i>Nowe linie · przecinki · spacje — zaznacza pasujące pojazdy</div></div>
+    </div>
+    <div style="width:1px;height:14px;background:#c4c9d4;flex-shrink:0;margin:0 5px;display:block"></div>
+    <div class="rcg">
+      <button class="rc-btn e-csv" onclick="csExport('csv')" title="CSV — Zestawienie"><i class="fas fa-file-csv"></i></button>
+      <button class="rc-btn e-xlsx" onclick="csExport('xlsx')" title="XLSX — Zestawienie"><i class="fas fa-file-excel"></i></button>
+    </div>
+  </div>
+  <div class="cs-grid" id="csGrid">
+    <div class="neu-card cs-box" id="csBoxVeh"><div class="cs-bh" data-fold="veh" title="Zwiń / rozwiń"><b><i class="fas fa-car"></i> Pojazdy</b><span class="cs-hr"><span class="cs-cnt" id="csVehCnt"></span><i class="fas fa-chevron-up cs-ch"></i></span></div>
+      <div class="cs-bd"><div class="cs-row"><input type="text" id="csVehSearch" class="rc-input cs-search" placeholder="Szukaj pojazdu..." autocomplete="off"><span class="cs-acts"><button type="button" data-a="veh-all">Wszystkie</button><button type="button" data-a="veh-flt">Wyszukane</button><button type="button" data-a="veh-none">Żadne</button></span></div><div class="cs-list" id="csVehList"></div></div></div>
+    <div class="neu-card cs-box" id="csBoxGrp"><div class="cs-bh" data-fold="grp" title="Zwiń / rozwiń"><b><i class="fas fa-tags"></i> Grupy kosztów</b><span class="cs-hr"><span class="cs-cnt" id="csGrpCnt"></span><i class="fas fa-chevron-up cs-ch"></i></span></div>
+      <div class="cs-bd"><div class="cs-row"><span class="cs-acts"><button type="button" data-a="grp-all">Wszystkie</button><button type="button" data-a="grp-none">Żadne</button></span></div><div class="cs-list" id="csGrpList"></div></div></div>
+    <div class="neu-card cs-box cs-yr" id="csBoxYr"><div class="cs-bh" data-fold="yr" title="Zwiń / rozwiń"><b><i class="fas fa-calendar"></i> Lata</b><span class="cs-hr"><i class="fas fa-chevron-up cs-ch"></i></span></div>
+      <div class="cs-bd"><div class="cs-years" id="csYears"></div></div></div>
+  </div>
+  <div id="csResult" class="table-container cs-res"></div>
 </div>
 <div id="tab-mapping" class="tab-content"><div class="neu-card mapping-container"><div class="header mapping-header"></div><div class="tabs-nav mapping-tabs"><button class="tab-btn active" onclick="switchMapSub('header', this)"><i class="fas fa-columns"></i> Kolumny</button><button class="tab-btn" onclick="switchMapSub('value', this)"><i class="fas fa-tags"></i> Wartości</button><button class="tab-btn" onclick="switchMapSub('registration', this)"><i class="fas fa-car"></i> Rejestracje</button><button class="tab-btn" onclick="switchMapSub('groupCode', this)"><i class="fas fa-calculator"></i> Konta</button><button class="tab-btn" onclick="switchMapSub('visibility', this)"><i class="fas fa-eye-slash"></i> Widoczność</button><button class="tab-btn" onclick="switchMapSub('mce', this)"><i class="fas fa-microchip"></i> MCE</button><button class="tab-btn" onclick="switchMapSub('logi', this)"><i class="fas fa-database"></i> Logi</button></div><div id="sub-header" class="sub-map-content sub-map-active"><div class="map-docs"><div class="map-header-box"><div class="map-logo"><i class="fas fa-columns"></i></div><div class="map-header-text"><h1>Mapowanie Kolumn</h1><p>Automatyczna zmiana nazw nagłówków</p></div><div class="map-toggle"><label class="switch"><input type="checkbox" id="check-header" checked onchange="toggleMapping('header')"><span class="slider"></span></label><span class="toggle-label">Aktywne</span></div></div><div class="map-section"><h2><i class="fas fa-info-circle"></i> Opis funkcji</h2><div class="map-info-grid"><div class="map-info-card"><div class="map-info-icon"><i class="fas fa-file-import"></i></div><div class="map-info-content"><h4>Wejście</h4><p>Oryginalna nazwa kolumny z pliku źródłowego</p></div></div><div class="map-info-card"><div class="map-info-icon"><i class="fas fa-exchange-alt"></i></div><div class="map-info-content"><h4>Transformacja</h4><p>Automatyczna zamiana według reguł</p></div></div><div class="map-info-card"><div class="map-info-icon"><i class="fas fa-file-export"></i></div><div class="map-info-content"><h4>Wyjście</h4><p>Nowa, czytelna nazwa kolumny</p></div></div></div><div class="map-note"><i class="fas fa-lightbulb"></i> Przykład: <code>WartośćNettoFak</code> → <code>Wartość netto</code></div></div><div class="map-section"><h2><i class="fas fa-plus-circle"></i> Dodaj regułę</h2><div class="map-form"><div class="map-input-row"><div class="map-input-group"><label>Oryginalna nazwa</label><input id="headerFrom" class="neu-input" placeholder="np. Nr_rej_pojazdu"></div><div class="map-input-arrow"><i class="fas fa-arrow-right"></i></div><div class="map-input-group"><label>Nowa nazwa</label><input id="headerTo" class="neu-input" placeholder="np. Rejestracja"></div><button class="map-btn-add" onclick="addMapping('header')"><i class="fas fa-plus"></i> Dodaj</button></div></div></div><div class="map-section"><div class="map-section-header"><h2><i class="fas fa-list"></i> Aktywne reguły</h2><button class="map-btn-reset" onclick="resetMappings('header')"><i class="fas fa-rotate-right"></i> Reset</button></div><div id="list-header" class="map-table-container"></div></div></div></div><div id="sub-value" class="sub-map-content"><div class="map-docs"><div class="map-header-box"><div class="map-logo" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><i class="fas fa-tags"></i></div><div class="map-header-text"><h1>Mapowanie Wartości</h1><p>Zamiana kodów produktów na nazwy grup</p></div><div class="map-toggle"><label class="switch"><input type="checkbox" id="check-value" checked onchange="toggleMapping('value')"><span class="slider"></span></label><span class="toggle-label">Aktywne</span></div></div><div class="map-section"><h2><i class="fas fa-info-circle"></i> Opis funkcji</h2><div class="map-info-grid"><div class="map-info-card"><div class="map-info-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><i class="fas fa-barcode"></i></div><div class="map-info-content"><h4>Kod produktu</h4><p>Krótki identyfikator produktu)</p></div></div><div class="map-info-card"><div class="map-info-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><i class="fas fa-tag"></i></div><div class="map-info-content"><h4>Grupa produktu</h4><p>Pełna nazwa kategorii (np. Paliwo, Oleje)</p></div></div><div class="map-info-card"><div class="map-info-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><i class="fas fa-table"></i></div><div class="map-info-content"><h4>Kolumna docelowa</h4><p>Zmiany w kolumnie "Grupa prod"</p></div></div></div><div class="map-note warn"><i class="fas fa-exclamation-triangle"></i> Mapowanie działa tylko na kolumnę <strong>"Grupa prod"</strong></div></div><div class="map-section"><h2><i class="fas fa-plus-circle"></i> Dodaj regułę</h2><div class="map-form"><div class="map-input-row"><div class="map-input-group"><label>Kod produktu</label><input id="valueFrom" class="neu-input" placeholder="np. PSF"></div><div class="map-input-arrow"><i class="fas fa-arrow-right"></i></div><div class="map-input-group"><label>Nazwa grupy</label><input id="valueTo" class="neu-input" placeholder="np. Paliwo"></div><button class="map-btn-add" onclick="addMapping('value')"><i class="fas fa-plus"></i> Dodaj</button></div></div></div><div class="map-section"><div class="map-section-header"><h2><i class="fas fa-list"></i> Aktywne reguły</h2><button class="map-btn-reset" onclick="resetMappings('value')"><i class="fas fa-rotate-right"></i> Reset</button></div><div id="list-value" class="map-table-container"></div></div></div></div><div id="sub-registration" class="sub-map-content"><div class="map-docs"><div class="map-header-box"><div class="map-logo" style="background:linear-gradient(135deg,#10b981,#059669)"><i class="fas fa-car"></i></div><div class="map-header-text"><h1>Mapowanie Rejestracji</h1><p>Ujednolicenie numerów rejestracyjnych</p></div><div class="map-toggle"><label class="switch"><input type="checkbox" id="check-registration" checked onchange="toggleMapping('registration')"><span class="slider"></span></label><span class="toggle-label">Aktywne</span></div></div><div class="map-section"><h2><i class="fas fa-info-circle"></i> Opis funkcji</h2><div class="map-info-grid"><div class="map-info-card"><div class="map-info-icon" style="background:linear-gradient(135deg,#10b981,#059669)"><i class="fas fa-sync-alt"></i></div><div class="map-info-content"><h4>Przerejestrowanie</h4><p>Zamiana starych numerów na nowe</p></div></div><div class="map-info-card"><div class="map-info-icon" style="background:linear-gradient(135deg,#10b981,#059669)"><i class="fas fa-user-tie"></i></div><div class="map-info-content"><h4>Nadpisuj nr karty</h4><p>Zastąp Nr rejestracyjny numerem karty jesli platność kartą imienną</p></div></div><div class="map-info-card"><div class="map-info-icon" style="background:linear-gradient(135deg,#10b981,#059669)"><i class="fas fa-chart-pie"></i></div><div class="map-info-content"><h4>Agregacja danych</h4><p>Łączenie historii pojazdu</p></div></div></div></div><div class="map-section"><h2><i class="fas fa-cog"></i> Opcje dodatkowe</h2><div class="map-options"><div class="map-option-card"><div class="map-option-toggle"><label class="switch"><input type="checkbox" id="check-nameOverride" checked onchange="toggleNameOverride()"><span class="slider"></span></label></div><div class="map-option-content"><h4><i class="fas fa-id-card"></i> Korekta Kart</h4><p>Nadpisuj w kolumnie "Nr rejestracyjny" numer karty jesli transakcja dotyczy kart imiennej</p></div></div></div></div><div class="map-section"><h2><i class="fas fa-plus-circle"></i> Dodaj regułę</h2><div class="map-form"><div class="map-input-row"><div class="map-input-group"><label>Stara rejestracja</label><input id="registrationFrom" class="neu-input" placeholder="np. WZ12345"></div><div class="map-input-arrow"><i class="fas fa-arrow-right"></i></div><div class="map-input-group"><label>Nowa rejestracja</label><input id="registrationTo" class="neu-input" placeholder="np. WZA9999"></div><button class="map-btn-add" onclick="addMapping('registration')"><i class="fas fa-plus"></i> Dodaj</button></div></div></div><div class="map-section"><div class="map-section-header"><h2><i class="fas fa-list"></i> Aktywne reguły</h2><button class="map-btn-reset" onclick="resetMappings('registration')"><i class="fas fa-rotate-right"></i> Reset</button></div><div id="list-registration" class="map-table-container"></div></div></div></div><div id="sub-groupCode" class="sub-map-content"><div class="map-docs"><div class="map-header-box"><div class="map-logo" style="background:linear-gradient(135deg,#6366f1,#4f46e5)"><i class="fas fa-calculator"></i></div><div class="map-header-text"><h1>Mapowanie Kont</h1><p>Zamiana kont księgowych na grupy produktów</p></div><div class="map-toggle"><label class="switch"><input type="checkbox" id="check-groupCode" checked onchange="toggleMapping('groupCode')"><span class="slider"></span></label><span class="toggle-label">Aktywne</span></div></div><div class="map-section"><h2><i class="fas fa-info-circle"></i> Opis funkcji</h2><div class="map-info-grid"><div class="map-info-card"><div class="map-info-icon" style="background:linear-gradient(135deg,#6366f1,#4f46e5)"><i class="fas fa-hashtag"></i></div><div class="map-info-content"><h4>Numer konta</h4><p>Konto księgowe z systemu FK</p></div></div><div class="map-info-card"><div class="map-info-icon" style="background:linear-gradient(135deg,#6366f1,#4f46e5)"><i class="fas fa-folder"></i></div><div class="map-info-content"><h4>Grupa produktu</h4><p>Kategoria do raportowania</p></div></div><div class="map-info-card"><div class="map-info-icon" style="background:linear-gradient(135deg,#6366f1,#4f46e5)"><i class="fas fa-filter"></i></div><div class="map-info-content"><h4>Filtrowanie</h4><p>Łatwiejsze grupowanie danych</p></div></div></div><div class="map-note"><i class="fas fa-lightbulb"></i> Przykład: <code>501-001</code> → <code>Paliwo ON</code></div></div><div class="map-section"><h2><i class="fas fa-plus-circle"></i> Dodaj regułę</h2><div class="map-form"><div class="map-input-row"><div class="map-input-group"><label>Numer konta</label><input id="groupCodeFrom" class="neu-input" placeholder="np. 501-001"></div><div class="map-input-arrow"><i class="fas fa-arrow-right"></i></div><div class="map-input-group"><label>Grupa produktu</label><input id="groupCodeTo" class="neu-input" placeholder="np. Paliwo ON"></div><button class="map-btn-add" onclick="addMapping('groupCode')"><i class="fas fa-plus"></i> Dodaj</button></div></div></div><div class="map-section"><div class="map-section-header"><h2><i class="fas fa-list"></i> Aktywne reguły</h2><button class="map-btn-reset" onclick="resetMappings('groupCode')"><i class="fas fa-rotate-right"></i> Reset</button></div><div id="list-groupCode" class="map-table-container"></div></div></div></div><div id="sub-visibility" class="sub-map-content sub-map-scroll"><div class="map-docs"><div class="map-header-box"><div class="map-logo" style="background:linear-gradient(135deg,#64748b,#475569)"><i class="fas fa-eye-slash"></i></div><div class="map-header-text"><h1>Widoczność Kolumn</h1><p>Zarządzaj wyświetlanymi kolumnami</p></div></div><div class="map-section"><h2><i class="fas fa-info-circle"></i> Opis funkcji</h2><div class="map-info-grid"><div class="map-info-card"><div class="map-info-icon" style="background:linear-gradient(135deg,#64748b,#475569)"><i class="fas fa-eye"></i></div><div class="map-info-content"><h4>Pokaż/Ukryj</h4><p>Przełączaj widoczność kolumn</p></div></div><div class="map-info-card"><div class="map-info-icon" style="background:linear-gradient(135deg,#64748b,#475569)"><i class="fas fa-compress-alt"></i></div><div class="map-info-content"><h4>Kompaktowy widok</h4><p>Ukryj niepotrzebne dane</p></div></div><div class="map-info-card"><div class="map-info-icon" style="background:linear-gradient(135deg,#64748b,#475569)"><i class="fas fa-save"></i></div><div class="map-info-content"><h4>Zapamiętywanie</h4><p>Ustawienia zapisywane lokalnie</p></div></div></div><div class="map-note"><i class="fas fa-info-circle"></i> Odznacz kolumny, które chcesz ukryć w tabeli danych</div></div><div class="map-section"><h2><i class="fas fa-columns"></i> Dostępne kolumny</h2><div id="colVisContainer" class="map-vis-grid"></div></div></div></div><div id="sub-mce" class="sub-map-content sub-map-scroll"><div class="mce-docs"><div class="mce-header-box"><div class="mce-logo"><i class="fas fa-microchip"></i></div><div class="mce-header-text"><h1>MCE — Silnik Korekty Liczników</h1><p>Automatyczna detekcja i naprawa błędnych odczytów licznika na podstawie historii tankowania</p></div><div class="mce-badges"><span class="mce-badge badge-async">Asynchroniczny</span><span class="mce-badge badge-ai">Theil-Sen</span><span class="mce-badge badge-ai" style="background:#16a34a">Anchor-Chain</span><span class="mce-badge badge-ai" style="background:#f59e0b;color:#000">DualFuel</span></div></div>
 <div class="mce-section"><h2><i class="fas fa-question-circle"></i> Jak to działa</h2>
@@ -1979,7 +2093,7 @@ window.dfToggleInc=function(el){
 };
 const sortLpgAnalysis=(mode)=>{if(S.lpgSortMode===mode){S.lpgSortDir=S.lpgSortDir==='desc'?'asc':'desc'}else{S.lpgSortMode=mode;switch(mode){case'reg':S.lpgSortDir='asc';break;case'lpgShare':case'suspiciousCount':case'potentialSavings':case'totalDist':case'avgDist':case'weekend':case'trans':case'totalCost':S.lpgSortDir='desc';break;default:S.lpgSortDir='desc'}}renLPGAnalysis()};
 const renWeekendTransactions=()=>{const container=$('weekendTransactions');if(!container)return;container.style.width='100%';container.style.maxWidth='100%';container.style.overflow='hidden';const weekendData=S.rep.weekend||S.data.filter(r=>r._opt&&r._opt.isWeekend);if(!weekendData.length){container.innerHTML=`<div style="text-align:center;padding:30px;color:var(--tx-m)"><i class="fas fa-calendar-check fa-2x"style="opacity:0.3;margin-bottom:10px"></i><p style="font-size:0.9rem">Brak transakcji weekendowych</p></div>`;return}const stats=weekendData.reduce((acc,r)=>{acc.total++;acc.cost+=r._opt.val||0;acc.liters+=r._opt.isFuel?(r._opt.lit||0):0;acc.qty+=!r._opt.isFuel?(r._opt.lit||0):0;if(!acc.vehicles.has(r._opt.reg))acc.vehicles.add(r._opt.reg);return acc},{total:0,cost:0,liters:0,qty:0,vehicles:new Set()});const sorted=[...weekendData].sort((a,b)=>b._opt.date-a._opt.date);if(!window.weekendPagination){window.weekendPagination={currentPage:1,rowsPerPage:100}}const pagination=window.weekendPagination;const exportToCSV=()=>{const headers=['Data','Dzień','Pojazd','Grupa','Ilość','Wartość','Stacja'];const rows=sorted.map(r=>[r._opt.date?r._opt.date.toISOString().split('T')[0]:'-',r._opt.dayName||'-',r._opt.reg||'-',r._opt.group||'-',r._opt.isFuel?`${(r._opt.lit||0).toFixed(2)}L`:`${(r._opt.lit||0).toFixed(2)}szt.`,(r._opt.val||0).toFixed(2),r._opt.stNo||'-']);const csvContent=[headers.join(','),...rows.map(row=>row.map(cell=>`"${cell}"`).join(','))].join('\n');const blob=new Blob(['\uFEFF'+csvContent],{type:'text/csv;charset=utf-8;'});const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download=`transakcje_weekendowe_${new Date().toISOString().split('T')[0]}.csv`;link.click()};const exportToXLSX=()=>{if(typeof XLSX==='undefined'){const script=document.createElement('script');script.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';script.onload=()=>generateXLSX();document.head.appendChild(script)}else{generateXLSX()}};const generateXLSX=()=>{const wb=XLSX.utils.book_new();const data=[['Data','Dzień','Pojazd','Grupa','Ilość','Wartość','Stacja'],...sorted.map(r=>[r._opt.date?r._opt.date.toISOString().split('T')[0]:'-',r._opt.dayName||'-',r._opt.reg||'-',r._opt.group||'-',r._opt.isFuel?`${(r._opt.lit||0).toFixed(2)}L`:`${(r._opt.lit||0).toFixed(2)}szt.`,(r._opt.val||0).toFixed(2),r._opt.stNo||'-'])];const ws=XLSX.utils.aoa_to_sheet(data);ws['!cols']=[{wch:12},{wch:10},{wch:12},{wch:15},{wch:12},{wch:12},{wch:20}];XLSX.utils.book_append_sheet(wb,ws,'Transakcje Weekendowe');XLSX.writeFile(wb,`transakcje_weekendowe_${new Date().toISOString().split('T')[0]}.xlsx`,{compression:true,bookSST:true})};const renderTable=()=>{const startIdx=(pagination.currentPage-1)*pagination.rowsPerPage;const endIdx=Math.min(startIdx+pagination.rowsPerPage,sorted.length);const currentPageData=sorted.slice(startIdx,endIdx);const totalPages=Math.ceil(sorted.length/pagination.rowsPerPage);container.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:5px;margin-bottom:10px"><div style="background:var(--bg-s);padding:4px;border-radius:4px;text-align:center"><div style="font-size:0.9rem;font-weight:700;line-height:1;color:var(--dang)">${stats.total}</div><div style="font-size:0.55rem;line-height:1.2;color:var(--tx-m);margin-top:2px">Transakcji</div></div><div style="background:var(--bg-s);padding:4px;border-radius:4px;text-align:center"><div style="font-size:0.9rem;font-weight:700;line-height:1;color:var(--act)">${fmtC(stats.cost)}</div><div style="font-size:0.55rem;line-height:1.2;color:var(--tx-m);margin-top:2px">Wartość</div></div><div style="background:var(--bg-s);padding:4px;border-radius:4px;text-align:center"><div style="font-size:0.9rem;font-weight:700;line-height:1;color:#10b981">${fmtN(stats.liters)}L</div><div style="font-size:0.55rem;line-height:1.2;color:var(--tx-m);margin-top:2px">Paliwo</div></div><div style="background:var(--bg-s);padding:4px;border-radius:4px;text-align:center"><div style="font-size:0.9rem;font-weight:700;line-height:1;color:var(--warn)">${stats.vehicles.size}</div><div style="font-size:0.55rem;line-height:1.2;color:var(--tx-m);margin-top:2px">Pojazdów</div></div></div><div style="overflow-x:auto;width:100%;-webkit-overflow-scrolling:touch;border:1px solid var(--bg-s);border-radius:6px;max-height:600px"><table style="width:100%;min-width:650px;font-size:0.75rem;border-collapse:collapse;white-space:nowrap"><thead><tr style="background:var(--bg-s);color:var(--tx-m)"><th style="padding:6px 8px;text-align:left">Data</th><th style="padding:6px 8px;text-align:left">Dzień</th><th style="padding:6px 8px;text-align:left;position:sticky;left:0;background:var(--bg-s);z-index:2">Pojazd</th><th style="padding:6px 8px;text-align:left">Grupa</th><th style="padding:6px 8px;text-align:right">Ilość</th><th style="padding:6px 8px;text-align:right">Wartość</th><th style="padding:6px 8px;text-align:left">Stacja</th></tr></thead><tbody>${currentPageData.map(r=>{const cl=resolveColor(r._opt.group);const lit=(r._opt.lit||0).toFixed(2);const val=(r._opt.val||0).toFixed(2);const qtyDisplay=r._opt.isFuel?lit+' L':lit+' szt.';return`<tr style="border-bottom:1px solid var(--bg-s)"><td style="padding:6px 8px">${r._opt.date?r._opt.date.toISOString().split('T')[0]:'-'}</td><td style="padding:6px 8px;color:var(--dang);font-weight:600;font-size:0.7rem">${r._opt.dayName}</td><td style="padding:6px 8px;font-weight:600;cursor:pointer;color:var(--act);position:sticky;left:0;background:var(--bg-p);z-index:1" onclick="showVehicleChart('${r._opt.reg}')">${r._opt.reg}</td><td style="padding:6px 8px"><span style="background:${cl}20;color:${cl};padding:2px 6px;border-radius:4px;font-size:0.65rem;font-weight:600">${r._opt.group}</span></td><td style="padding:6px 8px;text-align:right">${qtyDisplay}</td><td style="padding:6px 8px;text-align:right;font-weight:600">${val}</td><td style="padding:6px 8px;font-size:0.7rem;color:var(--tx-m)">${r._opt.stNo||'-'}</td></tr>`}).join('')}</tbody></table></div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:10px;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><button id="exportCsvBtn"style="padding:4px 12px;border-radius:4px;border:1px solid var(--bg-s);background:var(--bg-s);color:var(--tx-p);font-size:0.75rem;cursor:pointer;transition:all 0.2s"><i class="fas fa-file-csv"></i>CSV</button><button id="exportXlsxBtn"style="padding:4px 12px;border-radius:4px;border:1px solid var(--bg-s);background:var(--bg-s);color:var(--tx-p);font-size:0.75rem;cursor:pointer;transition:all 0.2s"><i class="fas fa-file-excel"></i>XLSX</button><span style="font-size:0.75rem;color:var(--tx-m);margin-left:8px">Wierszy:</span><select id="rowsPerPageSelect"style="padding:4px 8px;border-radius:4px;border:1px solid var(--bg-s);background:var(--bg-s);color:var(--tx-p);font-size:0.75rem;cursor:pointer"><option value="100"${pagination.rowsPerPage===100?'selected':''}>100</option><option value="500"${pagination.rowsPerPage===500?'selected':''}>500</option><option value="${sorted.length}">Wszystkie(${sorted.length})</option></select></div><div style="display:flex;align-items:center;gap:8px"><button id="prevPageBtn"style="padding:4px 12px;border-radius:4px;border:1px solid var(--bg-s);background:var(--bg-s);color:var(--tx-p);font-size:0.75rem;cursor:pointer;transition:all 0.2s"${pagination.currentPage===1?'disabled':''}><i class="fas fa-chevron-left"></i>Poprzednia</button><span style="font-size:0.75rem;color:var(--tx-m);white-space:nowrap">Strona<strong>${pagination.currentPage}</strong>z<strong>${totalPages}</strong><span style="opacity:0.7">(${startIdx+1}-${endIdx}z ${sorted.length})</span></span><button id="nextPageBtn"style="padding:4px 12px;border-radius:4px;border:1px solid var(--bg-s);background:var(--bg-s);color:var(--tx-p);font-size:0.75rem;cursor:pointer;transition:all 0.2s"${pagination.currentPage===totalPages?'disabled':''}>Następna<i class="fas fa-chevron-right"></i></button></div></div><div style="text-align:center;padding:8px;color:var(--tx-m);font-size:0.65rem">Wyświetlono wiersze ${startIdx+1}-${endIdx}z<strong>${sorted.length}</strong>transakcji weekendowych</div>`;const prevBtn=document.getElementById('prevPageBtn');const nextBtn=document.getElementById('nextPageBtn');const rowsSelect=document.getElementById('rowsPerPageSelect');const csvBtn=document.getElementById('exportCsvBtn');const xlsxBtn=document.getElementById('exportXlsxBtn');if(prevBtn){prevBtn.addEventListener('click',()=>{if(pagination.currentPage>1){pagination.currentPage--;renderTable()}})}if(nextBtn){nextBtn.addEventListener('click',()=>{const totalPages=Math.ceil(sorted.length/pagination.rowsPerPage);if(pagination.currentPage<totalPages){pagination.currentPage++;renderTable()}})}if(rowsSelect){rowsSelect.addEventListener('change',(e)=>{pagination.rowsPerPage=parseInt(e.target.value);pagination.currentPage=1;renderTable()})}if(csvBtn){csvBtn.addEventListener('click',exportToCSV)}if(xlsxBtn){xlsxBtn.addEventListener('click',exportToXLSX)}if(!document.getElementById('weekendPaginationStyles')){const style=document.createElement('style');style.id='weekendPaginationStyles';style.textContent=`#prevPageBtn:not(:disabled):hover,#nextPageBtn:not(:disabled):hover,#exportCsvBtn:hover,#exportXlsxBtn:hover{background:var(--act)!important;color:white!important;border-color:var(--act)!important}#prevPageBtn:disabled,#nextPageBtn:disabled{opacity:0.3;cursor:not-allowed}#rowsPerPageSelect:hover{border-color:var(--act)}`;document.head.appendChild(style)}};renderTable()};
-const refTab=()=>{const a=document.querySelector('.tab-content.active');if(!a)return;const t=a.id.replace('tab-','');if(t==='summaries'&&S.upd.sum)calcSum();else if(t==='station-reports'&&S.upd.st)calcSt();else if(t==='mileage-reports'&&S.upd.mil)calcMil();else if(t==='cpk'){if(S.upd.cpk||!S.rep.cpk.length)calcCPK()}else if(t==='ranking'){if(!S.rep.cpk.length||S.upd.cpk)calcCPK();else{calcRankingInternal();renRanking()}}else if(t==='dualfuel'){if(!S.rep.cpk.length||S.upd.cpk)calcCPK();else calcRankingInternal();if(!S.rep.lpgAnalysis||!S.rep.lpgAnalysis.length){const ys=S.selY.ranking?.length?[...S.selY.ranking]:S.summaryYears.slice(0,1);S.rep.lpgAnalysis=calcLPGAnalysis(ys);}renLPGAnalysis()}};
+const refTab=()=>{const a=document.querySelector('.tab-content.active');if(!a)return;const t=a.id.replace('tab-','');if(t==='summaries'&&S.upd.sum)calcSum();else if(t==='station-reports'&&S.upd.st)calcSt();else if(t==='mileage-reports'&&S.upd.mil)calcMil();else if(t==='cpk'){if(S.upd.cpk||!S.rep.cpk.length)calcCPK()}else if(t==='ranking'){if(!S.rep.cpk.length||S.upd.cpk)calcCPK();else{calcRankingInternal();renRanking()}}else if(t==='dualfuel'){if(!S.rep.cpk.length||S.upd.cpk)calcCPK();else calcRankingInternal();if(!S.rep.lpgAnalysis||!S.rep.lpgAnalysis.length){const ys=S.selY.ranking?.length?[...S.selY.ranking]:S.summaryYears.slice(0,1);S.rep.lpgAnalysis=calcLPGAnalysis(ys);}renLPGAnalysis()}else if(t==='custom-sum'&&window.csRefresh){window.csRefresh()}};
 const updCtrls=()=>{['summaries','station-reports','mileage-reports','cpk','ranking','dualfuel'].forEach(t=>{const d=$(`${t}-year-selector`);if(!d)return;const k=t==='summaries'?'sum':t==='station-reports'?'st':t==='mileage-reports'?'mil':(t==='ranking'||t==='dualfuel')?'ranking':'cpk';if(!S.selY[k]||!S.selY[k].length){if(S.summaryYears.length)S.selY[k]=[S.summaryYears[0]]}d.innerHTML=S.summaryYears.map(y=>`<button class="rc-yr ${S.selY[k].includes(y)?'active':''}"onclick="toggleYear('${t}',${y})">${y}</button>`).join('')})};
 const toggleYear=(t,y)=>{const key=t==='summaries'?'sum':t==='station-reports'?'st':t==='mileage-reports'?'mil':(t==='ranking'||t==='dualfuel')?'ranking':'cpk';const a=S.selY[key];if(a.includes(y))a.splice(a.indexOf(y),1);else a.push(y);if(t==='dualfuel'){if(!a.length)a.push(y);S.rep.lpgAnalysis=calcLPGAnalysis([...a]);updCtrls();renLPGAnalysis();if(typeof updateAllTabAnalytics==='function')setTimeout(updateAllTabAnalytics,100);return}updCtrls();S.upd[key==='ranking'?'cpk':key]=1;refTab();if(typeof updateAllTabAnalytics==='function')setTimeout(updateAllTabAnalytics,100)};
 let vehicleChartInstance=null;
@@ -2616,7 +2730,7 @@ const initDragDrop=()=>{renderMap('header');renderMap('value');renderMap('regist
 const initDateFilters=()=>{if(!$('dateFrom')){const grp=$('searchInput')?.parentElement;if(!grp)return;const d1=document.createElement('input');d1.type='date';d1.id='dateFrom';d1.className='neu-input';d1.style.display='none';d1.onchange=()=>filtTab(true);const d2=document.createElement('input');d2.type='date';d2.id='dateTo';d2.className='neu-input';d2.style.display='none';d2.onchange=()=>filtTab(true);grp.insertBefore(d1,$('searchInput'));grp.insertBefore(d2,$('searchInput'))}};
 const initNameOverride=()=>{const chk=$('check-nameOverride');if(chk){chk.checked=!!S.nameOv;chk.onchange=toggleNameOverride}};
 
-const initApp=()=>{loadSettings();initTheme();initDensity();initSearchListeners();_initMdpListener();initDragDrop();initDateFilters();initNameOverride();initEruda();console.log('FLManager v4.79_IDB_TCO_Meter załadowany!');console.log('Async chunked processing - działa lokalnie');console.log('Płynne przetwarzanie dużych zbiorów danych')};
+const initApp=()=>{loadSettings();initTheme();initDensity();initSearchListeners();_initMdpListener();initDragDrop();initDateFilters();initNameOverride();initEruda();console.log('FLManager v4.82_IDB_TCO_Meter załadowany!');console.log('Async chunked processing - działa lokalnie');console.log('Płynne przetwarzanie dużych zbiorów danych')};
 initApp();
 (function(){const css=document.createElement('style');css.textContent=`html{scroll-behavior:auto}.tabs-nav--fixed{position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:500!important;margin:0!important;padding:5px 8px 4px!important;background:var(--bg-s)!important;border-bottom:1px solid var(--bd)!important;box-shadow:0 2px 12px rgba(0,0,0,.18)!important;backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important;border-radius:0!important;will-change:transform;transform:translateZ(0)}.tab-ctrl-wrap--fixed{position:fixed!important;left:0!important;right:0!important;z-index:499!important;margin:0!important;padding:5px 8px 4px!important;background:var(--bg-s)!important;border-bottom:2px solid var(--bd)!important;box-shadow:0 3px 10px rgba(0,0,0,.13)!important;backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important;border-radius:0!important;will-change:transform;transform:translateZ(0)}.table-container{-webkit-overflow-scrolling:touch;scroll-behavior:smooth}.tabs-nav{will-change:transform}@media(max-width:768px){.tabs-nav--fixed,.tab-ctrl-wrap--fixed{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}}`;document.head.appendChild(css);const t=document.querySelector('.tabs-nav');if(!t)return;const np=document.createElement('div');np.id='tabs-nav-placeholder';np.style.cssText='display:none;flex-shrink:0';t.parentNode.insertBefore(np,t);let nf=false,not=0,npH=0,cnh=0,cwh=0,wntc=null,lat=null,rp=false,rt=null;const bw=()=>document.querySelectorAll('.tab-content').forEach(tab=>{if(tab.querySelector('.tab-ctrl-wrap'))return;const g=tab.querySelector('.gr-bar.gr-bar-main');if(!g)return;const c=Array.from(tab.children),i=c.indexOf(g);if(i<0)return;const eb=c.slice(0,i+1),w=document.createElement('div');w.className='tab-ctrl-wrap';tab.insertBefore(w,eb[0]);eb.forEach(e=>w.appendChild(e));const p=document.createElement('div');p.className='tab-ctrl-placeholder';p.style.display='none';tab.insertBefore(p,w)});const rth=()=>{document.querySelectorAll('.tab-ctrl-wrap--fixed').forEach(w=>{w.classList.remove('tab-ctrl-wrap--fixed');w.style.top=''});document.querySelectorAll('.tab-ctrl-placeholder').forEach(p=>p.style.display='none');wntc=null;cwh=0};const as=()=>{rp=false;return;const sy=window.scrollY;if(!nf){const nr=t.getBoundingClientRect();not=nr.top+sy;npH=t.offsetHeight}if(sy>not+2&&!nf){np.style.height=npH+'px';np.style.display='block';t.classList.add('tabs-nav--fixed');cnh=t.offsetHeight;nf=true}else if(sy<=not&&nf){t.classList.remove('tabs-nav--fixed');np.style.display='none';nf=false}const a=document.querySelector('.tab-content.active'),w=a?.querySelector('.tab-ctrl-wrap'),p=a?.querySelector('.tab-ctrl-placeholder');if(a!==lat){lat=a;wntc=null}if(!w||!p){rth();return}if(wntc===null){const f=w.classList.contains('tab-ctrl-wrap--fixed');if(f){w.classList.remove('tab-ctrl-wrap--fixed');p.style.display='none'}wntc=w.getBoundingClientRect().top+sy;cwh=w.offsetHeight;if(f){w.classList.add('tab-ctrl-wrap--fixed');p.style.display='block'}}if(sy>=wntc-cnh){if(!w.classList.contains('tab-ctrl-wrap--fixed')){p.style.height=cwh+'px';p.style.display='block';w.classList.add('tab-ctrl-wrap--fixed')}w.style.top=cnh+'px'}else if(w.classList.contains('tab-ctrl-wrap--fixed')){w.classList.remove('tab-ctrl-wrap--fixed');w.style.top='';p.style.display='none'}};bw();window.addEventListener('scroll',()=>{if(!rp){rp=true;requestAnimationFrame(as)}},{passive:true});window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{wntc=null;cwh=0;rth();requestAnimationFrame(as)},100)},{passive:true});const _st=window.switchTab;window.switchTab=(a,b)=>{rth();lat=null;if(_st)_st(a,b);bw();setTimeout(()=>{wntc=null;requestAnimationFrame(as)},60)}})();</script>
 
@@ -3411,6 +3525,227 @@ window.expLpgXLSXPivot=function(kind,keys){
  XLSX.writeFile(wb,'DualFuel_'+(isQ?'kwartaly':'miesiace')+'_kolumny_'+getCurrentDate()+'.xlsx',{compression:true,bookSST:true});
  showToast('Wyeksportowano: '+rl.length+' pojazdów, '+sel.length+' wskaźników');
 };
+})();
+</script>
+<script>
+(function(){
+var LS='flm_cs',st={regs:new Set(),grps:new Set(),years:new Set(),split:false,layout:'g',months:false,kon:false,fleet:false,from:'',to:'',fold:false,cf:{veh:false,grp:false,yr:false},loaded:false};
+var tx=[],recs=[],regs=[],groups=[],years=[],mil={},regQ='',NO='(brak grupy)',NK='(brak kontrahenta)';
+var MN=['Sty','Lut','Mar','Kwi','Maj','Cze','Lip','Sie','Wrz','Paź','Lis','Gru'];
+function $(i){return document.getElementById(i)}
+function esc2(t){return String(t==null?'':t).replace(/[&<>"']/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]})}
+function norm(s){return String(s).toUpperCase().replace(/[\s\-_.]+/g,'')}
+function load(){if(st.loaded)return;st.loaded=true;try{var o=JSON.parse(localStorage.getItem(LS)||'null');if(o){st.regs=new Set(o.regs||[]);st.grps=new Set(o.grps||[]);st.years=new Set((o.years||[]).map(Number));st.split=!!o.split;st.layout=['g','v','i','m','p'].indexOf(o.layout)>=0?o.layout:'g';st.months=!!o.months;st.from=o.from||'';st.to=o.to||'';st.kon=!!o.kon;st.fleet=!!o.fleet;st.fold=!!o.fold;st.cf=Object.assign({veh:false,grp:false,yr:false},o.cf||{})}}catch(e){}}
+function save(){try{localStorage.setItem(LS,JSON.stringify({regs:Array.from(st.regs),grps:Array.from(st.grps),years:Array.from(st.years),split:st.split,layout:st.layout,fleet:st.fleet,months:st.months,from:st.from,to:st.to,kon:st.kon,fold:st.fold,cf:st.cf}))}catch(e){}}
+var fPln=new Intl.NumberFormat('pl-PL',{minimumFractionDigits:2,maximumFractionDigits:2}),fInt=new Intl.NumberFormat('pl-PL',{maximumFractionDigits:0}),fCpk=new Intl.NumberFormat('pl-PL',{minimumFractionDigits:3,maximumFractionDigits:3}),fL=new Intl.NumberFormat('pl-PL',{minimumFractionDigits:1,maximumFractionDigits:1});
+var FM={p:fPln,i:fInt,c:fCpk,l:fL};
+/* rekordy: pojazd × rok × miesiąc × grupa × kontrahent */
+function build(){
+  var mp=new Map(),rc=new Map(),gc=new Map(),ys=new Set();tx=[];
+  for(var i=0;i<S.data.length;i++){var o=S.data[i]._opt;if(!o||!o.reg||o.year==null)continue;
+    var g=(o.group==null||o.group==='')?NO:String(o.group),k=o.kontrNazwa||o.kontrId||NK,m=o.month==null?0:o.month;
+    var key=o.reg+'\u0001'+o.year+'\u0001'+m+'\u0001'+g+'\u0001'+k,a=mp.get(key);
+    if(!a){a={reg:o.reg,y:o.year,m:m,g:g,k:k,v:0,l:0,t:0};mp.set(key,a)}
+    a.v+=o.val||0;if(o.isFuel)a.l+=o.lit||0;a.t++;tx.push({n:o.docNr||'',reg:o.reg,y:o.year,g:g,k:k,d:o.date instanceof Date?o.date.getTime():(o.date?+new Date(o.date):0),desc:o.desc||'',v:o.val||0,l:o.isFuel?(o.lit||0):0,mt:o.meter||o.rawMeter||0,fx:!!o.isFixed});ys.add(o.year);rc.set(o.reg,(rc.get(o.reg)||0)+1);gc.set(g,(gc.get(g)||0)+(o.val||0))}
+  recs=Array.from(mp.values());
+  regs=Array.from(rc.keys()).sort(function(a,b){return String(a).localeCompare(String(b))}).map(function(r){return{reg:r,n:rc.get(r)}});
+  groups=Array.from(gc.keys()).sort(function(a,b){return gc.get(b)-gc.get(a)});
+  years=Array.from(ys).sort(function(a,b){return a-b});
+  mil={};try{calcVO(years).forEach(function(r){(mil[r.reg]||(mil[r.reg]={}))[r.year]=r.totalDist||0})}catch(e){console.error(e)}
+  var rs=new Set(regs.map(function(r){return r.reg}));st.regs=new Set(Array.from(st.regs).filter(function(r){return rs.has(r)}));
+  st.grps=new Set(Array.from(st.grps).filter(function(g){return groups.indexOf(g)>=0}));
+  st.years=new Set(Array.from(st.years).filter(function(y){return years.indexOf(y)>=0}));
+  if(!st.years.size)years.forEach(function(y){st.years.add(y)});
+}
+function sumFor(rs){var gm={};recs.forEach(function(a){if(rs&&!rs.has(a.reg))return;gm[a.g]=(gm[a.g]||0)+a.v});return gm}
+function syncUI(){
+  var L=st.layout,kOk=!!(S&&S.hasKontrahent);
+  document.querySelectorAll('#csLaySeg button').forEach(function(b){b.classList.toggle('on',b.dataset.lay===L)});
+  document.querySelectorAll('#csPerSeg button').forEach(function(b){b.classList.toggle('on',(b.dataset.per==='m')===st.months)});
+  $('csPerSeg').classList.toggle('dis',L!=='g'&&L!=='v');$('csDtWrap').style.display=L==='p'?'inline-flex':'none';if($('csFrom').value!==st.from)$('csFrom').value=st.from;if($('csTo').value!==st.to)$('csTo').value=st.to;$('csSplitLb').classList.toggle('dis',L!=='g');
+  $('csKonLb').classList.toggle('dis',!kOk);$('csKonLb').title=kOk?'Dodaj kontrahenta jako poziom podsumowania':'Brak kolumny kontrahenta w wczytanych danych';
+  [['veh','csBoxVeh'],['grp','csBoxGrp'],['yr','csBoxYr']].forEach(function(x){$(x[1]).classList.toggle('cs-cl',!!st.cf[x[0]])});$('csGrid').style.display=st.fold?'none':'';$('tab-custom-sum').classList.toggle('cs-fold',st.fold);$('csColBtn').innerHTML='<i class="fas fa-chevron-'+(st.fold?'down':'up')+'"></i>';$('csColBtn').title=st.fold?'Rozwiń filtry':'Zwiń filtry';$('csKon').checked=st.kon&&kOk;$('csFleet').checked=st.fleet;
+}
+function renderLists(){
+  var q=regQ.toLowerCase(),h='';
+  regs.forEach(function(r){if(q&&String(r.reg).toLowerCase().indexOf(q)<0)return;h+='<label class="cs-it"><input type="checkbox" data-reg="'+esc2(r.reg)+'"'+(st.regs.has(r.reg)?' checked':'')+'><span class="cs-n">'+esc2(r.reg)+'</span><span class="cs-m">'+r.n+'</span></label>'});
+  $('csVehList').innerHTML=h||'<div class="cs-empty">Brak pojazdów</div>';
+  $('csVehCnt').textContent=st.regs.size+' / '+regs.length;
+  renderGroups();
+  $('csYears').innerHTML=years.map(function(y){return '<button type="button" class="cs-y'+(st.years.has(y)?' on':'')+'" data-y="'+y+'">'+y+'</button>'}).join('');
+}
+function renderGroups(){
+  var gm=sumFor(st.regs.size?st.regs:null),h='';
+  groups.forEach(function(g){h+='<label class="cs-it"><input type="checkbox" data-grp="'+esc2(g)+'"'+(st.grps.has(g)?' checked':'')+'><span class="cs-n" title="'+esc2(g)+'">'+esc2(g)+'</span><span class="cs-m">'+fInt.format(gm[g]||0)+' zł</span></label>'});
+  $('csGrpList').innerHTML=h||'<div class="cs-empty">Brak grup</div>';
+  $('csGrpCnt').textContent=st.grps.size+' / '+groups.length;
+}
+/* model tabeli: head[], fm[], rows[{cls,cells[]}] */
+function computeI(){
+  var kn=st.kon&&!!S.hasKontrahent,G=groups.filter(function(g){return st.grps.has(g)}),Y=years.filter(function(y){return st.years.has(y)});
+  var by=new Map(),all=[];
+  recs.forEach(function(r){if(!st.regs.has(r.reg)||!st.grps.has(r.g)||!st.years.has(r.y))return;all.push(r);var a=by.get(r.reg);if(!a){a=[];by.set(r.reg,a)}a.push(r)});
+  var dh=kn?['Pojazd','Grupa','Kontrahent']:['Pojazd','Grupa'],nd=dh.length,out=[];
+  var head=dh.concat(Y.map(String),['Razem (zł)']),fm=dh.map(function(){return't'}).concat(Y.map(function(){return'p'}),['p']);
+  function blk(name,list,km){
+    out.push({cls:'cs-vh',cells:[name]});
+    var gm=new Map(),tot={},lit={},tx={},sum=0,hasLit=false;
+    list.forEach(function(r){var k=r.g+(kn?'\u0001'+r.k:''),o=gm.get(k);if(!o){o={g:r.g,k:r.k,c:{},s:0};gm.set(k,o)}
+      o.c[r.y]=(o.c[r.y]||0)+r.v;o.s+=r.v;tot[r.y]=(tot[r.y]||0)+r.v;lit[r.y]=(lit[r.y]||0)+r.l;tx[r.y]=(tx[r.y]||0)+r.t;sum+=r.v;if(r.l>0)hasLit=true});
+    var pre=function(l,k){return kn?[name,l,k||'']:[name,l]};
+    Array.from(gm.values()).sort(function(a,b){return b.s-a.s}).forEach(function(o){out.push({cls:'',cells:pre(o.g,o.k).concat(Y.map(function(y){return o.c[y]==null?null:o.c[y]}),[o.s])})});
+    var row=function(cls,l,arr,t,f){out.push({cls:cls,rf:f,cells:pre(l).concat(arr,[t])})};
+    row('cs-sub','Razem (zł)',Y.map(function(y){return tot[y]==null?null:tot[y]}),sum,'p');
+    if(hasLit)row('cs-m','Paliwo (L)',Y.map(function(y){return lit[y]>0?lit[y]:null}),null,'l');
+    if(km){var ky=Y.map(function(y){var v=mil[name]&&mil[name][y];return tot[y]!=null&&v>0?v:null});
+      row('cs-m','Przebieg roczny (km)',ky,null,'i');row('cs-m','CPK (zł/km)',Y.map(function(y,i){return ky[i]?tot[y]/ky[i]:null}),null,'c')}
+    row('cs-m','Transakcje',Y.map(function(y){return tx[y]||null}),Y.reduce(function(a,y){return a+(tx[y]||0)},0),'i');
+  }
+  Array.from(by.keys()).sort(function(a,b){return String(a).localeCompare(String(b))}).forEach(function(k){blk(k,by.get(k),true)});
+  if(st.fleet&&all.length)blk('RAZEM — wszystkie pojazdy',all,false);
+  return{head:head,fm:fm,nd:nd,tc:nd+Y.length,hf:'i',rows:out,G:G,Y:Y}
+}
+function pad2(n){return n<10?'0'+n:''+n}
+function fD(t){if(!t)return'';var d=new Date(t);return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())}
+function computeP(){
+  var kn=st.kon&&!!S.hasKontrahent,G=groups.filter(function(g){return st.grps.has(g)}),Y=years.filter(function(y){return st.years.has(y)});
+  var f=st.from?+new Date(st.from+'T00:00:00'):0,t=st.to?+new Date(st.to+'T23:59:59'):0,rng=!!(f||t);
+  var by=new Map(),all=[];
+  tx.forEach(function(r){if(!st.regs.has(r.reg)||!st.grps.has(r.g))return;
+    if(rng){if(!r.d||(f&&r.d<f)||(t&&r.d>t))return}else if(!st.years.has(r.y))return;
+    all.push(r);var a=by.get(r.reg);if(!a){a=[];by.set(r.reg,a)}a.push(r)});
+  var dh=kn?['Data','Pojazd','Kontrahent','Nr FV','Grupa prod.','Dane kosztowe']:['Data','Pojazd','Nr FV','Grupa prod.','Dane kosztowe'],nd=dh.length;
+  var head=dh.concat(['Wartość netto (zł)','Przebieg (km)']),fm=dh.map(function(){return't'}).concat(['p','i']),out=[];
+  function pre(a,b,c,d){var x=[a,b];if(kn)x.push(c||'');x.push(d||'');x.push('');return x}
+  function blk(name,list,sep){
+    var l=list.slice().sort(function(a,b){return a.reg===b.reg?(a.d-b.d||a.mt-b.mt):String(a.reg).localeCompare(String(b.reg))});
+    if(sep)out.push({cls:'cs-vh',cells:[name]});
+    var sv=0,lo=null,hi=null,SV=/obs[łl]ug|przegl[aą]d|rozrz[aą]d|serwis/i;
+    l.forEach(function(r){sv+=r.v;if(r.mt>0){if(lo==null||r.mt<lo)lo=r.mt;if(hi==null||r.mt>hi)hi=r.mt}
+      var c=[fD(r.d),r.reg];if(kn)c.push(r.k);c.push(r.n,r.g,r.desc,r.v,r.mt>0?r.mt:null);out.push({cls:SV.test(r.g+' '+r.desc)?'cs-svc':'',cells:c})});
+    var c=[sep?'Razem':'RAZEM',sep?name:'wszystkie pojazdy'];if(kn)c.push('');c.push('','','Dystans w okresie (ost. − pierwszy odczyt)',sv,(hi!=null&&lo!=null&&hi>lo)?hi-lo:null);
+    out.push({cls:sep?'cs-sub':'cs-tot',cells:c});
+  }
+  Array.from(by.keys()).sort(function(a,b){return String(a).localeCompare(String(b))}).forEach(function(k){blk(k,by.get(k),true)});
+  if(st.fleet&&all.length)blk('RAZEM',all,false);
+  return{head:head,fm:fm,nd:nd,tc:-1,hf:'p',rows:out,G:G,Y:Y,rng:rng,f:st.from,t:st.to}
+}
+function compute(){
+  if(st.layout==='p')return computeP();
+  if(st.layout==='i')return computeI();
+  var RS=st.regs,Gs=st.grps,Ys=st.years,L=st.layout,fam=L==='g'||L==='v',mo=fam&&st.months,kn=st.kon&&!!S.hasKontrahent;
+  var G=groups.filter(function(g){return Gs.has(g)}),Y=years.filter(function(y){return Ys.has(y)});
+  var tk=fam&&!mo,s2=(L==='v'||L==='g')&&kn&&!mo,cols,colOf,dimOf,dh,mi=-1;
+  if(L==='g'){cols=G;colOf=function(r){return r.g};dh=['Rok'];if(mo){dh.push('Miesiąc');mi=1}dh.push('Pojazd');if(kn)dh.push('Kontrahent');
+    dimOf=function(r){var d=[r.y];if(mo)d.push(r.m);d.push(r.reg);if(kn)d.push(r.k);return d}}
+  else if(L==='v'){cols=G;colOf=function(r){return r.g};dh=['Pojazd','Rok'];if(mo){dh.push('Miesiąc');mi=2}if(kn)dh.push('Kontrahent');
+    dimOf=function(r){var d=[r.reg,r.y];if(mo)d.push(r.m);if(kn)d.push(r.k);return d}}
+  else if(L==='r'){cols=Y;colOf=function(r){return r.y};dh=kn?['Grupa','Pojazd','Kontrahent']:['Grupa','Pojazd'];dimOf=function(r){return kn?[r.g,r.reg,r.k]:[r.g,r.reg]}}
+  else{cols=MN.map(function(_,i){return i});colOf=function(r){return r.m};dh=kn?['Rok','Pojazd','Grupa','Kontrahent']:['Rok','Pojazd','Grupa'];dimOf=function(r){return kn?[r.y,r.reg,r.g,r.k]:[r.y,r.reg,r.g]}}
+  var nr=function(d){return{d:d,c:{},cost:0,lit:0,tx:0,km:0,ks:new Set()}};
+  var add=function(o,r,c){o.c[c]=(o.c[c]||0)+r.v;o.cost+=r.v;o.lit+=r.l;o.tx+=r.t;if(tk){var kk=r.reg+'\u0001'+r.y;if(!o.ks.has(kk)){o.ks.add(kk);o.km+=(mil[r.reg]&&mil[r.reg][r.y])||0}}};
+  var rows=new Map(),yt=new Map(),y2=new Map(),grand=nr([]),hasLit=false;
+  recs.forEach(function(r){if(!RS.has(r.reg)||!Gs.has(r.g)||!Ys.has(r.y))return;
+    var d=dimOf(r),k=d.join('\u0001'),row=rows.get(k);if(!row){row=nr(d);rows.set(k,row)}
+    var c=String(colOf(r));add(row,r,c);add(grand,r,c);
+    var f=d[0],y=yt.get(f);if(!y){y=nr([f]);yt.set(f,y)}add(y,r,c);
+    if(s2){var k2=d[0]+'\u0001'+d[1],z=y2.get(k2);if(!z){z=nr([d[0],d[1]]);y2.set(k2,z)}add(z,r,c)}
+    if(r.l>0)hasLit=true});
+  var arr=Array.from(rows.values());
+  arr.sort(function(a,b){if(L==='r'&&a.d[0]!==b.d[0])return yt.get(b.d[0]).cost-yt.get(a.d[0]).cost;for(var i=0;i<a.d.length;i++){var x=a.d[i],y=b.d[i];if(x===y)continue;return typeof x==='number'&&typeof y==='number'?x-y:String(x).localeCompare(String(y),'pl')}return 0});
+  var blank=dh.slice(1).map(function(){return''}),list=[];
+  arr.forEach(function(r,i){var pv=arr[i-1],nx=arr[i+1];
+    if(fam&&(!pv||pv.d[0]!==r.d[0]))list.push({cls:'cs-vh',r:r,lab:[(L==='g'?'Rok ':'')+r.d[0]].concat(blank)});
+    list.push({cls:'',r:r,lab:r.d.map(function(v,j){return j===mi?MN[v]:String(v)})});
+    if(s2&&(!nx||nx.d[0]!==r.d[0]||nx.d[1]!==r.d[1]))list.push({cls:'cs-sub2',r:y2.get(r.d[0]+'\u0001'+r.d[1]),lab:[r.d[0],'Razem '+r.d[1]].concat(dh.slice(2).map(function(){return''}))});
+    if((!nx||nx.d[0]!==r.d[0])&&(L==='v'||st.fleet))list.push({cls:'cs-sub',r:yt.get(r.d[0]),lab:['Razem '+r.d[0]].concat(blank)})});
+  var head=dh.slice(),fm=dh.map(function(){return't'});
+  cols.forEach(function(c){head.push(fam?c+' (zł)':L==='m'?MN[c]:String(c));fm.push('p')});
+  head.push(fam?'Koszt razem (zł)':'Razem (zł)');fm.push('p');
+  var showLit=fam&&hasLit;if(showLit){head.push('Paliwo (L)');fm.push('l')}
+  if(tk){head.push('Przebieg (km)','CPK (zł/km)');fm.push('i','c')}
+  head.push('Transakcje');fm.push('i');
+  var cells=function(it){var r=it.r,x=it.lab.slice();
+    if(it.cls==='cs-vh'){for(var i=1;i<head.length;i++)x.push(i<dh.length?'':null);return x}
+    cols.forEach(function(c){var v=r.c[String(c)];x.push(fam?(v||0):(v==null?null:v))});
+    x.push(r.cost);if(showLit)x.push(r.lit>0?r.lit:null);
+    if(tk){var hk=it.cls==='cs-sub2'?true:(it.cls==='cs-sub'||it.cls==='cs-tot')?L==='g':!kn;x.push(hk&&r.km>0?r.km:null);x.push(hk&&r.km>0?r.cost/r.km:null)}
+    x.push(r.tx);return x};
+  if(list.length&&st.fleet)list.push({cls:'cs-tot',r:grand,lab:['RAZEM'].concat(blank)});
+  return{head:head,fm:fm,nd:dh.length,tc:dh.length+cols.length,hf:fam?L:'',rows:list.map(function(it){return{cls:it.cls,cells:cells(it)}}),G:G,Y:Y}
+}
+function renderResult(){
+  var el=$('csResult'),lb=$('csSumLbl');
+  if(!recs.length){el.innerHTML='<div class="cs-empty">Brak danych — wczytaj pliki.</div>';lb.textContent='Brak danych';return}
+  lb.textContent='';
+  if(!st.regs.size||!st.grps.size||(!st.years.size&&!(st.layout==='p'&&(st.from||st.to)))){el.innerHTML='<div class="cs-empty"><i class="fas fa-hand-pointer" style="opacity:.4;font-size:1.4rem;display:block;margin-bottom:6px"></i>Zaznacz co najmniej jeden pojazd, jedną grupę kosztów i jeden rok.</div>';return}
+  var d=compute();
+  if(!d.rows.length){el.innerHTML='<div class="cs-empty">Brak danych dla wybranych kryteriów.</div>';return}
+  var h='<table class="cs-t"><thead><tr>'+d.head.map(function(t,i){return '<th'+(i<d.nd?' class="l"':'')+(t==='Przebieg (km)'&&st.kon&&S.hasKontrahent?' title="Przy kontrahencie przebieg jest wykazany tylko w wierszach „Razem [rok]”"':'')+'>'+esc2(t)+'</th>'}).join('')+'</tr></thead><tbody>';
+  d.rows.forEach(function(r){if(r.cls==='cs-vh'){h+='<tr class="cs-vh"><td class="l" colspan="'+d.head.length+'"><i class="fas fa-'+(d.hf==='g'?'calendar':'car')+'"></i> '+esc2(r.cells[0])+'</td></tr>';return}
+  h+='<tr class="'+r.cls+'">'+r.cells.map(function(v,i){
+    var f=(r.rf&&i>=d.nd)?r.rf:d.fm[i];if(f==='t')return '<td class="l'+(d.hf==='p'&&i===d.nd-1?' cs-w':'')+'">'+esc2(d.hf&&d.hf!=='p'&&i===0&&(d.hf==='i'||r.cls===''||r.cls==='cs-sub2')?'':v)+'</td>';
+    return '<td'+(i===d.tc?' class="cs-tc"':'')+'>'+(v==null?'—':FM[f].format(v))+'</td>'}).join('')+'</tr>'});
+  el.innerHTML=h+'</tbody></table>';
+}
+function renderAll(){syncUI();renderLists();renderResult()}
+window.csRefresh=function(){load();if(!S.data||!S.data.length){recs=[];regs=[];groups=[];years=[];renderAll();return}build();renderAll()};
+function applyList(){
+  var toks=$('csRegInput').value.split(/[\n\r,;|\s]+/).map(norm).filter(Boolean),u=Array.from(new Set(toks)),ix=new Map(regs.map(function(r){return[norm(r.reg),r.reg]}));
+  var hit=[],miss=[];u.forEach(function(t){ix.has(t)?hit.push(ix.get(t)):miss.push(t)});
+  if(!u.length){$('csRegStatus').textContent='Lista pusta';return}
+  st.regs=new Set(hit);save();renderAll();
+  var s=$('csRegStatus');s.textContent=hit.length+' / '+u.length+(miss.length?' · brak: '+miss.slice(0,2).join(', ')+(miss.length>2?'…':''):'');s.title=miss.join(', ');
+  $('csRegBtn').classList.add('active');
+}
+function regPanel(){
+  var p=$('csRegPanel'),b=$('csRegBtn');
+  if(p.classList.contains('open')){p.classList.remove('open');document.removeEventListener('click',outside,true);return}
+  var r=b.getBoundingClientRect(),left=Math.max(4,r.right-280);p.style.top=(r.bottom+4)+'px';p.style.left=left+'px';p.style.maxHeight=Math.max(160,innerHeight-r.bottom-12)+'px';p.style.overflowY='auto';p.classList.add('open');document.addEventListener('click',outside,true);
+}
+function outside(e){var p=$('csRegPanel');if(!p.contains(e.target)&&!e.target.closest('#csRegBtn')){p.classList.remove('open');document.removeEventListener('click',outside,true)}}
+function init(){
+  var root=$('tab-custom-sum');if(!root)return;
+  root.addEventListener('change',function(e){var t=e.target;
+    if(t.id==='csSplit'){st.split=t.checked;save();renderResult();return}
+    if(t.id==='csFrom'||t.id==='csTo'){st[t.id==='csFrom'?'from':'to']=t.value;save();renderResult();return}
+    if(t.id==='csFleet'){st.fleet=t.checked;save();renderResult();return}
+    if(t.id==='csKon'){st.kon=t.checked;save();renderResult();return}
+    if(t.dataset&&t.dataset.reg!=null){t.checked?st.regs.add(t.dataset.reg):st.regs.delete(t.dataset.reg);save();$('csVehCnt').textContent=st.regs.size+' / '+regs.length;renderGroups();renderResult()}
+    else if(t.dataset&&t.dataset.grp!=null){t.checked?st.grps.add(t.dataset.grp):st.grps.delete(t.dataset.grp);save();$('csGrpCnt').textContent=st.grps.size+' / '+groups.length;renderResult()}});
+  root.addEventListener('click',function(e){var fh=e.target.closest('[data-fold]');if(fh){st.cf[fh.dataset.fold]=!st.cf[fh.dataset.fold];save();syncUI();return}var b=e.target.closest('button');if(!b)return;
+    if(b.id==='csColBtn'){st.fold=!st.fold;save();syncUI();return}
+    if(b.dataset.lay){st.layout=b.dataset.lay;save();syncUI();renderResult();return}
+    if(b.dataset.per){st.months=b.dataset.per==='m';save();syncUI();renderResult();return}
+    if(b.id==='csRegBtn'){regPanel();return}
+    if(b.id==='csRegApply'){applyList();return}
+    if(b.id==='csRegClear'){$('csRegInput').value='';$('csRegStatus').textContent='';b.blur();$('csRegBtn').classList.remove('active');return}
+    if(b.dataset.y){var y=+b.dataset.y;st.years.has(y)?st.years.delete(y):st.years.add(y);save();b.classList.toggle('on');renderResult();return}
+    var a=b.dataset.a;if(!a)return;
+    if(a==='veh-all')regs.forEach(function(r){st.regs.add(r.reg)});
+    else if(a==='veh-none')st.regs.clear();
+    else if(a==='veh-flt'){var q=regQ.toLowerCase();regs.forEach(function(r){if(!q||String(r.reg).toLowerCase().indexOf(q)>=0)st.regs.add(r.reg)})}
+    else if(a==='grp-all')groups.forEach(function(g){st.grps.add(g)});
+    else if(a==='grp-none')st.grps.clear();
+    save();renderAll()});
+  var inp=$('csVehSearch'),tm=null;inp.addEventListener('input',function(){clearTimeout(tm);tm=setTimeout(function(){regQ=inp.value.trim();renderLists()},120)});
+}
+window.csExport=function(kind){
+  if(!recs.length){showToast('Brak danych do wyeksportowania.');return}
+  var d=compute();if(d.rows.length<2){showToast('Brak danych do wyeksportowania.');return}
+  var out=d.rows.filter(function(r){return r.cls!=='cs-vh'}).map(function(r){var o={};d.head.forEach(function(h,i){var v=r.cells[i],f=(r.rf&&i>=d.nd)?r.rf:d.fm[i];o[h]=f==='t'?v:(v==null?null:(f==='i'?Math.round(v):+v.toFixed(f==='c'?4:2)))});return o});
+  var date=new Date().toISOString().slice(0,10);
+  if(kind==='csv'){saveCSV(out,'Zestawienie_'+date);return}
+  if(typeof XLSX==='undefined'){showToast('Biblioteka XLSX nie jest załadowana.');return}
+  var ws=XLSX.utils.json_to_sheet(out);
+  ws['!cols']=d.head.map(function(k){return{wch:Math.max(12,Math.min(32,k.length+2))}});
+  var LN={g:'Rok · grupy'+(st.months?' (z podziałem na miesiące)':''),v:'Pojazdy (blok na pojazd)',i:'Pojazdy ⇄ (grupy w wierszach, lata w kolumnach)',r:'Grupa · lata',m:'Pojazd · miesiące',p:'Rozliczenie po sprzedaży (lista transakcji)'};
+  var notes=['Kryteria zestawienia:','Układ: '+LN[st.layout]+(st.kon&&S.hasKontrahent?' · z kontrahentem':''),'Pojazdy ('+st.regs.size+'): '+Array.from(st.regs).sort().join(', '),'Grupy kosztów ('+d.G.length+'): '+d.G.join(', '),(d.rng?'Zakres dat: '+(d.f||'…')+' — '+(d.t||'…'):'Lata: '+d.Y.join(', ')),'Przebieg/CPK w układach „Rok · grupy” (bez miesięcy) (przy kontrahencie tylko w wierszach „Razem [rok]”) i „Pojazdy” (przy kontrahencie przebieg pojazdu powtarza się w wierszach każdego kontrahenta, sumy bez dublowania; różnica odczytów licznika w roku, jak w zakładce Przebiegi).','Wygenerowano: '+date];
+  XLSX.utils.sheet_add_aoa(ws,notes.map(function(t){return[t]}),{origin:{r:out.length+2,c:0}});
+  var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Zestawienie');
+  XLSX.writeFile(wb,'Zestawienie_'+date+'.xlsx',{compression:true,bookSST:true});
+};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 </script>
 </body>
