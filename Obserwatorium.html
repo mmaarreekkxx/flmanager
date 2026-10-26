@@ -1,0 +1,2493 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#02040a">
+<title>Obserwatorium — glob NASA GIBS i przeloty ISS</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<!-- SGP4 (propagator orbit z TLE). Ładowany asynchronicznie; bez niego działa uproszczony model Kepler+J2 -->
+<script id="satjs" async src="https://cdn.jsdelivr.net/npm/satellite.js@5.0.0/dist/satellite.min.js"></script>
+<style>
+  :root{ --panel: rgba(9,15,29,.86); --line: rgba(148,175,220,.16); --acc:#6fd3ff; }
+  html,body{height:100%;margin:0;background:#02040a;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
+  #stage{position:fixed;inset:0;touch-action:none;cursor:grab;background:#02040a;contain:strict}
+  #stage.dragging{cursor:grabbing}
+  #stage canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
+  #ovc{pointer-events:none}
+  /* bez backdrop-filter: rozmycie pod panelami nad animowanym canvasem mocno obciąża kompozytor */
+  .glass{background:var(--panel);border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.4)}
+  .menu-h{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#7f93b0}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 2px;cursor:pointer}
+  .row b{display:block;font-weight:500;font-size:12.5px;color:#e5edf8}
+  .row small{display:block;font-size:10.5px;color:#7f93b0;line-height:1.3}
+  .sw{appearance:none;-webkit-appearance:none;width:34px;height:19px;border-radius:99px;background:rgba(148,163,184,.28);position:relative;cursor:pointer;transition:background .2s;flex:none;outline:none}
+  .sw::after{content:"";position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:#cbd5e1;transition:transform .2s}
+  .sw:checked{background:#2a9fd8}
+  .sw:checked::after{transform:translateX(15px);background:#fff}
+  .sw:focus-visible{box-shadow:0 0 0 2px rgba(111,211,255,.6)}
+  hr.sep{border:0;border-top:1px solid var(--line);margin:8px 0}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:18px;background:transparent;cursor:pointer;width:100%}
+  input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:rgba(148,163,184,.3)}
+  input[type=range]::-moz-range-track{height:4px;border-radius:4px;background:rgba(148,163,184,.3)}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#e8f6ff;margin-top:-5px;box-shadow:0 0 0 3px rgba(111,211,255,.25)}
+  input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radius:50%;background:#e8f6ff;box-shadow:0 0 0 3px rgba(111,211,255,.25)}
+  .btn{font-size:11.5px;padding:6px 10px;border-radius:10px;background:rgba(148,175,220,.12);border:1px solid var(--line);color:#dbe7f7;cursor:pointer;transition:background .15s;white-space:nowrap}
+  .btn:hover{background:rgba(148,175,220,.22)}
+  .btn.on{background:#1c6e9c;border-color:rgba(111,211,255,.5);color:#fff}
+  .icon-btn{width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;background:rgba(148,175,220,.12);border:1px solid var(--line);color:#e5edf8;cursor:pointer;flex:none;font-size:13px;transition:background .15s}
+  .icon-btn:hover{background:rgba(148,175,220,.24)}
+  .icon-btn.on{background:#1c6e9c;border-color:rgba(111,211,255,.5)}
+  .sel{color-scheme:dark;font-size:11.5px;padding:6px 6px;border-radius:10px;background:rgba(10,18,34,.95);border:1px solid var(--line);color:#dbe7f7;outline:none}
+  .seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:3px;border-radius:12px;background:rgba(148,175,220,.1);margin-top:6px}
+  .seg button{font-size:11.5px;padding:6px 4px;border-radius:9px;color:#9fb2cc;cursor:pointer;transition:all .15s}
+  .seg button.on{background:#1c6e9c;color:#fff}
+  .seg button:disabled{opacity:.35;cursor:not-allowed}
+  /* panele (menu mapy i ISS): dwie kolumny + automatyczne dopasowanie skali do okna — patrz fitPanel() */
+  .panel{width:min(580px,calc(100vw - 1.5rem));box-sizing:border-box;transform-origin:bottom right}
+  #issPanel{transform-origin:top right}
+  .cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:18px;align-items:start}
+  .cols>div{min-width:0}
+  @media (max-width:640px){.cols{grid-template-columns:minmax(0,1fr)}}
+  .panel .row{padding:5px 2px}
+  .panel hr.sep{margin:6px 0}
+  /* menu mapy: wąska, jedna kolumna (dwie kolumny zostają tylko w panelu ISS); wysokość dopasowuje fitPanel() */
+  /* panel ISS: węższy (510 px) i o ok. 1 px większa czcionka niż reszta interfejsu */
+  #issPanel.panel{width:min(480px,calc(100vw - 1.5rem))}
+  #issPanel .cols{column-gap:12px}
+  #issPanel [class*="text-["]{font-size:12.5px}
+  #issPanel #issLive{font-size:13px}
+  #issPanel .menu-h{font-size:12px}
+  #issPanel .row b{font-size:14px}
+  #issPanel .row small{font-size:12.5px}
+  #issPanel .btn{font-size:13.5px;padding:6px 3px;text-align:center}
+  #issPanel .sel{font-size:13.5px}
+  #issPanel .pass b{font-size:14px}
+  #issPanel .pass small,#issPanel .pass .pl,#issPanel .vis{font-size:12.5px}
+  /* stała wysokość listy przelotów: prawa kolumna rozciąga się do wysokości lewej, a lista przewija się wewnątrz —
+     filtrowanie ("gołym okiem", min. wysokość) nie zmienia już rozmiaru panelu ani jego skali */
+  #issPanel .cols{align-items:stretch}
+  #issPanel .cols>div:last-child{display:flex;flex-direction:column}
+  #issPanel #passList{flex:1 1 0;min-height:150px;overflow-y:auto;padding-right:3px}
+  #issPanel #skyCap{min-height:2.9em}
+  @media (max-width:640px){#issPanel #passList{flex:none;height:220px}}
+  #menu.panel{width:min(312px,calc(100vw - 1.5rem))}
+  #menu .cols{grid-template-columns:minmax(0,1fr);row-gap:8px}
+  #menu .row{padding:4px 2px}
+  .place{display:block;width:100%;text-align:left;font-size:12px;padding:6px 9px;border-radius:9px;color:#c9d7ea;cursor:pointer;transition:background .15s;white-space:nowrap}
+  .place:hover{background:rgba(111,211,255,.14);color:#fff}
+  .place i{font-style:normal;color:#6b7f9c;font-size:10px;margin-left:4px}
+  .chip{display:inline-flex;align-items:center;gap:8px;padding:7px 12px 7px 10px;border-radius:999px;cursor:pointer;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;color:#eaf6ff;transition:border-color .15s}
+  .chip:hover{border-color:rgba(111,211,255,.5)}
+  .chip .dot{width:7px;height:7px;border-radius:50%;background:#475569;transition:background .3s,box-shadow .3s}
+  .chip .dot.on{background:#34d399;box-shadow:0 0 8px #34d399}
+  #toasts{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:60;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:min(560px,calc(100vw - 24px))}
+  .toast{padding:9px 14px;border-radius:12px;font-size:12.5px;line-height:1.4;color:#e8f0fb;background:rgba(9,15,29,.94);border:1px solid var(--line);opacity:0;transform:translateY(-8px);transition:opacity .3s,transform .3s;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+  .toast.show{opacity:1;transform:none}
+  .toast.warn{border-color:rgba(251,191,36,.55)}
+  .toast.ok{border-color:rgba(52,211,153,.5)}
+  .pass{display:block;width:100%;text-align:left;padding:5px 9px;border-radius:10px;border:1px solid transparent;background:rgba(148,175,220,.07);margin-bottom:4px;cursor:pointer;transition:background .15s}
+  .pass:hover{background:rgba(148,175,220,.16)}
+  .pass.on{border-color:rgba(251,191,36,.6);background:rgba(251,191,36,.1)}
+  .pass b{font-size:12px;font-weight:600;color:#eaf2fc}
+  .pass small{display:block;font-size:10.5px;color:#8da2c0;margin-top:1px}
+  .pass .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .pass .pl{font-size:10.5px;color:#8da2c0;white-space:nowrap}
+  .vis{font-style:normal;color:#fcd34d;font-size:10.5px;white-space:nowrap}
+  .kv{display:flex;justify-content:space-between;gap:10px}
+  .kv span:first-child{color:#7f93b0}
+  ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:rgba(148,163,184,.3);border-radius:6px}
+  #places-m{scrollbar-width:none}#places-m::-webkit-scrollbar{display:none}
+</style>
+</head>
+<body class="text-slate-200 overflow-hidden select-none">
+
+<div id="stage">
+  <canvas id="glc"></canvas>
+  <canvas id="swc" style="display:none"></canvas>
+  <canvas id="ovc"></canvas>
+</div>
+
+<div id="toasts"></div>
+
+<!-- Lewy górny róg: nazwa + współrzędne -->
+<div class="fixed top-4 left-4 z-20 pointer-events-none max-w-[78vw]">
+  <div class="flex items-center gap-3">
+    <svg class="w-9 h-9 text-sky-300 flex-none" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="24" cy="24" r="16"/><ellipse cx="24" cy="24" rx="7" ry="16"/><path d="M8 24h32M10.5 15h27M10.5 33h27"/><circle cx="24" cy="24" r="21" opacity=".35" stroke-dasharray="2 4"/></svg>
+    <div>
+      <div class="text-[13px] font-semibold tracking-[0.28em] uppercase text-white">Obserwatorium</div>
+      <div class="text-[11px] text-slate-400 tracking-wide">Glob rzeczywisty · NASA GIBS · ISS</div>
+    </div>
+  </div>
+  <div class="mt-3 glass rounded-xl px-3 py-2 w-fit text-[11px] leading-[1.7] font-mono">
+    <div><span class="text-slate-500">ŚRODEK</span> <span id="cCenter">—</span></div>
+    <div><span class="text-slate-500">KURSOR</span> <span id="cHover">—</span></div>
+    <div><span class="text-slate-500">SKALA&nbsp;</span> <span id="cScale">—</span></div>
+    <div><span class="text-slate-500">NOC&nbsp;&nbsp;&nbsp;</span> <span id="cNight">—</span></div>
+    <div><span class="text-slate-500">ISS&nbsp;&nbsp;&nbsp;</span> <span id="cIss">—</span></div>
+  </div>
+  <div class="mt-2 flex items-center gap-2 text-[11px] text-slate-300">
+    <span id="stDot" class="w-2 h-2 rounded-full bg-sky-400 animate-pulse flex-none"></span><span id="stTxt">Start…</span>
+  </div>
+</div>
+
+<!-- Prawy górny róg -->
+<div class="fixed top-4 right-4 z-20 flex gap-2">
+  <button id="btnIss" class="icon-btn pointer-events-auto" title="ISS — położenie i przeloty" aria-label="ISS — położenie i przeloty">🛰</button>
+  <button id="btnFull" class="icon-btn pointer-events-auto" title="Pełny ekran" aria-label="Pełny ekran">⛶</button>
+</div>
+
+<!-- Panel ISS -->
+<div id="issPanel" class="panel fixed top-16 right-3 z-30 hidden glass rounded-2xl p-3">
+ <div id="issIn">
+  <div class="flex items-center justify-between mb-1.5">
+    <span class="menu-h">Międzynarodowa Stacja Kosmiczna</span>
+    <button id="issClose" class="icon-btn" style="width:26px;height:26px" aria-label="Zamknij">✕</button>
+  </div>
+  <div class="cols">
+    <div>
+      <div id="issLive" class="font-mono text-[11px] leading-[1.75]"></div>
+      <div class="grid grid-cols-2 gap-1.5 mt-2">
+        <button id="iGo" class="btn">Pokaż i śledź</button>
+        <button id="iNow" class="btn">Czas rzeczywisty</button>
+      </div>
+      <label class="row"><span><b>Pokaż ISS</b><small>znacznik, ślad i zasięg widoczności</small></span><input id="iShow" type="checkbox" class="sw" checked></label>
+      <label class="row"><span><b>Orbita i ślad na ziemi</b><small>−45 min … +100 min względem czasu na globie</small></span><input id="iOrbit" type="checkbox" class="sw" checked></label>
+      <label class="row"><span><b>Zasięg widoczności</b><small>obszar, z którego ISS jest nad horyzontem</small></span><input id="iFoot" type="checkbox" class="sw" checked></label>
+      <canvas id="skyc" width="360" height="360" class="mx-auto block mt-2" style="width:150px;height:150px"></canvas>
+      <div id="skyCap" class="text-[10.5px] text-slate-500 text-center mt-0.5 leading-snug"></div>
+    </div>
+    <div>
+      <div class="menu-h mb-1">Obserwator</div>
+      <select id="obsSel" class="sel w-full" aria-label="Miejsce obserwatora"></select>
+      <div class="grid grid-cols-2 gap-1.5 mt-1.5">
+        <button id="obsGeo" class="btn">Moja lokalizacja</button>
+        <button id="obsMid" class="btn">Środek widoku</button>
+      </div>
+      <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5 mt-2">
+        <span class="text-[10.5px] text-slate-400 flex-none">Min. wysokość</span>
+        <select id="pMinEl" class="sel" aria-label="Minimalna wysokość"><option value="5">5°</option><option value="10" selected>10°</option><option value="20">20°</option><option value="40">40°</option></select>
+        <label class="flex items-center gap-1.5 text-[10.5px] text-slate-300 ml-auto cursor-pointer"><input id="pVis" type="checkbox" class="sw" style="width:28px;height:16px">gołym okiem</label>
+      </div>
+      <div class="flex items-baseline justify-between mt-3 mb-1.5"><span class="menu-h">Najbliższe przeloty</span><span class="text-[10px] text-slate-500">★ gołym okiem</span></div>
+      <div id="passList"></div>
+    </div>
+  </div>
+  <div id="issMeta" class="text-[10.5px] text-slate-500 mt-2 leading-snug"></div>
+ </div>
+</div>
+
+<!-- Miejsca (desktop) -->
+<div class="fixed left-4 top-[292px] bottom-[110px] z-20 hidden md:block pointer-events-none">
+  <div class="glass rounded-2xl p-2 w-[188px] max-h-full overflow-auto pointer-events-auto">
+    <div class="menu-h px-2 pt-1 pb-1">Miejsca</div>
+    <div id="places"></div>
+  </div>
+</div>
+
+<!-- Miejsca (mobile) -->
+<div id="places-m" class="fixed left-0 right-0 bottom-[86px] z-20 md:hidden overflow-x-auto flex gap-2 px-3 pb-1"></div>
+
+<!-- Dolny pasek: czas -->
+<div class="fixed bottom-3 left-1/2 -translate-x-1/2 z-20 w-[min(640px,calc(100vw_-_1.5rem))]">
+  <div class="glass rounded-2xl px-3 py-2 flex items-center gap-2.5">
+    <button id="tPlay" class="icon-btn" title="Odtwarzaj / pauza" aria-label="Odtwarzaj lub pauza">❚❚</button>
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center justify-between gap-2 text-[11px] font-mono">
+        <span id="tClock" class="text-slate-100 truncate">—</span>
+        <span id="tSun" class="text-slate-500 truncate hidden sm:inline">—</span>
+      </div>
+      <input id="tSlider" type="range" min="0" max="1439" step="1" aria-label="Godzina UTC">
+    </div>
+    <select id="tSpeed" class="sel" aria-label="Prędkość czasu">
+      <option value="1">1×</option>
+      <option value="10">10×</option>
+      <option value="60">1 min/s</option>
+      <option value="600">10 min/s</option>
+      <option value="3600">1 godz./s</option>
+      <option value="21600">6 godz./s</option>
+    </select>
+    <button id="tNow" class="btn">Teraz</button>
+  </div>
+</div>
+
+<!-- Prawy dolny róg: menu zoomu, chip, podpis -->
+<div class="fixed right-3 bottom-[8.6rem] md:bottom-[5.9rem] xl:bottom-4 xl:right-4 z-30 flex flex-col items-end gap-2">
+  <div id="menu" class="panel glass rounded-2xl p-3 hidden">
+   <div id="menuIn"><div class="cols"><div>
+    <div class="flex items-center justify-between mb-1.5"><span class="menu-h">Zoom</span><span id="mZoomVal" class="font-mono text-[11px] text-slate-200">×1,0</span></div>
+    <div class="flex items-center gap-2">
+      <button id="zOut" class="icon-btn" aria-label="Oddal">−</button>
+      <input id="zSlider" type="range" min="0" max="1000" aria-label="Zoom">
+      <button id="zIn" class="icon-btn" aria-label="Przybliż">+</button>
+    </div>
+    <hr class="sep">
+    <div class="menu-h mb-0.5">Warstwy</div>
+    <label class="row"><span><b>Szczegóły online</b><small>NASA GIBS · od ×2,8 · Blue Marble + VIIRS</small></span><input id="mDetail" type="checkbox" class="sw" checked></label>
+    <label class="row"><span><b>Chmury</b><small>symulacja proceduralna (wypiekana na GPU)</small></span><input id="mClouds" type="checkbox" class="sw"></label>
+    <label class="row"><span><b>Atmosfera</b><small>rozpraszanie Rayleigha, zmierzch</small></span><input id="mAtmo" type="checkbox" class="sw" checked></label>
+    <label class="row"><span><b>Światła miast</b><small id="nRowSub">Earth at Night 2012</small></span><input id="mLights" type="checkbox" class="sw" checked></label>
+    <label class="row"><span><b>Obrót automatyczny</b><small>wyłącza się po dotknięciu globu</small></span><input id="mAuto" type="checkbox" class="sw" checked></label>
+    <div class="text-[10.5px] text-slate-500 mt-2 leading-snug">Przeciągnij — obrót · kółko / uszczypnięcie — zoom · dwuklik — przybliż w punkt · kliknięcie ISS — śledzenie · strzałki i +/− z klawiatury.</div>
+   </div>
+   <div>
+    <div class="rounded-xl p-2.5" style="background:rgba(148,175,220,.07);border:1px solid var(--line)">
+      <div class="menu-h mb-1.5">Źródło świateł nocnych</div>
+      <select id="nSel" class="sel w-full" aria-label="Źródło świateł nocnych"></select>
+      <div id="nDesc" class="text-[10.5px] text-slate-400 mt-1.5 leading-snug"></div>
+      <div id="nDateRow" class="hidden mt-2">
+        <div class="flex items-center gap-1.5">
+          <button id="nPrev" class="icon-btn" aria-label="Poprzedni dzień" title="Poprzedni dzień">◀</button>
+          <input id="nDate" type="date" class="sel flex-1 min-w-0" aria-label="Data obserwacji">
+          <button id="nNext" class="icon-btn" aria-label="Następny dzień" title="Następny dzień">▶</button>
+        </div>
+        <button id="nLatest" class="btn w-full mt-1.5">Najnowsze dostępne</button>
+      </div>
+      <div class="flex items-center gap-2 mt-2">
+        <span class="text-[11px] text-slate-400 flex-none">Jasność</span>
+        <input id="nGain" type="range" min="40" max="240" value="100" aria-label="Jasność świateł">
+        <span id="nGainV" class="font-mono text-[10.5px] text-slate-300 w-9 text-right flex-none">1,0×</span>
+      </div>
+      <div id="nStat" class="text-[10.5px] text-slate-500 mt-1.5">—</div>
+    </div>
+    <hr class="sep">
+    <div class="menu-h">Renderowanie</div>
+    <div class="seg"><button id="rGpu">GPU · WebGL2</button><button id="rSoft">Programowy</button></div>
+    <div id="mInfo" class="text-[11px] text-slate-400 mt-2 leading-snug"></div>
+    <button id="btnRetry" class="btn w-full mt-2">Ponów połączenie z NASA GIBS</button>
+   </div>
+  </div></div>
+  </div>
+  <button id="chip" class="chip glass" aria-haspopup="true" aria-expanded="false" title="Zoom i warstwy">
+    <span id="chipDot" class="dot"></span><span id="chipVal">×1,0</span>
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 6.5 5 3.5l3 3"/></svg>
+  </button>
+  <div id="credit" class="text-[10.5px] text-slate-400/90 text-right max-w-[250px] leading-snug pointer-events-none" style="text-shadow:0 1px 6px #000">NASA GIBS</div>
+</div>
+
+<noscript><div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;color:#fff">Do działania globu potrzebny jest JavaScript.</div></noscript>
+
+<script>
+'use strict';
+/* =====================================================================
+   OBSERWATORIUM — natywny JS, WebGL2 + render programowy, NASA GIBS, ISS
+
+   Techniki płynności:
+   • klipmapa kafelków: dwa poziomy (dokładny + zapasowy) w teksturach toroidalnych (REPEAT) —
+     przesuwanie widoku dogrywa tylko brakujące kafelki, bez przebudowy i bez przeskoków
+   • wgrywanie tekstur kafelek po kafelku (texSubImage2D) z budżetem czasu na klatkę
+   • dekodowanie obrazów poza głównym wątkiem (createImageBitmap), bez konwersji barw
+   • pamięć tekstur alokowana raz (texStorage2D), mipmapy odświeżane z opóźnieniem
+   • chmury wypiekane do tekstury w paskach (bez kosztu fbm w każdym pikselu)
+   • równoległa kompilacja shaderów (KHR_parallel_shader_compile)
+   • render na żądanie (w bezruchu ok. 12 kl./s), adaptacyjna rozdzielczość z histerezą
+   • kafelki z trzech domen GIBS (a/b/c) i prefetch w kierunku ruchu
+   ===================================================================== */
+const C_ = {};
+const $ = s => s.charAt(0) === '#' ? (C_[s] || (C_[s] = document.getElementById(s.slice(1)))) : document.querySelector(s);
+const DEG = Math.PI / 180, TAU = Math.PI * 2;
+const clamp = (v, a, b) => v < a ? a : (v > b ? b : v);
+const lerp = (a, b, t) => a + (b - a) * t;
+const wrap180 = a => ((a + 180) % 360 + 360) % 360 - 180;
+const mod = (a, n) => ((a % n) + n) % n;
+const smooth = (a, b, x) => { let t = (x - a) / (b - a); t = t < 0 ? 0 : t > 1 ? 1 : t; return t * t * (3 - 2 * t); };
+const fmtNum = (v, d = 1) => v.toLocaleString('pl-PL', { minimumFractionDigits: d, maximumFractionDigits: d });
+const fmtRes = m => m >= 1000 ? fmtNum(m / 1000, m >= 10000 ? 0 : 1) + ' km/px' : Math.round(m) + ' m/px';
+const fmtLat = l => fmtNum(Math.abs(l), 2) + '°' + (l >= 0 ? 'N' : 'S');
+const fmtLon = l => fmtNum(Math.abs(l), 2) + '°' + (l >= 0 ? 'E' : 'W');
+const IS_MOBILE = (window.matchMedia && matchMedia('(pointer:coarse)').matches) || Math.min(screen.width, screen.height) < 700;
+const stage = $('#stage');
+
+/* ---------- Stałe i konfiguracja ---------- */
+const R_EARTH = 6371008.8;
+const CAM_D = 5.5;
+const S1 = 1 / (0.8 * Math.sqrt(CAM_D * CAM_D - 1));
+const ZMIN = 0.7, ZMAX = 120;
+const DETAIL_MIN_ZOOM = 2.8;
+const MIN_L = 3, MAX_L = 7;
+const NS = 30;                                         // maks. liczba slotów klipmapy (nx·ny)
+const BASE_W = 2560, BASE_H = 1280, BASE_TH = 1536;    // mapa bazowa = poziom 2 GIBS (5×3 kafelki 512 px)
+const BASEV = BASE_H / BASE_TH;
+
+const DAY = { id: 'BlueMarble_ShadedRelief_Bathymetry', ext: 'jpeg' };
+const GRP_A = 'Kompozyty roczne (stałe)', GRP_B = 'Dane dzienne (wybierz datę)';
+const NIGHT = [
+  { id: 'cl2012', grp: GRP_A, label: 'Earth at Night 2012 · kompozyt', short: 'Earth at Night 2012', layer: 'VIIRS_CityLights_2012', ext: 'jpeg', gain: 1.0, natural: false,
+    desc: 'Klasyczny kompozyt bezchmurnych nocy z 2012 r. (VIIRS, Suomi NPP). Źródło domyślne, bez zmian w czasie.' },
+  { id: 'bm2016', grp: GRP_A, label: 'Black Marble 2016 · z lądami', short: 'Black Marble 2016', layer: 'VIIRS_Black_Marble', ext: 'png', time: '2016-01-01', gain: 1.0, natural: false,
+    desc: 'Roczny kompozyt Black Marble z 2016 r. (NASA Earth Observatory): światła miast na tle słabo widocznych lądów.' },
+  { id: 'bm2012', grp: GRP_A, label: 'Black Marble 2012 · z lądami', short: 'Black Marble 2012', layer: 'VIIRS_Black_Marble', ext: 'png', time: '2012-01-01', gain: 1.0, natural: false,
+    desc: 'Roczny kompozyt Black Marble z 2012 r. Dobry do porównań „kiedyś i dziś” z wersją 2016.' },
+  { id: 'nl2016', grp: GRP_A, label: 'Night Lights 2016 · same światła', short: 'Night Lights 2016', layer: 'VIIRS_Night_Lights', ext: 'png', time: '2016-01-01', gain: 1.15, natural: false,
+    desc: 'Warstwa przezroczysta z samymi światłami (2016), bez poświaty lądów — czysta czerń między miastami.' },
+  { id: 'ntl_snpp', grp: GRP_B, daily: true, label: 'Black Marble NTL · Suomi NPP', short: 'BM NTL · SNPP', layer: 'VIIRS_SNPP_GapFilled_BRDF_Corrected_DayNightBand_Radiance', ext: 'png', min: '2012-01-19', gain: 1.0, natural: false,
+    desc: 'Dzienne światła po korekcji księżycowej i atmosferycznej, z wypełnieniem luk (VNP46A2). Kolory według palety GIBS.' },
+  { id: 'ntl_n20', grp: GRP_B, daily: true, label: 'Black Marble NTL · NOAA-20', short: 'BM NTL · NOAA-20', layer: 'VIIRS_NOAA20_GapFilled_BRDF_Corrected_DayNightBand_Radiance', ext: 'png', min: '2018-01-05', gain: 1.0, natural: false,
+    desc: 'To samo co wyżej, ale z satelity NOAA-20 (inna godzina przelotu i inne pokrycie).' },
+  { id: 'encc', grp: GRP_B, daily: true, label: 'ENCC · Suomi NPP · skala szarości', short: 'ENCC · SNPP', layer: 'VIIRS_SNPP_DayNightBand_ENCC', ext: 'png', min: '2016-11-30', gain: 0.85, natural: false,
+    desc: 'Dzienny obraz nocny w skali szarości (Enhanced Near Constant Contrast): oprócz miast widać światło Księżyca i poświaty.' },
+  { id: 'rad_snpp', grp: GRP_B, daily: true, label: 'Radiancja nocna · Suomi NPP', short: 'Radiancja · SNPP', layer: 'VIIRS_SNPP_DayNightBand_At_Sensor_Radiance', ext: 'png', min: '2020-11-18', gain: 1.0, natural: false,
+    desc: 'Dzienna radiancja nocna (at-sensor) ze wzmocnionym kontrastem. Mogą być widoczne smugi przelotu i światło Księżyca.' },
+  { id: 'rad_n20', grp: GRP_B, daily: true, label: 'Radiancja nocna · NOAA-20', short: 'Radiancja · NOAA-20', layer: 'VIIRS_NOAA20_DayNightBand_At_Sensor_Radiance', ext: 'png', min: '2024-03-25', gain: 1.0, natural: false,
+    desc: 'Dzienna radiancja nocna z satelity NOAA-20, w skali szarości.' },
+  { id: 'm15_snpp', grp: GRP_B, daily: true, label: 'Niebiesko-żółty M15 · Suomi NPP', short: 'M15 · SNPP', layer: 'VIIRS_SNPP_DayNightBand_AtSensor_M15', ext: 'jpeg', min: '2021-04-30', gain: 1.0, natural: true,
+    desc: 'Kompozyt barwny: światła z pasma DNB na żółto, chmury z kanału podczerwonego M15 na niebiesko.' },
+  { id: 'm15_n20', grp: GRP_B, daily: true, label: 'Niebiesko-żółty M15 · NOAA-20', short: 'M15 · NOAA-20', layer: 'VIIRS_NOAA20_DayNightBand_AtSensor_M15', ext: 'jpeg', min: '2024-03-18', gain: 1.0, natural: true,
+    desc: 'Kompozyt barwny niebiesko-żółty z satelity NOAA-20.' }
+];
+const NP = { cur: NIGHT[0], date: null, sig: 'cl2012_static', manual: false, step: 0, live: true, done: false, committedOnce: false, announced: true,
+             lastGood: null, recent: [], timer: 0, stat: { ok: 0, gone: 0, fail: 0, tot: 15 } };
+const isoDay = ms => new Date(ms).toISOString().slice(0, 10);
+const shiftDate = (s, d) => isoDay(Date.parse(s + 'T00:00:00Z') + d * 86400000);
+const todayStr = () => isoDay(Date.now());
+const defaultDate = p => { const d = isoDay(Date.now() - 2 * 86400000); return p.min && d < p.min ? p.min : d; };
+
+// Siatka GIBS EPSG:4326: poziom 0 = 2×1 kafelki po 288°, każdy kolejny poziom dzieli kafelek na 2×2
+const tileSpan = L => 288 / Math.pow(2, L);
+const matW = L => Math.ceil(360 / tileSpan(L) - 1e-9);
+const matH = L => Math.ceil(180 / tileSpan(L) - 1e-9);
+const RES0 = tileSpan(0) / 512 * 111319.49;
+const resM = L => RES0 / Math.pow(2, L);
+const nightKey = (sig, L, r, c) => 'night:' + sig + '/' + L + '/' + r + '/' + c;
+const tileKey = (layer, L, r, c) => layer === 'night' ? nightKey(NP.sig, L, r, c) : layer + '/' + L + '/' + r + '/' + c;
+function tilePath(layer, L, r, c) {
+  if (layer === 'night') { const p = NP.cur, t = p.daily ? NP.date : p.time; return `${p.layer}/default/${t ? t + '/' : ''}500m/${L}/${r}/${c}.${p.ext}`; }
+  return `${DAY.id}/default/500m/${L}/${r}/${c}.${DAY.ext}`;
+}
+// trzy aliasy domeny GIBS (HTTP/1.1 — więcej równoległych połączeń); ostatnia próba na domenie głównej
+const HOSTS = ['gibs-a', 'gibs-b', 'gibs-c'];
+const tileURL = (job, shard) => `https://${shard ? HOSTS[(job.c + job.r) % 3] : 'gibs'}.earthdata.nasa.gov/wmts/epsg4326/best/${job.path}`;
+
+const cfg = { detail: true, clouds: false, atmo: true, lights: true, auto: true, renderer: 'gpu', nGain: 1 };
+const view = { lat: 24, lon: 12, lonU: 12, zoom: 1, zoomT: 1, cssW: 800, cssH: 600 };
+const T = { sim: Date.now(), speed: 1, playing: true };
+let baseSource = 'loading';
+let baseReady = false, baseDirty = false, baseVersion = 0, lastBaseUp = 0, ovDirty = true;
+let lonPrev = view.lon;
+function syncLonU() { view.lonU += wrap180(view.lon - lonPrev); lonPrev = view.lon; }   // ciągła (nieopakowana) długość
+
+/* ---------- Szum 3D (CPU) — mapa proceduralna i chmury w trybie programowym ---------- */
+function hash3i(x, y, z) {
+  let h = (Math.imul(x, 374761393) + Math.imul(y, 668265263) + Math.imul(z, 1274126177)) | 0;
+  h = Math.imul(h ^ (h >>> 13), 1103515245); h ^= h >>> 16;
+  return (h >>> 0) / 4294967296;
+}
+function noise3(x, y, z) {
+  const xi = Math.floor(x), yi = Math.floor(y), zi = Math.floor(z);
+  let fx = x - xi, fy = y - yi, fz = z - zi;
+  fx = fx * fx * (3 - 2 * fx); fy = fy * fy * (3 - 2 * fy); fz = fz * fz * (3 - 2 * fz);
+  const a = hash3i(xi, yi, zi), b = hash3i(xi + 1, yi, zi), c = hash3i(xi, yi + 1, zi), d = hash3i(xi + 1, yi + 1, zi);
+  const e = hash3i(xi, yi, zi + 1), f = hash3i(xi + 1, yi, zi + 1), g = hash3i(xi, yi + 1, zi + 1), h = hash3i(xi + 1, yi + 1, zi + 1);
+  const x1 = a + (b - a) * fx, x2 = c + (d - c) * fx, x3 = e + (f - e) * fx, x4 = g + (h - g) * fx;
+  const y1 = x1 + (x2 - x1) * fy, y2 = x3 + (x4 - x3) * fy;
+  return y1 + (y2 - y1) * fz;
+}
+function fbm3(x, y, z, oct) {
+  let s = 0, a = 0.5;
+  for (let i = 0; i < oct; i++) { s += a * noise3(x, y, z); x = x * 2.02 + 11.7; y = y * 2.02 + 3.3; z = z * 2.02 + 7.1; a *= 0.5; }
+  return s;
+}
+function cloudJS(px, py, pz, oct) {
+  const qx = px * 2.4, qy = py * 3.4, qz = pz * 2.4;
+  const w = fbm3(qx * 0.8 + 3.1, qy * 0.8 + 3.1, qz * 0.8 + 3.1, 3);
+  const n = fbm3(qx + w * 1.4, qy + w * 0.8, qz - w * 1.1, oct);
+  return smooth(0.50, 0.72, n);
+}
+
+/* ---------- Mapa bazowa (kanwy — źródło dla renderu programowego) ---------- */
+function mkCanvas(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
+const baseDay = mkCanvas(BASE_W, BASE_H), baseNight = mkCanvas(BASE_W, BASE_H), nightStage = mkCanvas(BASE_W, BASE_H);
+const baseDayCtx = baseDay.getContext('2d', { willReadFrequently: true });
+const baseNightCtx = baseNight.getContext('2d', { willReadFrequently: true });
+const nightStageCtx = nightStage.getContext('2d', { willReadFrequently: true });
+(function initBase() {
+  const g = baseDayCtx.createLinearGradient(0, 0, 0, BASE_H);
+  g.addColorStop(0, '#0d2c4a'); g.addColorStop(0.5, '#0a2240'); g.addColorStop(1, '#0d2c4a');
+  baseDayCtx.fillStyle = g; baseDayCtx.fillRect(0, 0, BASE_W, BASE_H);
+  baseNightCtx.fillStyle = '#000'; baseNightCtx.fillRect(0, 0, BASE_W, BASE_H);
+  nightStageCtx.fillStyle = '#000'; nightStageCtx.fillRect(0, 0, BASE_W, BASE_H);
+})();
+function drawBaseTile(job) {
+  const bmp = Net.cache.get(job.key); if (!bmp) return;
+  const cs = tileSpan(2) / 360 * BASE_W;
+  baseDayCtx.drawImage(bmp, Math.floor(job.c * cs), Math.floor(job.r * cs), Math.ceil(cs), Math.ceil(cs));
+}
+function buildProcedural() {
+  const W = 1024, H = 512;
+  const cd = new ImageData(W, H), cn = new ImageData(W, H), D = cd.data, N = cn.data;
+  const mix = (a, b, t) => a + (b - a) * t;
+  for (let y = 0; y < H; y++) {
+    const lat = (0.5 - (y + 0.5) / H) * Math.PI, cl = Math.cos(lat), sl = Math.sin(lat), alat = Math.abs(lat) / DEG;
+    for (let x = 0; x < W; x++) {
+      const lon = ((x + 0.5) / W - 0.5) * 2 * Math.PI;
+      const px = cl * Math.sin(lon), py = sl, pz = cl * Math.cos(lon);
+      const e = fbm3(px * 1.5 + 4.2, py * 1.5 + 1.1, pz * 1.5 + 7.7, 6) + 0.18 * (fbm3(px * 0.7 + 9, py * 0.7 + 3, pz * 0.7 + 1, 3) - 0.5);
+      const sea = 0.535, i = (y * W + x) * 4;
+      let r, g, b, land = false;
+      if (e < sea) {
+        const t = clamp((sea - e) / 0.22, 0, 1);
+        r = mix(40, 6, t); g = mix(115, 30, t); b = mix(152, 76, t);
+        if (alat > 74 + 6 * noise3(px * 8, py * 8, pz * 8)) { r = 214; g = 226; b = 236; }
+      } else {
+        land = true;
+        const m = fbm3(px * 3 + 20, py * 3 + 5, pz * 3 + 9, 4), h = (e - sea) / (1 - sea);
+        if (m < 0.46 && alat < 38) { r = 198; g = 170; b = 118; }
+        else if (m > 0.54) { r = 40; g = 88; b = 46; }
+        else { r = 96; g = 122; b = 64; }
+        if (alat > 58) { const t = smooth(58, 70, alat); r = mix(r, 128, t); g = mix(g, 134, t); b = mix(b, 122, t); }
+        const tm = smooth(0.25, 0.5, h); r = mix(r, 112, tm); g = mix(g, 102, tm); b = mix(b, 92, tm);
+        const ts = smooth(0.55, 0.75, h) + smooth(68, 78, alat);
+        const t2 = clamp(ts, 0, 1); r = mix(r, 238, t2); g = mix(g, 242, t2); b = mix(b, 246, t2);
+      }
+      D[i] = r; D[i + 1] = g; D[i + 2] = b; D[i + 3] = 255;
+      let l = 0;
+      if (land && alat < 66) l = smooth(0.60, 0.78, fbm3(px * 18, py * 18, pz * 18, 3)) * smooth(0.5, 0.56, fbm3(px * 4 + 2, py * 4, pz * 4, 3));
+      N[i] = 255 * l; N[i + 1] = 190 * l; N[i + 2] = 105 * l; N[i + 3] = 255;
+    }
+  }
+  const t1 = mkCanvas(W, H), t2 = mkCanvas(W, H);
+  t1.getContext('2d').putImageData(cd, 0, 0); t2.getContext('2d').putImageData(cn, 0, 0);
+  baseDayCtx.drawImage(t1, 0, 0, BASE_W, BASE_H); baseNightCtx.drawImage(t2, 0, 0, BASE_W, BASE_H); nightStageCtx.drawImage(t2, 0, 0, BASE_W, BASE_H);
+}
+
+/* ---------- Sieć: kafelki GIBS (kolejka, priorytety, anulowanie, cache LRU z limitem bajtów) ---------- */
+// dekodowanie poza głównym wątkiem; bez konwersji barw; kafelki nocne okna szczegółów od razu zmniejszone do 256 px
+async function decodeBlob(blob, job) {
+  const small = job.layer === 'night' && job.group === 'detail';
+  if (window.createImageBitmap) {
+    try {
+      const o = { premultiplyAlpha: 'premultiply', colorSpaceConversion: 'none' };
+      if (small) { o.resizeWidth = 256; o.resizeHeight = 256; o.resizeQuality = 'medium'; }
+      return await createImageBitmap(blob, o);
+    } catch (e) { try { return await createImageBitmap(blob); } catch (e2) { /* spadamy do <img> */ } }
+  }
+  return new Promise((res, rej) => {
+    const u = URL.createObjectURL(blob), im = new Image();
+    im.onload = () => { URL.revokeObjectURL(u); res(im); };
+    im.onerror = () => { URL.revokeObjectURL(u); rej(new Error('decode')); };
+    im.src = u;
+  });
+}
+const Net = {
+  cache: new Map(), used: new Map(), sizes: new Map(), inflight: new Map(), queue: new Map(), failedAt: new Map(),
+  stats: { base: { ok: 0, fail: 0, gone: 0, total: 0 }, nbase: { ok: 0, fail: 0, gone: 0, total: 0 }, detail: { ok: 0, fail: 0, gone: 0, total: 0 } },
+  protect: new Set(), MAXC: IS_MOBILE ? 6 : 10, MAXBYTES: (IS_MOBILE ? 90 : 220) * 1048576, bytes: 0, ver: 0,
+  shardOk: 0, shardFail: 0, shardBad: false,      // gdy aliasy gibs-a/b/c nie działają — wracamy na domenę główną
+  get(layer, L, r, c) {
+    const k = tileKey(layer, L, r, c), v = this.cache.get(k);
+    if (v) { this.used.set(k, performance.now()); return v; }
+    return null;
+  },
+  want(job) {
+    const k = job.key;
+    if (this.cache.has(k)) return;
+    const fa = this.failedAt.get(k); if (fa && performance.now() - fa < 30000) return;
+    if (this.inflight.has(k)) return;
+    const q = this.queue.get(k); if (q) { q.prio = job.prio; return; }
+    job.tries = 0; job.cancelled = false; job.path = tilePath(job.layer, job.L, job.r, job.c); job.sig = job.layer === 'night' ? NP.sig : '';
+    this.queue.set(k, job);
+    if (job.group === 'base') this.stats.base.total++;
+    this.pump();
+  },
+  setNeeded(set) {
+    for (const [k, j] of this.queue) if (j.group === 'detail' && !set.has(k)) this.queue.delete(k);
+    for (const [, e] of this.inflight) if (e.job.group === 'detail' && !set.has(e.job.key)) { e.job.cancelled = true; e.ctrl.abort(); }
+    this.protect = set;
+  },
+  pump() {
+    while (this.inflight.size < this.MAXC && this.queue.size) {
+      let best = null;
+      for (const j of this.queue.values()) if (!best || j.prio < best.prio) best = j;
+      this.queue.delete(best.key); this.start(best);
+    }
+  },
+  start(job) {
+    const ctrl = new AbortController();
+    this.inflight.set(job.key, { job, ctrl });
+    const to = setTimeout(() => ctrl.abort(), 25000);
+    const shard = !this.shardBad && job.tries < 2;
+    fetch(tileURL(job, shard), { signal: ctrl.signal, mode: 'cors', credentials: 'omit' })
+      .then(res => { if (!res.ok) { const e = new Error('HTTP ' + res.status); e.status = res.status; throw e; } return res.blob(); })
+      .then(blob => decodeBlob(blob, job))
+      .then(img => {
+        clearTimeout(to); this.inflight.delete(job.key);
+        if (shard) this.shardOk++;
+        this.store(job.key, img); this.stats[job.group].ok++; onTileLoaded(job); this.pump();
+      })
+      .catch(err => {
+        clearTimeout(to); this.inflight.delete(job.key);
+        if (job.cancelled) { this.pump(); return; }
+        if (shard && !(err && err.status)) { this.shardFail++; if (this.shardFail >= 3 && this.shardOk === 0) this.shardBad = true; }
+        this.fail(job, err); this.pump();
+      });
+  },
+  store(k, img) {
+    this.cache.set(k, img); this.used.set(k, performance.now()); this.ver++;
+    const b = img && img.width ? img.width * img.height * 4 : 0; this.sizes.set(k, b); this.bytes += b;
+    this.trim();
+  },
+  fail(job, err) {
+    if (err && (err.status === 404 || err.status === 400 || err.status === 403)) {
+      this.cache.set(job.key, 0); this.stats[job.group].gone++;               // brak kafelka — nie ponawiamy
+      if (job.group === 'base') checkBaseProgress();
+      else if (job.group === 'nbase' && job.sig === NP.sig) nightEvent();
+      return;
+    }
+    job.tries++;
+    if (job.tries < 3) {
+      setTimeout(() => {
+        if (!this.cache.has(job.key) && !job.cancelled && (job.group === 'base' || (job.group === 'nbase' && job.sig === NP.sig) || this.protect.has(job.key))) { this.queue.set(job.key, job); this.pump(); }
+      }, 700 * job.tries);
+      return;
+    }
+    this.failedAt.set(job.key, performance.now()); this.stats[job.group].fail++;
+    if (job.group === 'base') checkBaseProgress();
+    else if (job.group === 'nbase' && job.sig === NP.sig) nightEvent();
+    onTileFailed(job);
+  },
+  evict(k) {
+    const v = this.cache.get(k); if (v && v.close) v.close();
+    this.bytes -= this.sizes.get(k) || 0; this.sizes.delete(k); this.cache.delete(k); this.used.delete(k);
+  },
+  trim() {
+    if (this.bytes <= this.MAXBYTES) return;
+    const cand = [];
+    for (const k of this.cache.keys()) { const L = +k.split('/')[1]; if (L > 2 && !this.protect.has(k) && this.sizes.get(k)) cand.push(k); }
+    cand.sort((a, b) => (this.used.get(a) || 0) - (this.used.get(b) || 0));
+    for (const k of cand) { if (this.bytes <= this.MAXBYTES) break; this.evict(k); }
+  },
+  resetStats(g) { this.stats[g].ok = 0; this.stats[g].fail = 0; this.stats[g].gone = 0; },
+  dropPending(sig) {
+    for (const [k, j] of this.queue) if (j.group === 'nbase' && j.sig === sig) this.queue.delete(k);
+    for (const [, e] of this.inflight) if (e.job.group === 'nbase' && e.job.sig === sig) { e.job.cancelled = true; e.ctrl.abort(); }
+  },
+  evictSig(sig) {
+    const pre = 'night:' + sig + '/';
+    for (const k of [...this.cache.keys()]) if (k.startsWith(pre)) this.evict(k);
+    for (const k of [...this.failedAt.keys()]) if (k.startsWith(pre)) this.failedAt.delete(k);
+  },
+  resetSig(sig) {
+    const pre = 'night:' + sig + '/';
+    for (const k of [...this.cache.keys()]) if (k.startsWith(pre) && this.cache.get(k) === 0) this.cache.delete(k);
+    for (const k of [...this.failedAt.keys()]) if (k.startsWith(pre)) this.failedAt.delete(k);
+  }
+};
+
+function enqueueLayer(layer, prio) {
+  const group = layer === 'night' ? 'nbase' : 'base';
+  for (let r = 0; r < matH(2); r++) for (let c = 0; c < matW(2); c++)
+    Net.want({ key: tileKey(layer, 2, r, c), layer, L: 2, r, c, prio: prio + r * 0.01 + c * 0.001, group });
+}
+function enqueueDay() { enqueueLayer('day', -1000); }
+function enqueueNight() { enqueueLayer('night', -800); }
+function enqueueBase() { enqueueDay(); enqueueNight(); }
+function checkBaseProgress() {
+  const st = Net.stats.base;
+  if (st.ok > 0 && baseSource !== 'nasa') { baseSource = 'nasa'; setCredit(); }
+  baseReady = st.total > 0 && (st.ok + st.gone + st.fail) >= st.total;
+}
+function onTileLoaded(job) {
+  if (job.group === 'base') {
+    drawBaseTile(job); baseDirty = true; checkBaseProgress();
+    if (gpu) gpu.baseTile(job.c, job.r, Net.cache.get(job.key));
+    if (baseSource !== 'nasa') { baseSource = 'nasa'; setCredit(); }
+  } else if (job.group === 'nbase') {
+    if (job.sig === NP.sig) { drawNightTile(job.L, job.r, job.c); nightEvent(); }
+  }
+  // kafelki okna szczegółów: wgrywane do GPU w pump() z budżetem czasu
+}
+function onTileFailed(job) {
+  const st = Net.stats[job.group];
+  if (job.group === 'base' && st.ok === 0 && st.fail >= 4 && baseSource !== 'procedural') App.baseFailed();
+  if (job.group === 'detail' && st.ok === 0 && st.fail >= 4 && cfg.detail) App.detailFailed();
+}
+
+/* ---------- Dostawcy nocni: przełączanie, mapa bazowa „za kulisami”, wykrywanie braków ---------- */
+function nightScan() {
+  let ok = 0, gone = 0, fail = 0, tot = 0;
+  for (let r = 0; r < matH(2); r++) for (let c = 0; c < matW(2); c++) {
+    tot++; const k = tileKey('night', 2, r, c), v = Net.cache.get(k);
+    if (v) ok++; else if (v === 0) gone++; else if (Net.failedAt.has(k)) fail++;
+  }
+  return { ok, gone, fail, tot };
+}
+function drawNightTile(L, r, c) {
+  const bmp = Net.cache.get(tileKey('night', L, r, c)); if (!bmp) return;
+  const cs = tileSpan(L) / 360 * BASE_W, x0 = Math.floor(c * cs), y0 = Math.floor(r * cs);
+  const w = Math.ceil(cs), h = Math.ceil(cs);
+  nightStageCtx.fillStyle = '#000'; nightStageCtx.fillRect(x0, y0, w, h);   // przezroczystość → czerń
+  nightStageCtx.drawImage(bmp, x0, y0, w, h);
+  if (gpu) gpu.nightTile(NP.sig, c, r, bmp);
+}
+function redrawNightStage() {
+  nightStageCtx.fillStyle = '#000'; nightStageCtx.fillRect(0, 0, BASE_W, BASE_H);
+  for (let r = 0; r < matH(2); r++) for (let c = 0; c < matW(2); c++) { const b = Net.cache.get(tileKey('night', 2, r, c)); if (b) { const cs = BASE_W / 5; nightStageCtx.fillStyle = '#000'; nightStageCtx.fillRect(Math.floor(c * cs), Math.floor(r * cs), Math.ceil(cs), Math.ceil(cs)); nightStageCtx.drawImage(b, Math.floor(c * cs), Math.floor(r * cs), Math.ceil(cs), Math.ceil(cs)); } }
+  if (gpu) gpu.stageNight(NP.sig, NP.live);
+}
+function nightStageBlank() {
+  const d = nightStageCtx.getImageData(0, 0, BASE_W, BASE_H).data; let n = 0;
+  for (let i = 0; i < d.length; i += 4) if (d[i] > 40 || d[i + 1] > 40 || d[i + 2] > 40) { if (++n > 60) return false; }
+  return true;
+}
+function commitNight() {
+  baseNightCtx.drawImage(nightStage, 0, 0); baseDirty = true; NP.committedOnce = true;
+  NP.lastGood = { id: NP.cur.id, date: NP.date };
+  if (gpu) gpu.commitNight(NP.sig);
+  if (NP.step > 0 && !NP.announced) { NP.announced = true; toast(`Najnowsze dostępne dane „${NP.cur.short}”: ${NP.date}`, 'ok', 4500); }
+}
+function nightEvent() {
+  if (NP.done) return;
+  const s = nightScan(); NP.stat = s;
+  const settled = s.ok + s.gone + s.fail >= s.tot;
+  if (s.ok > 0) {
+    if (NP.live || settled) {
+      if (settled && NP.cur.daily && nightStageBlank()) { NP.stat = { ok: 0, gone: s.tot, fail: 0, tot: s.tot }; nightFailed(); return; }
+      commitNight();
+    }
+    if (settled) NP.done = true;
+  } else if (settled || s.gone + s.fail >= 6) nightFailed();
+}
+function nightFailed() {
+  if (NP.done) return; NP.done = true;
+  const p = NP.cur;
+  if (baseSource === 'procedural') return;
+  const net = NP.stat.fail > NP.stat.gone;
+  if (p.daily && !NP.manual && !net && NP.step < 8) {
+    const d = shiftDate(NP.date, -1);
+    if (!p.min || d >= p.min) { setNightProvider(p.id, { date: d, step: NP.step + 1 }); return; }
+  }
+  if (p.id === 'cl2012') { updateNightUI(); return; }
+  const same = NP.lastGood && NP.lastGood.id === p.id && NP.lastGood.date === NP.date;
+  const lg = NP.lastGood && !same ? NP.lastGood : { id: 'cl2012', date: null };
+  const to = NIGHT.find(x => x.id === lg.id) || NIGHT[0];
+  toast((net ? `Nie udało się pobrać „${p.short}” (błąd sieci)` : `Brak danych „${p.short}”${p.daily ? ' dla ' + NP.date : ''}`) +
+        ` — wracam do „${to.short}”${to.daily ? ' (' + lg.date + ')' : ''}.`, 'warn', 7500);
+  setNightProvider(lg.id, { date: lg.date, manual: true });
+}
+function setNightProvider(id, o = {}) {
+  const p = NIGHT.find(x => x.id === id) || NIGHT[0];
+  let date = null;
+  if (p.daily) {
+    date = o.date || defaultDate(p);
+    const t = todayStr(); if (date > t) date = t;
+    if (p.min && date < p.min) date = p.min;
+  }
+  const prevSig = NP.sig, sig = p.id + '_' + (date || 'static');
+  clearTimeout(NP.timer);
+  if (prevSig !== sig) Net.dropPending(prevSig);
+  NP.cur = p; NP.date = date; NP.sig = sig; NP.manual = !!o.manual; NP.step = o.step || 0;
+  NP.announced = NP.step === 0; NP.done = false;
+  NP.live = !NP.committedOnce && !p.daily;
+  NP.recent = [sig, ...NP.recent.filter(s => s !== sig)];
+  while (NP.recent.length > 3) Net.evictSig(NP.recent.pop());
+  Net.resetSig(sig);
+  redrawNightStage();
+  if (Det.P) requestTiles();
+  enqueueNight();
+  NP.timer = setTimeout(() => {
+    if (NP.sig !== sig || NP.done) return;
+    if (nightScan().ok > 0) { NP.live = true; commitNight(); }
+  }, 9000);
+  updateNightUI(); setCredit(); saveNight();
+  nightEvent();
+}
+function stepNightDate(d) {
+  const p = NP.cur; if (!p.daily) return;
+  const nd = shiftDate(NP.date, d);
+  if (nd > todayStr() || (p.min && nd < p.min)) { toast('Ta data jest poza zakresem dostępnych danych.', 'warn', 2800); return; }
+  setNightProvider(p.id, { date: nd, manual: true });
+}
+function buildNightUI() {
+  const sel = $('#nSel'); let grp = null, og = null;
+  for (const p of NIGHT) {
+    if (p.grp !== grp) { og = document.createElement('optgroup'); og.label = p.grp; sel.appendChild(og); grp = p.grp; }
+    const o = document.createElement('option'); o.value = p.id; o.textContent = p.label; og.appendChild(o);
+  }
+}
+function updateNightUI() {
+  const p = NP.cur, tag = p.short + (p.daily ? ' · ' + NP.date : '');
+  $('#nSel').value = p.id;
+  const dsc = p.desc + (p.daily ? ` Dane od ${p.min}.` : '');
+  $('#nDesc').textContent = dsc; $('#nSel').title = dsc;
+  $('#nDateRow').classList.toggle('hidden', !p.daily);
+  if (p.daily) { const di = $('#nDate'); di.min = p.min || ''; di.max = todayStr(); di.value = NP.date; }
+  $('#nRowSub').textContent = tag; $('#cNight').textContent = tag;
+}
+function saveNight() { try { localStorage.setItem('obs.night', JSON.stringify({ id: NP.cur.id, date: NP.manual ? NP.date : null })); } catch (e) { /* brak localStorage */ } }
+function loadNight() {
+  try { const j = JSON.parse(localStorage.getItem('obs.night') || 'null'); if (j && NIGHT.some(p => p.id === j.id)) return j; } catch (e) { /* ignoruj */ }
+  return null;
+}
+
+/* ---------- Słońce ---------- */
+function sunInfo(ms) {
+  const jd = ms / 86400000 + 2440587.5, n = jd - 2451545.0;
+  const L = (280.460 + 0.9856474 * n) % 360;
+  const g = ((357.528 + 0.9856003 * n) % 360) * DEG;
+  const lam = (L + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * DEG;
+  const eps = (23.439 - 0.0000004 * n) * DEG;
+  const dec = Math.asin(Math.sin(eps) * Math.sin(lam));
+  const ra = Math.atan2(Math.cos(eps) * Math.sin(lam), Math.cos(lam));
+  const gmst = ((280.46061837 + 360.98564736629 * n) % 360) * DEG;
+  let lon = ra - gmst; lon = Math.atan2(Math.sin(lon), Math.cos(lon));
+  const cd = Math.cos(dec);
+  return { dec, lon, gmst, dir: [cd * Math.sin(lon), Math.sin(dec), cd * Math.cos(lon)] };
+}
+
+/* ---------- Kamera ---------- */
+function camState() {
+  const la = view.lat * DEG, lo = view.lon * DEG, cl = Math.cos(la), sl = Math.sin(la);
+  const c = [cl * Math.sin(lo), sl, cl * Math.cos(lo)];
+  return {
+    cam: [c[0] * CAM_D, c[1] * CAM_D, c[2] * CAM_D], fwd: [-c[0], -c[1], -c[2]],
+    right: [Math.cos(lo), 0, -Math.sin(lo)], up: [-sl * Math.sin(lo), cl, -sl * Math.cos(lo)],
+    s: S1 / view.zoom
+  };
+}
+function pickVec(x, y) {
+  const cs = camState(), half = Math.min(view.cssW, view.cssH) / 2;
+  const px = (x - view.cssW / 2) / half * cs.s, py = (view.cssH / 2 - y) / half * cs.s;
+  let dx = cs.fwd[0] + cs.right[0] * px + cs.up[0] * py, dy = cs.fwd[1] + cs.right[1] * px + cs.up[1] * py, dz = cs.fwd[2] + cs.right[2] * px + cs.up[2] * py;
+  const il = 1 / Math.hypot(dx, dy, dz); dx *= il; dy *= il; dz *= il;
+  const b = cs.cam[0] * dx + cs.cam[1] * dy + cs.cam[2] * dz, disc = b * b - (CAM_D * CAM_D - 1);
+  if (disc < 0) return null;
+  const t = -b - Math.sqrt(disc);
+  const X = cs.cam[0] + dx * t, Y = cs.cam[1] + dy * t, Z = cs.cam[2] + dz * t;
+  return [X, Y, Z];                                      // wektor jednostkowy punktu na powierzchni (promień Ziemi = 1)
+}
+function pick(x, y) {
+  const v = pickVec(x, y);
+  return v ? { lat: Math.asin(clamp(v[1], -1, 1)) / DEG, lon: Math.atan2(v[0], v[2]) / DEG } : null;
+}
+function mppFor(pxMin) { return (CAM_D - 1) * (S1 / view.zoom) * 2 / pxMin * R_EARTH; }
+function currentMpp() { const r = active; return mppFor(r ? Math.min(r.pw(), r.ph()) : Math.min(view.cssW, view.cssH)); }
+
+/* ---------- Klipmapa: dwa poziomy kafelków wokół widoku (dokładny + zapasowy) ---------- */
+function resetRes(a) { for (let i = 0; i < a.length; i += 4) { a[i] = -1e7; a[i + 1] = -1e7; a[i + 2] = 0; a[i + 3] = 0; } }
+function mkClip(id) {
+  return { id, L: 0, NX: 6, NY: 5, list: [], res: new Float32Array(NS * 4), bornD: new Float64Array(NS), bornN: new Float64Array(NS), nightSig: '', gpu: null };
+}
+function resetClip(c, L) {
+  c.L = L; c.NX = Det.limits.nx; c.NY = Det.limits.ny; c.list = []; resetRes(c.res); c.bornD.fill(0); c.bornN.fill(0); c.nightSig = '';
+}
+const Det = {
+  fade: 0, target: 0, active: false, lastCheck: 0, wantL: 0, P: null, S: null,
+  clips: [mkClip(0), mkClip(1)], limits: { nx: 6, ny: 5 }, stat: { total: 0, loaded: 0 }, vx: 0, vy: 0
+};
+function visibleBBox() {
+  let dMin = 1e9, dMax = -1e9, laMin = 91, laMax = -91, n = 0;
+  for (let iy = 0; iy <= 8; iy++) for (let ix = 0; ix <= 8; ix++) {
+    const h = pick(ix / 8 * view.cssW, iy / 8 * view.cssH); if (!h) continue;
+    const d = wrap180(h.lon - view.lon);
+    dMin = Math.min(dMin, d); dMax = Math.max(dMax, d); laMin = Math.min(laMin, h.lat); laMax = Math.max(laMax, h.lat); n++;
+  }
+  if (!n) return null;
+  return { lonMin: view.lonU + dMin, lonMax: view.lonU + dMax, latMin: laMin, latMax: laMax };
+}
+// rozszerza zakres [lo,hi] o margines (maks. 2 kafelki), preferując stronę ruchu
+function padRange(lo, hi, room, minV, maxV, pref) {
+  let extra = Math.min(room, 2);
+  while (extra > 0) {
+    const first = pref >= 0 ? 1 : -1; let did = false;
+    for (const s of [first, -first]) {
+      if (extra <= 0) break;
+      if (s > 0 && hi < maxV) { hi++; extra--; did = true; } else if (s < 0 && lo > minV) { lo--; extra--; did = true; }
+    }
+    if (!did) break;
+  }
+  return [lo, hi];
+}
+function planWindow(L, bb, NX, NY, strict) {
+  const Tt = tileSpan(L), H = matH(L);
+  let c0 = Math.floor((bb.lonMin + 180) / Tt), c1 = Math.floor((bb.lonMax + 180) / Tt);
+  let r0 = clamp(Math.floor((90 - bb.latMax) / Tt), 0, H - 1), r1 = clamp(Math.floor((90 - bb.latMin) / Tt), 0, H - 1);
+  if (c1 - c0 + 1 > NX || r1 - r0 + 1 > NY) {
+    if (strict) return null;
+    const cc = Math.floor((view.lonU + 180) / Tt), rc = clamp(Math.floor((90 - view.lat) / Tt), 0, H - 1);
+    c0 = cc - Math.floor(NX / 2); c1 = c0 + NX - 1; const ny = Math.min(NY, H); r0 = clamp(rc - Math.floor(ny / 2), 0, H - ny); r1 = r0 + ny - 1;
+    return { c0, c1, r0, r1 };
+  }
+  [c0, c1] = padRange(c0, c1, NX - (c1 - c0 + 1), -1e9, 1e9, Det.vx);
+  [r0, r1] = padRange(r0, r1, NY - (r1 - r0 + 1), 0, H - 1, -Det.vy);
+  return { c0, c1, r0, r1 };
+}
+function assignLevels(Lp) {
+  const Ls = Lp - 1 >= MIN_L ? Lp - 1 : 0, cl = Det.clips;
+  let cp = cl.find(c => c.L === Lp), cs = Ls ? cl.find(c => c.L === Ls && c !== cp) : null;
+  const free = cl.filter(c => c !== cp && c !== cs);
+  if (!cp) { cp = free.pop(); resetClip(cp, Lp); }
+  if (Ls && !cs) { cs = free.pop(); resetClip(cs, Ls); }
+  Det.P = cp; Det.S = Ls ? cs : null;
+}
+function applyPlan(clip, plan, sec) {
+  const Tt = tileSpan(clip.L), W = matW(clip.L), cc = (view.lonU + 180) / Tt - 0.5, rc = (90 - view.lat) / Tt - 0.5, list = [];
+  for (let r = plan.r0; r <= plan.r1; r++) for (let c = plan.c0; c <= plan.c1; c++)
+    list.push({ cu: c, r, cw: mod(c, W), pr: Math.hypot(c - cc, r - rc) + (sec ? -60 : 0) });
+  list.sort((a, b) => a.pr - b.pr); clip.list = list;
+}
+function requestTiles() {
+  const need = new Set();
+  for (const clip of [Det.P, Det.S]) {
+    if (!clip) continue;
+    for (const t of clip.list) for (const layer of ['day', 'night']) {
+      if (layer === 'night' && !cfg.lights) continue;
+      const key = tileKey(layer, clip.L, t.r, t.cw); need.add(key);
+      Net.want({ key, layer, L: clip.L, r: t.r, c: t.cw, prio: t.pr + (layer === 'night' ? 0.5 : 0), group: 'detail' });
+    }
+  }
+  Net.setNeeded(need);
+}
+function countLoaded() {
+  const c = Det.P; if (!c) return 0; let n = 0;
+  for (const t of c.list) if (Net.cache.get(tileKey('day', c.L, t.r, t.cw))) n++;
+  return n;
+}
+function updateDetail(now, dt) {
+  Det.fade += (Det.target - Det.fade) * Math.min(1, dt * 5);
+  if (Math.abs(Det.target - Det.fade) < 0.004) Det.fade = Det.target;
+  if (Det.target === 0 && Det.fade === 0 && Det.P) { Det.P = null; Det.S = null; Net.setNeeded(new Set()); }
+  if (now - Det.lastCheck < 120) return;
+  Det.lastCheck = now;
+  const was = Det.active;
+  const on = was ? view.zoom >= DETAIL_MIN_ZOOM * 0.93 : view.zoom >= DETAIL_MIN_ZOOM;
+  Det.active = cfg.detail && on; Det.target = Det.active ? 1 : 0;
+  if (!Det.active) return;
+  const bb = visibleBBox(); if (!bb) return;
+  const Lf = Math.log2(RES0 / currentMpp()) - 0.35;
+  let wantL = Math.ceil(Lf);
+  if (Det.wantL && Lf > Det.wantL - 1.25 && Lf <= Det.wantL + 0.25) wantL = Det.wantL;
+  wantL = clamp(wantL, MIN_L, MAX_L); Det.wantL = wantL;
+  const lim = Det.limits; let Lp = 0, plan = null;
+  const cur = Det.P ? Det.P.L : 0;
+  if (cur && cur <= wantL && cur >= wantL - 1) { plan = planWindow(cur, bb, lim.nx, lim.ny, true); if (plan) Lp = cur; }
+  if (!plan) for (let L = wantL; L >= MIN_L; L--) { plan = planWindow(L, bb, lim.nx, lim.ny, true); if (plan) { Lp = L; break; } }
+  if (!plan) { Lp = MIN_L; plan = planWindow(Lp, bb, lim.nx, lim.ny, false); }
+  assignLevels(Lp);
+  applyPlan(Det.P, plan, false);
+  if (Det.S) { const p2 = planWindow(Det.S.L, bb, lim.nx, lim.ny, false); applyPlan(Det.S, p2, true); }
+  Det.stat.total = Det.P.list.length;
+  requestTiles();
+}
+
+/* ---------- Render GPU (WebGL2) ---------- */
+const GLSL_NOISE = `
+float hash21(vec2 p){ vec3 p3 = fract(vec3(p.xyx)*0.1031); p3 += dot(p3, p3.yzx+33.33); return fract((p3.x+p3.y)*p3.z); }
+float hash31(vec3 p3){ p3 = fract(p3*0.1031); p3 += dot(p3, p3.zyx+31.32); return fract((p3.x+p3.y)*p3.z); }
+float vnoise(vec3 x){
+  vec3 i = floor(x); vec3 f = fract(x); f = f*f*(3.0-2.0*f);
+  float a = hash31(i), b = hash31(i+vec3(1.0,0.0,0.0)), c = hash31(i+vec3(0.0,1.0,0.0)), d = hash31(i+vec3(1.0,1.0,0.0));
+  float e = hash31(i+vec3(0.0,0.0,1.0)), g = hash31(i+vec3(1.0,0.0,1.0)), h = hash31(i+vec3(0.0,1.0,1.0)), k = hash31(i+vec3(1.0,1.0,1.0));
+  return mix(mix(mix(a,b,f.x), mix(c,d,f.x), f.y), mix(mix(e,g,f.x), mix(h,k,f.x), f.y), f.z);
+}
+float fbm(vec3 p, int oct){
+  float s = 0.0, a = 0.5;
+  for (int i = 0; i < 7; i++) { if (i >= oct) break; s += a*vnoise(p); p = p*2.02 + vec3(11.7, 3.3, 7.1); a *= 0.5; }
+  return s;
+}
+float cloudCore(vec3 p, int oct){
+  vec3 q = p*vec3(2.4, 3.4, 2.4);
+  float w = fbm(q*0.8 + 3.1, 3);
+  float n = fbm(q + vec3(w*1.4, w*0.8, -w*1.1), oct);
+  return smoothstep(0.50, 0.72, n);
+}`;
+const VS = `#version 300 es
+void main(){
+  vec2 p = vec2(float((gl_VertexID<<1)&2), float(gl_VertexID&2));
+  gl_Position = vec4(p*2.0-1.0, 0.0, 1.0);
+}`;
+const BAKE_FS = `#version 300 es
+precision highp float;
+out vec4 o;
+uniform vec4 uBake;
+${GLSL_NOISE}
+void main(){
+  vec2 uv = gl_FragCoord.xy / uBake.xy;
+  float lon = (uv.x - 0.5)*6.28318530718;
+  float lat = (0.5 - uv.y)*3.14159265359;
+  float cl = cos(lat);
+  vec3 p = vec3(cl*sin(lon), sin(lat), cl*cos(lon));
+  o = vec4(cloudCore(p, 6), 0.0, 0.0, 1.0);
+}`;
+// funkcja próbkująca jeden poziom klipmapy; kk = całkowity indeks kolumny odpowiadający x=0, xr = położenie w kafelkach względem niego
+const clipFn = (name, arr) => `
+void ${name}(sampler2D td, sampler2D tn, vec4 cp, float kk, float xr, float yt, vec2 gx, vec2 gy, out vec4 cd, out vec4 cn){
+  vec2 nn = cp.yz;
+  float fcx = floor(xr); float fx = xr - fcx;
+  float ccol = kk + fcx;
+  float fcy = floor(yt); float fy = yt - fcy;
+  float mx = mod(ccol, nn.x); float my = mod(fcy, nn.y);
+  vec4 s = ${arr}[int(mx + nn.x*my)];
+  bool hit = (s.x == ccol && s.y == fcy) && cp.w > 0.5;
+  vec2 uv = vec2(mx + fx, my + fy)/nn;
+  vec2 g1 = gx/nn; vec2 g2 = gy/nn;
+  cd = vec4(0.0); cn = vec4(0.0);
+  if (hit && s.z > 0.0) cd = vec4(textureGrad(td, uv, g1, g2).rgb, s.z);
+  if (hit && s.w > 0.0) cn = vec4(textureGrad(tn, uv, g1, g2).rgb, s.w);
+}`;
+const FS = `#version 300 es
+precision highp float;
+precision highp int;
+precision highp sampler2D;
+out vec4 fragColor;
+#define NS ${NS}
+uniform vec2 uRes;
+uniform float uMin;
+uniform float uS;
+uniform vec3 uCam;
+uniform vec3 uFwd;
+uniform vec3 uRight;
+uniform vec3 uUp;
+uniform vec3 uSun;
+uniform float uTime;
+uniform float uZoom;
+uniform float uDet;
+uniform vec2 uStarRot;
+uniform float uLonC;
+uniform vec4 uCA;
+uniform vec4 uCB;
+uniform vec4 uKF;
+uniform vec4 uOpt;
+uniform vec2 uNP;
+uniform vec3 uCP;
+uniform sampler2D uDay;
+uniform sampler2D uNight;
+uniform sampler2D uDA;
+uniform sampler2D uNA;
+uniform sampler2D uDB;
+uniform sampler2D uNB;
+uniform sampler2D uCloud;
+uniform vec4 uSA[NS];
+uniform vec4 uSB[NS];
+
+const float PI = 3.14159265359;
+const float RA = 1.026;
+const float HS = 0.0032;
+const float BASEV = ${BASE_H / BASE_TH};
+const vec3 BETA = vec3(22.0, 52.0, 127.0);
+const float ATM_I = 1.25;
+${GLSL_NOISE}
+float cloudField(vec3 p, int oct){
+  float t = uTime*0.0025; float cs = cos(t), sn = sin(t);
+  p = vec3(cs*p.x + sn*p.z, p.y, cs*p.z - sn*p.x);
+  return cloudCore(p, oct);
+}
+${clipFn('clipA', 'uSA')}
+${clipFn('clipB', 'uSB')}
+float starLayer(vec3 d, float scale, float dens){
+  vec3 a = abs(d); vec2 uv; float face;
+  if (a.x >= a.y && a.x >= a.z) { uv = d.yz/a.x; face = d.x > 0.0 ? 0.0 : 1.0; }
+  else if (a.y >= a.z) { uv = d.xz/a.y; face = d.y > 0.0 ? 2.0 : 3.0; }
+  else { uv = d.xy/a.z; face = d.z > 0.0 ? 4.0 : 5.0; }
+  vec2 g = uv*scale; vec2 id = floor(g); vec2 f = fract(g);
+  float h = hash21(id + face*57.31);
+  if (h > dens) return 0.0;
+  vec2 pos = vec2(hash21(id + 13.7 + face), hash21(id + 91.3 + face))*0.7 + 0.15;
+  float px = max(uS/uMin*scale*1.2, 0.012);
+  float m = hash21(id + 7.7 + face);
+  return (1.0 - smoothstep(0.0, px, length(f - pos))) * (0.35 + 0.65*m*m);
+}
+vec3 sky(vec3 d){
+  d = vec3(uStarRot.x*d.x + uStarRot.y*d.z, d.y, uStarRot.x*d.z - uStarRot.y*d.x);
+  float s = starLayer(d, 38.0, 0.5) + 0.7*starLayer(d, 80.0, 0.38) + 0.45*starLayer(d, 170.0, 0.3);
+  vec3 tint = mix(vec3(1.0,0.85,0.75), vec3(0.75,0.85,1.0), hash31(floor(d*90.0)));
+  vec3 col = tint*s*1.2;
+  vec3 ng = normalize(vec3(0.25, 0.85, -0.45));
+  float b = dot(d, ng);
+  float band = exp(-b*b*14.0);
+  if (band > 0.015) {
+    float n = fbm(d*4.0 + 5.0, 5);
+    col += vec3(0.42, 0.5, 0.7)*band*(0.015 + 0.09*n*n);
+  }
+  col += vec3(0.008, 0.011, 0.02);
+  return col;
+}
+bool hitSphere(vec3 ro, vec3 rd, float r, out float t0, out float t1){
+  float b = dot(ro, rd); float c = dot(ro, ro) - r*r; float h = b*b - c;
+  t0 = 0.0; t1 = 0.0;
+  if (h < 0.0) return false;
+  h = sqrt(h); t0 = -b - h; t1 = -b + h; return true;
+}
+vec3 atmoScatter(vec3 ro, vec3 rd, float ta, float tb, vec3 L, out vec3 odOut){
+  const int N = 14;
+  float ds = (tb - ta)/float(N);
+  vec3 od = vec3(0.0); vec3 acc = vec3(0.0);
+  float mu = dot(rd, L);
+  float ph = 0.75*(1.0 + mu*mu);
+  for (int i = 0; i < N; i++) {
+    vec3 p = ro + rd*(ta + (float(i) + 0.5)*ds);
+    float r = length(p);
+    float h = max(r - 1.0, 0.0);
+    float dens = exp(-h/HS);
+    vec3 dod = BETA*dens*ds;
+    od += dod;
+    vec3 n = p/r;
+    float cs = dot(n, L);
+    float col;
+    if (cs > 0.05) { col = dens*HS/cs; }
+    else { float ht = max(r*sqrt(max(1.0 - cs*cs, 0.0)) - 1.0, 0.0); col = exp(-ht/HS)*0.07; }
+    float bb = dot(p, L); float shadow = 1.0;
+    if (bb < 0.0) { float dm = sqrt(max(r*r - bb*bb, 0.0)); shadow = smoothstep(0.975, 1.012, dm); }
+    acc += dod*ph*exp(-(od + BETA*col))*shadow;
+  }
+  odOut = od;
+  return acc;
+}
+vec3 shoulder(vec3 c){ vec3 over = max(c - 0.8, 0.0); return min(c, vec3(0.8)) + 0.2*(1.0 - exp(-over/0.2)); }
+
+void main(){
+  vec2 p = (gl_FragCoord.xy - 0.5*uRes)/uMin;
+  vec3 rd = normalize(uFwd + (uRight*p.x + uUp*p.y)*uS);
+  vec3 ro = uCam;
+  vec3 L = normalize(uSun);
+
+  float p0, p1, a0, a1;
+  bool hitP = hitSphere(ro, rd, 1.0, p0, p1);
+  bool hitA = hitSphere(ro, rd, RA, a0, a1);
+
+  // współrzędne „bezpieczne” (ciągłe także poza sylwetką) — pochodne liczone w jednolitym przepływie sterowania
+  float tc = -dot(ro, rd);
+  vec3 Ns = normalize(ro + rd*(hitP ? p0 : tc));
+  float lonS = atan(Ns.x, Ns.z);
+  float latS = asin(clamp(Ns.y, -1.0, 1.0));
+  vec2 uv = vec2(lonS/(2.0*PI) + 0.5, (0.5 - latS/PI)*BASEV);
+  float u2 = fract(uv.x + 0.5) - 0.5;
+  vec2 dxa = dFdx(vec2(uv.x, uv.y)); vec2 dya = dFdy(vec2(uv.x, uv.y));
+  vec2 dxb = dFdx(vec2(u2, uv.y));   vec2 dyb = dFdy(vec2(u2, uv.y));
+  bool useA = fwidth(uv.x) <= fwidth(u2);
+  vec2 gx = useA ? dxa : dxb; vec2 gy = useA ? dya : dyb;
+
+  float lonD = lonS*180.0/PI; float latD = latS*180.0/PI;
+  float dlA = mod(lonD - uLonC + 180.0, 360.0) - 180.0;
+  float dlB = mod(lonD - uLonC, 360.0);
+  float fxA = dFdx(dlA), fyA = dFdy(dlA), fxB = dFdx(dlB), fyB = dFdy(dlB);
+  bool useDA = fwidth(dlA) <= fwidth(dlB);
+  float dlx = useDA ? fxA : fxB; float dly = useDA ? fyA : fyB;
+  vec2 dLat = vec2(dFdx(latD), dFdy(latD));
+  float xA = (uKF.y + dlA)/uCA.x; float yA = (90.0 - latD)/uCA.x;
+  float xB = (uKF.w + dlA)/uCB.x; float yB = (90.0 - latD)/uCB.x;
+  vec2 gAx = vec2(dlx, -dLat.x)/uCA.x; vec2 gAy = vec2(dly, -dLat.y)/uCA.x;
+  vec2 gBx = vec2(dlx, -dLat.x)/uCB.x; vec2 gBy = vec2(dly, -dLat.y)/uCB.x;
+
+  vec3 col = vec3(0.0);
+  vec3 od = vec3(0.0);
+  vec3 sc = vec3(0.0);
+
+  if (hitP) {
+    vec3 N = normalize(ro + rd*p0);
+    vec3 V = -rd;
+    float mu = dot(N, L);
+
+    vec3 dayC = textureGrad(uDay, uv, gx, gy).rgb;
+    vec3 nC = textureGrad(uNight, uv, gx, gy).rgb;
+    vec4 dB = vec4(0.0); vec4 nB = vec4(0.0); vec4 dA = vec4(0.0); vec4 nA = vec4(0.0);
+    clipB(uDB, uNB, uCB, uKF.z, xB, yB, gBx, gBy, dB, nB);
+    clipA(uDA, uNA, uCA, uKF.x, xA, yA, gAx, gAy, dA, nA);
+    vec3 albS = mix(dayC, dB.rgb, dB.a*uDet);
+    albS = mix(albS, dA.rgb, dA.a*uDet);
+    vec3 nS = mix(nC, nB.rgb, nB.a*uDet);
+    nS = mix(nS, nA.rgb, nA.a*uDet);
+
+    float lum = dot(albS, vec3(0.299, 0.587, 0.114));
+    albS = clamp(mix(vec3(lum), albS, 1.07), 0.0, 1.0);
+    float water = smoothstep(0.06, 0.16, albS.b - albS.r) * (1.0 - smoothstep(0.7, 0.9, max(albS.r, max(albS.g, albS.b))));
+    vec3 alb = pow(albS, vec3(2.2));
+
+    // chmury: przy zoomie < 4 z tekstury wypieczonej na GPU, głębiej — proceduralnie (te same 6 oktaw → bez skoku)
+    float cl = 0.0; float clSh = 0.0;
+    float cvis = uOpt.x*(1.0 - 0.75*smoothstep(8.0, 40.0, uZoom));
+    if (uZoom < 4.0) cvis *= uCP.x;
+    if (cvis > 0.01) {
+      float c0, c1; hitSphere(ro, rd, 1.007, c0, c1);
+      vec3 Pc = normalize(ro + rd*c0);
+      if (uZoom < 4.0) {
+        vec2 cgx = vec2(gx.x, gx.y/BASEV); vec2 cgy = vec2(gy.x, gy.y/BASEV);
+        vec2 cuv = vec2(atan(Pc.x, Pc.z)/(2.0*PI) + 0.5 + uCP.y, 0.5 - asin(clamp(Pc.y, -1.0, 1.0))/PI);
+        cl = textureGrad(uCloud, cuv, cgx, cgy).r*cvis;
+        vec3 Ps = normalize(N + L*0.014);
+        vec2 suv = vec2(atan(Ps.x, Ps.z)/(2.0*PI) + 0.5 + uCP.y, 0.5 - asin(clamp(Ps.y, -1.0, 1.0))/PI);
+        clSh = textureGrad(uCloud, suv, cgx, cgy).r*cvis*smoothstep(0.0, 0.2, mu);
+      } else {
+        int oct = clamp(4 + int(log2(max(uZoom, 1.0))), 4, 7);
+        cl = cloudField(Pc, oct)*cvis;
+        clSh = cloudField(normalize(N + L*0.014), oct)*cvis*smoothstep(0.0, 0.2, mu);
+      }
+    }
+
+    float dif = max(mu, 0.0);
+    float wrapv = clamp((mu + 0.1)/1.1, 0.0, 1.0);
+    float difS = mix(dif, wrapv*wrapv, 0.35);
+    float am = 1.0/(max(mu, 0.0) + 0.05);
+    vec3 tau0 = BETA*HS;
+    vec3 sunCol = exp(-tau0*max(am - 1.0, 0.0));
+    float twi = smoothstep(-0.22, 0.02, mu)*(1.0 - smoothstep(0.02, 0.35, mu));
+    vec3 amb = vec3(0.020, 0.028, 0.050)*smoothstep(-0.3, 0.3, mu) + twi*vec3(0.10, 0.043, 0.025) + vec3(0.004, 0.006, 0.012);
+    vec3 lit = alb*(sunCol*difS*1.18*(1.0 - 0.55*clSh) + amb*(1.0 - 0.3*clSh));
+
+    vec3 H = normalize(L + V);
+    float nh = max(dot(N, H), 0.0);
+    float spec = pow(nh, 500.0)*2.2 + pow(nh, 50.0)*0.12;
+    float fres = pow(1.0 - max(dot(N, V), 0.0), 4.0);
+    lit += water*(1.0 - cl)*(sunCol*spec*smoothstep(0.0, 0.1, mu) + vec3(0.30, 0.50, 0.90)*fres*0.25*difS);
+
+    float nightF = (1.0 - smoothstep(-0.10, 0.06, mu))*uOpt.z;
+    vec3 tintN = mix(vec3(1.15, 0.95, 0.70), vec3(1.0), uNP.y);
+    vec3 lights = pow(nS, vec3(1.35))*tintN*2.2*uNP.x;
+    lights *= (1.0 - 0.85*cl);
+    lit += lights*nightF;
+    lit += alb*vec3(0.008, 0.012, 0.022)*(1.0 - smoothstep(-0.05, 0.2, mu));
+
+    if (cl > 0.001) {
+      float cdif = dif*0.9 + 0.1*smoothstep(-0.2, 0.2, mu);
+      vec3 clCol = (sunCol*cdif*1.05 + amb*3.0 + twi*vec3(0.20, 0.10, 0.06))*(0.82 + 0.18*cl);
+      lit = mix(lit, clCol, cl*0.92);
+    }
+
+    float hw = 0.0;
+    if (uOpt.y > 0.5 && hitA) {
+      sc = atmoScatter(ro, rd, max(a0, 0.0), p0, L, od);
+      hw = smoothstep(0.03, 0.14, p0 - max(a0, 0.0));
+    }
+    col = lit*exp(-od*0.35) + sc*ATM_I*hw*0.9;
+  } else {
+    vec3 bg = sky(rd);
+    if (uOpt.y > 0.5 && hitA) { sc = atmoScatter(ro, rd, max(a0, 0.0), a1, L, od); }
+    col = bg*exp(-od) + sc*ATM_I;
+    float sd = dot(rd, L);
+    col += vec3(1.0, 0.93, 0.80)*(exp(-(1.0 - sd)*900.0)*0.9 + smoothstep(0.99996, 0.99999, sd)*12.0);
+  }
+
+  col = shoulder(col);
+  col = pow(max(col, vec3(0.0)), vec3(1.0/2.2));
+  col += (hash21(gl_FragCoord.xy + fract(uTime)*37.0) - 0.5)/255.0;
+  fragColor = vec4(col, 1.0);
+}`;
+
+const CLOUD_W = IS_MOBILE ? 2048 : 4096, CLOUD_H = CLOUD_W / 2, CLOUD_STRIP = 32;
+
+class GPURenderer {
+  constructor(canvas) {
+    this.kind = 'gpu'; this.cv = canvas;
+    const gl = canvas.getContext('webgl2', { antialias: false, alpha: false, depth: false, stencil: false, powerPreference: 'high-performance' });
+    if (!gl) throw new Error('WebGL2 niedostępne');
+    this.gl = gl;
+    this.par = gl.getExtension('KHR_parallel_shader_compile');
+    this.aniso = gl.getExtension('EXT_texture_filter_anisotropic');
+    this.maxTex = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+    this.pr = this.prog(VS, FS); this.bp = this.prog(VS, BAKE_FS);
+    this.ready = false; this.failed = null; this.warmed = 0;
+    this.vao = gl.createVertexArray(); gl.bindVertexArray(this.vao);
+    this.fbo = gl.createFramebuffer();
+    this.dirty = new Set(); this.q = []; this.scratch = new Map();
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+    this.dummy = this.mkTex(1, 1, gl.RGBA8, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, false);
+    this.bd = this.mkTex(BASE_W, BASE_TH, gl.RGBA8, gl.REPEAT, gl.CLAMP_TO_EDGE, true);
+    this.nt = [this.mkTex(BASE_W, BASE_TH, gl.RGBA8, gl.REPEAT, gl.CLAMP_TO_EDGE, true), this.mkTex(BASE_W, BASE_TH, gl.RGBA8, gl.REPEAT, gl.CLAMP_TO_EDGE, true)];
+    this.nLive = 0; this.nSig = [null, null];
+    this.cl = this.mkTex(CLOUD_W, CLOUD_H, gl.R8, gl.REPEAT, gl.CLAMP_TO_EDGE, false);
+    this.bakeRow = 0; this.bakeDone = false; this.bakeAt = 0;
+    this.clear(this.bd, 0.04, 0.13, 0.25, 1); this.clear(this.nt[0], 0, 0, 0, 1); this.clear(this.nt[1], 0, 0, 0, 1);
+    this.zero = new Float32Array(NS * 4);
+    canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); App.gpuLost(); });
+    const mx = Math.max(2, Math.min(6, Math.floor(this.maxTex / 512)));
+    this.limits = IS_MOBILE ? { nx: Math.min(4, mx), ny: Math.min(4, mx) } : { nx: mx, ny: Math.min(5, mx) };
+  }
+  prog(vs, fs) {
+    const gl = this.gl, p = gl.createProgram();
+    const a = gl.createShader(gl.VERTEX_SHADER), b = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(a, vs); gl.compileShader(a); gl.shaderSource(b, fs); gl.compileShader(b);
+    gl.attachShader(p, a); gl.attachShader(p, b); gl.linkProgram(p);
+    p._sh = [a, b];
+    return p;
+  }
+  // kończy inicjalizację, gdy kompilator (asynchroniczny, jeśli dostępne KHR_parallel_shader_compile) skończy pracę
+  tryReady() {
+    const gl = this.gl;
+    if (this.failed) return false;
+    if (this.par && !(gl.getProgramParameter(this.pr, this.par.COMPLETION_STATUS_KHR) && gl.getProgramParameter(this.bp, this.par.COMPLETION_STATUS_KHR))) return false;
+    for (const p of [this.pr, this.bp]) if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
+      this.failed = gl.getProgramInfoLog(p) || 'błąd konsolidacji shadera';
+      for (const s of p._sh) { const l = gl.getShaderInfoLog(s); if (l) console.warn('Dziennik kompilatora shadera:\n' + l); }
+      return false;
+    }
+    this.u = {};
+    for (const n of ['uRes', 'uMin', 'uS', 'uCam', 'uFwd', 'uRight', 'uUp', 'uSun', 'uTime', 'uZoom', 'uDet', 'uStarRot', 'uLonC', 'uCA', 'uCB', 'uKF', 'uOpt', 'uNP', 'uCP',
+      'uDay', 'uNight', 'uDA', 'uNA', 'uDB', 'uNB', 'uCloud', 'uSA', 'uSB']) this.u[n] = gl.getUniformLocation(this.pr, n);
+    this.ub = gl.getUniformLocation(this.bp, 'uBake');
+    gl.useProgram(this.pr);
+    ['uDay', 'uNight', 'uDA', 'uNA', 'uDB', 'uNB', 'uCloud'].forEach((n, i) => gl.uniform1i(this.u[n], i));
+    this.ready = true; return true;
+  }
+  mkTex(w, h, fmt, ws, wt, aniso) {
+    const gl = this.gl, t = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE7); gl.bindTexture(gl.TEXTURE_2D, t);
+    const lv = Math.floor(Math.log2(Math.max(w, h))) + 1;
+    gl.texStorage2D(gl.TEXTURE_2D, lv, fmt, w, h);               // pamięć alokowana raz
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, ws);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wt);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, lv > 1 ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    if (aniso && this.aniso) gl.texParameterf(gl.TEXTURE_2D, this.aniso.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(4, gl.getParameter(this.aniso.MAX_TEXTURE_MAX_ANISOTROPY_EXT)));
+    return { t, w, h, lv, lastMip: 0 };
+  }
+  clear(tx, r, g, b, a) {
+    const gl = this.gl;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tx.t, 0);
+    gl.clearColor(r, g, b, a); gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null); this.dirty.add(tx);
+  }
+  scr(size) {
+    let c = this.scratch.get(size);
+    if (!c) { c = mkCanvas(size, size); this.scratch.set(size, c); }
+    return c;
+  }
+  // wgrywa pojedynczy kafelek (bez przebudowy całej tekstury)
+  upTile(tx, x, y, size, bmp) {
+    const gl = this.gl;
+    gl.activeTexture(gl.TEXTURE7); gl.bindTexture(gl.TEXTURE_2D, tx.t);
+    if (bmp.width === size && bmp.height === size) gl.texSubImage2D(gl.TEXTURE_2D, 0, x, y, gl.RGBA, gl.UNSIGNED_BYTE, bmp);
+    else { const cv = this.scr(size), g = cv.getContext('2d'); g.clearRect(0, 0, size, size); g.drawImage(bmp, 0, 0, size, size); gl.texSubImage2D(gl.TEXTURE_2D, 0, x, y, gl.RGBA, gl.UNSIGNED_BYTE, cv); }
+    this.dirty.add(tx);
+  }
+  baseTile(c, r, bmp) { if (bmp) this.q.push({ k: 'd', c, r, bmp }); }
+  nightTile(sig, c, r, bmp) { if (bmp) this.q.push({ k: 'n', sig, c, r, bmp }); }
+  stageNight(sig, direct) {
+    const idx = direct ? this.nLive : 1 - this.nLive;
+    this.nSig[idx] = sig; this.clear(this.nt[idx], 0, 0, 0, 1);
+    this.q = this.q.filter(e => e.k !== 'n');
+    for (let r = 0; r < matH(2); r++) for (let c = 0; c < matW(2); c++) { const b = Net.cache.get(nightKey(sig, 2, r, c)); if (b) this.q.push({ k: 'n', sig, c, r, bmp: b }); }
+  }
+  commitNight(sig) { const i = this.nSig.indexOf(sig); if (i >= 0) this.nLive = i; }
+  uploadCanvases() {
+    const gl = this.gl;
+    gl.activeTexture(gl.TEXTURE7);
+    gl.bindTexture(gl.TEXTURE_2D, this.bd.t); gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, gl.RGBA, gl.UNSIGNED_BYTE, baseDay); this.dirty.add(this.bd);
+    const n = this.nt[this.nLive]; gl.bindTexture(gl.TEXTURE_2D, n.t); gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, gl.RGBA, gl.UNSIGNED_BYTE, baseNight); this.dirty.add(n);
+    this.nSig[this.nLive] = NP.sig;
+  }
+  clipGPU(clip) {
+    const gl = this.gl;
+    if (clip.gpu && (clip.gpu.nx !== clip.NX || clip.gpu.ny !== clip.NY)) { gl.deleteTexture(clip.gpu.day.t); gl.deleteTexture(clip.gpu.night.t); clip.gpu = null; resetRes(clip.res); clip.bornD.fill(0); clip.bornN.fill(0); }
+    if (!clip.gpu) clip.gpu = {
+      nx: clip.NX, ny: clip.NY,
+      day: this.mkTex(clip.NX * 512, clip.NY * 512, gl.RGBA8, gl.REPEAT, gl.REPEAT, true),
+      night: this.mkTex(clip.NX * 256, clip.NY * 256, gl.RGBA8, gl.REPEAT, gl.REPEAT, true)
+    };
+    return clip.gpu;
+  }
+  upBase(e) {
+    const tx = e.k === 'd' ? this.bd : (() => { const i = this.nSig.indexOf(e.sig); return i < 0 ? null : this.nt[i]; })();
+    if (tx) this.upTile(tx, e.c * 512, e.r * 512, 512, e.bmp);
+  }
+  pumpClip(clip, now, ctx) {
+    const g = this.clipGPU(clip), NX = clip.NX, NY = clip.NY;
+    if (cfg.lights && clip.nightSig !== NP.sig) { clip.nightSig = NP.sig; clip.bornN.fill(0); }
+    for (const t of clip.list) {
+      const mx = mod(t.cu, NX), my = mod(t.r, NY), slot = mx + NX * my, i = slot * 4;
+      let resident = clip.res[i] === t.cu && clip.res[i + 1] === t.r;
+      const dReady = resident && clip.bornD[slot] > 0, nReady = resident && clip.bornN[slot] > 0;
+      if (!dReady) {
+        const b = Net.get('day', clip.L, t.r, t.cw);
+        if (b) {
+          if (!ctx.can()) return;
+          if (!resident) { clip.res[i] = t.cu; clip.res[i + 1] = t.r; clip.bornD[slot] = 0; clip.bornN[slot] = 0; resident = true; }
+          this.upTile(g.day, mx * 512, my * 512, 512, b); clip.bornD[slot] = now; ctx.did++;
+        }
+      }
+      if (cfg.lights && !(resident && clip.bornN[slot] > 0) && !nReady) {
+        const b = Net.get('night', clip.L, t.r, t.cw);
+        if (b) {
+          if (!ctx.can()) return;
+          if (!resident) { clip.res[i] = t.cu; clip.res[i + 1] = t.r; clip.bornD[slot] = 0; clip.bornN[slot] = 0; resident = true; }
+          this.upTile(g.night, mx * 256, my * 256, 256, b); clip.bornN[slot] = now; ctx.did++;
+        }
+      }
+    }
+  }
+  bakeStep(now) {
+    const gl = this.gl;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.cl.t, 0);
+    gl.viewport(0, 0, CLOUD_W, CLOUD_H); gl.enable(gl.SCISSOR_TEST); gl.scissor(0, this.bakeRow, CLOUD_W, CLOUD_STRIP);
+    gl.useProgram(this.bp); gl.uniform4f(this.ub, CLOUD_W, CLOUD_H, 0, 0);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.disable(gl.SCISSOR_TEST); gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.useProgram(this.pr);
+    this.bakeRow += CLOUD_STRIP;
+    if (this.bakeRow >= CLOUD_H) { this.bakeDone = true; this.bakeAt = now; this.dirty.add(this.cl); }
+  }
+  // jedna porcja pracy GPU na klatkę z budżetem czasu; zwraca true, gdy jest jeszcze coś do zrobienia
+  pump(now, budget) {
+    const ctx = { did: 0, t0: performance.now(), budget, can() { return this.did === 0 || performance.now() - this.t0 < this.budget; } };
+    while (this.q.length && ctx.can()) { this.upBase(this.q.shift()); ctx.did++; }
+    if (!this.q.length) {
+      if (Det.P && Det.fade > 0) { this.pumpClip(Det.P, now, ctx); if (Det.S) this.pumpClip(Det.S, now, ctx); }
+      else if (!IS_MOBILE && !this.warmed && now > 1800 && cfg.detail) { this.clipGPU(Det.clips[0]); this.clipGPU(Det.clips[1]); this.warmed = 1; ctx.did++; }   // rozgrzewka: alokacja pamięci zawczasu
+    }
+    if (this.ready && cfg.clouds && !this.bakeDone && ctx.can()) this.bakeStep(now);   // chmury wypiekane dopiero po włączeniu warstwy
+    const idle = ctx.did === 0;
+    for (const tx of this.dirty) {
+      if (idle || now - tx.lastMip > 100) {
+        this.gl.activeTexture(this.gl.TEXTURE7); this.gl.bindTexture(this.gl.TEXTURE_2D, tx.t); this.gl.generateMipmap(this.gl.TEXTURE_2D);
+        tx.lastMip = now; this.dirty.delete(tx);
+      }
+    }
+    return ctx.did > 0 || this.q.length > 0 || (cfg.clouds && !this.bakeDone) || !this.ready || this.dirty.size > 0;
+  }
+  resize(cssW, cssH, scale) {
+    let k = Math.min(window.devicePixelRatio || 1, 2) * scale, w = cssW * k, h = cssH * k;
+    const cap = IS_MOBILE ? 2.2e6 : 4.8e6;               // limit liczby pikseli (ekrany 4K)
+    if (w * h > cap) { const s = Math.sqrt(cap / (w * h)); w *= s; h *= s; }
+    w = Math.max(2, Math.round(w)); h = Math.max(2, Math.round(h));
+    if (this.cv.width !== w || this.cv.height !== h) { this.cv.width = w; this.cv.height = h; }
+  }
+  pw() { return this.cv.width; } ph() { return this.cv.height; }
+  draw(S) {
+    const gl = this.gl;
+    if (!this.ready && !this.tryReady()) { if (this.failed) App.gpuBroken(this.failed); return false; }
+    const u = this.u, w = this.cv.width, h = this.cv.height;
+    gl.useProgram(this.pr); gl.viewport(0, 0, w, h);
+    gl.uniform2f(u.uRes, w, h); gl.uniform1f(u.uMin, Math.min(w, h) / 2); gl.uniform1f(u.uS, S.s);
+    gl.uniform3fv(u.uCam, S.cam); gl.uniform3fv(u.uFwd, S.fwd); gl.uniform3fv(u.uRight, S.right); gl.uniform3fv(u.uUp, S.up); gl.uniform3fv(u.uSun, S.sun);
+    gl.uniform1f(u.uTime, S.time); gl.uniform1f(u.uZoom, S.zoom); gl.uniform1f(u.uDet, S.det);
+    gl.uniform2f(u.uStarRot, Math.cos(S.gmst), Math.sin(S.gmst));
+    gl.uniform1f(u.uLonC, S.lonC);
+    gl.uniform4f(u.uOpt, S.clouds ? 1 : 0, S.atmo ? 1 : 0, S.lights ? 1 : 0, 0);
+    gl.uniform2f(u.uNP, S.nGain, S.nNat);
+    const bakeFade = this.bakeDone ? clamp((S.nowMs - this.bakeAt) / 1200, 0, 1) : 0;
+    gl.uniform3f(u.uCP, bakeFade, mod(S.time * 0.0025 / TAU, 1), 0);
+    const P = Det.P && Det.P.gpu && S.det > 0.002 ? Det.P : null;
+    const Q = P && Det.S && Det.S.gpu ? Det.S : null;
+    const off = view.lonU + 180;
+    const kf = [0, 0, 0, 0];
+    if (P) { const T1 = tileSpan(P.L), K = Math.floor(off / T1); kf[0] = K; kf[1] = off - K * T1; }
+    if (Q) { const T2 = tileSpan(Q.L), K = Math.floor(off / T2); kf[2] = K; kf[3] = off - K * T2; }
+    gl.uniform4f(u.uKF, kf[0], kf[1], kf[2], kf[3]);
+    gl.uniform4f(u.uCA, P ? tileSpan(P.L) : 36, P ? P.NX : 1, P ? P.NY : 1, P ? 1 : 0);
+    gl.uniform4f(u.uCB, Q ? tileSpan(Q.L) : 36, Q ? Q.NX : 1, Q ? Q.NY : 1, Q ? 1 : 0);
+    gl.uniform4fv(u.uSA, P ? P.res : this.zero); gl.uniform4fv(u.uSB, Q ? Q.res : this.zero);
+    const bind = (unit, t) => { gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, t); };
+    bind(0, this.bd.t); bind(1, this.nt[this.nLive].t);
+    bind(2, P ? P.gpu.day.t : this.dummy.t); bind(3, P ? P.gpu.night.t : this.dummy.t);
+    bind(4, Q ? Q.gpu.day.t : this.dummy.t); bind(5, Q ? Q.gpu.night.t : this.dummy.t);
+    bind(6, this.cl.t);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    return true;
+  }
+}
+
+/* ---------- Render programowy (CPU, raycast kuli na ImageData) ---------- */
+const DEC = new Float32Array(256); for (let i = 0; i < 256; i++) DEC[i] = Math.pow(i / 255, 2.2);
+const ENC = new Uint8Array(1024); for (let i = 0; i < 1024; i++) ENC[i] = Math.round(Math.pow(i / 1023, 1 / 2.2) * 255);
+const TAU0 = [0.0704, 0.166, 0.406];
+const SUNLUT = (() => { const a = new Float32Array(256 * 3); for (let i = 0; i < 256; i++) { const mu = i / 255, am = Math.max(1 / (mu + 0.05) - 1, 0); for (let k = 0; k < 3; k++) a[i * 3 + k] = Math.exp(-TAU0[k] * am); } return a; })();
+
+class SoftRenderer {
+  constructor(canvas) {
+    this.kind = 'soft'; this.cv = canvas; this.ctx = canvas.getContext('2d');
+    this.off = mkCanvas(2, 2); this.octx = this.off.getContext('2d');
+    this.w = 0; this.h = 0; this.imgs = new Map(); this.stars = null; this.img = null;
+    this.lods = { day: [], night: [] }; this.cloud = null; this.tmp = new Float64Array(4);
+    this.limits = { nx: 4, ny: 4 };
+    this.tmpCv = [null, mkCanvas(BASE_W >> 1, BASE_H >> 1), mkCanvas(BASE_W >> 2, BASE_H >> 2)];
+    this.tc = new Map(); this.scv = mkCanvas(512, 512); this.tb = 0; this.lk = [-1, -1, -1, -1]; this.li = [null, null, null, null];
+    this.ready = true;                 // szum chmur liczony dopiero po ich włączeniu (ensureCloud w draw)
+  }
+  ensureCloud() {
+    if (this.cloud) return;
+    const W = 768, H = 384, a = new Uint8Array(W * H);
+    for (let y = 0; y < H; y++) {
+      const lat = (0.5 - (y + 0.5) / H) * Math.PI, cl = Math.cos(lat), sl = Math.sin(lat);
+      for (let x = 0; x < W; x++) {
+        const lon = ((x + 0.5) / W - 0.5) * 2 * Math.PI;
+        a[y * W + x] = cloudJS(cl * Math.sin(lon), sl, cl * Math.cos(lon), 5) * 255;
+      }
+    }
+    this.cloud = { a, W, H };
+  }
+  resize(cssW, cssH, scale) {
+    const k = Math.min(1, Math.sqrt(230000 * scale * scale / (cssW * cssH)));
+    const w = Math.max(64, Math.round(cssW * k)), h = Math.max(64, Math.round(cssH * k));
+    if (w === this.w && h === this.h) return;
+    this.w = w; this.h = h; this.cv.width = w; this.cv.height = h; this.off.width = w; this.off.height = h;
+    const key = w + 'x' + h; let img = this.imgs.get(key);
+    if (!img) { if (this.imgs.size > 3) this.imgs.clear(); img = new ImageData(w, h); this.imgs.set(key, img); }
+    this.img = img; this.makeStars();
+  }
+  pw() { return this.w || 2; } ph() { return this.h || 2; }
+  pump() { return false; }
+  makeStars() {
+    const c = mkCanvas(this.w, this.h), g = c.getContext('2d');
+    g.fillStyle = '#02040a'; g.fillRect(0, 0, this.w, this.h);
+    let seed = 12345; const rnd = () => { seed = (Math.imul(seed, 1664525) + 1013904223) | 0; return (seed >>> 0) / 4294967296; };
+    const n = Math.round(this.w * this.h / 900);
+    for (let i = 0; i < n; i++) {
+      const x = rnd() * this.w, y = rnd() * this.h, b = rnd(), a = 0.25 + 0.75 * b * b, r = b > 0.97 ? 1.3 : 0.7;
+      g.fillStyle = `rgba(${(200 + 55 * rnd()) | 0},${(210 + 45 * rnd()) | 0},255,${a})`;
+      g.beginPath(); g.arc(x, y, r, 0, 6.2832); g.fill();
+    }
+    this.stars = c;
+  }
+  uploadBase() {
+    for (const [name, cv] of [['day', baseDay], ['night', baseNight]]) {
+      const arr = [cv.getContext('2d').getImageData(0, 0, BASE_W, BASE_H)];
+      for (let l = 1; l <= 2; l++) {
+        const t = this.tmpCv[l], g = t.getContext('2d');
+        g.drawImage(cv, 0, 0, t.width, t.height); arr.push(g.getImageData(0, 0, t.width, t.height));
+      }
+      this.lods[name] = arr;
+    }
+  }
+  // dane pikseli kafelka (z ograniczeniem liczby dekodowań na klatkę)
+  tileImg(layer, L, cw, r) {
+    const key = (layer === 'night' ? NP.sig : 'd') + L + '/' + r + '/' + cw;
+    let id = this.tc.get(key); if (id) return id;
+    if (this.tb <= 0) return null;
+    const bmp = Net.get(layer, L, r, cw); if (!bmp) return null;
+    this.tb--;
+    const sz = bmp.width || 512, cv = this.scv; if (cv.width !== sz) { cv.width = sz; cv.height = sz; }
+    const g = cv.getContext('2d', { willReadFrequently: true }); g.clearRect(0, 0, sz, sz); g.drawImage(bmp, 0, 0, sz, sz);
+    id = g.getImageData(0, 0, sz, sz);
+    this.tc.set(key, id); if (this.tc.size > 24) this.tc.delete(this.tc.keys().next().value);
+    return id;
+  }
+  wsamp(clip, role, layer, lonU, latD, o) {
+    const L = clip.L, Tt = tileSpan(L), tx = (lonU + 180) / Tt, ty = (90 - latD) / Tt, ci = Math.floor(tx), ri = Math.floor(ty);
+    if (ri < 0 || ri >= matH(L)) return false;
+    const ix = role * 2 + (layer === 'day' ? 0 : 1), key = ci * 8192 + ri;
+    let img;
+    if (this.lk[ix] === key) img = this.li[ix]; else { img = this.tileImg(layer, L, mod(ci, matW(L)), ri); this.lk[ix] = key; this.li[ix] = img; }
+    if (!img) return false;
+    const d = img.data, W = img.width, H = img.height;
+    const x = (tx - ci) * W - 0.5, y = (ty - ri) * H - 0.5; let x0 = Math.floor(x), y0 = Math.floor(y);
+    const fx = x - x0, fy = y - y0; let x1 = x0 + 1, y1 = y0 + 1;
+    x0 = x0 < 0 ? 0 : x0 >= W ? W - 1 : x0; x1 = x1 < 0 ? 0 : x1 >= W ? W - 1 : x1; y0 = y0 < 0 ? 0 : y0 >= H ? H - 1 : y0; y1 = y1 < 0 ? 0 : y1 >= H ? H - 1 : y1;
+    const i00 = (y0 * W + x0) * 4, i10 = (y0 * W + x1) * 4, i01 = (y1 * W + x0) * 4, i11 = (y1 * W + x1) * 4;
+    const w00 = (1 - fx) * (1 - fy), w10 = fx * (1 - fy), w01 = (1 - fx) * fy, w11 = fx * fy;
+    o[0] = d[i00] * w00 + d[i10] * w10 + d[i01] * w01 + d[i11] * w11;
+    o[1] = d[i00 + 1] * w00 + d[i10 + 1] * w10 + d[i01 + 1] * w01 + d[i11 + 1] * w11;
+    o[2] = d[i00 + 2] * w00 + d[i10 + 2] * w10 + d[i01 + 2] * w01 + d[i11 + 2] * w11;
+    return true;
+  }
+  samp(img, u, v, o) {
+    const d = img.data, W = img.width, H = img.height;
+    const x = u * W - 0.5, y = v * H - 0.5; let x0 = Math.floor(x), y0 = Math.floor(y);
+    const fx = x - x0, fy = y - y0; let x1 = x0 + 1, y1 = y0 + 1;
+    x0 = mod(x0, W); x1 = mod(x1, W);
+    y0 = y0 < 0 ? 0 : (y0 >= H ? H - 1 : y0); y1 = y1 < 0 ? 0 : (y1 >= H ? H - 1 : y1);
+    const i00 = (y0 * W + x0) * 4, i10 = (y0 * W + x1) * 4, i01 = (y1 * W + x0) * 4, i11 = (y1 * W + x1) * 4;
+    const w00 = (1 - fx) * (1 - fy), w10 = fx * (1 - fy), w01 = (1 - fx) * fy, w11 = fx * fy;
+    o[0] = d[i00] * w00 + d[i10] * w10 + d[i01] * w01 + d[i11] * w11;
+    o[1] = d[i00 + 1] * w00 + d[i10 + 1] * w10 + d[i01 + 1] * w01 + d[i11 + 1] * w11;
+    o[2] = d[i00 + 2] * w00 + d[i10 + 2] * w10 + d[i01 + 2] * w01 + d[i11 + 2] * w11;
+  }
+  draw(S) {
+    const w = this.w, h = this.h, data = this.img.data, tmp = this.tmp;
+    const dayImgs = this.lods.day; if (!dayImgs.length) return true;
+    const minHalf = Math.min(w, h) / 2, cam = S.cam, fw = S.fwd, rt = S.right, up = S.up, s = S.s;
+    const lx = S.sun[0], ly = S.sun[1], lz = S.sun[2];
+    const D2m1 = CAM_D * CAM_D - 1;
+    const tpp = Math.max(1, S.mpp / 15654);
+    const lod = Math.min(2, Math.max(0, Math.floor(Math.log2(tpp))));
+    const dayL = dayImgs[lod], nightL = this.lods.night[lod];
+    if (S.clouds) this.ensureCloud();
+    const cl = this.cloud, cvis = S.clouds ? (1 - 0.85 * smooth(4, 15, S.zoom)) : 0;
+    const drift = S.time * 0.0025 / (2 * Math.PI);
+    const atmo = S.atmo, lights = S.lights, det = S.det;
+    const cP = (det > 0.01 && Det.P) ? Det.P : null, cS = cP ? Det.S : null;
+    this.tb = 3; this.lk = [-1, -1, -1, -1];
+    const nG = (S.nGain || 1) * 2.2, nN = S.nNat || 0;
+    const kR = nG * (1.15 - 0.15 * nN), kG = nG * (0.95 + 0.05 * nN), kB = nG * (0.70 + 0.30 * nN);
+
+    for (let y = 0; y < h; y++) {
+      const py = (h / 2 - (y + 0.5)) / minHalf * s;
+      const bx = fw[0] + up[0] * py, by = fw[1] + up[1] * py, bz = fw[2] + up[2] * py;
+      for (let x = 0; x < w; x++) {
+        const px = ((x + 0.5) - w / 2) / minHalf * s;
+        let dx = bx + rt[0] * px, dy = by + rt[1] * px, dz = bz + rt[2] * px;
+        const il = 1 / Math.sqrt(dx * dx + dy * dy + dz * dz); dx *= il; dy *= il; dz *= il;
+        const b = cam[0] * dx + cam[1] * dy + cam[2] * dz, disc = b * b - D2m1, o = (y * w + x) * 4;
+
+        if (disc < 0) {
+          if (atmo && b < 0) {
+            const dm = Math.sqrt(CAM_D * CAM_D - b * b);
+            if (dm < 1.03) {
+              const g = Math.exp(-(dm - 1) / 0.0075);
+              const qx = cam[0] - dx * b, qy = cam[1] - dy * b, qz = cam[2] - dz * b;
+              const nl = (qx * lx + qy * ly + qz * lz) / dm;
+              const a = Math.min(1, g * smooth(-0.35, 0.3, nl) * 0.9);
+              data[o] = 110; data[o + 1] = 170; data[o + 2] = 255; data[o + 3] = a * 255; continue;
+            }
+          }
+          data[o + 3] = 0; continue;
+        }
+
+        const t = -b - Math.sqrt(disc);
+        const nx = cam[0] + dx * t, ny = cam[1] + dy * t, nz = cam[2] + dz * t;
+        const mu = nx * lx + ny * ly + nz * lz;
+        const lat = Math.asin(ny < -1 ? -1 : ny > 1 ? 1 : ny), lon = Math.atan2(nx, nz);
+        const u = lon / (2 * Math.PI) + 0.5, v = 0.5 - lat / Math.PI;
+
+        this.samp(dayL, u, v, tmp);
+        let sr = tmp[0], sg = tmp[1], sb = tmp[2];
+        let nr = 0, ng = 0, nb = 0;
+        if (lights) { this.samp(nightL, u, v, tmp); nr = tmp[0]; ng = tmp[1]; nb = tmp[2]; }
+
+        if (cP) {
+          const lonU = S.lonU + wrap180(lon / DEG - S.lonC), latD = lat / DEG;
+          if (cS && this.wsamp(cS, 1, 'day', lonU, latD, tmp)) { sr += (tmp[0] - sr) * det; sg += (tmp[1] - sg) * det; sb += (tmp[2] - sb) * det; }
+          if (this.wsamp(cP, 0, 'day', lonU, latD, tmp)) { sr += (tmp[0] - sr) * det; sg += (tmp[1] - sg) * det; sb += (tmp[2] - sb) * det; }
+          if (lights) {
+            if (cS && this.wsamp(cS, 1, 'night', lonU, latD, tmp)) { nr += (tmp[0] - nr) * det; ng += (tmp[1] - ng) * det; nb += (tmp[2] - nb) * det; }
+            if (this.wsamp(cP, 0, 'night', lonU, latD, tmp)) { nr += (tmp[0] - nr) * det; ng += (tmp[1] - ng) * det; nb += (tmp[2] - nb) * det; }
+          }
+        }
+
+        const mx = Math.max(sr, sg, sb) / 255;
+        const water = clamp(((sb - sr) / 255 - 0.06) / 0.10, 0, 1) * (1 - smooth(0.7, 0.9, mx));
+        const lr = DEC[(sr + 0.5) | 0], lg = DEC[(sg + 0.5) | 0], lb = DEC[(sb + 0.5) | 0];
+
+        const dif = mu > 0 ? mu : 0, wr = clamp((mu + 0.1) / 1.1, 0, 1), difS = dif * 0.65 + wr * wr * 0.35;
+        const si = ((mu < 0 ? 0 : mu > 1 ? 1 : mu) * 255 | 0) * 3;
+        const twi = smooth(-0.22, 0.02, mu) * (1 - smooth(0.02, 0.35, mu));
+        const aS = smooth(-0.3, 0.3, mu);
+        const ambR = 0.020 * aS + twi * 0.10 + 0.004, ambG = 0.028 * aS + twi * 0.043 + 0.006, ambB = 0.050 * aS + twi * 0.025 + 0.012;
+        const dd = difS * 1.18;
+        let rr = lr * (SUNLUT[si] * dd + ambR), gg = lg * (SUNLUT[si + 1] * dd + ambG), bb2 = lb * (SUNLUT[si + 2] * dd + ambB);
+
+        if (water > 0.05 && mu > 0) {
+          const hx = lx - dx, hy = ly - dy, hz = lz - dz; const hl = 1 / Math.hypot(hx, hy, hz);
+          let nh = (nx * hx + ny * hy + nz * hz) * hl; nh = nh < 0 ? 0 : nh;
+          let p = nh; for (let i = 0; i < 8; i++) p *= p;
+          const sp = (p * 2.2 + nh * nh * nh * nh * 0.04) * water * smooth(0, 0.1, mu);
+          rr += sp * SUNLUT[si]; gg += sp * SUNLUT[si + 1]; bb2 += sp * SUNLUT[si + 2];
+        }
+
+        let clouds = 0;
+        if (cvis > 0.01) {
+          const cu = u + drift; const cw = cl.W, ch = cl.H;
+          let fx = (cu - Math.floor(cu)) * cw - 0.5, fy = v * ch - 0.5; const x0 = Math.floor(fx), y0 = Math.floor(fy); fx -= x0; fy -= y0;
+          const xa = mod(x0, cw), xb = mod(x0 + 1, cw), ya = clamp(y0, 0, ch - 1), yb = clamp(y0 + 1, 0, ch - 1);
+          const c = ((cl.a[ya * cw + xa] * (1 - fx) + cl.a[ya * cw + xb] * fx) * (1 - fy) + (cl.a[yb * cw + xa] * (1 - fx) + cl.a[yb * cw + xb] * fx) * fy) / 255;
+          clouds = c * cvis;
+        }
+        if (lights) {
+          const nf = (1 - smooth(-0.10, 0.06, mu)) * (1 - 0.85 * clouds);
+          if (nf > 0.001) { rr += Math.pow(nr / 255, 1.35) * kR * nf; gg += Math.pow(ng / 255, 1.35) * kG * nf; bb2 += Math.pow(nb / 255, 1.35) * kB * nf; }
+        }
+        if (clouds > 0.001) {
+          const cd = dif * 0.9 + 0.1 * smooth(-0.2, 0.2, mu), k = (0.82 + 0.18 * clouds), a = clouds * 0.92;
+          const cr = (SUNLUT[si] * cd * 1.05 + ambR * 3 + twi * 0.20) * k, cg = (SUNLUT[si + 1] * cd * 1.05 + ambG * 3 + twi * 0.10) * k, cb = (SUNLUT[si + 2] * cd * 1.05 + ambB * 3 + twi * 0.06) * k;
+          rr += (cr - rr) * a; gg += (cg - gg) * a; bb2 += (cb - bb2) * a;
+        }
+        if (atmo) {
+          const nv = -(nx * dx + ny * dy + nz * dz), e = 1 - (nv < 0 ? 0 : nv), rim = e * e * e;
+          const la = 0.12 + 0.88 * smooth(-0.2, 0.45, mu);
+          const k = 1 - 0.35 * rim;
+          rr = rr * k + rim * 0.22 * la; gg = gg * k + rim * 0.42 * la; bb2 = bb2 * k + rim * 0.80 * la;
+        }
+        data[o]     = ENC[Math.min(1023, Math.max(0, (rr * 1023) | 0))];
+        data[o + 1] = ENC[Math.min(1023, Math.max(0, (gg * 1023) | 0))];
+        data[o + 2] = ENC[Math.min(1023, Math.max(0, (bb2 * 1023) | 0))];
+        data[o + 3] = 255;
+      }
+    }
+    this.octx.putImageData(this.img, 0, 0);
+    this.ctx.drawImage(this.stars, 0, 0);
+    this.ctx.drawImage(this.off, 0, 0);
+    return true;
+  }
+}
+
+/* =====================================================================
+   ISS — rzeczywista orbita (TLE → SGP4), położenie, ślad, zasięg i przeloty nad obserwatorem
+   ===================================================================== */
+const RE_KM = 6371.0088, WA = 6378.137, WF = 1 / 298.257223563, WE2 = WF * (2 - WF);
+const FALLBACK_TLE = ['1 25544U 98067A   26298.49942685  .00007074  00000+0  13616-3 0  9991',
+                      '2 25544  51.6337  15.2393 0006903 308.0649  51.9716 15.49050058591953'];
+const OBS_PRESETS = [
+  { n: 'Warszawa', lat: 52.23, lon: 21.01 }, { n: 'Kraków', lat: 50.06, lon: 19.94 }, { n: 'Gdańsk', lat: 54.35, lon: 18.65 },
+  { n: 'Wrocław', lat: 51.11, lon: 17.04 }, { n: 'Poznań', lat: 52.41, lon: 16.93 }, { n: 'Londyn', lat: 51.51, lon: -0.13 },
+  { n: 'Nowy Jork', lat: 40.71, lon: -74.0 }, { n: 'Tokio', lat: 35.68, lon: 139.75 }, { n: 'Sydney', lat: -33.87, lon: 151.21 }, { n: 'Kair', lat: 30.04, lon: 31.24 }
+];
+const COMPASS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+const compass = azRad => COMPASS[Math.round(mod(azRad / DEG, 360) / 45) % 8];
+const ISS = {
+  sat: null, kep: null, l1: null, l2: null, epoch: 0, src: '—', state: 'loading',
+  show: true, orbit: true, foot: true, follow: false, panel: false,
+  pos: null, trk: null, trkC: 0, scr: null,
+  obs: { name: 'Warszawa', lat: 52.23, lon: 21.01, h: 0.1 }, minEl: 10, onlyVis: false,
+  passes: [], scan: null, scanId: 0, scanAt: 0, sel: null, selTrk: null, selSky: null, uiDirty: true, shown: []
+};
+
+function gmstRad(ms) {
+  const d = ms / 86400000 + 2440587.5 - 2451545.0, t = d / 36525;
+  return mod(280.46061837 + 360.98564736629 * d + 0.000387933 * t * t - t * t * t / 38710000, 360) * DEG;
+}
+function eciToEcef(p, g) { const c = Math.cos(g), s = Math.sin(g); return { x: p.x * c + p.y * s, y: -p.x * s + p.y * c, z: p.z }; }
+function ecefToGeo(e) {
+  const lon = Math.atan2(e.y, e.x), rho = Math.hypot(e.x, e.y);
+  let lat = Math.atan2(e.z, rho * (1 - WE2)), h = 0;
+  for (let i = 0; i < 5; i++) { const s = Math.sin(lat), N = WA / Math.sqrt(1 - WE2 * s * s); h = rho / Math.cos(lat) - N; lat = Math.atan2(e.z, rho * (1 - WE2 * N / (N + h))); }
+  return { lat, lon, h };
+}
+function geoToEcef(lat, lon, h) { const s = Math.sin(lat), c = Math.cos(lat), N = WA / Math.sqrt(1 - WE2 * s * s); return { x: (N + h) * c * Math.cos(lon), y: (N + h) * c * Math.sin(lon), z: (N * (1 - WE2) + h) * s }; }
+const wvec = (latDeg, lonDeg, r) => { const la = latDeg * DEG, lo = lonDeg * DEG, c = Math.cos(la); return [r * c * Math.sin(lo), r * Math.sin(la), r * c * Math.cos(lo)]; };
+function mkObs(o) {
+  const lat = o.lat * DEG, lon = o.lon * DEG;
+  return { e: geoToEcef(lat, lon, o.h || 0), sl: Math.sin(lon), cl: Math.cos(lon), sp: Math.sin(lat), cp: Math.cos(lat), w: wvec(o.lat, o.lon, 1) };
+}
+function lookAngles(ob, ec) {
+  const dx = ec.x - ob.e.x, dy = ec.y - ob.e.y, dz = ec.z - ob.e.z;
+  const E = -ob.sl * dx + ob.cl * dy, N = -ob.sp * ob.cl * dx - ob.sp * ob.sl * dy + ob.cp * dz, U = ob.cp * ob.cl * dx + ob.cp * ob.sl * dy + ob.sp * dz;
+  const rng = Math.hypot(dx, dy, dz);
+  return { el: Math.asin(U / rng), az: mod(Math.atan2(E, N), TAU), rng, ec };
+}
+
+// zapasowy propagator (gdy nie załadowano SGP4): Kepler + sekularne poprawki J2 z elementów TLE
+function kepInit(l1, l2) {
+  const g = (a, b) => +l2.slice(a, b);
+  return { inc: g(8, 16) * DEG, raan: g(17, 25) * DEG, ecc: +('0.' + l2.slice(26, 33).trim()), argp: g(34, 42) * DEG, M0: g(43, 51) * DEG, n: g(52, 63) * TAU / 86400, epoch: tleEpochMs(l1) };
+}
+function kepEci(k, ms) {
+  const mu = 398600.4418, Re = 6378.137, J2 = 1.08263e-3, dt = (ms - k.epoch) / 1000;
+  const ci = Math.cos(k.inc), si = Math.sin(k.inc), e = k.ecc;
+  const a = Math.cbrt(mu / (k.n * k.n)), p = a * (1 - e * e), q = 1.5 * J2 * (Re / p) * (Re / p);
+  const nEff = k.n * (1 + q * Math.sqrt(1 - e * e) * (1 - 1.5 * si * si));
+  const raan = k.raan - q * k.n * ci * dt, argp = k.argp + 0.5 * q * k.n * (5 * ci * ci - 1) * dt;
+  const M = mod(k.M0 + nEff * dt, TAU); let E = M;
+  for (let i = 0; i < 8; i++) E = E - (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E));
+  const cE = Math.cos(E), sE = Math.sin(E), r = a * (1 - e * cE), sq = Math.sqrt(1 - e * e);
+  const xo = a * (cE - e), yo = a * sq * sE, vf = Math.sqrt(mu * a) / r, vxo = -vf * sE, vyo = vf * sq * cE;
+  const cw = Math.cos(argp), sw = Math.sin(argp), cO = Math.cos(raan), sO = Math.sin(raan);
+  const rot = (x, y) => ({ x: (cO * cw - sO * sw * ci) * x + (-cO * sw - sO * cw * ci) * y, y: (sO * cw + cO * sw * ci) * x + (-sO * sw + cO * cw * ci) * y, z: sw * si * x + cw * si * y });
+  return { p: rot(xo, yo), v: rot(vxo, vyo) };
+}
+function issEci(ms) {
+  if (ISS.sat && window.satellite) {
+    const r = window.satellite.propagate(ISS.sat, new Date(ms));
+    if (r && r.position && typeof r.position === 'object') return { p: r.position, v: r.velocity };
+  }
+  return ISS.kep ? kepEci(ISS.kep, ms) : null;
+}
+function parseTLE(text) {
+  const lines = text.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+  const i = lines.findIndex(s => s.startsWith('1 25544'));
+  if (i < 0 || !lines[i + 1] || !lines[i + 1].startsWith('2 25544')) return null;
+  return [lines[i], lines[i + 1]];
+}
+function tleEpochMs(l1) { const yy = +l1.slice(18, 20), d = +l1.slice(20, 32); return Date.UTC(yy < 57 ? 2000 + yy : 1900 + yy, 0, 1) + (d - 1) * 86400000; }
+function setTLE(l1, l2, src) {
+  ISS.l1 = l1; ISS.l2 = l2; ISS.src = src; ISS.epoch = tleEpochMs(l1);
+  ISS.kep = kepInit(l1, l2); ISS.sat = window.satellite ? window.satellite.twoline2satrec(l1, l2) : null;
+  ISS.state = 'ok'; ISS.trk = null; ISS.uiDirty = true; startScan();
+}
+async function loadTLE() {
+  const now = Date.now(); let cached = null;
+  try { cached = JSON.parse(localStorage.getItem('obs.tle') || 'null'); } catch (e) { /* brak */ }
+  if (cached && now - cached.t < 3 * 3600e3) { setTLE(cached.l1, cached.l2, cached.src + ' (pamięć podręczna)'); return; }   // CelesTrak: maks. 1 pobranie / 2 h
+  const srcs = [['CelesTrak', 'https://celestrak.org/NORAD/elements/gp.php?CATNR=25544&FORMAT=TLE'], ['wheretheiss.at', 'https://api.wheretheiss.at/v1/satellites/25544/tles?format=text']];
+  for (const [n, u] of srcs) {
+    try {
+      const ctrl = new AbortController(), to = setTimeout(() => ctrl.abort(), 9000);
+      const r = await fetch(u, { signal: ctrl.signal, mode: 'cors' }); clearTimeout(to);
+      if (!r.ok) continue;
+      const t = parseTLE(await r.text());
+      if (t) { setTLE(t[0], t[1], n); try { localStorage.setItem('obs.tle', JSON.stringify({ l1: t[0], l2: t[1], src: n, t: now })); } catch (e) { /* ok */ } return; }
+    } catch (e) { /* następne źródło */ }
+  }
+  if (cached) { setTLE(cached.l1, cached.l2, cached.src + ' (zapisane wcześniej)'); return; }
+  setTLE(FALLBACK_TLE[0], FALLBACK_TLE[1], 'wbudowane (offline)');
+  toast('Nie udało się pobrać świeżych elementów orbity ISS — używam wbudowanych (mogą być nieprecyzyjne).', 'warn', 7000);
+}
+function issSunlit(w, sd) { const s = w[0] * sd[0] + w[1] * sd[1] + w[2] * sd[2]; return s >= 0 || (w[0] * w[0] + w[1] * w[1] + w[2] * w[2] - s * s) > 1; }
+
+function updateISS(sun) {
+  const ms = T.sim, e = issEci(ms); if (!e) return;
+  const ec = eciToEcef(e.p, gmstRad(ms)), geo = ecefToGeo(ec), lat = geo.lat / DEG, lon = geo.lon / DEG;
+  const w = wvec(lat, lon, 1 + geo.h / RE_KM);
+  ISS.pos = { lat, lon, alt: geo.h, speed: Math.hypot(e.v.x, e.v.y, e.v.z), w, lit: issSunlit(w, sun.dir), ec, ms };
+  const tp = performance.now();       // przy bardzo szybkim czasie przebudowa śladu najwyżej 4× na sekundę
+  if (!ISS.trk || (Math.abs(ms - ISS.trkC) > 150000 && tp - (ISS.trkAt || 0) > 250)) { buildTrack(ms); ISS.trkAt = tp; }
+  runScan();
+}
+function buildTrack(c) {
+  const step = 30000, back = 45 * 60000, fwd = 100 * 60000, n = Math.round((back + fwd) / step) + 1, t0 = c - back;
+  const g = new Float32Array(n * 3), o = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const ms = t0 + i * step, e = issEci(ms); if (!e) return;
+    const geo = ecefToGeo(eciToEcef(e.p, gmstRad(ms))), la = geo.lat / DEG, lo = geo.lon / DEG;
+    g.set(wvec(la, lo, 1.0015), i * 3); o.set(wvec(la, lo, 1 + geo.h / RE_KM), i * 3);
+  }
+  ISS.trk = { t0, step, n, g, o }; ISS.trkC = c;
+}
+
+/* Wyszukiwanie przelotów w porcjach (bez blokowania renderu) */
+function startScan() {
+  if (!ISS.sat && !ISS.kep) return;
+  ISS.passes = []; ISS.scanId++; ISS.scanAt = Date.now(); ISS.uiDirty = true;
+  ISS.scan = { gen: passScan(ISS.scanId, ISS.obs, Date.now(), 5 * 86400000) };
+}
+function runScan() {
+  const s = ISS.scan; if (!s) return;
+  const t0 = performance.now();
+  while (performance.now() - t0 < 3) { const r = s.gen.next(); if (r.done) { ISS.scan = null; ISS.uiDirty = true; break; } }
+}
+function* passScan(id, o, t0, span) {
+  const ob = mkObs(o), STEP = 30000, MINR = 5 * DEG;
+  const look = ms => { const e = issEci(ms); return lookAngles(ob, eciToEcef(e.p, gmstRad(ms))); };
+  const lit = (ms, ec) => {
+    const sd = sunInfo(ms).dir, w = [ec.y / WA, ec.z / WA, ec.x / WA];
+    return issSunlit(w, sd) && (ob.w[0] * sd[0] + ob.w[1] * sd[1] + ob.w[2] * sd[2]) < -0.1045;   // Słońce poniżej −6°
+  };
+  const cross = (ta, tb) => {
+    const sa = look(ta).el > 0; let a = ta, b = tb;
+    for (let i = 0; i < 10; i++) { const m = (a + b) / 2; if ((look(m).el > 0) === sa) a = m; else b = m; }
+    const t = (a + b) / 2; return { t, az: look(t).az };
+  };
+  let t = t0, l = look(t), cur = null, n = 0;
+  if (l.el > 0) cur = { aos: t, aosAz: l.az, ongoing: true, maxEl: l.el, maxT: t, maxAz: l.az, vis: false };
+  while (t < t0 + span) {
+    const t2 = t + STEP, l2 = look(t2);
+    if (!cur && l.el <= 0 && l2.el > 0) { const a = cross(t, t2); cur = { aos: a.t, aosAz: a.az, ongoing: false, maxEl: l2.el, maxT: t2, maxAz: l2.az, vis: false }; }
+    if (cur) {
+      if (l2.el > cur.maxEl) { cur.maxEl = l2.el; cur.maxT = t2; cur.maxAz = l2.az; }
+      if (l2.el > MINR && lit(t2, l2.ec)) cur.vis = true;
+      if (l2.el <= 0) {
+        const b = cross(t, t2); cur.los = b.t; cur.losAz = b.az;
+        let lo = cur.maxT - STEP, hi = cur.maxT + STEP;
+        for (let i = 0; i < 14; i++) { const m1 = lo + (hi - lo) / 3, m2 = hi - (hi - lo) / 3; if (look(m1).el < look(m2).el) lo = m1; else hi = m2; }
+        const mt = (lo + hi) / 2, lm = look(mt); if (lm.el >= cur.maxEl) { cur.maxEl = lm.el; cur.maxT = mt; cur.maxAz = lm.az; }
+        if (ISS.scanId !== id) return;
+        if (cur.maxEl > 3 * DEG) ISS.passes.push(cur);
+        ISS.uiDirty = true; cur = null;
+      }
+    }
+    t = t2; l = l2;
+    if (++n % 50 === 0) { yield; if (ISS.scanId !== id) return; }
+  }
+}
+function selectPass(p) {
+  ISS.sel = p;
+  const ob = mkObs(ISS.obs), pts = [], sky = [];
+  for (let ms = p.aos; ms <= p.los + 1; ms += 10000) {
+    const e = issEci(ms), ec = eciToEcef(e.p, gmstRad(ms)), la = lookAngles(ob, ec), geo = ecefToGeo(ec);
+    sky.push({ ms, az: la.az, el: la.el }); pts.push(...wvec(geo.lat / DEG, geo.lon / DEG, 1.003));
+  }
+  ISS.selTrk = Float32Array.from(pts); ISS.selSky = sky;
+  T.sim = p.aos - 90000; T.speed = 10; T.playing = true; $('#tSpeed').value = '10'; $('#tPlay').textContent = '❚❚';
+  ISS.follow = false; ISS.show = true; $('#iShow').checked = true;
+  flyTo(ISS.obs.lat, ISS.obs.lon, 3.8, 1800);
+  ISS.uiDirty = true; ovDirty = true; drawSky();
+}
+
+/* Rysowanie na warstwie 2D nad globem: ślad, orbita, zasięg, znacznik ISS, obserwator */
+const ovc = $('#ovc'), ovx = ovc.getContext('2d');
+const _p = { x: 0, y: 0, ok: false, hid: false };
+function projXYZ(cs, half, x, y, z) {
+  const vx = x - cs.cam[0], vy = y - cs.cam[1], vz = z - cs.cam[2];
+  const dep = vx * cs.fwd[0] + vy * cs.fwd[1] + vz * cs.fwd[2];
+  if (dep <= 0.05) { _p.ok = false; return _p; }
+  _p.x = view.cssW / 2 + (vx * cs.right[0] + vy * cs.right[1] + vz * cs.right[2]) / (dep * cs.s) * half;
+  _p.y = view.cssH / 2 - (vx * cs.up[0] + vy * cs.up[1] + vz * cs.up[2]) / (dep * cs.s) * half;
+  const len = Math.sqrt(vx * vx + vy * vy + vz * vz), dx = vx / len, dy = vy / len, dz = vz / len;
+  const b = cs.cam[0] * dx + cs.cam[1] * dy + cs.cam[2] * dz, disc = b * b - (CAM_D * CAM_D - 1);
+  const t0 = disc > 0 ? -b - Math.sqrt(disc) : 0;
+  _p.hid = disc > 0 && t0 > 0 && t0 < len - 1e-3; _p.ok = true; return _p;
+}
+function strokeTrack(ctx, cs, half, arr, i0, i1) {
+  let pen = false; ctx.beginPath();
+  for (let i = i0; i <= i1; i++) {
+    const p = projXYZ(cs, half, arr[i * 3], arr[i * 3 + 1], arr[i * 3 + 2]);
+    if (p.ok && !p.hid) { if (pen) ctx.lineTo(p.x, p.y); else { ctx.moveTo(p.x, p.y); pen = true; } } else pen = false;
+  }
+  ctx.stroke();
+}
+function drawIssIcon(ctx, x, y, lit) {
+  const g = ctx.createRadialGradient(x, y, 0, x, y, 22);
+  g.addColorStop(0, lit ? 'rgba(255,244,200,.55)' : 'rgba(120,170,255,.4)'); g.addColorStop(1, 'rgba(255,244,200,0)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 22, 0, TAU); ctx.fill();
+  ctx.fillStyle = lit ? '#fff7d6' : '#a9c4ff'; ctx.strokeStyle = 'rgba(2,4,10,.9)'; ctx.lineWidth = 1;
+  ctx.fillRect(x - 11, y - 2, 7, 4); ctx.fillRect(x + 4, y - 2, 7, 4); ctx.fillRect(x - 1.5, y - 6, 3, 12);
+  ctx.strokeRect(x - 11, y - 2, 7, 4); ctx.strokeRect(x + 4, y - 2, 7, 4);
+}
+function label(ctx, txt, x, y, color, align) {
+  ctx.font = '600 11px ui-sans-serif,system-ui,sans-serif'; ctx.textAlign = align || 'left'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(2,4,10,.9)';
+  ctx.strokeText(txt, x, y); ctx.fillStyle = color; ctx.fillText(txt, x, y);
+}
+function drawOverlay() {
+  const ctx = ovx; ctx.clearRect(0, 0, view.cssW, view.cssH); ISS.scr = null; ovDirty = false;
+  if (!ISS.show && !ISS.panel) return;
+  const cs = camState(), half = Math.min(view.cssW, view.cssH) / 2;
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  const P = ISS.pos, trk = ISS.trk;
+  // obserwator
+  if (ISS.panel || ISS.sel) {
+    const w = wvec(ISS.obs.lat, ISS.obs.lon, 1.002), p = projXYZ(cs, half, w[0], w[1], w[2]);
+    if (p.ok && !p.hid) {
+      ctx.strokeStyle = '#ffd36b'; ctx.fillStyle = 'rgba(255,211,107,.25)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, TAU); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(p.x, p.y, 1.6, 0, TAU); ctx.fillStyle = '#ffd36b'; ctx.fill();
+      label(ctx, ISS.obs.name, p.x + 10, p.y + 4, '#ffe6a8');
+    }
+  }
+  if (!ISS.show || !P) return;
+  // zasięg widoczności (horyzont)
+  if (ISS.foot) {
+    const c = P.w, il = 1 / Math.hypot(c[0], c[1], c[2]), cx = c[0] * il, cy = c[1] * il, cz = c[2] * il;
+    const gam = Math.acos(RE_KM / (RE_KM + P.alt)); let ux = cy * 0 - cz * 1, uy = cz * 0 - cx * 0, uz = cx * 1 - cy * 0;   // c × (0,1,0)
+    let ul = Math.hypot(ux, uy, uz); if (ul < 1e-4) { ux = 1; uy = 0; uz = 0; ul = 1; } ux /= ul; uy /= ul; uz /= ul;
+    const vx = cy * uz - cz * uy, vy = cz * ux - cx * uz, vz = cx * uy - cy * ux;
+    ctx.beginPath(); let pen = false;
+    for (let k = 0; k <= 96; k++) {
+      const th = k / 96 * TAU, ct = Math.cos(th), st = Math.sin(th), sg = Math.sin(gam), cg = Math.cos(gam);
+      const x = (cx * cg + (ux * ct + vx * st) * sg) * 1.001, y = (cy * cg + (uy * ct + vy * st) * sg) * 1.001, z = (cz * cg + (uz * ct + vz * st) * sg) * 1.001;
+      const p = projXYZ(cs, half, x, y, z);
+      if (p.ok && !p.hid) { if (pen) ctx.lineTo(p.x, p.y); else { ctx.moveTo(p.x, p.y); pen = true; } } else pen = false;
+    }
+    ctx.strokeStyle = 'rgba(111,211,255,.55)'; ctx.lineWidth = 1.2; ctx.setLineDash([2, 4]); ctx.stroke(); ctx.setLineDash([]);
+  }
+  if (ISS.orbit && trk) {
+    const f = clamp((P.ms - trk.t0) / trk.step, 0, trk.n - 1), i = Math.floor(f);
+    // ślad na ziemi: przeszłość kreskowana, przyszłość ciągła
+    ctx.lineWidth = 1.6; ctx.strokeStyle = 'rgba(111,211,255,.45)'; ctx.setLineDash([3, 5]); strokeTrack(ctx, cs, half, trk.g, 0, i); ctx.setLineDash([]);
+    ctx.strokeStyle = 'rgba(111,211,255,.95)'; ctx.lineWidth = 2; strokeTrack(ctx, cs, half, trk.g, i, trk.n - 1);
+    // orbita na wysokości stacji
+    ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(255,255,255,.28)'; strokeTrack(ctx, cs, half, trk.o, 0, trk.n - 1);
+  }
+  if (ISS.selTrk) {
+    ctx.lineWidth = 3.2; ctx.strokeStyle = 'rgba(255,196,64,.95)'; strokeTrack(ctx, cs, half, ISS.selTrk, 0, ISS.selTrk.length / 3 - 1);
+  }
+  // znacznik ISS + linia do punktu podsatelitarnego
+  const sw = wvec(P.lat, P.lon, 1.0015), ps = projXYZ(cs, half, sw[0], sw[1], sw[2]), sx = ps.x, sy = ps.y, sOk = ps.ok && !ps.hid;
+  const pi = projXYZ(cs, half, P.w[0], P.w[1], P.w[2]);
+  if (pi.ok) {
+    const hid = pi.hid, x = pi.x, y = pi.y;
+    if (!hid) {
+      if (sOk) { ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(sx, sy); ctx.stroke(); ctx.beginPath(); ctx.arc(sx, sy, 3, 0, TAU); ctx.stroke(); }
+      drawIssIcon(ctx, x, y, P.lit);
+      label(ctx, 'ISS', x + 14, y - 8, '#ffffff'); label(ctx, Math.round(P.alt) + ' km · ' + (P.lit ? 'w słońcu' : 'w cieniu'), x + 14, y + 5, '#b9cde6');
+      ISS.scr = { x, y, vis: true };
+    }
+  }
+}
+
+/* Panel i interfejs ISS */
+function skyXY(az, el, cx, cy, R) { const r = (90 - el / DEG) / 90 * R; return [cx - r * Math.sin(az), cy - r * Math.cos(az)]; }   // N u góry, E po lewej (widok w górę)
+function drawSky() {
+  const sk = ISS.selSky, p = ISS.sel, has = !!(sk && sk.length && p);
+  const cv = $('#skyc'), g = cv.getContext('2d'), W = cv.width, cx = W / 2, cy = W / 2, R = W / 2 - 46;
+  g.clearRect(0, 0, W, W);
+  g.strokeStyle = 'rgba(148,175,220,.3)'; g.lineWidth = 3;
+  for (const el of [0, 30, 60]) { g.beginPath(); g.arc(cx, cy, (90 - el) / 90 * R, 0, TAU); g.stroke(); }
+  g.beginPath(); g.moveTo(cx - R, cy); g.lineTo(cx + R, cy); g.moveTo(cx, cy - R); g.lineTo(cx, cy + R); g.stroke();
+  g.fillStyle = '#8da2c0'; g.font = '600 30px ui-sans-serif,system-ui,sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText('N', cx, cy - R - 24); g.fillText('S', cx, cy + R + 24); g.fillText('W', cx + R + 26, cy); g.fillText('E', cx - R - 26, cy);
+  if (!has) { $('#skyCap').textContent = 'Wybierz przelot, aby zobaczyć jego tor na niebie.'; return; }
+  g.strokeStyle = '#ffc440'; g.lineWidth = 8; g.lineCap = 'round'; g.beginPath();
+  sk.forEach((s, i) => { const [x, y] = skyXY(s.az, Math.max(s.el, 0), cx, cy, R); if (i) g.lineTo(x, y); else g.moveTo(x, y); });
+  g.stroke();
+  const mark = (s, col, t) => {
+    const [x, y] = skyXY(s.az, Math.max(s.el, 0), cx, cy, R);
+    g.fillStyle = col; g.beginPath(); g.arc(x, y, 11, 0, TAU); g.fill();
+    g.fillStyle = '#fff'; g.font = '600 26px ui-sans-serif,system-ui,sans-serif';
+    g.textAlign = x > cx ? 'right' : 'left'; g.fillText(t, x + (x > cx ? -16 : 16), y - 16); g.textAlign = 'center';   // podpis skierowany do środka
+  };
+  mark(sk[0], '#34d399', 'AOS'); mark(sk[sk.length - 1], '#f87171', 'LOS');
+  let best = sk[0]; for (const s of sk) if (s.el > best.el) best = s; mark(best, '#60a5fa', Math.round(best.el / DEG) + '°');
+  const cur = sk.find(s => s.ms >= T.sim);
+  if (cur && T.sim >= sk[0].ms) { const [x, y] = skyXY(cur.az, Math.max(cur.el, 0), cx, cy, R); g.fillStyle = '#fff'; g.beginPath(); g.arc(x, y, 12, 0, TAU); g.fill(); g.strokeStyle = '#000'; g.lineWidth = 4; g.stroke(); }
+  $('#skyCap').textContent = `Tor na niebie: ${compass(p.aosAz)} → ${compass(p.losAz)}, maks. ${Math.round(p.maxEl / DEG)}° (${compass(p.maxAz)})`;
+}
+const fmtDur = ms => { const s = Math.round(ms / 1000), m = Math.floor(s / 60); return m + ' min ' + String(s % 60).padStart(2, '0') + ' s'; };
+function renderPasses() {
+  const box = $('#passList'), all = ISS.passes.filter(p => p.maxEl >= ISS.minEl * DEG && (!ISS.onlyVis || p.vis)), list = all.slice(0, 20);   // 6 najbliższych — żeby panel mieścił się w oknie
+  ISS.shown = list; const now = Date.now();
+  if (!list.length) { box.innerHTML = `<div class="text-[11px] text-slate-500 py-2">${ISS.scan ? 'Obliczanie przelotów…' : 'Brak przelotów spełniających kryteria w ciągu 5 dni.'}</div>`; return; }
+  box.innerHTML = list.map((p, i) => {
+    const d = new Date(p.aos), live = p.ongoing && p.aos <= now, dt = p.aos - now;
+    const when = live ? 'Trwa teraz' : d.toLocaleString('pl-PL', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    const left = live || dt <= 0 ? '' : dt > 36 * 3600e3 ? 'za ' + Math.floor(dt / 86400e3) + ' d' : dt > 3600e3 ? 'za ' + Math.floor(dt / 3600e3) + ' h ' + Math.round((dt % 3600e3) / 60e3) + ' min' : 'za ' + Math.max(1, Math.round(dt / 60e3)) + ' min';
+    const tip = d.toLocaleString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) + (p.vis ? ' · widoczny gołym okiem' : '');
+    const star = p.vis ? '<em class="vis">★</em> ' : '';
+    return `<button class="pass${ISS.sel === p ? ' on' : ''}" data-i="${i}" title="${tip}"><div class="top"><b>${star}${when}</b><span class="pl">${left}</span></div>` +
+      `<small>maks. ${Math.round(p.maxEl / DEG)}° (${compass(p.maxAz)}) · ${fmtDur(p.los - p.aos)} · ${compass(p.aosAz)} → ${compass(p.losAz)}</small></button>`;
+  }).join('') + (all.length > list.length ? `<div class="text-[10px] text-slate-500 px-1">+ ${all.length - list.length} kolejnych w ciągu 5 dni</div>` : '');
+}
+function buildIssUI() {
+  const sel = $('#obsSel');
+  OBS_PRESETS.forEach((o, i) => { const op = document.createElement('option'); op.value = 'p' + i; op.textContent = o.n; sel.appendChild(op); });
+  const cu = document.createElement('option'); cu.value = 'c'; cu.textContent = 'Własna lokalizacja'; cu.hidden = true; sel.appendChild(cu);
+  try { const s = JSON.parse(localStorage.getItem('obs.obs') || 'null'); if (s && isFinite(s.lat) && isFinite(s.lon)) ISS.obs = s; } catch (e) { /* ok */ }
+  syncObsSel();
+  sel.addEventListener('change', e => { const v = e.target.value; if (v[0] === 'p') { const o = OBS_PRESETS[+v.slice(1)]; setObserver({ name: o.n, lat: o.lat, lon: o.lon, h: 0.1 }); } });
+  $('#obsGeo').onclick = () => {
+    if (!navigator.geolocation) { toast('Przeglądarka nie udostępnia geolokalizacji.', 'warn'); return; }
+    navigator.geolocation.getCurrentPosition(p => setObserver({ name: 'Moja lokalizacja', lat: p.coords.latitude, lon: p.coords.longitude, h: (p.coords.altitude || 100) / 1000 }),
+      () => toast('Nie udało się ustalić lokalizacji (brak zgody?).', 'warn'), { timeout: 8000, maximumAge: 600000 });
+  };
+  $('#obsMid').onclick = () => setObserver({ name: `Środek widoku (${fmtNum(view.lat, 1)}°, ${fmtNum(view.lon, 1)}°)`, lat: view.lat, lon: wrap180(view.lon), h: 0.1 });
+  $('#pMinEl').addEventListener('change', e => { ISS.minEl = +e.target.value; ISS.uiDirty = true; });
+  $('#pVis').addEventListener('change', e => { ISS.onlyVis = e.target.checked; ISS.uiDirty = true; });
+  $('#passList').addEventListener('click', e => { const b = e.target.closest('button[data-i]'); if (b && ISS.shown[+b.dataset.i]) selectPass(ISS.shown[+b.dataset.i]); });
+  $('#iShow').addEventListener('change', e => { ISS.show = e.target.checked; ovDirty = true; });
+  $('#iOrbit').addEventListener('change', e => { ISS.orbit = e.target.checked; ovDirty = true; });
+  $('#iFoot').addEventListener('change', e => { ISS.foot = e.target.checked; ovDirty = true; });
+  $('#iGo').onclick = () => followIss();
+  $('#iNow').onclick = () => { T.sim = Date.now(); T.speed = 1; T.playing = true; $('#tSpeed').value = '1'; $('#tPlay').textContent = '❚❚'; ISS.sel = null; ISS.selTrk = null; ISS.selSky = null; ISS.uiDirty = true; drawSky(); };
+  $('#btnIss').onclick = e => { e.stopPropagation(); toggleIssPanel(); };
+  $('#issClose').onclick = () => toggleIssPanel(false);
+  $('#issPanel').addEventListener('click', e => e.stopPropagation());
+  drawSky();
+}
+function syncObsSel() {
+  const i = OBS_PRESETS.findIndex(o => o.n === ISS.obs.name), sel = $('#obsSel');
+  if (i >= 0) sel.value = 'p' + i; else { const cu = sel.querySelector('option[value="c"]'); cu.textContent = ISS.obs.name; cu.hidden = false; sel.value = 'c'; }
+}
+function setObserver(o) {
+  ISS.obs = o; try { localStorage.setItem('obs.obs', JSON.stringify(o)); } catch (e) { /* ok */ }
+  ISS.sel = null; ISS.selTrk = null; ISS.selSky = null; syncObsSel(); startScan(); drawSky(); ovDirty = true;
+  flyTo(o.lat, o.lon, Math.max(view.zoom, 2.2), 1400);
+}
+function toggleIssPanel(v) {
+  ISS.panel = v === undefined ? !ISS.panel : v;
+  $('#issPanel').classList.toggle('hidden', !ISS.panel); $('#btnIss').classList.toggle('on', ISS.panel);
+  if (ISS.panel) { closeMenu(); ISS.uiDirty = true; $('#issPanel')._s = undefined; fitIss(); }
+  ovDirty = true;
+}
+function followIss() {
+  if (!ISS.pos) return;
+  ISS.show = true; $('#iShow').checked = true;
+  flyTo(ISS.pos.lat, ISS.pos.lon, Math.max(view.zoom, 3.2), 1400, () => { ISS.follow = true; updateIssPanel(); });
+}
+let lastIssUi = 0;
+function updateIssPanel(now) {
+  if (now !== undefined) { if (now - lastIssUi < 250) return; lastIssUi = now; }   // DOM tylko 4× na sekundę
+  const P = ISS.pos;
+  $('#cIss').textContent = P ? `${fmtLat(P.lat)} ${fmtLon(P.lon)} · ${Math.round(P.alt)} km ${P.lit ? '☀' : '☾'}` : (ISS.state === 'loading' ? 'ładowanie orbity…' : '—');
+  if (!ISS.panel) return;
+  $('#btnIss').classList.toggle('on', true); $('#iGo').classList.toggle('on', ISS.follow); $('#iGo').textContent = ISS.follow ? 'Śledzę ISS ✓' : 'Pokaż i śledź';
+  if (P) {
+    const spd = P.speed * 3600, age = (T.sim - ISS.epoch) / 86400000;
+    $('#issLive').innerHTML =
+      `<div class="kv"><span>Szerokość</span><span>${fmtLat(P.lat)}</span></div><div class="kv"><span>Długość</span><span>${fmtLon(P.lon)}</span></div>` +
+      `<div class="kv"><span>Wysokość</span><span>${fmtNum(P.alt, 1)} km</span></div><div class="kv"><span>Prędkość</span><span>${Math.round(spd).toLocaleString('pl-PL')} km/h (${fmtNum(P.speed, 2)} km/s)</span></div>` +
+      `<div class="kv"><span>Oświetlenie</span><span>${P.lit ? 'w świetle Słońca' : 'w cieniu Ziemi'}</span></div>` +
+      `<div class="kv"><span>Czas na globie</span><span>${new Date(T.sim).toISOString().slice(11, 19)} UTC</span></div>`;
+    $('#issMeta').innerHTML = `Orbita: <b>${ISS.src}</b> · epoka ${new Date(ISS.epoch).toISOString().slice(0, 16).replace('T', ' ')} UTC (${fmtNum(Math.abs(age), 1)} dn. ${age >= 0 ? 'temu' : 'w przód'}) · propagator: ${ISS.sat ? 'SGP4' : 'Kepler + J2 (uproszczony)'}.` +
+      (Math.abs(age) > 10 ? ' <span style="color:#fbbf24">Dane są stare — położenie przybliżone.</span>' : '') + ' Dokładność przelotów maleje po ok. 3–5 dobach.';
+    $('#issMeta').title = 'Epoka TLE: ' + new Date(ISS.epoch).toISOString().slice(0, 16).replace('T', ' ') + ' UTC. Dokładność przelotów maleje po ok. 3–5 dobach od epoki.';
+  }
+  if (ISS.uiDirty) { renderPasses(); ISS.uiDirty = false; }
+  if (ISS.selSky) drawSky();
+  if (Date.now() - ISS.scanAt > 6 * 3600e3 && !ISS.scan) startScan();
+}
+
+/* ---------- Aplikacja: wybór renderera, UI, interakcje ---------- */
+let gpu = null, soft = null, active = null, gpuFailed = false;
+const perf = { ema: 0, vs: 0.0167, scale: 1, cool: 0, cap: 1, capAt: 0, warm: 0 };
+let interacting = 0;
+
+const App = {
+  baseFailed() {
+    buildProcedural(); baseSource = 'procedural'; baseReady = true; baseDirty = true; setCredit();
+    if (gpu) gpu.uploadCanvases();
+    toast('Brak dostępu do NASA GIBS — używam wbudowanej mapy proceduralnej. Menu zoomu → „Ponów połączenie”.', 'warn', 9000);
+  },
+  detailFailed() {
+    cfg.detail = false; $('#mDetail').checked = false; Det.target = 0; Net.setNeeded(new Set());
+    toast('Nie udało się pobrać kafelków NASA GIBS — szczegóły online wyłączone.', 'warn', 8000);
+  },
+  gpuLost() { gpuFailed = true; toast('Utracono kontekst GPU — przełączam na render programowy.', 'warn'); setRenderer('soft'); },
+  gpuBroken(msg) { console.warn('Shader GPU:', msg); gpuFailed = true; toast('Nie udało się skompilować shadera GPU — przełączam na render programowy.', 'warn', 7000); setRenderer('soft'); }
+};
+function toast(msg, kind = 'info', ms = 5200) {
+  const el = document.createElement('div'); el.className = 'toast ' + kind; el.textContent = msg;
+  $('#toasts').appendChild(el);
+  requestAnimationFrame(() => el.classList.add('show'));
+  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 400); }, ms);
+}
+function setRenderer(kind) {
+  if (kind === 'gpu' && !gpu) {
+    try { gpu = new GPURenderer($('#glc')); }
+    catch (e) { console.warn('GPU:', e); gpuFailed = true; kind = 'soft'; toast('WebGL2 niedostępne — używam renderu programowego.', 'warn'); }
+  }
+  if (kind === 'soft' && !soft) soft = new SoftRenderer($('#swc'));
+  cfg.renderer = kind; active = kind === 'gpu' ? gpu : soft;
+  $('#glc').style.display = kind === 'gpu' ? 'block' : 'none';
+  $('#swc').style.display = kind === 'soft' ? 'block' : 'none';
+  Det.limits = active.limits;
+  for (const c of Det.clips) resetClip(c, 0);
+  Det.P = null; Det.S = null; Net.setNeeded(new Set());
+  resizeAll();
+  if (kind === 'soft') soft.uploadBase();
+  baseVersion++;
+  $('#rGpu').classList.toggle('on', kind === 'gpu'); $('#rSoft').classList.toggle('on', kind === 'soft');
+  $('#rGpu').disabled = gpuFailed;
+}
+function resizeAll() {
+  const r = stage.getBoundingClientRect();
+  view.cssW = Math.max(2, r.width); view.cssH = Math.max(2, r.height);
+  if (active) { if (active.kind === 'gpu') active.resize(view.cssW, view.cssH, perf.scale); else active.resize(view.cssW, view.cssH, interacting > 0 ? 0.6 : 1); }
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  ovc.width = Math.round(view.cssW * dpr); ovc.height = Math.round(view.cssH * dpr); ovx.setTransform(dpr, 0, 0, dpr, 0, 0); ovDirty = true;
+}
+new ResizeObserver(resizeAll).observe(stage);
+
+function setCredit() {
+  $('#credit').textContent = baseSource === 'procedural'
+    ? 'Mapa wbudowana (tryb offline) · dane NASA GIBS niedostępne'
+    : 'Obrazy: NASA GIBS · Blue Marble · ' + NP.cur.short + (NP.cur.daily ? ' (' + NP.date + ')' : '') + ' · Orbita ISS: CelesTrak / SGP4';
+}
+
+/* Miejsca */
+const PLACES = [
+  { n: 'Warszawa', lat: 52.23, lon: 21.01, z: 38 }, { n: 'Tatry', lat: 49.2, lon: 19.95, z: 46 }, { n: 'Alpy', lat: 46.5, lon: 9.5, z: 24 },
+  { n: 'Kair i delta Nilu', lat: 30.6, lon: 31.0, z: 16 }, { n: 'Himalaje', lat: 28.0, lon: 86.9, z: 24 }, { n: 'Wielki Kanion', lat: 36.1, lon: -112.15, z: 50 },
+  { n: 'Amazonia', lat: -3.4, lon: -60.0, z: 10 }, { n: 'Tokio', lat: 35.68, lon: 139.75, z: 38 }, { n: 'Nowy Jork', lat: 40.7, lon: -74.0, z: 46 },
+  { n: 'Dubaj', lat: 25.2, lon: 55.3, z: 46 }, { n: 'Islandia', lat: 64.9, lon: -18.5, z: 14 }, { n: 'Sydney', lat: -33.87, lon: 151.2, z: 46 },
+  { n: 'Europa nocą', lat: 49, lon: 14, z: 4.4, hour: 0.5 }, { n: 'Indie nocą', lat: 22, lon: 79, z: 4.8, hour: 0.5 }
+];
+function buildPlaces() {
+  const a = $('#places'), m = $('#places-m');
+  PLACES.forEach(p => {
+    const b = document.createElement('button'); b.className = 'place'; b.innerHTML = p.n + (p.hour !== undefined ? '<i>☾</i>' : '');
+    b.onclick = () => goPlace(p); a.appendChild(b);
+    const c = document.createElement('button'); c.className = 'btn flex-none'; c.textContent = p.n; c.onclick = () => goPlace(p); m.appendChild(c);
+  });
+}
+function goPlace(p) {
+  if (p.hour !== undefined) { const dayStart = Math.floor(T.sim / 86400000) * 86400000; T.sim = dayStart + mod(p.hour - p.lon / 15, 24) * 3600000; }
+  flyTo(p.lat, p.lon, p.z);
+}
+
+/* Przelot kamery */
+let flight = null;
+function flyTo(lat, lon, zoom, dur = 2000, after) {
+  setAuto(false); ISS.follow = false;
+  flight = { t0: performance.now(), dur, lat0: view.lat, lon0: view.lon, z0: view.zoom, lat1: lat, lon1: wrap180(lon), z1: clamp(zoom, ZMIN, ZMAX), after };
+  inertia.lat = 0; inertia.lon = 0;
+}
+const ease = k => k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+function stepFlight(now) {
+  if (!flight) return;
+  const k = clamp((now - flight.t0) / flight.dur, 0, 1), e = ease(k);
+  const dLon = wrap180(flight.lon1 - flight.lon0);
+  view.lat = lerp(flight.lat0, flight.lat1, e); view.lon = wrap180(flight.lon0 + dLon * e);
+  const dist = Math.hypot(flight.lat1 - flight.lat0, dLon * Math.cos(view.lat * DEG));
+  const dip = Math.max(0, Math.log(Math.min(flight.z0, flight.z1) / 1.3)) * clamp(dist / 40, 0, 1);
+  view.zoom = Math.exp(lerp(Math.log(flight.z0), Math.log(flight.z1), e) - dip * Math.sin(Math.PI * k));
+  view.zoomT = view.zoom;
+  if (k >= 1) { view.zoom = view.zoomT = flight.z1; const f = flight; flight = null; if (f.after) f.after(); }
+}
+
+/* Interakcje wskaźnika */
+const ptrs = new Map(); let drag = null, pinch = null, lastTap = { t: 0, x: 0, y: 0 };
+const inertia = { lat: 0, lon: 0 };
+let hoverPt = null;
+function cssMetersPerPx() { return (CAM_D - 1) * (S1 / view.zoom) * 2 / Math.min(view.cssW, view.cssH) * R_EARTH; }
+function panBy(dx, dy) {
+  const dpp = cssMetersPerPx() / 111319.49;
+  view.lon = wrap180(view.lon - dx * dpp / Math.max(Math.cos(view.lat * DEG), 0.12));
+  view.lat = clamp(view.lat + dy * dpp, -88, 88);
+}
+/* ---------- Precyzyjne obracanie: „chwytanie” punktu na globie ----------
+   Punkt pod kursorem w chwili kliknięcia (P) zostaje dokładnie pod kursorem przez całe przeciąganie.
+   Szerokość i długość kamery wyznacza metoda Newtona z dokładnego modelu projekcji (identycznego jak w shaderze),
+   więc nie ma przybliżeń zależnych od szerokości geograficznej, położenia na ekranie ani zoomu. */
+const GRAB_MAX_LAT = 88 * DEG;     // jak ograniczenie szerokości kamery
+const GRAB_ANCHOR_COS = 0.26;      // chwytamy tylko punkty do ~75° od środka widoku (przy samym brzegu ruch byłby zbyt czuły)
+const GRAB_SOLVE_COS = 0.22;       // …i akceptujemy rozwiązanie do ~77°; dalej działa tryb zapasowy
+const DRAG_SLOP = 2;               // martwa strefa (px): drżenie ręki przy kliknięciu nie obraca globu
+// współrzędne ekranowe (jednostka = połowa krótszego boku) punktu P dla kamery (la, lo) [rad]; o[2] = cos kąta od środka widoku
+function projGrab(P, la, lo, s, o) {
+  const cl = Math.cos(la), sl = Math.sin(la), co = Math.cos(lo), so = Math.sin(lo);
+  const pc = P[0] * cl * so + P[1] * sl + P[2] * cl * co, dep = CAM_D - pc;
+  o[0] = (P[0] * co - P[2] * so) / (dep * s);
+  o[1] = (-P[0] * sl * so + P[1] * cl - P[2] * sl * co) / (dep * s);
+  o[2] = pc;
+}
+// znajduje kamerę, dla której punkt P leży dokładnie w pikselu (x, y); null, gdy to niemożliwe (poza tarczą, zbyt blisko brzegu, bieguny)
+function solveGrab(P, x, y) {
+  const half = Math.min(view.cssW, view.cssH) / 2, s = S1 / view.zoom;
+  const tx = (x - view.cssW / 2) / half, ty = (view.cssH / 2 - y) / half, tol = 0.2 / half;   // tolerancja 0,2 px
+  let la = view.lat * DEG, lo = view.lon * DEG;
+  const o = [0, 0, 0], o1 = [0, 0, 0], o2 = [0, 0, 0], H = 1e-5;
+  projGrab(P, la, lo, s, o);
+  let ex = o[0] - tx, ey = o[1] - ty, e = Math.hypot(ex, ey);
+  for (let it = 0; it < 14 && e > tol * 0.05; it++) {
+    projGrab(P, la + H, lo, s, o1); projGrab(P, la, lo + H, s, o2);
+    const a = (o1[0] - o[0]) / H, b = (o2[0] - o[0]) / H, c = (o1[1] - o[1]) / H, d = (o2[1] - o[1]) / H;
+    const det = a * d - b * c; if (Math.abs(det) < 1e-9) return null;
+    let dla = -(d * ex - b * ey) / det, dlo = -(a * ey - c * ex) / det;
+    const m = Math.max(Math.abs(dla), Math.abs(dlo)); if (m > 0.4) { dla *= 0.4 / m; dlo *= 0.4 / m; }   // ogranicz krok (≈23°)
+    let t = 1, ok = false, la2 = la, lo2 = lo, e2 = e;
+    for (let k = 0; k < 6; k++, t *= 0.5) {                                                              // przeszukiwanie wsteczne
+      la2 = la + t * dla; lo2 = lo + t * dlo; projGrab(P, la2, lo2, s, o);
+      e2 = Math.hypot(o[0] - tx, o[1] - ty); if (e2 < e) { ok = true; break; }
+    }
+    if (!ok) break;
+    la = la2; lo = lo2; ex = o[0] - tx; ey = o[1] - ty; e = e2;
+  }
+  projGrab(P, la, lo, s, o);
+  if (!(e <= tol) || Math.abs(la) > GRAB_MAX_LAT || o[2] < GRAB_SOLVE_COS) return null;
+  return { lat: la / DEG, lon: wrap180(lo / DEG) };
+}
+// punkt do „chwycenia” pod pikselem (x, y) albo null (poza tarczą lub zbyt blisko brzegu)
+function anchorAt(x, y) {
+  const v = pickVec(x, y); if (!v) return null;
+  const la = view.lat * DEG, lo = view.lon * DEG, cl = Math.cos(la);
+  return v[0] * cl * Math.sin(lo) + v[1] * Math.sin(la) + v[2] * cl * Math.cos(lo) >= GRAB_ANCHOR_COS ? v : null;
+}
+// dokładne przesunięcie zawartości ekranu o (dx, dy) px (chwyta punkt w środku widoku); bez przybliżenia 1/cos(szer.)
+function panExact(dx, dy) {
+  const la = view.lat * DEG, lo = view.lon * DEG, cl = Math.cos(la);
+  const r = solveGrab([cl * Math.sin(lo), Math.sin(la), cl * Math.cos(lo)], view.cssW / 2 + dx, view.cssH / 2 + dy);
+  if (r) { view.lat = r.lat; view.lon = r.lon; return true; }
+  panBy(dx, dy); return false;
+}
+// przeciąganie stosowane raz na klatkę (ostatnia pozycja kursora) — bez zbędnych obliczeń przy myszach 1000 Hz
+function applyDrag() {
+  const d = drag; if (!d || !d.pend) return false;
+  d.pend = false;
+  const x = d.px, y = d.py;
+  if (!d.on) { if (Math.hypot(x - d.sx, y - d.sy) < DRAG_SLOP) return false; d.on = true; }
+  const r = d.P ? solveGrab(d.P, x, y) : null;
+  if (r) { view.lat = r.lat; view.lon = r.lon; }
+  else { panExact(x - d.ax, y - d.ay); d.P = anchorAt(x, y); }        // tryb zapasowy (kursor poza tarczą / przy brzegu / biegun) + ponowne chwycenie
+  d.ax = x; d.ay = y;
+  return true;
+}
+// inercja z rzeczywistego ruchu kamery z ostatnich ~120 ms (zamiast wygładzania pojedynczych zdarzeń)
+const dragHist = [];
+function trackDrag(now) {
+  dragHist.push({ t: now, la: view.lat, lo: view.lonU });
+  while (dragHist.length > 2 && now - dragHist[0].t > 120) dragHist.shift();
+}
+function releaseInertia(now) {
+  const h = dragHist, n = h.length; inertia.lat = 0; inertia.lon = 0;
+  if (n >= 2 && now - h[n - 1].t < 70) {                                // kursor ruszał się tuż przed puszczeniem
+    const a = h[0], b = h[n - 1], dt = (b.t - a.t) / 1000;
+    if (dt > 0.016) { inertia.lat = clamp((b.la - a.la) / dt, -240, 240); inertia.lon = clamp((b.lo - a.lo) / dt, -240, 240); }
+  }
+  dragHist.length = 0;
+}
+function setAuto(v) { cfg.auto = v; $('#mAuto').checked = v; }
+function touchInteract() { interacting = 12; }
+
+stage.addEventListener('pointerdown', e => {
+  stage.setPointerCapture(e.pointerId);
+  ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (ptrs.size === 1) {
+    flight = null; inertia.lat = 0; inertia.lon = 0; dragHist.length = 0; stage.classList.add('dragging');
+    drag = { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, t: performance.now(), lastT: performance.now(), moved: 0,
+             P: anchorAt(e.clientX, e.clientY), on: false, pend: false, px: e.clientX, py: e.clientY, ax: e.clientX, ay: e.clientY };
+    if (cfg.auto) setAuto(false);
+    if (ISS.follow) { ISS.follow = false; ISS.uiDirty = true; }
+    closeMenu();
+  } else if (ptrs.size === 2) {
+    const [a, b] = [...ptrs.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), z: view.zoomT }; drag = null;
+  }
+});
+stage.addEventListener('pointermove', e => {
+  const p = ptrs.get(e.pointerId);
+  if (p) {
+    p.x = e.clientX; p.y = e.clientY;
+    if (ptrs.size === 2 && pinch) {
+      const [a, b] = [...ptrs.values()], d = Math.hypot(a.x - b.x, a.y - b.y);
+      view.zoomT = clamp(pinch.z * d / pinch.d, ZMIN, ZMAX); view.zoom = view.zoomT; touchInteract();
+    } else if (drag) {
+      drag.moved += Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y);
+      drag.x = e.clientX; drag.y = e.clientY; drag.px = e.clientX; drag.py = e.clientY; drag.pend = true;   // obrót zostanie zastosowany w następnej klatce
+      drag.lastT = performance.now(); touchInteract();
+    }
+  }
+  hoverPt = { x: e.clientX, y: e.clientY };
+});
+function endPointer(e) {
+  if (!ptrs.has(e.pointerId)) return;
+  ptrs.delete(e.pointerId);
+  if (ptrs.size < 2) pinch = null;
+  if (drag && ptrs.size === 0) {
+    const now = performance.now();
+    if (drag.moved < 6 && now - drag.t < 350) {
+      if (ISS.scr && ISS.scr.vis && Math.hypot(e.clientX - ISS.scr.x, e.clientY - ISS.scr.y) < 20) { toggleIssPanel(true); followIss(); }
+      else if (now - lastTap.t < 360 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 30) {
+        const h = pick(e.clientX, e.clientY);
+        if (h) flyTo(h.lat, h.lon, Math.min(ZMAX, Math.max(view.zoom * 2.4, 2)), 900);
+        lastTap.t = 0;
+      } else lastTap = { t: now, x: e.clientX, y: e.clientY };
+      inertia.lat = 0; inertia.lon = 0;
+    } else { if (applyDrag()) { syncLonU(); trackDrag(now); } releaseInertia(now); }   // ostatnia pozycja kursora + inercja z historii ruchu
+    drag = null; stage.classList.remove('dragging');
+  }
+}
+stage.addEventListener('pointerup', endPointer);
+stage.addEventListener('pointercancel', endPointer);
+stage.addEventListener('pointerleave', () => { hoverPt = null; $('#cHover').textContent = '—'; });
+stage.addEventListener('wheel', e => {
+  e.preventDefault(); if (cfg.auto) setAuto(false);
+  const k = Math.exp(-e.deltaY * (e.deltaMode === 1 ? 0.05 : 0.0016));
+  view.zoomT = clamp(view.zoomT * k, ZMIN, ZMAX); touchInteract();
+}, { passive: false });
+window.addEventListener('keydown', e => {
+  if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName) && e.target.type !== 'checkbox') return;
+  const KP = 56; let used = true;                  // krok strzałek w pikselach — taki sam na każdej szerokości i przy każdym zoomie
+  switch (e.key) {
+    case 'ArrowLeft': panExact(KP, 0); break;
+    case 'ArrowRight': panExact(-KP, 0); break;
+    case 'ArrowUp': panExact(0, KP); break;
+    case 'ArrowDown': panExact(0, -KP); break;
+    case '+': case '=': view.zoomT = clamp(view.zoomT * 1.25, ZMIN, ZMAX); break;
+    case '-': case '_': view.zoomT = clamp(view.zoomT / 1.25, ZMIN, ZMAX); break;
+    default: used = false;
+  }
+  if (used) { setAuto(false); ISS.follow = false; touchInteract(); e.preventDefault(); }
+});
+
+/* Menu chipu zoomu */
+const menu = $('#menu'), chip = $('#chip');
+function closeMenu() { menu.classList.add('hidden'); chip.setAttribute('aria-expanded', 'false'); }
+chip.addEventListener('click', e => {
+  e.stopPropagation();
+  const open = menu.classList.contains('hidden');
+  menu.classList.toggle('hidden', !open); chip.setAttribute('aria-expanded', open ? 'true' : 'false');
+  if (open) { if (ISS.panel) toggleIssPanel(false); menu._s = undefined; fitMenu(); }      // jeden panel naraz — nie zasłaniają się nawzajem
+});
+menu.addEventListener('click', e => e.stopPropagation());
+document.addEventListener('click', closeMenu);
+
+/* Dopasowanie paneli do okna: gdy panel jest wyższy/szerszy niż dostępne miejsce, jest skalowany (transform),
+   dzięki czemu mieści się w pionie i poziomie bez przewijania. Poniżej skali 0,62 (bardzo małe ekrany) włącza się przewijanie. */
+function fitPanel(el, inner, availH) {
+  const natH = inner.offsetHeight + 26, natW = inner.scrollWidth + 26, availW = window.innerWidth - 16;
+  if (!natH || availH < 60) return;
+  let s = Math.min(1, availH / natH, availW / natW), mh = '', ov = '';
+  if (el._s !== undefined && s > el._s) s = el._s;   // dopóki panel jest otwarty, skala tylko maleje — brak nagłego „powiększania” po zmianie zawartości
+  el._s = s;                                          // (reset przy otwarciu panelu i zmianie rozmiaru okna)
+  if (s < 0.62) { s = 0.62; mh = Math.floor(availH / s) + 'px'; ov = 'auto'; }
+  const t = s > 0.995 ? '' : 'scale(' + s.toFixed(3) + ')';
+  if (el.style.transform !== t) el.style.transform = t;
+  if (el.style.maxHeight !== mh) el.style.maxHeight = mh;
+  if (el.style.overflowY !== ov) el.style.overflowY = ov;
+}
+function fitMenu() { if (!menu.classList.contains('hidden')) fitPanel(menu, $('#menuIn'), chip.getBoundingClientRect().top - 8 - 56); }
+function fitIss() { const p = $('#issPanel'); if (!p.classList.contains('hidden')) fitPanel(p, $('#issIn'), chip.getBoundingClientRect().top - 10 - 64); }
+let fitQ = 0;
+const refit = () => { if (fitQ) return; fitQ = requestAnimationFrame(() => { fitQ = 0; fitMenu(); fitIss(); }); };
+new ResizeObserver(refit).observe($('#menuIn')); new ResizeObserver(refit).observe($('#issIn'));
+window.addEventListener('resize', () => { menu._s = undefined; $('#issPanel')._s = undefined; refit(); });   // zmiana okna: przelicz skalę od nowa (może też wzrosnąć)
+
+const zToS = z => Math.round(1000 * Math.log(z / ZMIN) / Math.log(ZMAX / ZMIN));
+const sToZ = s => ZMIN * Math.pow(ZMAX / ZMIN, s / 1000);
+$('#zSlider').addEventListener('input', e => { view.zoomT = clamp(sToZ(+e.target.value), ZMIN, ZMAX); flight = null; touchInteract(); });
+$('#zIn').onclick = () => { view.zoomT = clamp(view.zoomT * 1.6, ZMIN, ZMAX); };
+$('#zOut').onclick = () => { view.zoomT = clamp(view.zoomT / 1.6, ZMIN, ZMAX); };
+$('#mDetail').addEventListener('change', e => {
+  cfg.detail = e.target.checked;
+  if (cfg.detail) { Net.resetStats('detail'); Net.failedAt.clear(); }
+  else { Det.target = 0; Net.setNeeded(new Set()); }
+});
+$('#mClouds').addEventListener('change', e => { cfg.clouds = e.target.checked; });
+$('#mAtmo').addEventListener('change', e => { cfg.atmo = e.target.checked; });
+$('#mLights').addEventListener('change', e => { cfg.lights = e.target.checked; if (Det.P) requestTiles(); });
+$('#mAuto').addEventListener('change', e => { cfg.auto = e.target.checked; });
+$('#nSel').addEventListener('change', e => {
+  const p = NIGHT.find(x => x.id === e.target.value) || NIGHT[0], keep = p.daily && NP.date;
+  setNightProvider(p.id, { date: keep ? NP.date : null, manual: keep ? NP.manual : false });
+});
+$('#nDate').addEventListener('change', e => { if (e.target.value) setNightProvider(NP.cur.id, { date: e.target.value, manual: true }); });
+$('#nPrev').onclick = () => stepNightDate(-1);
+$('#nNext').onclick = () => stepNightDate(1);
+$('#nLatest').onclick = () => setNightProvider(NP.cur.id, { date: null });
+$('#nGain').addEventListener('input', e => { cfg.nGain = (+e.target.value) / 100; $('#nGainV').textContent = fmtNum(cfg.nGain, 1) + '×'; });
+$('#rGpu').onclick = () => { if (!gpuFailed) setRenderer('gpu'); };
+$('#rSoft').onclick = () => setRenderer('soft');
+$('#btnRetry').onclick = () => {
+  Net.failedAt.clear(); Net.resetStats('base'); Net.resetStats('detail'); Net.stats.base.total = 0;
+  baseReady = false; if (baseSource === 'procedural') baseSource = 'loading';
+  for (const k of [...Net.cache.keys()]) if (Net.cache.get(k) === 0) Net.cache.delete(k);
+  NP.done = false; enqueueBase(); if (Det.P) requestTiles(); setCredit();
+  if (!cfg.detail) { cfg.detail = true; $('#mDetail').checked = true; }
+  loadTLE();
+  toast('Ponawiam pobieranie map z NASA GIBS…', 'ok', 3000);
+};
+$('#btnFull').onclick = () => {
+  if (document.fullscreenElement) document.exitFullscreen(); else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+};
+
+/* Pasek czasu */
+let sliderDown = false;
+const tSlider = $('#tSlider');
+tSlider.addEventListener('pointerdown', () => { sliderDown = true; });
+window.addEventListener('pointerup', () => { sliderDown = false; });
+tSlider.addEventListener('input', e => { T.sim = Math.floor(T.sim / 86400000) * 86400000 + (+e.target.value) * 60000; });
+$('#tPlay').onclick = () => { T.playing = !T.playing; $('#tPlay').textContent = T.playing ? '❚❚' : '▶'; };
+$('#tSpeed').addEventListener('change', e => { T.speed = +e.target.value; });
+$('#tNow').onclick = () => { T.sim = Date.now(); T.speed = 1; T.playing = true; $('#tSpeed').value = '1'; $('#tPlay').textContent = '❚❚'; };
+
+/* Status i etykiety (odświeżane co ~250 ms) */
+let lastUi = 0;
+function updateUI(now, sun) {
+  if (now - lastUi < 250) return; lastUi = now;
+  const mpp = currentMpp();
+  $('#cCenter').textContent = fmtLat(view.lat) + ' ' + fmtLon(view.lon);
+  $('#cScale').textContent = '≈ ' + fmtRes(mpp);
+  const zt = '×' + fmtNum(view.zoom, view.zoom < 10 ? 1 : 0);
+  $('#chipVal').textContent = zt; $('#mZoomVal').textContent = zt;
+  if (document.activeElement !== $('#zSlider')) $('#zSlider').value = zToS(view.zoom);
+  const detVisible = !!Det.P && Det.fade > 0.05;
+  $('#chipDot').classList.toggle('on', detVisible);
+  $('#tClock').textContent = 'UTC ' + new Date(T.sim).toISOString().slice(0, 19).replace('T', ' ');
+  $('#tSun').textContent = 'Słońce w zenicie: ' + fmtLat(sun.dec / DEG) + ' ' + fmtLon(sun.lon / DEG);
+  if (!sliderDown) { const d = new Date(T.sim); tSlider.value = d.getUTCHours() * 60 + d.getUTCMinutes(); }
+  if (detVisible) Det.stat.loaded = countLoaded();
+  const ns = nightScan(), nOpen = ns.ok + ns.gone + ns.fail < ns.tot;
+  $('#nStat').textContent = (nOpen ? 'Wczytywanie… ' : 'Gotowe · ') + ns.ok + '/' + ns.tot + ' kafelków bazowych' +
+    (ns.gone ? ` · ${ns.gone} bez danych` : '') + (ns.fail ? ` · ${ns.fail} błędów` : '') + (NP.step ? ` · cofnięto o ${NP.step} dn.` : '');
+
+  let txt, col, pulse = false;
+  const st = Net.stats.base;
+  if (active.kind === 'gpu' && !active.ready) { txt = 'Kompilacja shaderów…'; col = '#38bdf8'; pulse = true; }
+  else if (baseSource === 'procedural') { txt = 'Tryb offline · mapa wbudowana'; col = '#f59e0b'; }
+  else if (!baseReady) { txt = `Wczytywanie map NASA GIBS… ${st.ok + st.gone + st.fail}/${st.total}`; col = '#38bdf8'; pulse = true; }
+  else if (detVisible) { txt = `Szczegóły online · poziom ${Det.P.L} · ${fmtRes(resM(Det.P.L))} · ${Det.stat.loaded}/${Det.stat.total} kafelków`; col = '#34d399'; pulse = Det.stat.loaded < Det.stat.total; }
+  else if (cfg.detail && view.zoom < DETAIL_MIN_ZOOM) { txt = `Mapa bazowa NASA GIBS · szczegóły od ×${fmtNum(DETAIL_MIN_ZOOM, 1)}`; col = '#7dd3fc'; }
+  else if (!cfg.detail) { txt = 'Mapa bazowa NASA GIBS · szczegóły wyłączone'; col = '#94a3b8'; }
+  else { txt = 'Mapa bazowa NASA GIBS'; col = '#7dd3fc'; }
+  $('#stTxt').textContent = txt; $('#stDot').style.background = col; $('#stDot').classList.toggle('animate-pulse', pulse);
+
+  $('#mInfo').textContent = (active.kind === 'gpu'
+    ? `GPU: shader WebGL2, ${active.pw()}×${active.ph()} px (skala ${fmtNum(perf.scale, 2)}), pamięć kafelków ${fmtNum(Net.bytes / 1048576, 0)} MB.`
+    : `Programowy: ${active.pw()}×${active.ph()} px, obraz skalowany. Okno szczegółów ograniczone do 4×4 kafelków.`) +
+    ` Maks. poziom GIBS: ${MAX_L} (${fmtRes(resM(MAX_L))}).`;
+  fitMenu(); fitIss();     // położenie chipu zależy od długości podpisu źródła — dopasuj panele ponownie
+}
+function updateHover() {
+  if (!hoverPt) return;
+  const h = pick(hoverPt.x, hoverPt.y);
+  $('#cHover').textContent = h ? fmtLat(h.lat) + ' ' + fmtLon(h.lon) : 'poza globem';
+}
+
+/* ---------- Pętla główna ---------- */
+let lastT = performance.now(), lastSig = '', lastHover = 0, lastRender = 0;
+function rampClips(now) {
+  let ramping = false;
+  for (const c of [Det.P, Det.S]) {
+    if (!c) continue;
+    for (let s = 0; s < c.NX * c.NY; s++) {
+      const bd = c.bornD[s], bn = c.bornN[s];
+      const ad = bd ? Math.min(1, (now - bd) / 240) : 0, an = bn ? Math.min(1, (now - bn) / 240) : 0;
+      c.res[s * 4 + 2] = ad; c.res[s * 4 + 3] = an;
+      if ((bd && ad < 1) || (bn && an < 1)) ramping = true;
+    }
+  }
+  return ramping;
+}
+function adaptResolution(now, dt, animating) {
+  if (active.kind !== 'gpu' || !animating || dt >= 0.09 || now < perf.warm) return;
+  perf.vs = Math.min(perf.vs * 1.002, dt); const vs = clamp(perf.vs, 0.0069, 0.0175);
+  perf.ema = perf.ema ? lerp(perf.ema, dt, 0.1) : dt;
+  if (now < perf.cool) return;
+  if (perf.ema > vs * 1.45 && perf.scale > 0.5) {
+    perf.scale = Math.max(0.5, Math.round((perf.scale - 0.1) * 100) / 100); perf.cap = Math.min(1, perf.scale + 0.15); perf.capAt = now;
+    resizeAll(); perf.cool = now + 700; perf.ema = 0;
+  } else if (perf.ema < vs * 1.12 && perf.scale < Math.min(1, perf.cap)) {
+    perf.scale = Math.min(1, Math.round((perf.scale + 0.05) * 100) / 100);
+    resizeAll(); perf.cool = now + 2500; perf.ema = 0;
+  }
+  if (now - perf.capAt > 8000 && perf.cap < 1) { perf.cap = Math.min(1, perf.cap + 0.05); perf.capAt = now; }
+}
+let _warned = false;
+function warnOnce(e) { if (!_warned) { _warned = true; console.warn('Obserwatorium:', e); } }
+function frame(now) {
+  requestAnimationFrame(frame);      // planujemy następną klatkę od razu — wyjątek w jednym module nie zatrzyma pętli
+  const dt = Math.min(0.1, Math.max(0.001, (now - lastT) / 1000)); lastT = now;
+  if (T.playing) T.sim += dt * 1000 * T.speed;
+  stepFlight(now);
+  const dragged = applyDrag();                      // obrót przeciąganiem — raz na klatkę, zsynchronizowany z renderem
+  let moving = !!flight;
+  if (!flight) {
+    if (cfg.auto && !drag && !pinch) { view.lon = wrap180(view.lon + dt * 3.2 / Math.max(view.zoom, 1)); moving = true; }
+    if (!drag && (Math.abs(inertia.lat) > 0.05 || Math.abs(inertia.lon) > 0.05)) {
+      view.lon = wrap180(view.lon + inertia.lon * dt); view.lat = clamp(view.lat + inertia.lat * dt, -88, 88);
+      const dec = Math.exp(-dt * 3.2); inertia.lon *= dec; inertia.lat *= dec; touchInteract();
+    }
+    if (Math.abs(view.zoomT - view.zoom) > 1e-4) {
+      const k = 1 - Math.exp(-dt * 11);
+      view.zoom = Math.exp(lerp(Math.log(view.zoom), Math.log(view.zoomT), k)); touchInteract();
+    }
+    if (ISS.follow && ISS.pos) {
+      const k = 1 - Math.exp(-dt * 4);
+      view.lat = clamp(lerp(view.lat, ISS.pos.lat, k), -88, 88); view.lon = wrap180(view.lon + wrap180(ISS.pos.lon - view.lon) * k); moving = true;
+    }
+  } else touchInteract();
+  syncLonU();
+  if (dragged) trackDrag(now);
+  // wektor ruchu (kierunek prefetchu kafelków)
+  Det.vx = lerp(Det.vx, clamp(inertia.lon, -1, 1) + (cfg.auto ? 1 : 0), 0.1); Det.vy = lerp(Det.vy, clamp(inertia.lat, -1, 1), 0.1);
+
+  const sun = sunInfo(T.sim);
+  updateDetail(now, dt);
+  try { updateISS(sun); } catch (e) { warnOnce(e); ISS.scan = null; }
+
+  let busy = false;
+  if (active.kind === 'gpu') {
+    try { busy = active.pump(now, (moving || interacting > 0) ? 1.6 : 5); } catch (e) { warnOnce(e); busy = true; }
+    if (rampClips(now)) busy = true;
+  }
+  if (baseDirty && now - lastBaseUp > 220) { if (active.kind === 'soft') soft.uploadBase(); baseDirty = false; lastBaseUp = now; baseVersion++; }
+
+  const animating = interacting > 0 || moving || Math.abs(view.zoomT - view.zoom) > 1e-4 || Det.fade !== Det.target || (T.playing && T.speed >= 10) || ovDirty;
+  adaptResolution(now, dt, animating);
+
+  let doRender;
+  if (active.kind === 'gpu') doRender = animating || busy || now - lastRender >= 80;       // w bezruchu ok. 12 kl./s
+  else {
+    const sig = [view.lat.toFixed(3), view.lon.toFixed(3), view.zoom.toFixed(3), Math.floor(T.sim / (T.speed > 1 ? 500 : 20000)), Math.floor(now / 3000),
+      Det.fade.toFixed(2), Net.ver, baseVersion, cfg.clouds, cfg.atmo, cfg.lights, cfg.nGain, NP.sig, active.w].join('|');
+    doRender = sig !== lastSig; lastSig = sig;
+  }
+  if (interacting > 0) { interacting--; if (interacting === 0 && active.kind === 'soft') { resizeAll(); lastSig = ''; } }
+  else if (active.kind === 'soft' && active.w && Math.abs(active.w - Math.round(view.cssW * Math.min(1, Math.sqrt(230000 / (view.cssW * view.cssH))))) > 2) { resizeAll(); lastSig = ''; }
+  if (interacting > 0 && active.kind === 'soft') resizeAll();
+
+  let drew = false;
+  if (doRender) {
+    const cs = camState();
+    const ok = active.draw({
+      cam: cs.cam, fwd: cs.fwd, right: cs.right, up: cs.up, s: cs.s, sun: sun.dir, gmst: sun.gmst,
+      time: now / 1000, nowMs: now, zoom: view.zoom, det: Det.P ? Det.fade : 0, lonU: view.lonU, lonC: view.lon,
+      clouds: cfg.clouds, atmo: cfg.atmo, lights: cfg.lights, mpp: currentMpp(),
+      nGain: cfg.nGain * NP.cur.gain, nNat: NP.cur.natural ? 1 : 0
+    });
+    if (ok !== false) { lastRender = now; drew = true; }
+  }
+  if (drew || ovDirty || active.kind === 'soft') { try { drawOverlay(); } catch (e) { warnOnce(e); ovDirty = false; } }
+  if (now - lastHover > 90) { lastHover = now; updateHover(); }
+  updateUI(now, sun);
+  try { updateIssPanel(now); } catch (e) { warnOnce(e); }
+}
+
+/* ---------- Start ---------- */
+(function init() {
+  buildPlaces(); setCredit();
+  $('#mInfo').textContent = '';
+  let hasGL = false;
+  try { hasGL = !!document.createElement('canvas').getContext('webgl2'); } catch (e) { hasGL = false; }
+  if (!hasGL) gpuFailed = true;
+  setRenderer(hasGL ? 'gpu' : 'soft');
+  perf.warm = performance.now() + 2500;
+  $('#tSpeed').value = '1';
+  buildNightUI();
+  const sv = loadNight();
+  setNightProvider(sv ? sv.id : 'cl2012', { date: sv && sv.date, manual: !!(sv && sv.date) });
+  enqueueDay();
+  buildIssUI();
+  const sj = $('#satjs');
+  const onSat = () => { if (window.satellite && ISS.l1) { ISS.sat = window.satellite.twoline2satrec(ISS.l1, ISS.l2); ISS.trk = null; ISS.uiDirty = true; startScan(); } };
+  if (window.satellite) loadTLE(); else { loadTLE(); sj.addEventListener('load', onSat); }
+  requestAnimationFrame(t => { lastT = t; requestAnimationFrame(frame); });
+})();
+</script>
+</body>
+</html>
