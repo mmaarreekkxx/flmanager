@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><meta name="theme-color" content="#1f2937">
-<meta name="description" content="FLMANAGER - Zaawansowany system zarządzania flotą pojazdów z MCE, analizą kosztów i raportowaniem">
+<meta name="" content="FLMANAGER - Zaawansowany system zarządzania flotą pojazdów z MCE, analizą kosztów i raportowaniem">
 <title>FLMANAGER v4.82_IDB_TCO_Meter</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -308,11 +308,10 @@ table.tco-t tr.tco-hl td{background:rgba(124,58,237,.07)!important;font-weight:7
 #tab-custom-sum .cs-sw input:checked+i::after{transform:translateX(8px)}
 #tab-custom-sum .cs-sw input:checked~span{color:var(--tx-p)}
 #tab-custom-sum .cs-sw input:focus-visible+i{outline:2px solid var(--act);outline-offset:1px}
-#tab-custom-sum .cs-seg{display:inline-flex;border:1px solid var(--bd);border-radius:4px;overflow:hidden;flex:none}
-#tab-custom-sum .cs-seg button{border:0;background:transparent;color:var(--tx-m);font:600 .6rem var(--font-text);padding:0 7px;height:20px;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s}
-#tab-custom-sum .cs-seg button+button{border-left:1px solid var(--bd)}
-#tab-custom-sum .cs-seg button:hover:not(.on){background:var(--hov);color:var(--tx-p)}
-#tab-custom-sum .cs-seg button.on{background:var(--act);color:#fff}
+#tab-custom-sum .cs-seg{display:inline-flex;gap:3px;flex:none}
+#tab-custom-sum .cs-seg button{height:22px;padding:0 10px;background:linear-gradient(180deg,var(--bg-p),var(--bg-s));border:1px solid var(--bd);border-radius:3px;color:var(--tx-m);font:400 .6rem var(--font-text);cursor:pointer;white-space:nowrap;transition:.15s}
+#tab-custom-sum .cs-seg button:hover:not(.on){border-color:var(--act);color:var(--act)}
+#tab-custom-sum .cs-seg button.on{background:linear-gradient(135deg,var(--act),#6366f1);border-color:var(--act);color:#fff;font-weight:600;box-shadow:0 1px 4px rgba(124,58,237,.35)}
 #tab-custom-sum.cs-fold .cs-res{max-height:calc(100dvh - 90px)}
 #tab-custom-sum .cs-t tr.cs-vh td{background:var(--bg-t);color:var(--act);font-weight:700;border-top:2px solid var(--act);text-align:left}
 #tab-custom-sum .cs-t tr.cs-sub2 td{font-style:italic;background:var(--bg-s)}
@@ -335,23 +334,68 @@ table.tco-t tr.tco-hl td{background:rgba(124,58,237,.07)!important;font-weight:7
 #tab-custom-sum .cs-t tr.cs-svc td{background:rgba(245,158,11,.16);font-weight:700}
 #tab-custom-sum .cs-t tr.cs-svc td:first-child{box-shadow:inset 3px 0 0 #f59e0b}
 #tab-custom-sum .cs-t tr.cs-svc td.cs-w::before{content:'\1F527  ';font-weight:400}
-#tab-custom-sum .cs-dt{width:118px;height:22px;font-size:.62rem}
+#tab-custom-sum .cs-lb{font-weight:600;text-transform:uppercase;letter-spacing:.5px;font-size:.55rem;margin-right:4px}
+#tab-custom-sum .cs-tbtn{padding:0 8px!important;font-size:.62rem!important;gap:5px;border:1px solid var(--bd)!important;border-radius:3px!important;color:var(--tx-s)}
+#tab-custom-sum .cs-tbtn i{color:var(--act);font-size:.6rem}
+#tab-custom-sum .cs-tbtn.active{background:linear-gradient(135deg,var(--act),#6366f1);color:#fff;border-color:var(--act)!important}
+#tab-custom-sum .cs-tbtn.active i{color:#fff}
+#tab-custom-sum .cs-bar{flex-wrap:wrap;row-gap:5px}
+#tab-custom-sum .cs-lb{font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--tx-m);margin-right:5px;white-space:nowrap}
+#tab-custom-sum .cs-fg{gap:4px}
+#tab-custom-sum .cs-sep{width:1px;height:18px;background:var(--bd);flex-shrink:0;margin:0 8px}
+#tab-custom-sum .cs-chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border:1px solid var(--bd);border-radius:12px;background:linear-gradient(180deg,var(--bg-p),var(--bg-s));color:var(--tx-s);font:600 .62rem var(--font-text);cursor:pointer;white-space:nowrap;transition:.15s;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+#tab-custom-sum .cs-chip>i:first-child{color:var(--act);font-size:.6rem}
+#tab-custom-sum .cs-chip .cs-cl{color:var(--tx-m);font-weight:500}
+#tab-custom-sum .cs-chip b{color:var(--tx-p);font-weight:700}
+#tab-custom-sum .cs-chip .cs-cv{font-size:.5rem;color:var(--tx-m);transition:transform .15s}
+#tab-custom-sum .cs-chip:hover,#tab-custom-sum .cs-chip.open{border-color:var(--act)}
+#tab-custom-sum .cs-chip.open .cs-cv{transform:rotate(180deg)}
+#tab-custom-sum .cs-chip.sub{background:rgba(124,58,237,.12);border-color:var(--act)}
+#tab-custom-sum .cs-chip.sub b{color:var(--act)}
+#tab-custom-sum .cs-pop{display:none;position:fixed;z-index:1500;width:330px;max-width:calc(100vw - 16px);background:var(--bg-p);border:1px solid var(--bd);border-radius:var(--rmd);box-shadow:0 12px 40px rgba(0,0,0,.28),0 2px 8px rgba(0,0,0,.12);overflow:hidden}
+#tab-custom-sum .cs-pop.open{display:block;animation:fadeIn .15s}
+#tab-custom-sum .cs-ph{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;font-size:.72rem;color:var(--tx-p);border-bottom:1px solid var(--bd);background:var(--bg-s)}
+#tab-custom-sum .cs-ph i{color:var(--act);margin-right:5px}
+#tab-custom-sum .cs-pb{display:flex;flex-direction:column;gap:8px;padding:10px 12px;max-height:min(70vh,520px);overflow:auto}
+#tab-custom-sum .cs-pb .cs-search{width:100%;height:26px;box-sizing:border-box;font-size:.7rem}
+#tab-custom-sum .cs-pb .cs-list{max-height:min(280px,40vh)}
+#tab-custom-sum .cs-paste-t{display:flex;align-items:center;gap:6px;width:100%;height:26px;padding:0 10px;border:1px dashed var(--act);border-radius:4px;background:rgba(124,58,237,.06);color:var(--act);font:600 .64rem var(--font-text);cursor:pointer}
+#tab-custom-sum .cs-paste-t .cs-cv{margin-left:auto;font-size:.5rem;transition:transform .15s}
+#tab-custom-sum .cs-paste-t.open .cs-cv{transform:rotate(180deg)}
+#tab-custom-sum .cs-paste-t:hover{background:rgba(124,58,237,.12)}
+#tab-custom-sum .cs-inl .rlp-textarea{height:96px}
+#tab-custom-sum .cs-clr{height:24px;width:28px;background:var(--bg-s);border-color:var(--bd);color:var(--tx-m)}
+#tab-custom-sum .cs-sh{display:flex;align-items:center;justify-content:space-between;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tx-m);margin-bottom:6px}
+#tab-custom-sum .cs-lnk{background:none;border:0;color:var(--act);font-size:.62rem;cursor:pointer;text-transform:none;letter-spacing:0;font-weight:600}
+#tab-custom-sum .cs-yrs{display:flex;flex-wrap:wrap;gap:5px}
+#tab-custom-sum .cs-yrs .rc-yr{height:24px;padding:0 10px!important;font-size:.68rem!important}
+#tab-custom-sum .cs-hint{font-size:.6rem;color:var(--tx-m);line-height:1.4;margin-top:6px}
+#tab-custom-sum .cs-hint i{color:#d97706;margin-right:3px}
+#tab-custom-sum .cs-sec+.cs-sec{border-top:1px solid var(--bd);padding-top:10px}
+#tab-custom-sum .cs-dtb{display:flex;flex-direction:column;gap:6px}
+#tab-custom-sum .cs-dtb label{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.65rem;font-weight:600;color:var(--tx-s)}
+#tab-custom-sum .cs-dt{width:150px;height:24px;font-size:.68rem}
 #tab-custom-sum .cs-t td.cs-w{max-width:340px;white-space:normal;word-break:break-word;font-family:var(--font-text)}
 #tab-custom-sum .report-controls{flex-wrap:wrap;height:auto;padding:4px 6px;row-gap:4px;min-height:30px}
 #tab-custom-sum .rc-spacer{flex:1 1 8px}
 @media(max-height:520px){#tab-custom-sum .cs-grid{grid-template-columns:1fr 1fr 1fr}#tab-custom-sum .cs-list{max-height:120px}#tab-custom-sum .cs-res{max-height:none}}
 #tab-custom-sum .cs-y{font-size:.62rem;padding:2px 7px;border-radius:4px;font-weight:600}
-#tab-custom-sum .cs-acts button{border:0;background:transparent;padding:1px 4px;font-size:.6rem;color:var(--tx-m)}
-#tab-custom-sum .cs-acts button:hover{color:var(--act);text-decoration:underline}
+#tab-custom-sum .cs-acts button{height:22px;padding:0 10px;font:600 .62rem var(--font-text);letter-spacing:.2px;border:1px solid var(--bd);border-radius:11px;background:linear-gradient(180deg,var(--bg-p),var(--bg-s));color:var(--tx-s);cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:4px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+#tab-custom-sum .cs-acts button i{font-size:.55rem;color:var(--act)}
+#tab-custom-sum .cs-acts button:hover{border-color:var(--act);color:var(--act);background:rgba(124,58,237,.1);text-decoration:none}
+#tab-custom-sum .cs-acts .cs-pbtn{background:linear-gradient(135deg,var(--act),#6366f1);color:#fff;border-color:var(--act)}
+#tab-custom-sum .cs-acts .cs-pbtn i{color:#fff}
+#tab-custom-sum .cs-acts .cs-pbtn:hover{background:linear-gradient(135deg,var(--ach),#4f46e5);color:#fff}
+#tab-custom-sum .cs-acts button:active{transform:translateY(1px);box-shadow:none}
 #tab-custom-sum .cs-t td:not(.l),#tab-custom-sum .cs-t th:not(.l){text-align:right}
-table.cs-t{width:100%;border-collapse:collapse;font-size:.7rem}
-table.cs-t th{text-align:right;padding:7px 8px;font-size:.58rem;text-transform:uppercase;letter-spacing:.4px;color:var(--tx-m);border-bottom:2px solid var(--act);font-weight:700;background:var(--bg-card);vertical-align:bottom;max-width:150px}
-table.cs-t th:first-child,table.cs-t th.l{text-align:left}
-table.cs-t td{padding:5px 8px;text-align:right;border-bottom:1px solid var(--bg-s);font-family:var(--font-mono);font-size:.7rem;white-space:nowrap}
-table.cs-t td.l{text-align:left;font-family:var(--font-text);font-weight:600}
+#tab-custom-sum .cs-t td.l,#tab-custom-sum .cs-t th.l{text-align:left}
+table.cs-t{width:100%;border-collapse:collapse}
+table.cs-t td{white-space:nowrap}
+table.cs-t td.l{font-weight:600;color:var(--act)}
+table.cs-t td:not(.l){font-weight:500}
 table.cs-t tbody tr:hover td{background:var(--hov)}
-table.cs-t tr.cs-sub td{font-weight:800;background:var(--bg-t);border-top:1px solid var(--bd)}
-table.cs-t tr.cs-tot td{font-weight:800;background:var(--bg-t);border-top:2px solid var(--act);border-bottom:none}
+table.cs-t tr.cs-sub td{font-weight:700;background:var(--bg-t);color:var(--tx-p)}
+table.cs-t tr.cs-tot td{font-weight:700;background:var(--bg-t);color:var(--tx-p);border-top:2px solid var(--act)}
 table.cs-t td.cs-tc{font-weight:700;color:var(--act)}
 /* dialog eksportu DualFuel XLSX */
 #dfxDlg{position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);padding:16px}
@@ -816,37 +860,62 @@ body{height:100dvh}
   </div>
 </div>
 <div id="tab-custom-sum" class="tab-content">
-  <div class="report-controls">
-    <div class="rcg"><button type="button" class="rc-btn" id="csColBtn" title="Zwiń filtry"><i class="fas fa-chevron-up"></i></button><span class="cs-sumlbl" id="csSumLbl" style="margin-left:6px"></span></div>
-    <div class="rc-spacer"></div>
-    <div class="rcg"><div class="cs-seg" id="csLaySeg"><button type="button" data-lay="g" title="Wiersze: rok · kolumny: grupy kosztów">Rok·grupy</button><button type="button" data-lay="v" title="Osobny blok dla każdego pojazdu: lata w wierszach, grupy kosztów w kolumnach">Pojazdy</button><button type="button" data-lay="i" title="Blok na pojazd: grupy kosztów w wierszach, lata w kolumnach, przebieg roczny pod spodem">Pojazdy⇄</button><button type="button" data-lay="m" title="Wiersze: rok i pojazd · kolumny: miesiące">Pojazd·mies.</button><button type="button" data-lay="p" title="Rozliczenie po sprzedaży: lista transakcji pojazdu — data, grupa, dane kosztowe, wartość netto, przebieg (opcjonalnie od/do daty)">Po sprzedaży</button></div></div>
-    <div style="width:1px;height:14px;background:#c4c9d4;flex-shrink:0;margin:0 6px;display:block"></div>
-    <div class="rcg" id="csDtWrap" style="display:none;gap:4px"><span class="cs-sumlbl">Od</span><input type="date" id="csFrom" class="rc-input cs-dt" title="Od daty (np. data sprzedaży) — przy wybranym zakresie lata są pomijane"><span class="cs-sumlbl">Do</span><input type="date" id="csTo" class="rc-input cs-dt" title="Do daty"></div>
-    <div class="rcg"><div class="cs-seg" id="csPerSeg"><button type="button" data-per="y" title="Zestawienie roczne">Rok</button><button type="button" data-per="m" title="Roczne z podziałem na miesiące">Rok+mies.</button></div></div>
-    <div style="width:1px;height:14px;background:#c4c9d4;flex-shrink:0;margin:0 6px;display:block"></div>
+  <div class="report-controls cs-bar">
+    <div class="rcg cs-fg"><span class="cs-lb">Dane</span>
+      <button type="button" class="cs-chip" id="csChipVeh" data-pop="csPopVeh" title="Wybór pojazdów"><i class="fas fa-car"></i><span class="cs-cl">Pojazdy</span><b id="csVehCnt"></b><i class="fas fa-chevron-down cs-cv"></i></button>
+      <button type="button" class="cs-chip" id="csChipReg" data-pop="csPopReg" title="Wklej listę numerów rejestracyjnych — zaznaczy pasujące pojazdy"><i class="fas fa-paste"></i><span class="cs-cl">Lista rejestracji</span><b id="csRegTxt">wklej</b><i class="fas fa-chevron-down cs-cv"></i></button>
+      <button type="button" class="cs-chip" id="csChipGrp" data-pop="csPopGrp" title="Wybór grup kosztów"><i class="fas fa-tags"></i><span class="cs-cl">Grupy kosztów</span><b id="csGrpCnt"></b><i class="fas fa-chevron-down cs-cv"></i></button>
+      <button type="button" class="cs-chip" id="csChipPer" data-pop="csPopPer" title="Wybór lat lub zakresu dat"><i class="fas fa-calendar-days"></i><span class="cs-cl">Okres</span><b id="csPerTxt"></b><i class="fas fa-chevron-down cs-cv"></i></button>
+    </div>
+    <div class="cs-sep"></div>
+    <div class="rcg"><span class="cs-lb">Układ</span><div class="cs-seg" id="csLaySeg"><button type="button" data-lay="g" title="Wiersze: rok · kolumny: grupy kosztów">Rok·grupy</button><button type="button" data-lay="v" title="Osobny blok dla każdego pojazdu: lata w wierszach, grupy kosztów w kolumnach">Pojazdy</button><button type="button" data-lay="i" title="Blok na pojazd: grupy kosztów w wierszach, lata w kolumnach, przebieg roczny pod spodem">Pojazdy⇄</button><button type="button" data-lay="m" title="Wiersze: rok i pojazd · kolumny: miesiące">Pojazd·mies.</button><button type="button" data-lay="p" title="Rozliczenie po sprzedaży: lista transakcji pojazdu — data, grupa, dane kosztowe, wartość netto, przebieg (opcjonalnie od/do daty)">Po sprzedaży</button></div></div>
+    <div class="rcg"><span class="cs-lb">Podział</span><div class="cs-seg" id="csPerSeg"><button type="button" data-per="y" title="Zestawienie roczne">Rok</button><button type="button" data-per="m" title="Roczne z podziałem na miesiące">Rok + miesiące</button></div></div>
+    <div class="cs-sep"></div>
     <div class="rcg" style="gap:10px">
       <label class="cs-sw" id="csSplitLb" style="display:none"><input type="checkbox" id="csSplit"><i></i><span>Pojazdy</span></label>
       <label class="cs-sw" id="csFleetLb" title="Pokaż sumy łączące wszystkie pojazdy"><input type="checkbox" id="csFleet"><i></i><span>Suma floty</span></label>
       <label class="cs-sw" id="csKonLb" title="Dodaj kontrahenta jako poziom podsumowania"><input type="checkbox" id="csKon"><i></i><span>Kontrahent</span></label>
     </div>
-    <div style="width:1px;height:14px;background:#c4c9d4;flex-shrink:0;margin:0 6px;display:block"></div>
-    <div class="rcg">
-      <button type="button" class="rc-btn" id="csRegBtn" title="Wklej listę numerów rejestracyjnych"><i class="fas fa-car"></i></button>
-      <div id="csRegPanel" class="reg-list-panel"><div class="rlp-head"><i class="fas fa-car"></i><span class="rlp-head-title">Filtr rejestracji</span><button type="button" id="csRegClear" class="rlp-clear-btn"><i class="fas fa-times"></i> wyczyść</button></div><div class="rlp-body"><textarea id="csRegInput" class="rlp-textarea" placeholder="Wklej numery rejestracyjne&#10;(nowe linie, przecinki lub spacje):&#10;&#10;CMG1234A&#10;CMG5678B"></textarea></div><div class="rlp-footer"><button type="button" id="csRegApply" class="rlp-apply"><i class="fas fa-filter"></i> Zastosuj filtr</button><span id="csRegStatus" class="rlp-status"></span></div><div class="rlp-hint"><i class="fas fa-info-circle" style="color:#d97706;margin-right:3px"></i>Nowe linie · przecinki · spacje — zaznacza pasujące pojazdy</div></div>
-    </div>
-    <div style="width:1px;height:14px;background:#c4c9d4;flex-shrink:0;margin:0 5px;display:block"></div>
+    <div class="rc-spacer"></div>
     <div class="rcg">
       <button class="rc-btn e-csv" onclick="csExport('csv')" title="CSV — Zestawienie"><i class="fas fa-file-csv"></i></button>
       <button class="rc-btn e-xlsx" onclick="csExport('xlsx')" title="XLSX — Zestawienie"><i class="fas fa-file-excel"></i></button>
     </div>
+    <span id="csSumLbl" hidden></span>
   </div>
-  <div class="cs-grid" id="csGrid">
-    <div class="neu-card cs-box" id="csBoxVeh"><div class="cs-bh" data-fold="veh" title="Zwiń / rozwiń"><b><i class="fas fa-car"></i> Pojazdy</b><span class="cs-hr"><span class="cs-cnt" id="csVehCnt"></span><i class="fas fa-chevron-up cs-ch"></i></span></div>
-      <div class="cs-bd"><div class="cs-row"><input type="text" id="csVehSearch" class="rc-input cs-search" placeholder="Szukaj pojazdu..." autocomplete="off"><span class="cs-acts"><button type="button" data-a="veh-all">Wszystkie</button><button type="button" data-a="veh-flt">Wyszukane</button><button type="button" data-a="veh-none">Żadne</button></span></div><div class="cs-list" id="csVehList"></div></div></div>
-    <div class="neu-card cs-box" id="csBoxGrp"><div class="cs-bh" data-fold="grp" title="Zwiń / rozwiń"><b><i class="fas fa-tags"></i> Grupy kosztów</b><span class="cs-hr"><span class="cs-cnt" id="csGrpCnt"></span><i class="fas fa-chevron-up cs-ch"></i></span></div>
-      <div class="cs-bd"><div class="cs-row"><span class="cs-acts"><button type="button" data-a="grp-all">Wszystkie</button><button type="button" data-a="grp-none">Żadne</button></span></div><div class="cs-list" id="csGrpList"></div></div></div>
-    <div class="neu-card cs-box cs-yr" id="csBoxYr"><div class="cs-bh" data-fold="yr" title="Zwiń / rozwiń"><b><i class="fas fa-calendar"></i> Lata</b><span class="cs-hr"><i class="fas fa-chevron-up cs-ch"></i></span></div>
-      <div class="cs-bd"><div class="cs-years" id="csYears"></div></div></div>
+
+  <div id="csPopVeh" class="cs-pop">
+    <div class="cs-ph"><b><i class="fas fa-car"></i> Pojazdy</b><span class="cs-cnt" id="csVehCnt2"></span></div>
+    <div class="cs-pb">
+      <input type="text" id="csVehSearch" class="rc-input cs-search" placeholder="Szukaj pojazdu..." autocomplete="off">
+      <div class="cs-acts"><button type="button" data-a="veh-all"><i class="fas fa-check-double"></i>Wszystkie</button><button type="button" data-a="veh-flt" title="Zaznacz pojazdy pasujące do wyszukiwania"><i class="fas fa-magnifying-glass"></i>Wyszukane</button><button type="button" data-a="veh-none"><i class="fas fa-ban"></i>Żadne</button></div>
+      <div class="cs-list" id="csVehList"></div>
+    </div>
+  </div>
+  <div id="csPopReg" class="cs-pop">
+    <div class="cs-ph"><b><i class="fas fa-paste"></i> Lista rejestracji</b><button type="button" id="csRegClear" class="cs-lnk" title="Wyczyść pole listy">wyczyść</button></div>
+    <div class="cs-pb">
+      <textarea id="csRegInput" class="rlp-textarea" placeholder="Wklej numery rejestracyjne&#10;(nowe linie, przecinki lub spacje):&#10;&#10;CMG1234A&#10;CMG5678B"></textarea>
+      <button type="button" id="csRegApply" class="rlp-apply" style="height:28px"><i class="fas fa-filter"></i> Zaznacz pojazdy z listy</button>
+      <div class="rlp-status" id="csRegStatus" style="line-height:1.4;white-space:normal"></div>
+      <div class="cs-hint"><i class="fas fa-info-circle"></i> Zastępuje bieżące zaznaczenie w „Pojazdy”. Nowe linie · przecinki · spacje.</div>
+    </div>
+  </div>
+  <div id="csPopGrp" class="cs-pop">
+    <div class="cs-ph"><b><i class="fas fa-tags"></i> Grupy kosztów</b><span class="cs-cnt" id="csGrpCnt2"></span></div>
+    <div class="cs-pb">
+      <div class="cs-acts"><button type="button" data-a="grp-all"><i class="fas fa-check-double"></i>Wszystkie</button><button type="button" data-a="grp-none"><i class="fas fa-ban"></i>Żadne</button></div>
+      <div class="cs-list" id="csGrpList"></div>
+    </div>
+  </div>
+  <div id="csPopPer" class="cs-pop">
+    <div class="cs-ph"><b><i class="fas fa-calendar-days"></i> Okres</b></div>
+    <div class="cs-pb">
+      <div class="cs-sec" id="csYrSec"><div class="cs-sh">Lata</div><div class="cs-yrs" id="csYears"></div></div>
+      <div class="cs-sec" id="csDtSec" hidden><div class="cs-sh">Zakres dat <button type="button" id="csDtClear" class="cs-lnk">wyczyść</button></div>
+        <div class="cs-dtb"><label>Od<input type="date" id="csFrom" class="rc-input cs-dt"></label><label>Do<input type="date" id="csTo" class="rc-input cs-dt"></label></div>
+        <div class="cs-hint"><i class="fas fa-info-circle"></i> Zakres dat zastępuje wybór lat — np. od daty sprzedaży pojazdu.</div></div>
+    </div>
   </div>
   <div id="csResult" class="table-container cs-res"></div>
 </div>
@@ -3535,8 +3604,8 @@ var MN=['Sty','Lut','Mar','Kwi','Maj','Cze','Lip','Sie','Wrz','Paź','Lis','Gru'
 function $(i){return document.getElementById(i)}
 function esc2(t){return String(t==null?'':t).replace(/[&<>"']/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]})}
 function norm(s){return String(s).toUpperCase().replace(/[\s\-_.]+/g,'')}
-function load(){if(st.loaded)return;st.loaded=true;try{var o=JSON.parse(localStorage.getItem(LS)||'null');if(o){st.regs=new Set(o.regs||[]);st.grps=new Set(o.grps||[]);st.years=new Set((o.years||[]).map(Number));st.split=!!o.split;st.layout=['g','v','i','m','p'].indexOf(o.layout)>=0?o.layout:'g';st.months=!!o.months;st.from=o.from||'';st.to=o.to||'';st.kon=!!o.kon;st.fleet=!!o.fleet;st.fold=!!o.fold;st.cf=Object.assign({veh:false,grp:false,yr:false},o.cf||{})}}catch(e){}}
-function save(){try{localStorage.setItem(LS,JSON.stringify({regs:Array.from(st.regs),grps:Array.from(st.grps),years:Array.from(st.years),split:st.split,layout:st.layout,fleet:st.fleet,months:st.months,from:st.from,to:st.to,kon:st.kon,fold:st.fold,cf:st.cf}))}catch(e){}}
+function load(){if(st.loaded)return;st.loaded=true;try{var o=JSON.parse(localStorage.getItem(LS)||'null');if(o){st.regs=new Set(o.regs||[]);st.grps=new Set(o.grps||[]);st.years=new Set((o.years||[]).map(Number));st.split=!!o.split;st.layout=['g','v','i','m','p'].indexOf(o.layout)>=0?o.layout:'g';st.months=!!o.months;st.seeded=!!o.seeded;st.from=o.from||'';st.to=o.to||'';st.kon=!!o.kon;st.fleet=!!o.fleet;st.fold=!!o.fold;st.cf=Object.assign({veh:false,grp:false,yr:false},o.cf||{})}}catch(e){}}
+function save(){try{localStorage.setItem(LS,JSON.stringify({regs:Array.from(st.regs),grps:Array.from(st.grps),years:Array.from(st.years),split:st.split,layout:st.layout,fleet:st.fleet,months:st.months,seeded:st.seeded,from:st.from,to:st.to,kon:st.kon,fold:st.fold,cf:st.cf}))}catch(e){}}
 var fPln=new Intl.NumberFormat('pl-PL',{minimumFractionDigits:2,maximumFractionDigits:2}),fInt=new Intl.NumberFormat('pl-PL',{maximumFractionDigits:0}),fCpk=new Intl.NumberFormat('pl-PL',{minimumFractionDigits:3,maximumFractionDigits:3}),fL=new Intl.NumberFormat('pl-PL',{minimumFractionDigits:1,maximumFractionDigits:1});
 var FM={p:fPln,i:fInt,c:fCpk,l:fL};
 /* rekordy: pojazd × rok × miesiąc × grupa × kontrahent */
@@ -3556,15 +3625,29 @@ function build(){
   st.grps=new Set(Array.from(st.grps).filter(function(g){return groups.indexOf(g)>=0}));
   st.years=new Set(Array.from(st.years).filter(function(y){return years.indexOf(y)>=0}));
   if(!st.years.size)years.forEach(function(y){st.years.add(y)});
+  if(!st.seeded){st.seeded=true;regs.forEach(function(r){st.regs.add(r.reg)});groups.forEach(function(g){st.grps.add(g)});save()}
 }
 function sumFor(rs){var gm={};recs.forEach(function(a){if(rs&&!rs.has(a.reg))return;gm[a.g]=(gm[a.g]||0)+a.v});return gm}
+function chipSync(){
+  var rv=regs.length,rg=groups.length,rng=st.layout==='p'&&!!(st.from||st.to);
+  $('csVehCnt').textContent=st.regs.size+' / '+rv;$('csVehCnt2').textContent=st.regs.size+' z '+rv;
+  $('csGrpCnt').textContent=st.grps.size+' / '+rg;$('csGrpCnt2').textContent=st.grps.size+' z '+rg;
+  var ys=years.filter(function(y){return st.years.has(y)}),pt;
+  if(rng)pt=(st.from?'od '+st.from:'')+(st.from&&st.to?' ':'')+(st.to?'do '+st.to:'');
+  else pt=!ys.length?'brak':ys.length<=3?ys.join(', '):ys[0]+'–'+ys[ys.length-1]+' ('+ys.length+')';
+  $('csPerTxt').textContent=pt;
+  $('csChipVeh').classList.toggle('sub',rv>0&&st.regs.size<rv);
+  $('csChipGrp').classList.toggle('sub',rg>0&&st.grps.size<rg);
+  $('csChipPer').classList.toggle('sub',rng||(years.length>0&&st.years.size<years.length));
+  $('csYrSec').classList.toggle('dis',rng);
+}
 function syncUI(){
   var L=st.layout,kOk=!!(S&&S.hasKontrahent);
   document.querySelectorAll('#csLaySeg button').forEach(function(b){b.classList.toggle('on',b.dataset.lay===L)});
   document.querySelectorAll('#csPerSeg button').forEach(function(b){b.classList.toggle('on',(b.dataset.per==='m')===st.months)});
-  $('csPerSeg').classList.toggle('dis',L!=='g'&&L!=='v');$('csDtWrap').style.display=L==='p'?'inline-flex':'none';if($('csFrom').value!==st.from)$('csFrom').value=st.from;if($('csTo').value!==st.to)$('csTo').value=st.to;$('csSplitLb').classList.toggle('dis',L!=='g');
+  $('csPerSeg').classList.toggle('dis',L!=='g'&&L!=='v');$('csDtSec').hidden=L!=='p';if($('csFrom').value!==st.from)$('csFrom').value=st.from;if($('csTo').value!==st.to)$('csTo').value=st.to;$('csSplitLb').classList.toggle('dis',L!=='g');
   $('csKonLb').classList.toggle('dis',!kOk);$('csKonLb').title=kOk?'Dodaj kontrahenta jako poziom podsumowania':'Brak kolumny kontrahenta w wczytanych danych';
-  [['veh','csBoxVeh'],['grp','csBoxGrp'],['yr','csBoxYr']].forEach(function(x){$(x[1]).classList.toggle('cs-cl',!!st.cf[x[0]])});$('csGrid').style.display=st.fold?'none':'';$('tab-custom-sum').classList.toggle('cs-fold',st.fold);$('csColBtn').innerHTML='<i class="fas fa-chevron-'+(st.fold?'down':'up')+'"></i>';$('csColBtn').title=st.fold?'Rozwiń filtry':'Zwiń filtry';$('csKon').checked=st.kon&&kOk;$('csFleet').checked=st.fleet;
+  $('csKon').checked=st.kon&&kOk;$('csFleet').checked=st.fleet;chipSync();
 }
 function renderLists(){
   var q=regQ.toLowerCase(),h='';
@@ -3572,7 +3655,7 @@ function renderLists(){
   $('csVehList').innerHTML=h||'<div class="cs-empty">Brak pojazdów</div>';
   $('csVehCnt').textContent=st.regs.size+' / '+regs.length;
   renderGroups();
-  $('csYears').innerHTML=years.map(function(y){return '<button type="button" class="cs-y'+(st.years.has(y)?' on':'')+'" data-y="'+y+'">'+y+'</button>'}).join('');
+  $('csYears').innerHTML=years.map(function(y){return '<button type="button" class="rc-yr'+(st.years.has(y)?' active':'')+'" data-y="'+y+'">'+y+'</button>'}).join('');
 }
 function renderGroups(){
   var gm=sumFor(st.regs.size?st.regs:null),h='';
@@ -3675,6 +3758,7 @@ function compute(){
   return{head:head,fm:fm,nd:dh.length,tc:dh.length+cols.length,hf:fam?L:'',rows:list.map(function(it){return{cls:it.cls,cells:cells(it)}}),G:G,Y:Y}
 }
 function renderResult(){
+  chipSync();
   var el=$('csResult'),lb=$('csSumLbl');
   if(!recs.length){el.innerHTML='<div class="cs-empty">Brak danych — wczytaj pliki.</div>';lb.textContent='Brak danych';return}
   lb.textContent='';
@@ -3695,32 +3779,39 @@ function applyList(){
   var hit=[],miss=[];u.forEach(function(t){ix.has(t)?hit.push(ix.get(t)):miss.push(t)});
   if(!u.length){$('csRegStatus').textContent='Lista pusta';return}
   st.regs=new Set(hit);save();renderAll();
-  var s=$('csRegStatus');s.textContent=hit.length+' / '+u.length+(miss.length?' · brak: '+miss.slice(0,2).join(', ')+(miss.length>2?'…':''):'');s.title=miss.join(', ');
-  $('csRegBtn').classList.add('active');
+  var s=$('csRegStatus');s.textContent='Zaznaczono '+hit.length+' z '+u.length+(miss.length?'. Nie znaleziono: '+miss.join(', '):'.');
+  $('csRegTxt').textContent=hit.length+' / '+u.length;$('csChipReg').classList.add('sub');
 }
-function regPanel(){
-  var p=$('csRegPanel'),b=$('csRegBtn');
-  if(p.classList.contains('open')){p.classList.remove('open');document.removeEventListener('click',outside,true);return}
-  var r=b.getBoundingClientRect(),left=Math.max(4,r.right-280);p.style.top=(r.bottom+4)+'px';p.style.left=left+'px';p.style.maxHeight=Math.max(160,innerHeight-r.bottom-12)+'px';p.style.overflowY='auto';p.classList.add('open');document.addEventListener('click',outside,true);
+var openPop=null;
+function closePop(){if(!openPop)return;$(openPop.id).classList.remove('open');openPop.chip.classList.remove('open');openPop=null;document.removeEventListener('click',popOut,true);document.removeEventListener('keydown',popKey,true);window.removeEventListener('resize',popResize)}
+var popW=0;function popResize(){if(innerWidth!==popW)closePop()}
+function popOut(e){if(!openPop)return;var pe=$(openPop.id),path=e.composedPath?e.composedPath():[];if(path.indexOf(pe)>=0||pe.contains(e.target)||(e.target.closest&&e.target.closest('.cs-chip')))return;closePop()}
+function popKey(e){if(e.key==='Escape')closePop()}
+function togglePop(id,chip){
+  if(openPop&&openPop.id===id){closePop();return}
+  closePop();var p=$(id),r=chip.getBoundingClientRect(),w=Math.min(330,innerWidth-16);
+  p.style.width=w+'px';p.style.top=(r.bottom+4)+'px';p.style.left=Math.max(8,Math.min(r.left,innerWidth-w-8))+'px';
+  p.classList.add('open');chip.classList.add('open');openPop={id:id,chip:chip};
+  document.addEventListener('click',popOut,true);document.addEventListener('keydown',popKey,true);window.addEventListener('resize',popResize);popW=innerWidth;
+  var f=p.querySelector('input[type=text]');if(f&&innerWidth>700)setTimeout(function(){f.focus()},30);
 }
-function outside(e){var p=$('csRegPanel');if(!p.contains(e.target)&&!e.target.closest('#csRegBtn')){p.classList.remove('open');document.removeEventListener('click',outside,true)}}
 function init(){
   var root=$('tab-custom-sum');if(!root)return;
   root.addEventListener('change',function(e){var t=e.target;
     if(t.id==='csSplit'){st.split=t.checked;save();renderResult();return}
-    if(t.id==='csFrom'||t.id==='csTo'){st[t.id==='csFrom'?'from':'to']=t.value;save();renderResult();return}
+    if(t.id==='csFrom'||t.id==='csTo'){st[t.id==='csFrom'?'from':'to']=t.value;save();syncUI();renderResult();return}
     if(t.id==='csFleet'){st.fleet=t.checked;save();renderResult();return}
     if(t.id==='csKon'){st.kon=t.checked;save();renderResult();return}
     if(t.dataset&&t.dataset.reg!=null){t.checked?st.regs.add(t.dataset.reg):st.regs.delete(t.dataset.reg);save();$('csVehCnt').textContent=st.regs.size+' / '+regs.length;renderGroups();renderResult()}
     else if(t.dataset&&t.dataset.grp!=null){t.checked?st.grps.add(t.dataset.grp):st.grps.delete(t.dataset.grp);save();$('csGrpCnt').textContent=st.grps.size+' / '+groups.length;renderResult()}});
   root.addEventListener('click',function(e){var fh=e.target.closest('[data-fold]');if(fh){st.cf[fh.dataset.fold]=!st.cf[fh.dataset.fold];save();syncUI();return}var b=e.target.closest('button');if(!b)return;
-    if(b.id==='csColBtn'){st.fold=!st.fold;save();syncUI();return}
+    if(b.classList.contains('cs-chip')){togglePop(b.dataset.pop,b);return}
     if(b.dataset.lay){st.layout=b.dataset.lay;save();syncUI();renderResult();return}
     if(b.dataset.per){st.months=b.dataset.per==='m';save();syncUI();renderResult();return}
-    if(b.id==='csRegBtn'){regPanel();return}
+    if(b.id==='csDtClear'){st.from='';st.to='';$('csFrom').value='';$('csTo').value='';save();syncUI();renderResult();return}
     if(b.id==='csRegApply'){applyList();return}
-    if(b.id==='csRegClear'){$('csRegInput').value='';$('csRegStatus').textContent='';b.blur();$('csRegBtn').classList.remove('active');return}
-    if(b.dataset.y){var y=+b.dataset.y;st.years.has(y)?st.years.delete(y):st.years.add(y);save();b.classList.toggle('on');renderResult();return}
+    if(b.id==='csRegClear'){$('csRegInput').value='';$('csRegStatus').textContent='';b.blur();$('csRegTxt').textContent='wklej';$('csChipReg').classList.remove('sub');return}
+    if(b.dataset.y){var y=+b.dataset.y;st.years.has(y)?st.years.delete(y):st.years.add(y);save();b.classList.toggle('active');chipSync();renderResult();return}
     var a=b.dataset.a;if(!a)return;
     if(a==='veh-all')regs.forEach(function(r){st.regs.add(r.reg)});
     else if(a==='veh-none')st.regs.clear();
@@ -3733,15 +3824,15 @@ function init(){
 window.csExport=function(kind){
   if(!recs.length){showToast('Brak danych do wyeksportowania.');return}
   var d=compute();if(d.rows.length<2){showToast('Brak danych do wyeksportowania.');return}
-  var out=d.rows.filter(function(r){return r.cls!=='cs-vh'}).map(function(r){var o={};d.head.forEach(function(h,i){var v=r.cells[i],f=(r.rf&&i>=d.nd)?r.rf:d.fm[i];o[h]=f==='t'?v:(v==null?null:(f==='i'?Math.round(v):+v.toFixed(f==='c'?4:2)))});return o});
+  var out=d.rows.filter(function(r){return r.cls!=='cs-vh'}).map(function(r){return d.head.map(function(h,i){var v=r.cells[i],f=(r.rf&&i>=d.nd)?r.rf:d.fm[i];return f==='t'?v:(v==null?null:(f==='i'?Math.round(v):+v.toFixed(f==='c'?4:2)))})});out.unshift(d.head.slice());
   var date=new Date().toISOString().slice(0,10);
   if(kind==='csv'){saveCSV(out,'Zestawienie_'+date);return}
   if(typeof XLSX==='undefined'){showToast('Biblioteka XLSX nie jest załadowana.');return}
-  var ws=XLSX.utils.json_to_sheet(out);
+  var ws=XLSX.utils.aoa_to_sheet(out);
   ws['!cols']=d.head.map(function(k){return{wch:Math.max(12,Math.min(32,k.length+2))}});
   var LN={g:'Rok · grupy'+(st.months?' (z podziałem na miesiące)':''),v:'Pojazdy (blok na pojazd)',i:'Pojazdy ⇄ (grupy w wierszach, lata w kolumnach)',r:'Grupa · lata',m:'Pojazd · miesiące',p:'Rozliczenie po sprzedaży (lista transakcji)'};
   var notes=['Kryteria zestawienia:','Układ: '+LN[st.layout]+(st.kon&&S.hasKontrahent?' · z kontrahentem':''),'Pojazdy ('+st.regs.size+'): '+Array.from(st.regs).sort().join(', '),'Grupy kosztów ('+d.G.length+'): '+d.G.join(', '),(d.rng?'Zakres dat: '+(d.f||'…')+' — '+(d.t||'…'):'Lata: '+d.Y.join(', ')),'Przebieg/CPK w układach „Rok · grupy” (bez miesięcy) (przy kontrahencie tylko w wierszach „Razem [rok]”) i „Pojazdy” (przy kontrahencie przebieg pojazdu powtarza się w wierszach każdego kontrahenta, sumy bez dublowania; różnica odczytów licznika w roku, jak w zakładce Przebiegi).','Wygenerowano: '+date];
-  XLSX.utils.sheet_add_aoa(ws,notes.map(function(t){return[t]}),{origin:{r:out.length+2,c:0}});
+  XLSX.utils.sheet_add_aoa(ws,notes.map(function(t){return[t]}),{origin:{r:out.length+1,c:0}});
   var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Zestawienie');
   XLSX.writeFile(wb,'Zestawienie_'+date+'.xlsx',{compression:true,bookSST:true});
 };
