@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#02040a">
 <title>Obserwatorium — glob NASA GIBS i przeloty ISS</title>
+<!-- wcześniejsze nawiązanie połączeń (DNS + TLS) z serwerami map i bibliotek: kafelki ruszają bez czekania na handshake -->
+<link rel="preconnect" href="https://gibs-a.earthdata.nasa.gov" crossorigin>
+<link rel="preconnect" href="https://gibs-b.earthdata.nasa.gov" crossorigin>
+<link rel="preconnect" href="https://gibs-c.earthdata.nasa.gov" crossorigin>
+<link rel="preconnect" href="https://gibs.earthdata.nasa.gov" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <!-- SGP4 (propagator orbit z TLE). Ładowany asynchronicznie; bez niego działa uproszczony model Kepler+J2 -->
 <script id="satjs" async src="https://cdn.jsdelivr.net/npm/satellite.js@5.0.0/dist/satellite.min.js"></script>
@@ -227,7 +233,7 @@
     <label class="row"><span><b>Chmury</b><small>symulacja proceduralna (wypiekana na GPU)</small></span><input id="mClouds" type="checkbox" class="sw"></label>
     <label class="row"><span><b>Atmosfera</b><small>rozpraszanie Rayleigha, zmierzch</small></span><input id="mAtmo" type="checkbox" class="sw" checked></label>
     <label class="row"><span><b>Światła miast</b><small id="nRowSub">Earth at Night 2012</small></span><input id="mLights" type="checkbox" class="sw" checked></label>
-    <label class="row"><span><b>Moja lokalizacja</b><small>znacznik: 52,6567° N, 17,9095° E</small></span><input id="mHome" type="checkbox" class="sw" checked></label>
+    <label class="row"><span><b>Moja lokalizacja</b><small>punkt na globie · 52,6567° N, 17,9095° E</small></span><input id="mHome" type="checkbox" class="sw" checked></label>
     <label class="row"><span><b>Obrót automatyczny</b><small>wyłącza się po dotknięciu globu</small></span><input id="mAuto" type="checkbox" class="sw" checked></label>
     <div class="text-[10.5px] text-slate-500 mt-2 leading-snug">Przeciągnij — obrót · kółko / uszczypnięcie — zoom · dwuklik — przybliż w punkt · kliknięcie ISS — śledzenie · strzałki i +/− z klawiatury.</div>
    </div>
@@ -396,10 +402,16 @@ const nightStageCtx = nightStage.getContext('2d', { willReadFrequently: true });
   baseNightCtx.fillStyle = '#000'; baseNightCtx.fillRect(0, 0, BASE_W, BASE_H);
   nightStageCtx.fillStyle = '#000'; nightStageCtx.fillRect(0, 0, BASE_W, BASE_H);
 })();
+// maluje kafelek poziomu 0–2 w kanwie bazowej (poziomy 0 i 1 są grube, ale pokrywają cały glob po kilku żądaniach)
+function paintDay(L, r, c, bmp) {
+  const cs = tileSpan(L) / 360 * BASE_W;
+  baseDayCtx.drawImage(bmp, Math.floor(c * cs), Math.floor(r * cs), Math.ceil(cs), Math.ceil(cs));
+}
 function drawBaseTile(job) {
   const bmp = Net.cache.get(job.key); if (!bmp) return;
-  const cs = tileSpan(2) / 360 * BASE_W;
-  baseDayCtx.drawImage(bmp, Math.floor(job.c * cs), Math.floor(job.r * cs), Math.ceil(cs), Math.ceil(cs));
+  paintDay(job.L, job.r, job.c, bmp);
+  for (let L = job.L + 1; L <= 2; L++)          // spóźniony kafelek grubszy nie może zakryć dokładniejszych — odmaluj te już wczytane
+    for (let r = 0; r < matH(L); r++) for (let c = 0; c < matW(L); c++) { const b = Net.cache.get(tileKey('day', L, r, c)); if (b) paintDay(L, r, c, b); }
 }
 function buildProcedural() {
   const W = 1024, H = 512;
@@ -457,6 +469,25 @@ async function decodeBlob(blob, job) {
     im.src = u;
   });
 }
+/* Trwały cache kafelków (Cache Storage): kolejne uruchomienia ładują mapę z dysku, bez sieci i bez opóźnień.
+   Dostępny tylko w kontekście bezpiecznym (https / localhost) — poza nim działa jak dotąd. Zapisywane są wyłącznie kafelki,
+   które poprawnie się zdekodowały; dane dzienne (świeże, mogą się jeszcze uzupełniać) nie są cache'owane. */
+const TILE_CACHE = window.caches ? caches.open('obs-tiles-v1').catch(() => null) : Promise.resolve(null);
+const canonURL = job => 'https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/' + job.path;      // jeden klucz niezależnie od aliasu domeny
+TILE_CACHE.then(async c => {                                                                     // limit rozmiaru: usuń najstarsze wpisy
+  if (!c) return;
+  try { const k = await c.keys(), max = IS_MOBILE ? 350 : 800; for (let i = 0; i < k.length - max; i++) c.delete(k[i]); } catch (e) { /* ignoruj */ }
+});
+async function fetchTile(job, shard, signal) {
+  const c = job.daily ? null : await TILE_CACHE;
+  if (c) { try { const hit = await c.match(canonURL(job)); if (hit) { job.fresh = false; return await hit.blob(); } } catch (e) { /* ignoruj */ } }
+  job.fresh = true;
+  const res = await fetch(tileURL(job, shard), { signal, mode: 'cors', credentials: 'omit' });
+  if (!res.ok) { const e = new Error('HTTP ' + res.status); e.status = res.status; throw e; }
+  return res.blob();
+}
+const cacheTile = (job, blob) => { if (!job.daily) TILE_CACHE.then(c => c && c.put(canonURL(job), new Response(blob, { headers: { 'Content-Type': blob.type || 'image/jpeg' } }))).catch(() => {}); };
+const uncacheTile = job => { TILE_CACHE.then(c => c && c.delete(canonURL(job))).catch(() => {}); };
 const Net = {
   cache: new Map(), used: new Map(), sizes: new Map(), inflight: new Map(), queue: new Map(), failedAt: new Map(),
   stats: { base: { ok: 0, fail: 0, gone: 0, total: 0 }, nbase: { ok: 0, fail: 0, gone: 0, total: 0 }, detail: { ok: 0, fail: 0, gone: 0, total: 0 } },
@@ -474,6 +505,7 @@ const Net = {
     if (this.inflight.has(k)) return;
     const q = this.queue.get(k); if (q) { q.prio = job.prio; return; }
     job.tries = 0; job.cancelled = false; job.path = tilePath(job.layer, job.L, job.r, job.c); job.sig = job.layer === 'night' ? NP.sig : '';
+    job.daily = job.layer === 'night' && !!NP.cur.daily;
     this.queue.set(k, job);
     if (job.group === 'base') this.stats.base.total++;
     this.pump();
@@ -493,20 +525,20 @@ const Net = {
   start(job) {
     const ctrl = new AbortController();
     this.inflight.set(job.key, { job, ctrl });
-    const to = setTimeout(() => ctrl.abort(), 25000);
+    const to = setTimeout(() => ctrl.abort(), 12000);       // zawieszone połączenie nie blokuje slotu dłużej niż 12 s — ponowna próba przez inny alias
     const shard = !this.shardBad && job.tries < 2;
-    fetch(tileURL(job, shard), { signal: ctrl.signal, mode: 'cors', credentials: 'omit' })
-      .then(res => { if (!res.ok) { const e = new Error('HTTP ' + res.status); e.status = res.status; throw e; } return res.blob(); })
-      .then(blob => decodeBlob(blob, job))
+    fetchTile(job, shard, ctrl.signal)
+      .then(blob => decodeBlob(blob, job).then(img => { if (job.fresh) cacheTile(job, blob); return img; }))
       .then(img => {
         clearTimeout(to); this.inflight.delete(job.key);
-        if (shard) this.shardOk++;
+        if (shard && job.fresh) this.shardOk++;
         this.store(job.key, img); this.stats[job.group].ok++; onTileLoaded(job); this.pump();
       })
       .catch(err => {
         clearTimeout(to); this.inflight.delete(job.key);
         if (job.cancelled) { this.pump(); return; }
-        if (shard && !(err && err.status)) { this.shardFail++; if (this.shardFail >= 3 && this.shardOk === 0) this.shardBad = true; }
+        if (job.fresh === false) uncacheTile(job);           // uszkodzony wpis w cache — usuń; kolejna próba pójdzie przez sieć
+        if (shard && job.fresh && !(err && err.status)) { this.shardFail++; if (this.shardFail >= 3 && this.shardOk === 0) this.shardBad = true; }
         this.fail(job, err); this.pump();
       });
   },
@@ -564,8 +596,10 @@ const Net = {
 
 function enqueueLayer(layer, prio) {
   const group = layer === 'night' ? 'nbase' : 'base';
-  for (let r = 0; r < matH(2); r++) for (let c = 0; c < matW(2); c++)
-    Net.want({ key: tileKey(layer, 2, r, c), layer, L: 2, r, c, prio: prio + r * 0.01 + c * 0.001, group });
+  // dzień ładuje się progresywnie: poziom 0 (2 kafelki) → 1 (6) → 2 (15); cały glob pojawia się po kilkuset ms i tylko się wyostrza
+  for (const L of layer === 'night' ? [2] : [0, 1, 2])
+    for (let r = 0; r < matH(L); r++) for (let c = 0; c < matW(L); c++)
+      Net.want({ key: tileKey(layer, L, r, c), layer, L, r, c, prio: prio + L * 50 + r * 0.01 + c * 0.001, group });
 }
 function enqueueDay() { enqueueLayer('day', -1000); }
 function enqueueNight() { enqueueLayer('night', -800); }
@@ -578,7 +612,7 @@ function checkBaseProgress() {
 function onTileLoaded(job) {
   if (job.group === 'base') {
     drawBaseTile(job); baseDirty = true; checkBaseProgress();
-    if (gpu) gpu.baseTile(job.c, job.r, Net.cache.get(job.key));
+    if (gpu) { if (job.L === 2) gpu.baseTile(job.c, job.r, Net.cache.get(job.key)); else gpu.baseCanvas(); }
     if (baseSource !== 'nasa') { baseSource = 'nasa'; setCredit(); }
   } else if (job.group === 'nbase') {
     if (job.sig === NP.sig) { drawNightTile(job.L, job.r, job.c); nightEvent(); }
@@ -760,7 +794,7 @@ function resetClip(c, L) {
   c.L = L; c.NX = Det.limits.nx; c.NY = Det.limits.ny; c.list = []; resetRes(c.res); c.bornD.fill(0); c.bornN.fill(0); c.nightSig = '';
 }
 const Det = {
-  fade: 0, target: 0, active: false, lastCheck: 0, wantL: 0, P: null, S: null,
+  fade: 0, target: 0, active: false, warm: false, lastCheck: 0, wantL: 0, P: null, S: null,
   clips: [mkClip(0), mkClip(1)], limits: { nx: 6, ny: 5 }, stat: { total: 0, loaded: 0 }, vx: 0, vy: 0
 };
 function visibleBBox() {
@@ -816,11 +850,17 @@ function applyPlan(clip, plan, sec) {
   list.sort((a, b) => a.pr - b.pr); clip.list = list;
 }
 function requestTiles() {
-  const need = new Set();
+  const need = new Set(), sd = cfg.lights ? sunInfo(T.sim).dir : null;
   for (const clip of [Det.P, Det.S]) {
     if (!clip) continue;
+    const span = tileSpan(clip.L), rho = span * 0.75 * DEG;                      // promień kątowy kafelka (z zapasem na połowę przekątnej)
     for (const t of clip.list) for (const layer of ['day', 'night']) {
-      if (layer === 'night' && !cfg.lights) continue;
+      if (layer === 'night') {
+        if (!sd) continue;
+        // kafelek w całości po stronie dziennej (Słońce wyraźnie nad horyzontem) — światła miast są tam niewidoczne, więc nie pobieramy ich warstwy
+        const la = (90 - (t.r + 0.5) * span) * DEG, lo = (-180 + (t.cu + 0.5) * span) * DEG, cl = Math.cos(la);
+        if (cl * Math.sin(lo) * sd[0] + Math.sin(la) * sd[1] + cl * Math.cos(lo) * sd[2] - rho > 0.08) continue;
+      }
       const key = tileKey(layer, clip.L, t.r, t.cw); need.add(key);
       Net.want({ key, layer, L: clip.L, r: t.r, c: t.cw, prio: t.pr + (layer === 'night' ? 0.5 : 0), group: 'detail' });
     }
@@ -835,13 +875,14 @@ function countLoaded() {
 function updateDetail(now, dt) {
   Det.fade += (Det.target - Det.fade) * Math.min(1, dt * 5);
   if (Math.abs(Det.target - Det.fade) < 0.004) Det.fade = Det.target;
-  if (Det.target === 0 && Det.fade === 0 && Det.P) { Det.P = null; Det.S = null; Net.setNeeded(new Set()); }
+  if (!Det.warm && Det.fade === 0 && Det.P) { Det.P = null; Det.S = null; Net.setNeeded(new Set()); }
   if (now - Det.lastCheck < 120) return;
   Det.lastCheck = now;
   const was = Det.active;
   const on = was ? view.zoom >= DETAIL_MIN_ZOOM * 0.93 : view.zoom >= DETAIL_MIN_ZOOM;
   Det.active = cfg.detail && on; Det.target = Det.active ? 1 : 0;
-  if (!Det.active) return;
+  Det.warm = cfg.detail && view.zoom >= DETAIL_MIN_ZOOM * 0.72;       // od ×2,0: kafelki szczegółów pobierają się i trafiają na GPU z wyprzedzeniem (jeszcze niewidoczne)
+  if (!Det.warm) return;
   const bb = visibleBBox(); if (!bb) return;
   const Lf = Math.log2(RES0 / currentMpp()) - 0.35;
   let wantL = Math.ceil(Lf);
@@ -1241,6 +1282,7 @@ class GPURenderer {
     this.dirty.add(tx);
   }
   baseTile(c, r, bmp) { if (bmp) this.q.push({ k: 'd', c, r, bmp }); }
+  baseCanvas() { if (!this.q.some(e => e.k === 'dc')) this.q.push({ k: 'dc' }); }      // grube poziomy 0/1: wgraj całą kanwę dnia (tylko kilka razy przy starcie)
   nightTile(sig, c, r, bmp) { if (bmp) this.q.push({ k: 'n', sig, c, r, bmp }); }
   stageNight(sig, direct) {
     const idx = direct ? this.nLive : 1 - this.nLive;
@@ -1267,6 +1309,10 @@ class GPURenderer {
     return clip.gpu;
   }
   upBase(e) {
+    if (e.k === 'dc') {
+      const gl = this.gl; gl.activeTexture(gl.TEXTURE7); gl.bindTexture(gl.TEXTURE_2D, this.bd.t);
+      gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, gl.RGBA, gl.UNSIGNED_BYTE, baseDay); this.dirty.add(this.bd); return;
+    }
     const tx = e.k === 'd' ? this.bd : (() => { const i = this.nSig.indexOf(e.sig); return i < 0 ? null : this.nt[i]; })();
     if (tx) this.upTile(tx, e.c * 512, e.r * 512, 512, e.bmp);
   }
@@ -1302,7 +1348,7 @@ class GPURenderer {
     const ctx = { did: 0, t0: performance.now(), budget, can() { return this.did === 0 || performance.now() - this.t0 < this.budget; } };
     while (this.q.length && ctx.can()) { this.upBase(this.q.shift()); ctx.did++; }
     if (!this.q.length) {
-      if (Det.P && Det.fade > 0) { this.pumpClip(Det.P, now, ctx); if (Det.S) this.pumpClip(Det.S, now, ctx); }
+      if (Det.P) { this.pumpClip(Det.P, now, ctx); if (Det.S) this.pumpClip(Det.S, now, ctx); }      // także w fazie „warm” (fade = 0): wgrywanie z wyprzedzeniem
       else if (!IS_MOBILE && !this.warmed && now > 1800 && cfg.detail) { this.clipGPU(Det.clips[0]); this.clipGPU(Det.clips[1]); this.warmed = 1; ctx.did++; }   // rozgrzewka: alokacja pamięci zawczasu
     }
     if (this.ready && cfg.clouds && !this.bakeDone && ctx.can()) this.bakeStep(now);   // chmury wypiekane dopiero po włączeniu warstwy
@@ -1786,21 +1832,12 @@ function label(ctx, txt, x, y, color, align) {
   ctx.font = '600 11px ui-sans-serif,system-ui,sans-serif'; ctx.textAlign = align || 'left'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(2,4,10,.9)';
   ctx.strokeText(txt, x, y); ctx.fillStyle = color; ctx.fillText(txt, x, y);
 }
-// stały znacznik „Moja lokalizacja”: celownik z przerwą + pulsujący pierścień + biały punkt dokładnie w miejscu położenia
+// stały znacznik „Moja lokalizacja”: sam punkt (czerwony, z białą obwódką i ciemną poświatą — widoczny na każdym tle), bez napisu
 function drawHome(ctx, cs, half) {
-  const w = wvec(HOME.lat, HOME.lon, 1), p = projXYZ(cs, half, w[0], w[1], w[2]);   // r = 1 (sama powierzchnia, bez uniesienia) — brak paralaksy przy brzegu tarczy
-  if (!p.ok || p.hid) return;
-  const x = p.x, y = p.y; if (x < -30 || y < -30 || x > view.cssW + 30 || y > view.cssH + 30) return;
-  const ph = (performance.now() % 2200) / 2200;
-  ctx.strokeStyle = 'rgba(255,90,90,' + (0.55 * (1 - ph)).toFixed(3) + ')'; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.arc(x, y, 7 + 15 * ph, 0, TAU); ctx.stroke();                    // pulsujący pierścień
-  ctx.beginPath();
-  for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { ctx.moveTo(x + a * 5, y + b * 5); ctx.lineTo(x + a * 13, y + b * 13); }   // przerwa w środku: punkt pozostaje niezasłonięty
-  ctx.strokeStyle = 'rgba(2,4,10,.85)'; ctx.lineWidth = 4.2; ctx.stroke(); ctx.strokeStyle = '#ff5a5a'; ctx.lineWidth = 2; ctx.stroke();
-  ctx.beginPath(); ctx.arc(x, y, 2, 0, TAU); ctx.fillStyle = '#fff'; ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(2,4,10,.9)'; ctx.stroke();   // dokładny punkt
-  const left = x > view.cssW - 190, tx = x + (left ? -17 : 17), al = left ? 'right' : 'left';
-  label(ctx, HOME.n, tx, y - 2, '#ffd0d0', al);
-  label(ctx, fmtNum(HOME.lat, 4) + '° N · ' + fmtNum(HOME.lon, 4) + '° E', tx, y + 11, '#b9cde6', al);
+  const w = wvec(HOME.lat, HOME.lon, 1), p = projXYZ(cs, half, w[0], w[1], w[2]);   // r = 1 (sama powierzchnia) — brak paralaksy przy brzegu tarczy
+  if (!p.ok || p.hid || p.x < -20 || p.y < -20 || p.x > view.cssW + 20 || p.y > view.cssH + 20) return;
+  ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, TAU); ctx.fillStyle = 'rgba(2,4,10,.5)'; ctx.fill();
+  ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, TAU); ctx.fillStyle = '#ff4d4d'; ctx.fill(); ctx.lineWidth = 1.6; ctx.strokeStyle = '#fff'; ctx.stroke();
 }
 function drawOverlay() {
   const ctx = ovx; ctx.clearRect(0, 0, view.cssW, view.cssH); ISS.scr = null; ovDirty = false;
