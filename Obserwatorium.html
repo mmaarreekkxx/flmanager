@@ -229,15 +229,20 @@
     </div>
     <hr class="sep">
     <div class="menu-h mb-0.5">Warstwy</div>
-    <label class="row"><span><b>Szczegóły online</b><small>NASA GIBS · od ×2,8 · Blue Marble + VIIRS</small></span><input id="mDetail" type="checkbox" class="sw" checked></label>
+    <label class="row"><span><b>Szczegóły online</b><small>mapa dzienna i światła pobierane z internetu przy zbliżaniu</small></span><input id="mDetail" type="checkbox" class="sw" checked></label>
     <label class="row"><span><b>Chmury</b><small>symulacja proceduralna (wypiekana na GPU)</small></span><input id="mClouds" type="checkbox" class="sw"></label>
     <label class="row"><span><b>Atmosfera</b><small>rozpraszanie Rayleigha, zmierzch</small></span><input id="mAtmo" type="checkbox" class="sw" checked></label>
     <label class="row"><span><b>Światła miast</b><small id="nRowSub">Earth at Night 2012</small></span><input id="mLights" type="checkbox" class="sw" checked></label>
-    <label class="row"><span><b>Moja lokalizacja</b><small>punkt na globie · 52,6567° N, 17,9095° E</small></span><input id="mHome" type="checkbox" class="sw" checked></label>
+    <label class="row"><span><b>Moja lokalizacja</b><small>punkt na globie · 52,7270° N, 17,9095° E</small></span><input id="mHome" type="checkbox" class="sw" checked></label>
     <label class="row"><span><b>Obrót automatyczny</b><small>wyłącza się po dotknięciu globu</small></span><input id="mAuto" type="checkbox" class="sw" checked></label>
     <div class="text-[10.5px] text-slate-500 mt-2 leading-snug">Przeciągnij — obrót · kółko / uszczypnięcie — zoom · dwuklik — przybliż w punkt · kliknięcie ISS — śledzenie · strzałki i +/− z klawiatury.</div>
    </div>
    <div>
+    <div class="rounded-xl p-2.5 mb-2" style="background:rgba(148,175,220,.07);border:1px solid var(--line)">
+      <div class="menu-h mb-1.5">Mapa szczegółów</div>
+      <select id="dSel" class="sel w-full" aria-label="Źródło mapy szczegółów"></select>
+      <div id="dDesc" class="text-[10.5px] text-slate-400 mt-1.5 leading-snug"></div>
+    </div>
     <div class="rounded-xl p-2.5" style="background:rgba(148,175,220,.07);border:1px solid var(--line)">
       <div class="menu-h mb-1.5">Źródło świateł nocnych</div>
       <select id="nSel" class="sel w-full" aria-label="Źródło świateł nocnych"></select>
@@ -287,9 +292,10 @@ const wrap180 = a => ((a + 180) % 360 + 360) % 360 - 180;
 const mod = (a, n) => ((a % n) + n) % n;
 const smooth = (a, b, x) => { let t = (x - a) / (b - a); t = t < 0 ? 0 : t > 1 ? 1 : t; return t * t * (3 - 2 * t); };
 const fmtNum = (v, d = 1) => v.toLocaleString('pl-PL', { minimumFractionDigits: d, maximumFractionDigits: d });
-const fmtRes = m => m >= 1000 ? fmtNum(m / 1000, m >= 10000 ? 0 : 1) + ' km/px' : Math.round(m) + ' m/px';
-const fmtLat = l => fmtNum(Math.abs(l), 2) + '°' + (l >= 0 ? 'N' : 'S');
-const fmtLon = l => fmtNum(Math.abs(l), 2) + '°' + (l >= 0 ? 'E' : 'W');
+const fmtRes = m => m >= 1000 ? fmtNum(m / 1000, m >= 10000 ? 0 : 1) + ' km/px' : m >= 10 ? Math.round(m) + ' m/px' : fmtNum(m, m >= 1 ? 1 : 2) + ' m/px';
+const fmtLat = (l, d = 2) => fmtNum(Math.abs(l), d) + '°' + (l >= 0 ? 'N' : 'S');
+const coordDec = () => clamp(2 + Math.floor(Math.log10(Math.max(1, view.zoom))), 2, 6);   // więcej cyfr współrzędnych przy większym zoomie
+const fmtLon = (l, d = 2) => fmtNum(Math.abs(l), d) + '°' + (l >= 0 ? 'E' : 'W');
 const IS_MOBILE = (window.matchMedia && matchMedia('(pointer:coarse)').matches) || Math.min(screen.width, screen.height) < 700;
 const stage = $('#stage');
 
@@ -297,9 +303,11 @@ const stage = $('#stage');
 const R_EARTH = 6371008.8;
 const CAM_D = 5.5;
 const S1 = 1 / (0.8 * Math.sqrt(CAM_D * CAM_D - 1));
-const ZMIN = 0.7, ZMAX = 120;
-const DETAIL_MIN_ZOOM = 2.8;
-const MIN_L = 3, MAX_L = 7;
+const ZMIN = 0.7; let ZMAX = 120;                      // zmienne zależnie od wybranej mapy szczegółów (setDayProvider)
+let DETAIL_MIN_ZOOM = 2.8;
+const HI_ZOOM = 120;          // od tego zoomu shader liczy położenie względem środka widoku (tryb lokalny, precyzja float32)
+const NIGHT_MAXL = 15;        // najgłębszy poziom, dla którego pobieramy/wgrywamy światła (GIBS ma je do poziomu 7, wyżej to ułamki piksela)
+const MIN_L = 3; let MAX_L = 7;
 const NS = 30;                                         // maks. liczba slotów klipmapy (nx·ny)
 const BASE_W = 2560, BASE_H = 1280, BASE_TH = 1536;    // mapa bazowa = poziom 2 GIBS (5×3 kafelki 512 px)
 const BASEV = BASE_H / BASE_TH;
@@ -332,6 +340,27 @@ const NIGHT = [
 ];
 const NP = { cur: NIGHT[0], date: null, sig: 'cl2012_static', manual: false, step: 0, live: true, done: false, committedOnce: false, announced: true,
              lastGood: null, recent: [], timer: 0, stat: { ok: 0, gone: 0, fail: 0, tot: 15 } };
+/* Mapa dzienna w oknie szczegółów (mapa bazowa całego globu zawsze pochodzi z NASA Blue Marble).
+   Esri: usługa ArcGIS „export” w układzie geograficznym (EPSG:4326) — serwer sam przelicza kafelki Mercatora na siatkę stopniową,
+   więc obraz pasuje do komórek 512 px poziomów GIBS, a klipmapa i shader działają bez zmian. Poziomy L > 7 to kwestia samego adresu (bbox);
+   poziom L odpowiada ok. zoomowi Esri z ≈ L + 1,3. */
+const ESRI_ROOT = 'https://server.arcgisonline.com/ArcGIS/rest/services/';
+const ESRI_CREDIT = 'Esri, Vantor, Earthstar Geographics i społeczność GIS';
+const DAYSRC = [
+  { id: 'gibs', grp: 'NASA GIBS', label: 'NASA Blue Marble', short: 'NASA Blue Marble', maxL: 7, zmax: 300, minZoom: 2.8,
+    desc: 'Cieniowana rzeźba i batymetria (Blue Marble), ok. 490 m/px. Zoom do ×300. Źródło domyślne.' },
+  { id: 'esri_img', grp: 'Esri ArcGIS', esri: 'World_Imagery', label: 'Zdjęcia satelitarne (World Imagery)', short: 'Esri World Imagery', maxL: 18, zmax: 50000, minZoom: 1.8,
+    desc: 'Zdjęcia satelitarne i lotnicze: 15 m na całym świecie, 0,3–1 m w wielu miastach. Zoom do ×50 000 (ok. 0,2–0,3 m/px).' },
+  { id: 'esri_topo', grp: 'Esri ArcGIS', esri: 'World_Topo_Map', label: 'Mapa topograficzna (World Topo)', short: 'Esri World Topo', maxL: 18, zmax: 50000, minZoom: 1.8,
+    desc: 'Rzeźba terenu, drogi, granice i nazwy miejscowości. Zoom do ×50 000.' },
+  { id: 'esri_street', grp: 'Esri ArcGIS', esri: 'World_Street_Map', label: 'Mapa ulic (World Street Map)', short: 'Esri World Street Map', maxL: 18, zmax: 50000, minZoom: 1.8,
+    desc: 'Ulice, drogi, nazwy miast i miejsc. Zoom do ×50 000.' },
+  { id: 'esri_natgeo', grp: 'Esri ArcGIS', esri: 'NatGeo_World_Map', label: 'National Geographic', short: 'Esri NatGeo World Map', maxL: 12, zmax: 1000, minZoom: 1.8,
+    desc: 'Mapa w stylu National Geographic: rzeźba, ekosystemy, nazwy. Zoom do ×1000.' },
+  { id: 'esri_relief', grp: 'Esri ArcGIS', esri: 'World_Shaded_Relief', label: 'Cieniowana rzeźba (World Shaded Relief)', short: 'Esri World Shaded Relief', maxL: 12, zmax: 1000, minZoom: 1.8,
+    desc: 'Sama rzeźba terenu bez nazw, do ok. 30 m/px. Zoom do ×1000.' }
+];
+const DP = { cur: DAYSRC[0] };
 const isoDay = ms => new Date(ms).toISOString().slice(0, 10);
 const shiftDate = (s, d) => isoDay(Date.parse(s + 'T00:00:00Z') + d * 86400000);
 const todayStr = () => isoDay(Date.now());
@@ -344,14 +373,24 @@ const matH = L => Math.ceil(180 / tileSpan(L) - 1e-9);
 const RES0 = tileSpan(0) / 512 * 111319.49;
 const resM = L => RES0 / Math.pow(2, L);
 const nightKey = (sig, L, r, c) => 'night:' + sig + '/' + L + '/' + r + '/' + c;
-const tileKey = (layer, L, r, c) => layer === 'night' ? nightKey(NP.sig, L, r, c) : layer + '/' + L + '/' + r + '/' + c;
+// kafelki dnia powyżej poziomu 2 zależą od wybranego dostawcy (inne źródło = inny klucz, więc w pamięci nic się nie miesza)
+const tileKey = (layer, L, r, c) => layer === 'night' ? nightKey(NP.sig, L, r, c)
+  : (layer === 'day' && L > 2 && DP.cur.esri ? 'day:' + DP.cur.id : layer) + '/' + L + '/' + r + '/' + c;
 function tilePath(layer, L, r, c) {
   if (layer === 'night') { const p = NP.cur, t = p.daily ? NP.date : p.time; return `${p.layer}/default/${t ? t + '/' : ''}500m/${L}/${r}/${c}.${p.ext}`; }
   return `${DAY.id}/default/500m/${L}/${r}/${c}.${DAY.ext}`;
 }
 // trzy aliasy domeny GIBS (HTTP/1.1 — więcej równoległych połączeń); ostatnia próba na domenie głównej
 const HOSTS = ['gibs-a', 'gibs-b', 'gibs-c'];
-const tileURL = (job, shard) => `https://${shard ? HOSTS[(job.c + job.r) % 3] : 'gibs'}.earthdata.nasa.gov/wmts/epsg4326/best/${job.path}`;
+// Esri „export”: komórka siatki (poziom L, wiersz r, kolumna c) → obraz 512×512 px dokładnie w jej granicach geograficznych.
+// Komórki wychodzące poza zasięg Mercatora (|szer.| > 85,05°) dostają PNG z przezroczystością, całkiem poza zasięgiem są pomijane (esriSkip).
+function esriURL(svc, L, r, c) {
+  const s = tileSpan(L), x0 = -180 + c * s, y1 = 90 - r * s, y0 = y1 - s, f = v => v.toFixed(10);
+  const edge = y1 > 85.05 || y0 < -85.05;
+  return `${ESRI_ROOT}${svc}/MapServer/export?bbox=${f(x0)},${f(y0)},${f(x0 + s)},${f(y1)}&bboxSR=4326&imageSR=4326&size=512,512&format=${edge ? 'png32&transparent=true' : 'jpg'}&f=image`;
+}
+const esriSkip = (L, r) => { const s = tileSpan(L), y1 = 90 - r * s; return y1 - s >= 85.05 || y1 <= -85.05; };
+const tileURL = (job, shard) => job.url || `https://${shard ? HOSTS[(job.c + job.r) % 3] : 'gibs'}.earthdata.nasa.gov/wmts/epsg4326/best/${job.path}`;
 
 const cfg = { detail: true, clouds: false, atmo: true, lights: true, auto: true, home: true, nGain: 1 };
 const view = { lat: 24, lon: 12, lonU: 12, zoom: 1, zoomT: 1, cssW: 800, cssH: 600 };
@@ -359,7 +398,10 @@ const T = { sim: Date.now(), speed: 1, playing: true };
 let baseSource = 'loading';
 let baseReady = false, baseDirty = false, baseVersion = 0, lastBaseUp = 0, ovDirty = true;
 let lonPrev = view.lon;
-function syncLonU() { view.lonU += wrap180(view.lon - lonPrev); lonPrev = view.lon; }   // ciągła (nieopakowana) długość
+function syncLonU() {
+  view.lonU += wrap180(view.lon - lonPrev); lonPrev = view.lon;
+  if (Math.abs(view.lonU) > 2000 && !Det.P) view.lonU -= 360 * Math.round(view.lonU / 360);   // numery kolumn kafelków muszą być małymi liczbami całkowitymi (float32 w shaderze)
+}   // ciągła (nieopakowana) długość
 
 /* ---------- Szum 3D (CPU) — mapa proceduralna i chmury w trybie programowym ---------- */
 function hash3i(x, y, z) {
@@ -473,10 +515,10 @@ async function decodeBlob(blob, job) {
    Dostępny tylko w kontekście bezpiecznym (https / localhost) — poza nim działa jak dotąd. Zapisywane są wyłącznie kafelki,
    które poprawnie się zdekodowały; dane dzienne (świeże, mogą się jeszcze uzupełniać) nie są cache'owane. */
 const TILE_CACHE = window.caches ? caches.open('obs-tiles-v1').catch(() => null) : Promise.resolve(null);
-const canonURL = job => 'https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/' + job.path;      // jeden klucz niezależnie od aliasu domeny
+const canonURL = job => job.url || 'https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/' + job.path;      // jeden klucz niezależnie od aliasu domeny
 TILE_CACHE.then(async c => {                                                                     // limit rozmiaru: usuń najstarsze wpisy
   if (!c) return;
-  try { const k = await c.keys(), max = IS_MOBILE ? 350 : 800; for (let i = 0; i < k.length - max; i++) c.delete(k[i]); } catch (e) { /* ignoruj */ }
+  try { const k = await c.keys(), max = IS_MOBILE ? 500 : 1500; for (let i = 0; i < k.length - max; i++) c.delete(k[i]); } catch (e) { /* ignoruj */ }
 });
 async function fetchTile(job, shard, signal) {
   const c = job.daily ? null : await TILE_CACHE;
@@ -490,7 +532,7 @@ const cacheTile = (job, blob) => { if (!job.daily) TILE_CACHE.then(c => c && c.p
 const uncacheTile = job => { TILE_CACHE.then(c => c && c.delete(canonURL(job))).catch(() => {}); };
 const Net = {
   cache: new Map(), used: new Map(), sizes: new Map(), inflight: new Map(), queue: new Map(), failedAt: new Map(),
-  stats: { base: { ok: 0, fail: 0, gone: 0, total: 0 }, nbase: { ok: 0, fail: 0, gone: 0, total: 0 }, detail: { ok: 0, fail: 0, gone: 0, total: 0 } },
+  stats: { base: { ok: 0, fail: 0, gone: 0, total: 0 }, nbase: { ok: 0, fail: 0, gone: 0, total: 0 }, detail: { ok: 0, fail: 0, gone: 0, total: 0 }, esri: { ok: 0, fail: 0, gone: 0, total: 0 } },
   protect: new Set(), MAXC: IS_MOBILE ? 6 : 10, MAXBYTES: (IS_MOBILE ? 90 : 220) * 1048576, bytes: 0, ver: 0,
   shardOk: 0, shardFail: 0, shardBad: false,      // gdy aliasy gibs-a/b/c nie działają — wracamy na domenę główną
   get(layer, L, r, c) {
@@ -506,6 +548,8 @@ const Net = {
     const q = this.queue.get(k); if (q) { q.prio = job.prio; return; }
     job.tries = 0; job.cancelled = false; job.path = tilePath(job.layer, job.L, job.r, job.c); job.sig = job.layer === 'night' ? NP.sig : '';
     job.daily = job.layer === 'night' && !!NP.cur.daily;
+    job.url = job.layer === 'day' && job.L > 2 && DP.cur.esri ? esriURL(DP.cur.esri, job.L, job.r, job.c) : null;   // dzień w oknie szczegółów z Esri
+    job.esri = !!job.url;
     this.queue.set(k, job);
     if (job.group === 'base') this.stats.base.total++;
     this.pump();
@@ -526,13 +570,13 @@ const Net = {
     const ctrl = new AbortController();
     this.inflight.set(job.key, { job, ctrl });
     const to = setTimeout(() => ctrl.abort(), 12000);       // zawieszone połączenie nie blokuje slotu dłużej niż 12 s — ponowna próba przez inny alias
-    const shard = !this.shardBad && job.tries < 2;
+    const shard = !job.esri && !this.shardBad && job.tries < 2;      // aliasy domen dotyczą tylko GIBS
     fetchTile(job, shard, ctrl.signal)
       .then(blob => decodeBlob(blob, job).then(img => { if (job.fresh) cacheTile(job, blob); return img; }))
       .then(img => {
         clearTimeout(to); this.inflight.delete(job.key);
         if (shard && job.fresh) this.shardOk++;
-        this.store(job.key, img); this.stats[job.group].ok++; onTileLoaded(job); this.pump();
+        this.store(job.key, img); this.stats[job.group].ok++; if (job.esri) this.stats.esri.ok++; onTileLoaded(job); this.pump();
       })
       .catch(err => {
         clearTimeout(to); this.inflight.delete(job.key);
@@ -561,7 +605,7 @@ const Net = {
       }, 700 * job.tries);
       return;
     }
-    this.failedAt.set(job.key, performance.now()); this.stats[job.group].fail++;
+    this.failedAt.set(job.key, performance.now()); this.stats[job.group].fail++; if (job.esri) this.stats.esri.fail++;
     if (job.group === 'base') checkBaseProgress();
     else if (job.group === 'nbase' && job.sig === NP.sig) nightEvent();
     onTileFailed(job);
@@ -621,6 +665,7 @@ function onTileLoaded(job) {
 }
 function onTileFailed(job) {
   const st = Net.stats[job.group];
+  if (job.esri) { const e = Net.stats.esri; if (e.ok === 0 && e.fail >= 4 && DP.cur.esri) App.esriFailed(); return; }   // Esri nieosiągalne (sieć / CORS) → powrót do NASA
   if (job.group === 'base' && st.ok === 0 && st.fail >= 4 && baseSource !== 'procedural') App.baseFailed();
   if (job.group === 'detail' && st.ok === 0 && st.fail >= 4 && cfg.detail) App.detailFailed();
 }
@@ -850,19 +895,22 @@ function applyPlan(clip, plan, sec) {
   list.sort((a, b) => a.pr - b.pr); clip.list = list;
 }
 function requestTiles() {
-  const need = new Set(), sd = cfg.lights ? sunInfo(T.sim).dir : null;
+  const need = new Set(), sd = cfg.lights ? sunInfo(T.sim).dir : null, ds = DP.cur.esri;
   for (const clip of [Det.P, Det.S]) {
     if (!clip) continue;
-    const span = tileSpan(clip.L), rho = span * 0.75 * DEG;                      // promień kątowy kafelka (z zapasem na połowę przekątnej)
+    const span = tileSpan(clip.L), rho = span * 0.75 * DEG, sh = Math.max(0, clip.L - 7);   // sh > 0: poziom wyższy niż 7 (Esri) — światła GIBS bierzemy z poziomu 7                      // promień kątowy kafelka (z zapasem na połowę przekątnej)
     for (const t of clip.list) for (const layer of ['day', 'night']) {
+      if (layer === 'day' && ds && esriSkip(clip.L, t.r)) continue;       // poza zasięgiem Mercatora (bieguny) — zostaje mapa bazowa NASA
       if (layer === 'night') {
-        if (!sd) continue;
+        if (!sd || clip.L > NIGHT_MAXL) continue;
         // kafelek w całości po stronie dziennej (Słońce wyraźnie nad horyzontem) — światła miast są tam niewidoczne, więc nie pobieramy ich warstwy
         const la = (90 - (t.r + 0.5) * span) * DEG, lo = (-180 + (t.cu + 0.5) * span) * DEG, cl = Math.cos(la);
         if (cl * Math.sin(lo) * sd[0] + Math.sin(la) * sd[1] + cl * Math.cos(lo) * sd[2] - rho > 0.08) continue;
       }
-      const key = tileKey(layer, clip.L, t.r, t.cw); need.add(key);
-      Net.want({ key, layer, L: clip.L, r: t.r, c: t.cw, prio: t.pr + (layer === 'night' ? 0.5 : 0), group: 'detail' });
+      let L = clip.L, r = t.r, c = t.cw;
+      if (layer === 'night') { L = clip.L - sh; r = t.r >> sh; c = t.cw >> sh; }
+      const key = tileKey(layer, L, r, c); need.add(key);
+      Net.want({ key, layer, L, r, c, prio: t.pr + (layer === 'night' ? 0.5 : 0), group: 'detail' });
     }
   }
   Net.setNeeded(need);
@@ -941,18 +989,19 @@ void main(){
 }`;
 // funkcja próbkująca jeden poziom klipmapy; kk = całkowity indeks kolumny odpowiadający x=0, xr = położenie w kafelkach względem niego
 const clipFn = (name, arr) => `
-void ${name}(sampler2D td, sampler2D tn, vec4 cp, float kk, float xr, float yt, vec2 gx, vec2 gy, out vec4 cd, out vec4 cn){
+void ${name}(sampler2D td, sampler2D tn, vec4 cp, float kk, float kr, float xr, float yt, vec2 gx, vec2 gy, out vec4 cd, out vec4 cn){
   vec2 nn = cp.yz;
   float fcx = floor(xr); float fx = xr - fcx;
   float ccol = kk + fcx;
   float fcy = floor(yt); float fy = yt - fcy;
-  float mx = mod(ccol, nn.x); float my = mod(fcy, nn.y);
+  float crow = kr + fcy;
+  float mx = mod(ccol, nn.x); float my = mod(crow, nn.y);
   vec4 s = ${arr}[int(mx + nn.x*my)];
-  bool hit = (s.x == ccol && s.y == fcy) && cp.w > 0.5;
+  bool hit = (s.x == ccol && s.y == crow) && cp.w > 0.5;
   vec2 uv = vec2(mx + fx, my + fy)/nn;
   vec2 g1 = gx/nn; vec2 g2 = gy/nn;
   cd = vec4(0.0); cn = vec4(0.0);
-  if (hit && s.z > 0.0) cd = vec4(textureGrad(td, uv, g1, g2).rgb, s.z);
+  if (hit && s.z > 0.0) { vec4 t = textureGrad(td, uv, g1, g2); cd = vec4(t.rgb/max(t.a, 0.001), s.z*t.a); }   // przezroczystość kafelka (np. poza zasięgiem Mercatora Esri) odsłania mapę bazową
   if (hit && s.w > 0.0) cn = vec4(textureGrad(tn, uv, g1, g2).rgb, s.w);
 }`;
 const FS = `#version 300 es
@@ -977,6 +1026,9 @@ uniform float uLonC;
 uniform vec4 uCA;
 uniform vec4 uCB;
 uniform vec4 uKF;
+uniform vec4 uKR;
+uniform vec3 uHi;
+uniform vec4 uLoc;
 uniform vec4 uOpt;
 uniform vec2 uNP;
 uniform vec3 uCP;
@@ -1076,28 +1128,54 @@ void main(){
   bool hitA = hitSphere(ro, rd, RA, a0, a1);
 
   // współrzędne „bezpieczne” (ciągłe także poza sylwetką) — pochodne liczone w jednolitym przepływie sterowania
-  float tc = -dot(ro, rd);
-  vec3 Ns = normalize(ro + rd*(hitP ? p0 : tc));
-  float lonS = atan(Ns.x, Ns.z);
-  float latS = asin(clamp(Ns.y, -1.0, 1.0));
-  vec2 uv = vec2(lonS/(2.0*PI) + 0.5, (0.5 - latS/PI)*BASEV);
-  float u2 = fract(uv.x + 0.5) - 0.5;
-  vec2 dxa = dFdx(vec2(uv.x, uv.y)); vec2 dya = dFdy(vec2(uv.x, uv.y));
-  vec2 dxb = dFdx(vec2(u2, uv.y));   vec2 dyb = dFdy(vec2(u2, uv.y));
-  bool useA = fwidth(uv.x) <= fwidth(u2);
-  vec2 gx = useA ? dxa : dxb; vec2 gy = useA ? dya : dyb;
-
-  float lonD = lonS*180.0/PI; float latD = latS*180.0/PI;
-  float dlA = mod(lonD - uLonC + 180.0, 360.0) - 180.0;
-  float dlB = mod(lonD - uLonC, 360.0);
-  float fxA = dFdx(dlA), fyA = dFdy(dlA), fxB = dFdx(dlB), fyB = dFdy(dlB);
-  bool useDA = fwidth(dlA) <= fwidth(dlB);
-  float dlx = useDA ? fxA : fxB; float dly = useDA ? fyA : fyB;
-  vec2 dLat = vec2(dFdx(latD), dFdy(latD));
-  float xA = (uKF.y + dlA)/uCA.x; float yA = (90.0 - latD)/uCA.x;
-  float xB = (uKF.w + dlA)/uCB.x; float yB = (90.0 - latD)/uCB.x;
-  vec2 gAx = vec2(dlx, -dLat.x)/uCA.x; vec2 gAy = vec2(dly, -dLat.y)/uCA.x;
-  vec2 gBx = vec2(dlx, -dLat.x)/uCB.x; vec2 gBy = vec2(dly, -dLat.y)/uCB.x;
+  vec2 uv; vec2 gx; vec2 gy;
+  float xA, yA, xB, yB, krA, krB;
+  vec2 gAx, gAy, gBx, gBy;
+  if (uHi.x > 0.5) {
+    // tryb lokalny (zoom od ok. 120): położenie piksela względem środka widoku liczone na płaszczyźnie stycznej, w małych liczbach.
+    // float32 nie traci wtedy precyzji nawet przy zoomie rzędu dziesiątek tysięcy (kafelki ok. 0,2 m/px); współrzędne bezwzględne są tylko w uniformach (CPU, double)
+    float aa = uHi.y*p.x; float bb = uHi.y*p.y;
+    float sl0 = uLoc.x; float cl0 = uLoc.y;
+    float zz = sqrt(max(1.0 - aa*aa - bb*bb, 0.0));
+    float wq = cl0*zz - sl0*bb;
+    float hq = sqrt(aa*aa + wq*wq);
+    float nq = bb - sl0*aa*aa/(hq + wq);
+    float dq = hq*cl0 + (sl0*zz + cl0*bb)*sl0;
+    float t1 = aa/wq; float t2 = nq/dq;
+    float dlam = abs(t1) < 0.05 ? t1*(1.0 - t1*t1*(0.3333333 - t1*t1*0.2)) : atan(aa, wq);
+    float dphi = abs(t2) < 0.05 ? t2*(1.0 - t2*t2*(0.3333333 - t2*t2*0.2)) : atan(nq, dq);
+    float dlD = dlam*57.29577951; float dpD = dphi*57.29577951;
+    uv = vec2((uLoc.w + dlam)/(2.0*PI) + 0.5, (0.5 - (uLoc.z + dphi)/PI)*BASEV);
+    gx = vec2(dFdx(dlD)/360.0, dFdx(dpD)/180.0*BASEV);
+    gy = vec2(dFdy(dlD)/360.0, dFdy(dpD)/180.0*BASEV);
+    xA = (uKF.y + dlD)/uCA.x; yA = (uKR.y - dpD)/uCA.x; krA = uKR.x;
+    xB = (uKF.w + dlD)/uCB.x; yB = (uKR.w - dpD)/uCB.x; krB = uKR.z;
+    vec2 dxl = vec2(dFdx(dlD), -dFdx(dpD)); vec2 dyl = vec2(dFdy(dlD), -dFdy(dpD));
+    gAx = dxl/uCA.x; gAy = dyl/uCA.x; gBx = dxl/uCB.x; gBy = dyl/uCB.x;
+  } else {
+    // współrzędne bezpieczne (ciągłe także poza sylwetką) — pochodne liczone w jednolitym przepływie sterowania
+    float tc = -dot(ro, rd);
+    vec3 Ns = normalize(ro + rd*(hitP ? p0 : tc));
+    float lonS = atan(Ns.x, Ns.z);
+    float latS = asin(clamp(Ns.y, -1.0, 1.0));
+    uv = vec2(lonS/(2.0*PI) + 0.5, (0.5 - latS/PI)*BASEV);
+    float u2 = fract(uv.x + 0.5) - 0.5;
+    vec2 dxa = dFdx(vec2(uv.x, uv.y)); vec2 dya = dFdy(vec2(uv.x, uv.y));
+    vec2 dxb = dFdx(vec2(u2, uv.y));   vec2 dyb = dFdy(vec2(u2, uv.y));
+    bool useA = fwidth(uv.x) <= fwidth(u2);
+    gx = useA ? dxa : dxb; gy = useA ? dya : dyb;
+    float lonD = lonS*180.0/PI; float latD = latS*180.0/PI;
+    float dlA = mod(lonD - uLonC + 180.0, 360.0) - 180.0;
+    float dlB = mod(lonD - uLonC, 360.0);
+    float fxA = dFdx(dlA), fyA = dFdy(dlA), fxB = dFdx(dlB), fyB = dFdy(dlB);
+    bool useDA = fwidth(dlA) <= fwidth(dlB);
+    float dlx = useDA ? fxA : fxB; float dly = useDA ? fyA : fyB;
+    vec2 dLat = vec2(dFdx(latD), dFdy(latD));
+    xA = (uKF.y + dlA)/uCA.x; yA = (90.0 - latD)/uCA.x; krA = 0.0;
+    xB = (uKF.w + dlA)/uCB.x; yB = (90.0 - latD)/uCB.x; krB = 0.0;
+    gAx = vec2(dlx, -dLat.x)/uCA.x; gAy = vec2(dly, -dLat.y)/uCA.x;
+    gBx = vec2(dlx, -dLat.x)/uCB.x; gBy = vec2(dly, -dLat.y)/uCB.x;
+  }
 
   vec3 col = vec3(0.0);
   vec3 od = vec3(0.0);
@@ -1111,8 +1189,8 @@ void main(){
     vec3 dayC = textureGrad(uDay, uv, gx, gy).rgb;
     vec3 nC = textureGrad(uNight, uv, gx, gy).rgb;
     vec4 dB = vec4(0.0); vec4 nB = vec4(0.0); vec4 dA = vec4(0.0); vec4 nA = vec4(0.0);
-    clipB(uDB, uNB, uCB, uKF.z, xB, yB, gBx, gBy, dB, nB);
-    clipA(uDA, uNA, uCA, uKF.x, xA, yA, gAx, gAy, dA, nA);
+    clipB(uDB, uNB, uCB, uKF.z, krB, xB, yB, gBx, gBy, dB, nB);
+    clipA(uDA, uNA, uCA, uKF.x, krA, xA, yA, gAx, gAy, dA, nA);
     vec3 albS = mix(dayC, dB.rgb, dB.a*uDet);
     albS = mix(albS, dA.rgb, dA.a*uDet);
     vec3 nS = mix(nC, nB.rgb, nB.a*uDet);
@@ -1125,7 +1203,7 @@ void main(){
 
     // chmury: przy zoomie < 4 z tekstury wypieczonej na GPU, głębiej — proceduralnie (te same 6 oktaw → bez skoku)
     float cl = 0.0; float clSh = 0.0;
-    float cvis = uOpt.x*(1.0 - 0.75*smoothstep(8.0, 40.0, uZoom));
+    float cvis = uOpt.x*(1.0 - 0.75*smoothstep(8.0, 40.0, uZoom))*(1.0 - smoothstep(150.0, 600.0, uZoom));   // przy dużym zoomie chmury znikają
     if (uZoom < 4.0) cvis *= uCP.x;
     if (cvis > 0.01) {
       float c0, c1; hitSphere(ro, rd, 1.007, c0, c1);
@@ -1162,7 +1240,7 @@ void main(){
 
     float nightF = (1.0 - smoothstep(-0.10, 0.06, mu))*uOpt.z;
     vec3 tintN = mix(vec3(1.15, 0.95, 0.70), vec3(1.0), uNP.y);
-    vec3 lights = pow(nS, vec3(1.35))*tintN*2.2*uNP.x;
+    vec3 lights = pow(nS, vec3(1.35))*tintN*2.2*uNP.x*(1.0 - smoothstep(400.0, 2400.0, uZoom));   // światła mają 490 m/px — przy dużym zoomie wygaszane
     lights *= (1.0 - 0.85*cl);
     lit += lights*nightF;
     lit += alb*vec3(0.008, 0.012, 0.022)*(1.0 - smoothstep(-0.05, 0.2, mu));
@@ -1242,7 +1320,7 @@ class GPURenderer {
       return false;
     }
     this.u = {};
-    for (const n of ['uRes', 'uMin', 'uS', 'uCam', 'uFwd', 'uRight', 'uUp', 'uSun', 'uTime', 'uZoom', 'uDet', 'uStarRot', 'uLonC', 'uCA', 'uCB', 'uKF', 'uOpt', 'uNP', 'uCP',
+    for (const n of ['uRes', 'uMin', 'uS', 'uCam', 'uFwd', 'uRight', 'uUp', 'uSun', 'uTime', 'uZoom', 'uDet', 'uStarRot', 'uLonC', 'uCA', 'uCB', 'uKF', 'uKR', 'uHi', 'uLoc', 'uOpt', 'uNP', 'uCP',
       'uDay', 'uNight', 'uDA', 'uNA', 'uDB', 'uNB', 'uCloud', 'uSA', 'uSB']) this.u[n] = gl.getUniformLocation(this.pr, n);
     this.ub = gl.getUniformLocation(this.bp, 'uBake');
     gl.useProgram(this.pr);
@@ -1274,11 +1352,11 @@ class GPURenderer {
     return c;
   }
   // wgrywa pojedynczy kafelek (bez przebudowy całej tekstury)
-  upTile(tx, x, y, size, bmp) {
+  upTile(tx, x, y, size, bmp, sh = 0, sx = 0, sy = 0) {      // sh > 0: wgraj tylko fragment (sx, sy) siatki 2^sh × 2^sh kafelka źródłowego
     const gl = this.gl;
     gl.activeTexture(gl.TEXTURE7); gl.bindTexture(gl.TEXTURE_2D, tx.t);
-    if (bmp.width === size && bmp.height === size) gl.texSubImage2D(gl.TEXTURE_2D, 0, x, y, gl.RGBA, gl.UNSIGNED_BYTE, bmp);
-    else { const cv = this.scr(size), g = cv.getContext('2d'); g.clearRect(0, 0, size, size); g.drawImage(bmp, 0, 0, size, size); gl.texSubImage2D(gl.TEXTURE_2D, 0, x, y, gl.RGBA, gl.UNSIGNED_BYTE, cv); }
+    if (!sh && bmp.width === size && bmp.height === size) gl.texSubImage2D(gl.TEXTURE_2D, 0, x, y, gl.RGBA, gl.UNSIGNED_BYTE, bmp);
+    else { const cv = this.scr(size), g = cv.getContext('2d'); g.clearRect(0, 0, size, size); const w = Math.max(1, bmp.width >> sh), h = Math.max(1, bmp.height >> sh); g.drawImage(bmp, sx * w, sy * h, w, h, 0, 0, size, size); gl.texSubImage2D(gl.TEXTURE_2D, 0, x, y, gl.RGBA, gl.UNSIGNED_BYTE, cv); }
     this.dirty.add(tx);
   }
   baseTile(c, r, bmp) { if (bmp) this.q.push({ k: 'd', c, r, bmp }); }
@@ -1322,13 +1400,13 @@ class GPURenderer {
     for (const t of clip.list) {
       const mx = mod(t.cu, NX), my = mod(t.r, NY), slot = mx + NX * my, i = slot * 4;
       for (let k = 0; k < 2; k++) {                                   // k=0: dzień (512 px), k=1: noc (256 px) — bez alokacji tablic w pętli
-        if (k && !cfg.lights) break;
+        if (k && (!cfg.lights || clip.L > NIGHT_MAXL)) break;
         const born = k ? clip.bornN : clip.bornD, sz = k ? 256 : 512;
         if (clip.res[i] === t.cu && clip.res[i + 1] === t.r && born[slot] > 0) continue;       // kafelek już na GPU
-        const b = Net.get(k ? 'night' : 'day', clip.L, t.r, t.cw); if (!b) continue;
+        const sh = k ? Math.max(0, clip.L - 7) : 0, b = k ? Net.get('night', clip.L - sh, t.r >> sh, t.cw >> sh) : Net.get('day', clip.L, t.r, t.cw); if (!b) continue;
         if (!ctx.can()) return;
         if (clip.res[i] !== t.cu || clip.res[i + 1] !== t.r) { clip.res[i] = t.cu; clip.res[i + 1] = t.r; clip.bornD[slot] = 0; clip.bornN[slot] = 0; }   // slot przejmuje nowy kafelek
-        this.upTile(k ? g.night : g.day, mx * sz, my * sz, sz, b); born[slot] = now; ctx.did++;
+        this.upTile(k ? g.night : g.day, mx * sz, my * sz, sz, b, sh, t.cw & ((1 << sh) - 1), t.r & ((1 << sh) - 1)); born[slot] = now; ctx.did++;
       }
     }
   }
@@ -1390,6 +1468,14 @@ class GPURenderer {
     if (P) { const T1 = tileSpan(P.L), K = Math.floor(off / T1); kf[0] = K; kf[1] = off - K * T1; }
     if (Q) { const T2 = tileSpan(Q.L), K = Math.floor(off / T2); kf[2] = K; kf[3] = off - K * T2; }
     gl.uniform4f(u.uKF, kf[0], kf[1], kf[2], kf[3]);
+    // wiersz kafelka i odległość środka widoku od jego górnej krawędzi (w stopniach) — liczone w double, w shaderze tylko małe różnice
+    const dv = 90 - S.lat, kr = [0, 0, 0, 0];
+    if (P) { const T1 = tileSpan(P.L), K = Math.floor(dv / T1); kr[0] = K; kr[1] = dv - K * T1; }
+    if (Q) { const T2 = tileSpan(Q.L), K = Math.floor(dv / T2); kr[2] = K; kr[3] = dv - K * T2; }
+    gl.uniform4f(u.uKR, kr[0], kr[1], kr[2], kr[3]);
+    const la0 = S.lat * DEG;
+    gl.uniform3f(u.uHi, S.zoom >= HI_ZOOM ? 1 : 0, (CAM_D - 1) * S.s, 0);
+    gl.uniform4f(u.uLoc, Math.sin(la0), Math.cos(la0), la0, S.lonC * DEG);
     gl.uniform4f(u.uCA, P ? tileSpan(P.L) : 36, P ? P.NX : 1, P ? P.NY : 1, P ? 1 : 0);
     gl.uniform4f(u.uCB, Q ? tileSpan(Q.L) : 36, Q ? Q.NX : 1, Q ? Q.NY : 1, Q ? 1 : 0);
     gl.uniform4fv(u.uSA, P ? P.res : this.zero); gl.uniform4fv(u.uSB, Q ? Q.res : this.zero);
@@ -1467,7 +1553,7 @@ class SoftRenderer {
   }
   // dane pikseli kafelka (z ograniczeniem liczby dekodowań na klatkę)
   tileImg(layer, L, cw, r) {
-    const key = (layer === 'night' ? NP.sig : 'd') + L + '/' + r + '/' + cw;
+    const key = (layer === 'night' ? NP.sig : 'd' + DP.cur.id) + L + '/' + r + '/' + cw;
     let id = this.tc.get(key); if (id) return id;
     if (this.tb <= 0) return null;
     const bmp = Net.get(layer, L, r, cw); if (!bmp) return null;
@@ -1479,7 +1565,7 @@ class SoftRenderer {
     return id;
   }
   wsamp(clip, role, layer, lonU, latD, o) {
-    const L = clip.L, Tt = tileSpan(L), tx = (lonU + 180) / Tt, ty = (90 - latD) / Tt, ci = Math.floor(tx), ri = Math.floor(ty);
+    const L = layer === 'night' ? Math.min(clip.L, 7) : clip.L, Tt = tileSpan(L), tx = (lonU + 180) / Tt, ty = (90 - latD) / Tt, ci = Math.floor(tx), ri = Math.floor(ty);
     if (ri < 0 || ri >= matH(L)) return false;
     const ix = role * 2 + (layer === 'day' ? 0 : 1), key = ci * 8192 + ri;
     if (this.lk[ix] !== key) { this.li[ix] = this.tileImg(layer, L, mod(ci, matW(L)), ri); this.lk[ix] = key; }
@@ -1507,12 +1593,12 @@ class SoftRenderer {
     const lod = Math.min(2, Math.max(0, Math.floor(Math.log2(tpp))));
     const dayL = dayImgs[lod], nightL = this.lods.night[lod];
     if (S.clouds) this.ensureCloud();
-    const cl = this.cloud, cvis = S.clouds ? (1 - 0.85 * smooth(4, 15, S.zoom)) : 0;
+    const cl = this.cloud, cvis = S.clouds ? (1 - 0.85 * smooth(4, 15, S.zoom)) * (1 - smooth(150, 600, S.zoom)) : 0;
     const drift = S.time * 0.0025 / (2 * Math.PI);
     const atmo = S.atmo, lights = S.lights, det = S.det;
     const cP = (det > 0.01 && Det.P) ? Det.P : null, cS = cP ? Det.S : null;
     this.tb = 3; this.lk = [-1, -1, -1, -1];
-    const nG = (S.nGain || 1) * 2.2, nN = S.nNat || 0;
+    const nG = (S.nGain || 1) * 2.2 * (1 - smooth(400, 2400, S.zoom)), nN = S.nNat || 0;
     const kR = nG * (1.15 - 0.15 * nN), kG = nG * (0.95 + 0.05 * nN), kB = nG * (0.70 + 0.30 * nN);
 
     for (let y = 0; y < h; y++) {
@@ -1620,7 +1706,7 @@ class SoftRenderer {
 const RE_KM = 6371.0088, WA = 6378.137, WF = 1 / 298.257223563, WE2 = WF * (2 - WF);
 const FALLBACK_TLE = ['1 25544U 98067A   26298.49942685  .00007074  00000+0  13616-3 0  9991',
                       '2 25544  51.6337  15.2393 0006903 308.0649  51.9716 15.49050058591953'];
-const HOME = { n: 'Moja lokalizacja', lat: 52.6567, lon: 17.9095 }, MOGILNO = { n: 'Mogilno', lat: 52.6578, lon: 17.9557 };   // wspólne dla listy miejsc i obserwatorów ISS
+const HOME = { n: 'Moja lokalizacja', lat: 52.7270, lon: 17.9095 }, MOGILNO = { n: 'Mogilno', lat: 52.6578, lon: 17.9557 };   // wspólne dla listy miejsc i obserwatorów ISS
 const OBS_PRESETS = [
   HOME, MOGILNO,
   { n: 'Warszawa', lat: 52.23, lon: 21.01 }, { n: 'Kraków', lat: 50.06, lon: 19.94 }, { n: 'Gdańsk', lat: 54.35, lon: 18.65 },
@@ -1839,11 +1925,19 @@ function drawHome(ctx, cs, half) {
   ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, TAU); ctx.fillStyle = 'rgba(2,4,10,.5)'; ctx.fill();
   ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, TAU); ctx.fillStyle = '#ff4d4d'; ctx.fill(); ctx.lineWidth = 1.6; ctx.strokeStyle = '#fff'; ctx.stroke();
 }
+// malutka kropka dla ostatnio wybranej innej lokalizacji (bursztynowa, mniejsza od czerwonego punktu „Moja lokalizacja”)
+function drawSel(ctx, cs, half) {
+  const w = wvec(SEL.lat, SEL.lon, 1), p = projXYZ(cs, half, w[0], w[1], w[2]);
+  if (!p.ok || p.hid || p.x < -20 || p.y < -20 || p.x > view.cssW + 20 || p.y > view.cssH + 20) return;
+  ctx.beginPath(); ctx.arc(p.x, p.y, 3.6, 0, TAU); ctx.fillStyle = 'rgba(2,4,10,.5)'; ctx.fill();
+  ctx.beginPath(); ctx.arc(p.x, p.y, 2.2, 0, TAU); ctx.fillStyle = '#ffd36b'; ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = '#fff'; ctx.stroke();
+}
 function drawOverlay() {
   const ctx = ovx; ctx.clearRect(0, 0, view.cssW, view.cssH); ISS.scr = null; ovDirty = false;
   const cs = camState(), half = Math.min(view.cssW, view.cssH) / 2;
   ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   if (cfg.home) drawHome(ctx, cs, half);
+  if (SEL && !(cfg.home && Math.abs(SEL.lat - HOME.lat) < 1e-3 && Math.abs(SEL.lon - HOME.lon) < 1e-3)) drawSel(ctx, cs, half);   // gdy wybrano „Moja lokalizacja” — wystarczy czerwony punkt
   if (!ISS.show && !ISS.panel) return;
   const P = ISS.pos, trk = ISS.trk;
   // obserwator (pomijany, gdy to „Moja lokalizacja” — ma już własny znacznik)
@@ -1942,7 +2036,7 @@ function buildIssUI() {
   const sel = $('#obsSel');
   OBS_PRESETS.forEach((o, i) => { const op = document.createElement('option'); op.value = 'p' + i; op.textContent = o.n; sel.appendChild(op); });
   const cu = document.createElement('option'); cu.value = 'c'; cu.textContent = 'Własna lokalizacja'; cu.hidden = true; sel.appendChild(cu);
-  try { const s = JSON.parse(localStorage.getItem('obs.obs') || 'null'); if (s && isFinite(s.lat) && isFinite(s.lon)) ISS.obs = s; } catch (e) { /* ok */ }
+  try { const s = JSON.parse(localStorage.getItem('obs.obs') || 'null'); if (s && isFinite(s.lat) && isFinite(s.lon)) ISS.obs = s.name === HOME.n ? { name: HOME.n, lat: HOME.lat, lon: HOME.lon, h: 0.1 } : s; } catch (e) { /* ok */ }   // zapamiętana „Moja lokalizacja” zawsze używa aktualnych współrzędnych HOME
   syncObsSel();
   sel.addEventListener('change', e => { const v = e.target.value; if (v[0] === 'p') { const o = OBS_PRESETS[+v.slice(1)]; setObserver({ name: o.n, lat: o.lat, lon: o.lon, h: 0.1 }); } });
   $('#obsGeo').onclick = () => {
@@ -1968,6 +2062,7 @@ function syncObsSel() {
 }
 function setObserver(o) {
   ISS.obs = o; try { localStorage.setItem('obs.obs', JSON.stringify(o)); } catch (e) { /* ok */ }
+  SEL = { lat: o.lat, lon: o.lon };
   ISS.sel = null; ISS.selTrk = null; ISS.selSky = null; syncObsSel(); startScan(); drawSky(); ovDirty = true;
   flyTo(o.lat, o.lon, Math.max(view.zoom, 2.2), 1400);
 }
@@ -2016,6 +2111,10 @@ const App = {
     if (gpu) gpu.uploadCanvases();
     toast('Brak dostępu do NASA GIBS — używam wbudowanej mapy proceduralnej. Menu zoomu → „Ponów połączenie”.', 'warn', 9000);
   },
+  esriFailed() {
+    toast('Nie udało się pobrać map Esri (brak połączenia lub blokada serwera) — wracam do NASA Blue Marble.', 'warn', 8000);
+    setDayProvider('gibs', false);          // bez zapisu: wybór użytkownika zostaje, może spróbować ponownie później
+  },
   detailFailed() {
     cfg.detail = false; $('#mDetail').checked = false; Det.target = 0; Net.setNeeded(new Set());
     toast('Nie udało się pobrać kafelków NASA GIBS — szczegóły online wyłączone.', 'warn', 8000);
@@ -2059,8 +2158,31 @@ new ResizeObserver(resizeAll).observe(stage);
 function setCredit() {
   $('#credit').textContent = baseSource === 'procedural'
     ? 'Mapa wbudowana (tryb offline) · dane NASA GIBS niedostępne'
-    : 'Obrazy: NASA GIBS · Blue Marble · ' + NP.cur.short + (NP.cur.daily ? ' (' + NP.date + ')' : '') + ' · Orbita ISS: CelesTrak / SGP4';
+    : 'Obrazy: NASA GIBS · Blue Marble · ' + NP.cur.short + (NP.cur.daily ? ' (' + NP.date + ')' : '') + (DP.cur.esri ? ' · ' + DP.cur.short + ': ' + ESRI_CREDIT : '') + ' · Orbita ISS: CelesTrak / SGP4';
 }
+
+/* Mapa szczegółów: NASA Blue Marble albo Esri */
+function buildDayUI() {
+  const sel = $('#dSel'); let grp = null, og = null;
+  for (const p of DAYSRC) {
+    if (p.grp !== grp) { og = document.createElement('optgroup'); og.label = p.grp; sel.appendChild(og); grp = p.grp; }
+    const o = document.createElement('option'); o.value = p.id; o.textContent = p.label; og.appendChild(o);
+  }
+  sel.addEventListener('change', e => setDayProvider(e.target.value, true));
+}
+function loadDay() { try { const v = localStorage.getItem('obs.day'); if (DAYSRC.some(p => p.id === v)) return v; } catch (e) { /* brak localStorage */ } return 'gibs'; }
+function setDayProvider(id, save) {
+  const p = DAYSRC.find(x => x.id === id) || DAYSRC[0];
+  DP.cur = p; DETAIL_MIN_ZOOM = p.minZoom; ZMAX = p.zmax; MAX_L = p.maxL;
+  view.zoomT = Math.min(view.zoomT, ZMAX);          // zoom sam wygładzi się do nowego limitu
+  Net.resetStats('esri'); Net.failedAt.clear();
+  for (const c of Det.clips) resetClip(c, 0);                 // sloty klipmapy zawierały obrazy poprzedniego źródła
+  Det.P = null; Det.S = null; Det.wantL = 0; Det.lastCheck = 0; Net.setNeeded(new Set());
+  $('#dSel').value = p.id; $('#dDesc').textContent = p.desc + (p.esri ? ' Źródło obrazów: ' + ESRI_CREDIT + '.' : '');
+  if (save) { try { localStorage.setItem('obs.day', p.id); } catch (e) { /* ok */ } }
+  setCredit(); ovDirty = true;
+}
+let SEL = null;     // ostatnio wybrana inna lokalizacja (lista „Miejsca” lub obserwator ISS) — rysowana jako mała kropka
 
 /* Miejsca */
 const PLACES = [
@@ -2081,13 +2203,14 @@ function buildPlaces() {
 }
 function goPlace(p) {
   if (p.hour !== undefined) { const dayStart = Math.floor(T.sim / 86400000) * 86400000; T.sim = dayStart + mod(p.hour - p.lon / 15, 24) * 3600000; }
+  SEL = p.hour === undefined ? { lat: p.lat, lon: p.lon } : null; ovDirty = true;     // „Europa/Indie nocą” to całe regiony — bez kropki
   flyTo(p.lat, p.lon, p.z);
 }
 
 /* Przelot kamery */
 let flight = null;
 function flyTo(lat, lon, zoom, dur = 2000, after) {
-  setAuto(false); ISS.follow = false;
+  setAuto(false); ISS.follow = false; zAnchor = null;
   flight = { t0: performance.now(), dur, lat0: view.lat, lon0: view.lon, z0: view.zoom, lat1: lat, lon1: wrap180(lon), z1: clamp(zoom, ZMIN, ZMAX), after };
   inertia.lat = 0; inertia.lon = 0;
 }
@@ -2107,7 +2230,7 @@ function stepFlight(now) {
 /* Interakcje wskaźnika */
 const ptrs = new Map(); let drag = null, pinch = null, lastTap = { t: 0, x: 0, y: 0 };
 const inertia = { lat: 0, lon: 0 };
-let hoverPt = null;
+let hoverPt = null, zAnchor = null;   // zAnchor: punkt „chwycony” do zoomu kółkiem ({ P, x, y })
 function cssMetersPerPx() { return (CAM_D - 1) * (S1 / view.zoom) * 2 / Math.min(view.cssW, view.cssH) * R_EARTH; }
 function panBy(dx, dy) {
   const dpp = cssMetersPerPx() / 111319.49;
@@ -2202,7 +2325,7 @@ stage.addEventListener('pointerdown', e => {
   stage.setPointerCapture(e.pointerId);
   ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
   if (ptrs.size === 1) {
-    flight = null; inertia.lat = 0; inertia.lon = 0; dragHist.length = 0; stage.classList.add('dragging');
+    flight = null; zAnchor = null; inertia.lat = 0; inertia.lon = 0; dragHist.length = 0; stage.classList.add('dragging');
     drag = { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, t: performance.now(), lastT: performance.now(), moved: 0,
              P: anchorAt(e.clientX, e.clientY), on: false, pend: false, px: e.clientX, py: e.clientY, ax: e.clientX, ay: e.clientY };
     if (cfg.auto) setAuto(false);
@@ -2251,6 +2374,8 @@ stage.addEventListener('pointerleave', () => { hoverPt = null; $('#cHover').text
 stage.addEventListener('wheel', e => {
   e.preventDefault(); if (cfg.auto) setAuto(false);
   const k = Math.exp(-e.deltaY * (e.deltaMode === 1 ? 0.05 : 0.0016));
+  const P = anchorAt(e.clientX, e.clientY);                // zoom względem kursora (gdy kursor jest na tarczy, nie tuż przy brzegu); inaczej względem środka
+  zAnchor = P ? { P, x: e.clientX, y: e.clientY } : null;
   view.zoomT = clamp(view.zoomT * k, ZMIN, ZMAX); touchInteract();
 }, { passive: false });
 window.addEventListener('keydown', e => {
@@ -2265,7 +2390,7 @@ window.addEventListener('keydown', e => {
     case '-': case '_': view.zoomT = clamp(view.zoomT / 1.25, ZMIN, ZMAX); break;
     default: used = false;
   }
-  if (used) { setAuto(false); ISS.follow = false; touchInteract(); e.preventDefault(); }
+  if (used) { setAuto(false); ISS.follow = false; zAnchor = null; touchInteract(); e.preventDefault(); }
 });
 
 /* Menu chipu zoomu */
@@ -2303,9 +2428,9 @@ window.addEventListener('resize', () => { menu._s = undefined; $('#issPanel')._s
 
 const zToS = z => Math.round(1000 * Math.log(z / ZMIN) / Math.log(ZMAX / ZMIN));
 const sToZ = s => ZMIN * Math.pow(ZMAX / ZMIN, s / 1000);
-$('#zSlider').addEventListener('input', e => { view.zoomT = clamp(sToZ(+e.target.value), ZMIN, ZMAX); flight = null; touchInteract(); });
-$('#zIn').onclick = () => { view.zoomT = clamp(view.zoomT * 1.6, ZMIN, ZMAX); };
-$('#zOut').onclick = () => { view.zoomT = clamp(view.zoomT / 1.6, ZMIN, ZMAX); };
+$('#zSlider').addEventListener('input', e => { view.zoomT = clamp(sToZ(+e.target.value), ZMIN, ZMAX); flight = null; zAnchor = null; touchInteract(); });
+$('#zIn').onclick = () => { zAnchor = null; view.zoomT = clamp(view.zoomT * 1.6, ZMIN, ZMAX); };
+$('#zOut').onclick = () => { zAnchor = null; view.zoomT = clamp(view.zoomT / 1.6, ZMIN, ZMAX); };
 $('#mDetail').addEventListener('change', e => {
   cfg.detail = e.target.checked;
   if (cfg.detail) { Net.resetStats('detail'); Net.failedAt.clear(); }
@@ -2352,7 +2477,8 @@ let lastUi = 0;
 function updateUI(now, sun) {
   if (now - lastUi < 250) return; lastUi = now;
   const mpp = currentMpp();
-  $('#cCenter').textContent = fmtLat(view.lat) + ' ' + fmtLon(view.lon);
+  const cd = coordDec();
+  $('#cCenter').textContent = fmtLat(view.lat, cd) + ' ' + fmtLon(view.lon, cd);
   $('#cScale').textContent = '≈ ' + fmtRes(mpp);
   const zt = '×' + fmtNum(view.zoom, view.zoom < 10 ? 1 : 0);
   $('#chipVal').textContent = zt; $('#mZoomVal').textContent = zt;
@@ -2372,8 +2498,8 @@ function updateUI(now, sun) {
   if (active.kind === 'gpu' && !active.ready) { txt = 'Kompilacja shaderów…'; col = '#38bdf8'; pulse = true; }
   else if (baseSource === 'procedural') { txt = 'Tryb offline · mapa wbudowana'; col = '#f59e0b'; }
   else if (!baseReady) { txt = `Wczytywanie map NASA GIBS… ${st.ok + st.gone + st.fail}/${st.total}`; col = '#38bdf8'; pulse = true; }
-  else if (detVisible) { txt = `Szczegóły online · poziom ${Det.P.L} · ${fmtRes(resM(Det.P.L))} · ${Det.stat.loaded}/${Det.stat.total} kafelków`; col = '#34d399'; pulse = Det.stat.loaded < Det.stat.total; }
-  else if (cfg.detail && view.zoom < DETAIL_MIN_ZOOM) { txt = `Mapa bazowa NASA GIBS · szczegóły od ×${fmtNum(DETAIL_MIN_ZOOM, 1)}`; col = '#7dd3fc'; }
+  else if (detVisible) { txt = `Szczegóły online${DP.cur.esri ? ' (Esri)' : ''} · poziom ${Det.P.L} · ${fmtRes(resM(Det.P.L))} · ${Det.stat.loaded}/${Det.stat.total} kafelków`; col = '#34d399'; pulse = Det.stat.loaded < Det.stat.total; }
+  else if (cfg.detail && view.zoom < DETAIL_MIN_ZOOM) { txt = `Mapa bazowa NASA GIBS · szczegóły ${DP.cur.esri ? 'Esri ' : ''}od ×${fmtNum(DETAIL_MIN_ZOOM, 1)}`; col = '#7dd3fc'; }
   else if (!cfg.detail) { txt = 'Mapa bazowa NASA GIBS · szczegóły wyłączone'; col = '#94a3b8'; }
   else { txt = 'Mapa bazowa NASA GIBS'; col = '#7dd3fc'; }
   $('#stTxt').textContent = txt; $('#stDot').style.background = col; $('#stDot').classList.toggle('animate-pulse', pulse);
@@ -2381,13 +2507,13 @@ function updateUI(now, sun) {
   $('#mInfo').textContent = (active.kind === 'gpu'
     ? `GPU: shader WebGL2, ${active.pw()}×${active.ph()} px (skala ${fmtNum(perf.scale, 2)}), pamięć kafelków ${fmtNum(Net.bytes / 1048576, 0)} MB.`
     : `Programowy: ${active.pw()}×${active.ph()} px, obraz skalowany. Okno szczegółów ograniczone do 4×4 kafelków.`) +
-    ` Maks. poziom GIBS: ${MAX_L} (${fmtRes(resM(MAX_L))}).`;
+    ` Maks. poziom szczegółów: ${MAX_L} (${fmtRes(resM(MAX_L))}).`;
   fitMenu(); fitIss();     // położenie chipu zależy od długości podpisu źródła — dopasuj panele ponownie
 }
 function updateHover() {
   if (!hoverPt) return;
   const h = pick(hoverPt.x, hoverPt.y);
-  $('#cHover').textContent = h ? fmtLat(h.lat) + ' ' + fmtLon(h.lon) : 'poza globem';
+  $('#cHover').textContent = h ? fmtLat(h.lat, coordDec()) + ' ' + fmtLon(h.lon, coordDec()) : 'poza globem';
 }
 
 /* ---------- Pętla główna ---------- */
@@ -2430,13 +2556,17 @@ function frame(now) {
   let moving = !!flight;
   if (!flight) {
     if (cfg.auto && !drag && !pinch) { view.lon = wrap180(view.lon + dt * 3.2 / Math.max(view.zoom, 1)); moving = true; }
-    if (!drag && (Math.abs(inertia.lat) > 0.05 || Math.abs(inertia.lon) > 0.05)) {
+    const thr = 0.4 * cssMetersPerPx() / 111319.49;       // próg zatrzymania inercji: ok. 0,4 px/s, niezależnie od zoomu
+    if (!drag && (Math.abs(inertia.lat) > thr || Math.abs(inertia.lon) > thr)) {
       view.lon = wrap180(view.lon + inertia.lon * dt); view.lat = clamp(view.lat + inertia.lat * dt, -88, 88);
       const dec = Math.exp(-dt * 3.2); inertia.lon *= dec; inertia.lat *= dec; touchInteract();
     }
-    if (Math.abs(view.zoomT - view.zoom) > 1e-4) {
-      const k = 1 - Math.exp(-dt * 11);
-      view.zoom = Math.exp(lerp(Math.log(view.zoom), Math.log(view.zoomT), k)); touchInteract();
+    const lz = Math.log(view.zoomT / view.zoom);           // różnica zoomu w skali logarytmicznej — działa tak samo przy ×50 000 jak przy ×2
+    if (Math.abs(lz) > 2e-5) { view.zoom *= Math.exp(lz * (1 - Math.exp(-dt * 11))); touchInteract(); } else view.zoom = view.zoomT;
+    if (zAnchor) {                                          // zoom kółkiem względem kursora: punkt pod kursorem zostaje pod kursorem
+      const r = drag ? null : solveGrab(zAnchor.P, zAnchor.x, zAnchor.y);
+      if (r) { view.lat = r.lat; view.lon = r.lon; }
+      if (Math.abs(lz) <= 2e-5) zAnchor = null;
     }
     if (ISS.follow && ISS.pos) {
       const k = 1 - Math.exp(-dt * 4);
@@ -2478,7 +2608,7 @@ function frame(now) {
     const cs = camState();
     const ok = active.draw({
       cam: cs.cam, fwd: cs.fwd, right: cs.right, up: cs.up, s: cs.s, sun: sun.dir, gmst: sun.gmst,
-      time: now / 1000, nowMs: now, zoom: view.zoom, det: Det.P ? Det.fade : 0, lonU: view.lonU, lonC: view.lon,
+      time: now / 1000, nowMs: now, zoom: view.zoom, det: Det.P ? Det.fade : 0, lonU: view.lonU, lonC: view.lon, lat: view.lat,
       clouds: cfg.clouds, atmo: cfg.atmo, lights: cfg.lights, mpp: currentMpp(),
       nGain: cfg.nGain * NP.cur.gain, nNat: NP.cur.natural ? 1 : 0
     });
@@ -2505,6 +2635,7 @@ function frame(now) {
   setNightProvider(sv ? sv.id : 'cl2012', { date: sv && sv.date, manual: !!(sv && sv.date) });
   enqueueDay();
   buildIssUI();
+  buildDayUI(); setDayProvider(loadDay(), false);        // zapamiętana mapa szczegółów (domyślnie NASA Blue Marble)
   const sj = $('#satjs');
   const onSat = () => { if (window.satellite && ISS.l1) { ISS.sat = window.satellite.twoline2satrec(ISS.l1, ISS.l2); ISS.trk = null; ISS.uiDirty = true; startScan(); } };
   if (window.satellite) loadTLE(); else { loadTLE(); sj.addEventListener('load', onSat); }
