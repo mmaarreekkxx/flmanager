@@ -2493,7 +2493,6 @@ const _dfCols=keys=>keys.map(k=>({wch:k==='Rekomendacja'?60:k==='Okres'?22:k==='
 /* ─ Zestawienie DualFuel z podziałem na miesiące ('m') lub kwartały ('q') ─ */
 window.expLpgXLSXPeriod=function(kind){
   if(!(S.rep.lpgAnalysis||[]).length){showToast('Brak danych do wyeksportowania.');return}
-  if(typeof XLSX==='undefined'){showToast('Biblioteka XLSX nie jest załadowana.');return}
   var isQ=kind==='q';
   var ys=(S.selY.ranking&&S.selY.ranking.length)?S.selY.ranking.slice():[];
   if(!ys.length){showToast('Wybierz rok.');return}
@@ -2519,16 +2518,24 @@ window.expLpgXLSXPeriod=function(kind){
     var tl=T.lpgL+T.pbL;
     sums.push({"Okres":labelOf(k),"Liczba pojazdów":res.length,"Dystans (km)":toInt(T.dist),"LPG (L)":toNum(T.lpgL,2),"LPG koszt (PLN)":toNum(T.lpgC,2),"Transakcje LPG":toInt(T.lpgT),"Benzyna (L)":toNum(T.pbL,2),"Benzyna koszt (PLN)":toNum(T.pbC,2),"Transakcje benzyna":toInt(T.pbT),"Koszt łącznie (PLN)":toNum(T.lpgC+T.pbC,2),"CPK (PLN/km)":T.dist>0?toNum((T.lpgC+T.pbC)/T.dist,4):null,"Udział LPG (%)":tl>0?toNum(T.lpgL/tl*100,2):null,"Transakcje weekend":toInt(T.wk),"Incydenty pewne":toInt(T.cer),"Incydenty podejrzane":toInt(T.sus),"Utrata oszczędności (PLN)":toNum(T.sav,2)})});
   if(!rows.length){showToast('Brak danych do wyeksportowania.');return}
+  var info=['Uwagi:','Wskaźniki każdego okresu są liczone wyłącznie z tankowań z tego okresu (te same reguły co w zestawieniu rocznym). Arkusz „Suma okresów” podsumowuje flotę w każdym okresie.','Dystans okresu = ostatni odczyt licznika w okresie minus ostatni odczyt z bezpośrednio poprzedniego okresu (np. luty: od ostatniego tankowania w styczniu). Gdy pojazd nie ma odczytów w poprzednim okresie (brak danych lub przerwa), dystans liczony jest od pierwszego dostępnego odczytu w danym okresie.','Status i rekomendacja oceniają wyłącznie dany okres (przy małej liczbie tankowań mają ograniczoną wiarygodność).','Utrata oszczędności (PLN) = Koszt_Pb − (Litry_Pb × 1,15 × śr._cena_LPG) — ile przepłacono za benzynę w stosunku do kosztu pokonania tej samej trasy na LPG.','Przykład: zapłacono za Pb 50 L × 6,80 zł = 340,00 zł; ekwiwalent LPG 50 × 1,15 × 3,00 zł = 172,50 zł; utrata = 167,50 zł przepłacono.','×1,15 — LPG ma niższą gęstość energii, potrzeba ok. 15% więcej litrów na km.'];
+  var hd=Object.keys(rows[0]),hs=Object.keys(sums[0]||{});
+  var spec={file:'DualFuel_'+(isQ?'kwartaly':'miesiace')+'_'+getCurrentDate()+'.xlsx',sheets:[
+    {name:isQ?'Kwartały':'Miesiące',title:'DualFuel — zestawienie '+(isQ?'kwartalne':'miesięczne'),sub:'LPG / BENZYNA / KOSZTY / CPK',meta:'Lata: '+ys.join(', ')+'   |   Okresów: '+keys.length+'   |   Wygenerowano: '+getCurrentDate(),head1:hd,rows:rows.map(function(r){return hd.map(function(k){return r[k]})}),nl:2,notes:info.slice(1)},
+    {name:'Suma okresów',title:'DualFuel — suma okresów',sub:'PODSUMOWANIE FLOTY W KAŻDYM OKRESIE',meta:'Wskaźniki względne liczone z sum okresów   |   Wygenerowano: '+getCurrentDate(),head1:hs,rows:sums.map(function(r){return hs.map(function(k){return r[k]})}),nl:1,tab:'65738A'}]};
+  var legacy=function(){
+  if(typeof XLSX==='undefined'){showToast('Biblioteka XLSX nie jest załadowana.');return}
   var wb=XLSX.utils.book_new();
   var ws=XLSX.utils.json_to_sheet(rows);
   ws['!cols']=_dfCols(Object.keys(rows[0]));
   ws['!autofilter']={ref:XLSX.utils.encode_range({s:{r:0,c:0},e:{r:rows.length,c:Object.keys(rows[0]).length-1}})};
   XLSX.utils.book_append_sheet(wb,ws,isQ?'Kwartały':'Miesiące');
-  var info=['Uwagi:','Wskaźniki każdego okresu są liczone wyłącznie z tankowań z tego okresu (te same reguły co w zestawieniu rocznym). Arkusz „Suma okresów” podsumowuje flotę w każdym okresie.','Dystans okresu = ostatni odczyt licznika w okresie minus ostatni odczyt z bezpośrednio poprzedniego okresu (np. luty: od ostatniego tankowania w styczniu). Gdy pojazd nie ma odczytów w poprzednim okresie (brak danych lub przerwa), dystans liczony jest od pierwszego dostępnego odczytu w danym okresie.','Status i rekomendacja oceniają wyłącznie dany okres (przy małej liczbie tankowań mają ograniczoną wiarygodność).','Utrata oszczędności (PLN) = Koszt_Pb − (Litry_Pb × 1,15 × śr._cena_LPG) — ile przepłacono za benzynę w stosunku do kosztu pokonania tej samej trasy na LPG.','Przykład: zapłacono za Pb 50 L × 6,80 zł = 340,00 zł; ekwiwalent LPG 50 × 1,15 × 3,00 zł = 172,50 zł; utrata = 167,50 zł przepłacono.','×1,15 — LPG ma niższą gęstość energii, potrzeba ok. 15% więcej litrów na km.'];
   XLSX.utils.sheet_add_aoa(ws,info.map(function(t){return [t]}),{origin:{r:rows.length+2,c:0}});
   var ws2=XLSX.utils.json_to_sheet(sums);ws2['!cols']=_dfCols(Object.keys(sums[0]||{}));
   XLSX.utils.book_append_sheet(wb,ws2,'Suma okresów');
   XLSX.writeFile(wb,'DualFuel_'+(isQ?'kwartaly':'miesiace')+'_'+getCurrentDate()+'.xlsx',{compression:true,bookSST:true});
+  };
+  flmXlsx(spec).then(function(ok){if(!ok)legacy()});
   showToast('Wyeksportowano: '+rows.length+' wierszy ('+keys.length+' okresów)');
 };
 window.expLpgXLSX=()=>{
@@ -2536,12 +2543,14 @@ window.expLpgXLSX=()=>{
   if(!data.length){showToast('Brak danych do wyeksportowania.');return}
   const wkndCounts=S.data.reduce((acc,t)=>{if(t._opt?.isWeekend){const reg=t._opt.reg;acc[reg]=(acc[reg]||0)+1}return acc},{});
   const rows=data.map(r=>_dfXlsxRow(r,wkndCounts[r.reg]||0));
+  const legacy=()=>{
   if(typeof XLSX==='undefined'){showToast('Biblioteka XLSX nie jest załadowana.');return}
   const ws=XLSX.utils.json_to_sheet(rows);
   ws['!cols']=_dfCols(Object.keys(rows[0]));
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,"Analiza DualFuel");
-  XLSX.writeFile(wb,`DualFuel_${getCurrentDate()}.xlsx`,{compression:true,bookSST:true});
+  XLSX.writeFile(wb,`DualFuel_${getCurrentDate()}.xlsx`,{compression:true,bookSST:true});};
+  flmXlsx({file:`DualFuel_${getCurrentDate()}.xlsx`,sheets:[{name:'Analiza DualFuel',title:'Analiza DualFuel',sub:'LPG / BENZYNA / KOSZTY / CPK',meta:'Pojazdów: '+rows.length+'   |   Wygenerowano: '+getCurrentDate(),head1:Object.keys(rows[0]),rows:rows.map(r=>Object.keys(rows[0]).map(k=>r[k])),nl:1,boldFirst:true}]}).then(ok=>{if(!ok)legacy()});
 };
 const switchMapSub=(t,b)=>{$$('.sub-map-content').forEach(e=>e.style.display='none');const sub=$(`sub-${t}`);if(sub)sub.style.display='flex';if(b){$$('#tab-mapping .tab-btn').forEach(e=>e.classList.remove('active'));b.classList.add('active')}if(t==='visibility')renColVis();else if(t==='logi'){renderLogi();if(typeof renderImpLog==='function')renderImpLog()}else renderMap(t)};
 const renderMap=t=>{const d=$(`list-${t}`),m=S.map[t];if(!d)return;const entries=Object.entries(m).sort((a,b)=>a[0].localeCompare(b[0]));if(!entries.length){d.innerHTML='<div style="padding:10px;text-align:center;color:var(--tx-m)">Brak mapowań</div>';return}d.innerHTML='<div class="map-rules-grid">'+entries.map(([k,v])=>`<div class="map-rule-card"><span class="map-rule-from"title="${esc(k)}">${esc(k)}</span><i class="fas fa-arrow-right map-rule-arrow"></i><span class="map-rule-to"title="${esc(v)}">${esc(v)}</span><button class="map-rule-del"onclick="delMap('${t}','${esc(k).replace(/'/g,"\\'")}')"><i class="fas fa-times"></i></button></div>`).join('')+'</div>';};
@@ -3546,7 +3555,6 @@ window.openDfXlsxDialog=function(){
 /* ─ Okresy w kolumnach: wiersz = pojazd × rok, kolumny = miesiące/kwartały, arkusz = wskaźnik ─ */
 window.expLpgXLSXPivot=function(kind,keys){
  if(!(S.rep.lpgAnalysis||[]).length){showToast('Brak danych do wyeksportowania.');return}
- if(typeof XLSX==='undefined'){showToast('Biblioteka XLSX nie jest załadowana.');return}
  var isQ=kind==='q',nP=isQ?4:12;
  var ys=(S.selY.ranking||[]).slice().sort();if(!ys.length){showToast('Wybierz rok.');return}
  var ySet=new Set(ys),hasG=S.selGr.size>0;
@@ -3561,11 +3569,12 @@ window.expLpgXLSXPivot=function(kind,keys){
  var ps=Object.keys(used).map(Number).sort(function(a,b){return a-b});
  if(!ps.length||!regs.size){showToast('Brak danych do wyeksportowania.');return}
  var rl=Array.from(regs).sort(function(a,b){return String(a).localeCompare(String(b))});
- var wb=XLSX.utils.book_new();
+ var wb=(typeof XLSX!=='undefined')?XLSX.utils.book_new():null;
+ var notes=['Uwagi:','Wiersz = pojazd × rok; kolejny rok tego samego pojazdu to kolejny wiersz.','Wartości okresu są liczone wyłącznie z tankowań z tego okresu; „Cały rok” — z całego roku (przy wskaźnikach względnych, np. udział, CPK, spalanie, nie jest sumą okresów).','Dystans okresu = ostatni odczyt licznika w okresie minus ostatni odczyt z bezpośrednio poprzedniego okresu (np. luty: od ostatniego tankowania w styczniu). Gdy pojazd nie ma odczytów w poprzednim okresie (brak danych lub przerwa), dystans liczony jest od pierwszego dostępnego odczytu w danym okresie. „Cały rok” liczony analogicznie względem poprzedniego roku.','Puste pole = brak tankowań pojazdu w tym okresie.','Arkusz „Suma okresów” podsumowuje całą flotę w każdym okresie (wskaźniki względne liczone z sum).','Utrata oszczędności (PLN) = Koszt_Pb − (Litry_Pb × 1,15 × śr._cena_LPG) — ile przepłacono za benzynę w stosunku do kosztu pokonania tej samej trasy na LPG.','Przykład: zapłacono za Pb 50 L × 6,80 zł = 340,00 zł; ekwiwalent LPG 50 × 1,15 × 3,00 zł = 172,50 zł; utrata = 167,50 zł przepłacono.','×1,15 — LPG ma niższą gęstość energii, potrzeba ok. 15% więcej litrów na km.'];
  var sel=METRICS.filter(function(m){return keys.indexOf(m[0])>=0}),k=sel.length;
  var plabels=ps.map(function(p){return isQ?'Q'+(p+1):MN[p]}).concat(['Cały rok']);
- var h1=['Pojazd','Rok'],h2=['',''],merges=[{s:{r:0,c:0},e:{r:1,c:0}},{s:{r:0,c:1},e:{r:1,c:1}}];
- plabels.forEach(function(lb,i){var c0=2+i*k;h1.push(lb);for(var j=1;j<k;j++)h1.push('');sel.forEach(function(M){h2.push(M[1])});if(k>1)merges.push({s:{r:0,c:c0},e:{r:0,c:c0+k-1}})});
+ var merges2=[],h1=['Pojazd','Rok'],h2=['',''],merges=[{s:{r:0,c:0},e:{r:1,c:0}},{s:{r:0,c:1},e:{r:1,c:1}}];
+ plabels.forEach(function(lb,i){var c0=2+i*k;h1.push(lb);for(var j=1;j<k;j++)h1.push('');sel.forEach(function(M){h2.push(M[1])});if(k>1){merges.push({s:{r:0,c:c0},e:{r:0,c:c0+k-1}});merges2.push([c0,c0+k-1])}});
  var aoa=[h1,h2];
  rl.forEach(function(reg){ys.forEach(function(y){
   var yrR=yr[y].get(reg);if(!yrR)return;
@@ -3573,13 +3582,14 @@ window.expLpgXLSXPivot=function(kind,keys){
   ps.forEach(function(p){var mm=cell[y+'|'+p],r=mm&&mm.get(reg),w=wk[y+'|'+p+'|'+reg]||0;sel.forEach(function(M){row.push(r?M[2](r,w):null)})});
   var wy=wk[y+'||'+reg]||0;sel.forEach(function(M){row.push(M[2](yrR,wy))});aoa.push(row)})});
  var nCols=h1.length,nData=aoa.length;
+ if(wb){
  var ws=XLSX.utils.aoa_to_sheet(aoa);
  var cols=[{wch:14},{wch:7}];for(var ci=2;ci<nCols;ci++)cols.push({wch:Math.max(11,Math.min(22,String(h2[ci]).length+2))});ws['!cols']=cols;
  ws['!merges']=merges;ws['!autofilter']={ref:XLSX.utils.encode_range({s:{r:1,c:0},e:{r:nData-1,c:nCols-1}})};
- var notes=['Uwagi:','Wiersz = pojazd × rok; kolejny rok tego samego pojazdu to kolejny wiersz.','Wartości okresu są liczone wyłącznie z tankowań z tego okresu; „Cały rok” — z całego roku (przy wskaźnikach względnych, np. udział, CPK, spalanie, nie jest sumą okresów).','Dystans okresu = ostatni odczyt licznika w okresie minus ostatni odczyt z bezpośrednio poprzedniego okresu (np. luty: od ostatniego tankowania w styczniu). Gdy pojazd nie ma odczytów w poprzednim okresie (brak danych lub przerwa), dystans liczony jest od pierwszego dostępnego odczytu w danym okresie. „Cały rok” liczony analogicznie względem poprzedniego roku.','Puste pole = brak tankowań pojazdu w tym okresie.','Arkusz „Suma okresów” podsumowuje całą flotę w każdym okresie (wskaźniki względne liczone z sum).','Utrata oszczędności (PLN) = Koszt_Pb − (Litry_Pb × 1,15 × śr._cena_LPG) — ile przepłacono za benzynę w stosunku do kosztu pokonania tej samej trasy na LPG.','Przykład: zapłacono za Pb 50 L × 6,80 zł = 340,00 zł; ekwiwalent LPG 50 × 1,15 × 3,00 zł = 172,50 zł; utrata = 167,50 zł przepłacono.','×1,15 — LPG ma niższą gęstość energii, potrzeba ok. 15% więcej litrów na km.'];
  XLSX.utils.sheet_add_aoa(ws,notes.map(function(t){return [t]}),{origin:{r:nData+1,c:0}});
  ws['!ref']=XLSX.utils.encode_range({s:{r:0,c:0},e:{r:nData+1+notes.length,c:nCols-1}});
  XLSX.utils.book_append_sheet(wb,ws,isQ?'Kwartały':'Miesiące');
+ }
  /* podsumowanie floty: wiersz = rok × wskaźnik, kolumny = okresy */
  var agg=function(m){var L=Array.from(m.values()),t={lpgLit:0,lpgCost:0,pbLit:0,pbCost:0,totalDist:0,totalTrans:0,lpgTrans:0,pbTrans:0,certainCount:0,suspiciousCount:0,potentialSavings:0};
   L.forEach(function(r){t.lpgLit+=r.lpgLit;t.lpgCost+=r.lpgCost;t.pbLit+=r.pbLit;t.pbCost+=r.pbCost;t.totalDist+=r.totalDist||0;t.totalTrans+=r.totalTrans||0;t.lpgTrans+=r.lpgTrans||0;t.pbTrans+=r.pbTrans||0;t.certainCount+=r.certainCount||0;t.suspiciousCount+=r.suspiciousCount||0;t.potentialSavings+=r.potentialSavings||0});
@@ -3590,9 +3600,13 @@ window.expLpgXLSXPivot=function(kind,keys){
   var cols=ps.map(function(p){var m=cell[y+'|'+p];return m?{a:agg(m),w:wkSum(y,p)}:null}).concat([{a:agg(yr[y]),w:wkSum(y,null)}]);
   sa.push([y,'Liczba pojazdów'].concat(cols.map(function(c){return c?c.a.n:null})));
   sel.forEach(function(M){sa.push([y,M[1]].concat(cols.map(function(c){return c?M[2](c.a,c.w):null})))})});
+ if(wb){
  var wsS=XLSX.utils.aoa_to_sheet(sa);var sc=[{wch:7},{wch:28}];for(var si=2;si<sh1.length;si++)sc.push({wch:13});wsS['!cols']=sc;
  XLSX.utils.book_append_sheet(wb,wsS,'Suma okresów');
- XLSX.writeFile(wb,'DualFuel_'+(isQ?'kwartaly':'miesiace')+'_kolumny_'+getCurrentDate()+'.xlsx',{compression:true,bookSST:true});
+ }
+ var spec={file:'DualFuel_'+(isQ?'kwartaly':'miesiace')+'_kolumny_'+getCurrentDate()+'.xlsx',sheets:[{name:isQ?'Kwartały':'Miesiące',title:'DualFuel — zestawienie '+(isQ?'kwartalne':'miesięczne')+' (okresy w kolumnach)',sub:'LPG / BENZYNA / KOSZTY / CPK',meta:'Lata: '+ys.join(', ')+'   |   Pojazdów: '+rl.length+'   |   Wskaźników: '+sel.length+'   |   Wygenerowano: '+getCurrentDate(),head1:h1,head2:h2,merges:merges2,rows:aoa.slice(2),nl:2,notes:notes.slice(1),boldFrom:2+ps.length*k},{name:'Suma okresów',title:'DualFuel — suma okresów',sub:'PODSUMOWANIE FLOTY W KAŻDYM OKRESIE',meta:'Wskaźniki względne liczone z sum okresów   |   Wygenerowano: '+getCurrentDate(),head1:sh1,rows:sa.slice(1),nl:2,boldFrom:sh1.length-1,tab:'65738A'}]};
+ flmXlsx(spec).then(function(ok){if(ok)return;if(wb)XLSX.writeFile(wb,spec.file,{compression:true,bookSST:true});else showToast('Biblioteka XLSX nie jest załadowana.')});
+
  showToast('Wyeksportowano: '+rl.length+' pojazdów, '+sel.length+' wskaźników');
 };
 })();
@@ -3930,6 +3944,61 @@ window.csExport=function(kind){
 };
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
+</script>
+<script>
+/* flmXlsx — wspólny, stylizowany zapis XLSX (ExcelJS). spec:{file,sheets:[{name,title,sub,meta,head1,head2,merges,nl,rows,notes,boldFrom,tab}]} */
+window.flmXlsx=async function(spec){
+  if(!(await (window.ExcelJS?Promise.resolve(true):new Promise(function(res){var sc=document.createElement('script');sc.src='https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js';sc.onload=function(){res(!!window.ExcelJS)};sc.onerror=function(){res(false)};document.head.appendChild(sc)}))))return false;
+  try{
+  var wb=new ExcelJS.Workbook();wb.creator='FLManager';wb.created=new Date();
+  var FONT='Calibri',NAVY='242B3D',NAVY2='2F3A52',TXT='263247',NUM='202938',META='65738A',LINE='D9E1EC',ZEB='F0F4F9',SUB='E4EAF4',STX='202D43',AMB='FEF3C7',ACC='7C3AED';
+  var fill=function(c){return{type:'pattern',pattern:'solid',fgColor:{argb:'FF'+c}}},hl={style:'thin',color:{argb:'FF'+LINE}};
+  var fmtFor=function(h,vals){h=String(h==null?'':h);
+    if(/^(rok|okres|pojazd|status|rekomendacja|wskaźnik)$/i.test(h))return null;
+    if(/cpk/i.test(h))return '0.000';
+    if(/\(km\)|licznik|liczba|transakcje|incydenty/i.test(h))return '0';
+    if(/pln|\(l\)|spalanie|\(%\)|udział/i.test(h))return '0.00';
+    for(var i=0;i<vals.length;i++){var v=vals[i];if(typeof v==='number')return Number.isInteger(v)?'0':'0.00'}return null};
+  spec.sheets.forEach(function(S0){
+    var h1=S0.head1,h2=S0.head2||null,nc=h1.length,NC=Math.max(nc,6),hr=h2?6:5,top=hr+1,nl=S0.nl||1;
+    var ws=wb.addWorksheet(S0.name,{views:[{state:'frozen',xSplit:Math.min(nl,2),ySplit:h2?6:5,showGridLines:false}],properties:{tabColor:{argb:'FF'+(S0.tab||NAVY)}}});
+    ws.mergeCells(1,1,1,NC);var t=ws.getCell(1,1);t.value=S0.title;t.font={name:FONT,size:18,bold:true,color:{argb:'FFFFFFFF'}};t.fill=fill(NAVY);t.alignment={vertical:'middle',indent:1};ws.getRow(1).height=34;
+    ws.mergeCells(2,1,2,NC);var u=ws.getCell(2,1);u.value=S0.sub;u.font={name:FONT,size:10,color:{argb:'FFC3CCDC'}};u.fill=fill(NAVY);u.alignment={vertical:'middle',indent:1};u.border={bottom:{style:'medium',color:{argb:'FF'+ACC}}};ws.getRow(2).height=20;
+    ws.mergeCells(3,1,3,NC);var g=ws.getCell(3,1);g.value=S0.meta;g.font={name:FONT,size:10,color:{argb:'FF'+META}};g.fill=fill('E8EDF5');g.alignment={vertical:'middle',indent:1,wrapText:true};ws.getRow(3).height=nc<9?34:22;ws.getRow(4).height=8;
+    // nagłówki
+    var gi=[];if(h2){var gcur=-1,gcol=0;h1.forEach(function(h,i){if(i<nl||h!==''){gcur=i;gcol=(gcol+1)}gi[i]=i<nl?-1:gcol})}
+    var hc=function(cell,v,i,row){cell.value=v;cell.font={name:FONT,size:10,bold:true,color:{argb:'FFFFFFFF'}};cell.fill=fill(h2&&i>=nl&&gi[i]%2===0?NAVY2:NAVY);cell.alignment={vertical:'middle',horizontal:i<nl?'left':'center',wrapText:true,indent:i<nl?1:0};cell.border={bottom:row===hr?{style:'thin',color:{argb:'FF'+NAVY}}:undefined,left:(h2&&i>nl&&gi[i]!==gi[i-1])?{style:'thin',color:{argb:'FF65738A'}}:undefined}};
+    ws.getRow(5).height=h2?24:32;if(h2)ws.getRow(6).height=34;
+    h1.forEach(function(h,i){hc(ws.getCell(5,i+1),h,i,5)});
+    if(h2){h2.forEach(function(h,i){hc(ws.getCell(6,i+1),h,i,6)});(S0.merges||[]).forEach(function(m){ws.mergeCells(5,m[0]+1,5,m[1]+1)});for(var c0=0;c0<nl;c0++)ws.mergeCells(5,c0+1,6,c0+1)}
+    var heads=h2?h2.map(function(h,i){return i<nl?h1[i]:h}):h1;
+    // dane
+    var fm=heads.map(function(h,i){return fmtFor(h,S0.rows.slice(0,200).map(function(r){return r[i]}))});
+    var W=heads.map(function(h){return Math.max(9,Math.min(20,String(h).length*0.95+3))});
+    var bf=S0.boldFrom==null?1e9:S0.boldFrom;
+    S0.rows.forEach(function(r,ri){var row=ws.getRow(top+ri),zb=ri%2===1;
+      for(var i=0;i<nc;i++){var v=r[i],c=row.getCell(i+1),isN=typeof v==='number',st=/^status$/i.test(heads[i]),rc=/rekomendacja/i.test(heads[i]);
+        c.value=(v===''||v==null)?null:v;if(isN&&fm[i])c.numFmt=fm[i];
+        var col=isN?NUM:TXT,fl=zb?ZEB:'FFFFFF',bold=i>=bf||(i<nl&&i===0&&nl>0&&S0.boldFirst);
+        if(i>=bf)fl=SUB;
+        if(st&&typeof v==='string'){if(v.indexOf('🔴')>=0||v.indexOf('🚨')>=0){col='B91C1C';fl='FEE2E2'}else if(v.indexOf('⚠')>=0){col='B45309';fl=AMB}else if(v.indexOf('✅')>=0){col='047857';fl='DCFCE7'}}
+        c.font={name:FONT,size:10,bold:!!bold||(st&&fl!=='FFFFFF'&&fl!==ZEB&&fl!==SUB),color:{argb:'FF'+((i>=bf)?STX:col)}};
+        c.fill=fill(fl);c.border={bottom:hl,left:(h2&&i>nl&&gi[i]!==gi[i-1])?{style:'thin',color:{argb:'FF'+LINE}}:undefined};
+        c.alignment={vertical:'middle',horizontal:isN?'right':'left',wrapText:rc,indent:(i===0&&!isN)?1:0};
+        var L=(v==null?0:String(isN?(v%1?v.toFixed(2):v):v).length)+3;if(rc)L=60;W[i]=Math.max(W[i],Math.min(rc?60:(isN?20:34),L))}
+      var ml=1;for(var q2=0;q2<nc;q2++){if(/rekomendacja/i.test(heads[q2])&&typeof r[q2]==='string')ml=Math.max(ml,Math.ceil(r[q2].length/62))}row.height=ml>1?ml*13+5:17});
+    heads.forEach(function(h,i){ws.getColumn(i+1).width=Math.round(W[i]*10)/10});
+    for(var cc=nc+1;cc<=NC;cc++)ws.getColumn(cc).width=10;
+    ws.autoFilter={from:{row:hr,column:1},to:{row:hr+S0.rows.length,column:nc}};
+    // uwagi pod tabelą
+    if(S0.notes&&S0.notes.length){var r0=top+S0.rows.length+1,tw=0;for(var q=1;q<=nc;q++)tw+=ws.getColumn(q).width||10;
+      var hh=ws.getCell(r0,1);hh.value='Uwagi';hh.font={name:FONT,size:11,bold:true,color:{argb:'FF'+STX}};
+      S0.notes.forEach(function(n,k){var rr=r0+1+k;ws.mergeCells(rr,1,rr,nc);var c=ws.getCell(rr,1);c.value=n;c.font={name:FONT,size:9,color:{argb:'FF'+META}};c.alignment={wrapText:true,vertical:'top',indent:1};ws.getRow(rr).height=Math.max(15,Math.ceil(String(n).length/(tw*1.05))*12.5+3)})}
+    ws.pageSetup={orientation:nc>8?'landscape':'portrait',paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0,horizontalCentered:true,margins:{left:.4,right:.4,top:.6,bottom:.6,header:.3,footer:.3},printTitlesRow:hr===6?'5:6':'5:5'};
+    ws.headerFooter={oddFooter:'&L&8FLManager — '+S0.name+'&C&8Strona &P z &N&R&8&D'}});
+  var buf=await wb.xlsx.writeBuffer(),bl=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),a=document.createElement('a');
+  a.href=URL.createObjectURL(bl);a.download=spec.file;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500);return true}catch(e){console.error('flmXlsx',e);return false}
+};
 </script>
 </body>
 </html>
