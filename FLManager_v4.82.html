@@ -869,9 +869,10 @@ body{height:100dvh}
       <button type="button" class="cs-chip" id="csChipReg" data-pop="csPopReg" title="Wklej listę numerów rejestracyjnych — zaznaczy pasujące pojazdy"><i class="fas fa-paste"></i><span class="cs-cl">Wklej rej.</span><b id="csRegTxt"></b><i class="fas fa-chevron-down cs-cv"></i></button>
       <button type="button" class="cs-chip" id="csChipGrp" data-pop="csPopGrp" title="Wybór grup kosztów"><i class="fas fa-tags"></i><span class="cs-cl">Grupy</span><b id="csGrpCnt"></b><i class="fas fa-chevron-down cs-cv"></i></button>
       <button type="button" class="cs-chip" id="csChipPer" data-pop="csPopPer" title="Wybór lat lub zakresu dat"><i class="fas fa-calendar-days"></i><span class="cs-cl">Okres</span><b id="csPerTxt"></b><i class="fas fa-chevron-down cs-cv"></i></button>
+      <button type="button" class="cs-chip" id="csChipKm" data-pop="csPopKm" style="display:none" title="Przedziały przebiegu: tryb, krok i limit"><i class="fas fa-gauge-high"></i><span class="cs-cl">Przebieg</span><b id="csKmTxt"></b><i class="fas fa-chevron-down cs-cv"></i></button>
     </div>
     <div class="cs-sep"></div>
-    <div class="rcg"><span class="cs-lb">Układ</span><div class="cs-seg" id="csLaySeg"><button type="button" data-lay="g" title="Wiersze: rok · kolumny: grupy kosztów">Rok·grupy</button><button type="button" data-lay="v" title="Osobny blok dla każdego pojazdu: lata w wierszach, grupy kosztów w kolumnach">Pojazdy</button><button type="button" data-lay="i" title="Blok na pojazd: grupy kosztów w wierszach, lata w kolumnach, przebieg roczny pod spodem">Pojazdy⇄</button><button type="button" data-lay="m" title="Wiersze: rok i pojazd · kolumny: miesiące">Pojazd·mies.</button><button type="button" data-lay="p" title="Rozliczenie po sprzedaży: lista transakcji pojazdu — data, grupa, dane kosztowe, wartość netto, przebieg (opcjonalnie od/do daty)">Po sprzedaży</button></div></div>
+    <div class="rcg"><span class="cs-lb">Układ</span><div class="cs-seg" id="csLaySeg"><button type="button" data-lay="g" title="Wiersze: rok · kolumny: grupy kosztów">Rok·grupy</button><button type="button" data-lay="v" title="Osobny blok dla każdego pojazdu: lata w wierszach, grupy kosztów w kolumnach">Pojazdy</button><button type="button" data-lay="i" title="Blok na pojazd: grupy kosztów w wierszach, lata w kolumnach, przebieg roczny pod spodem">Pojazdy⇄</button><button type="button" data-lay="m" title="Wiersze: rok i pojazd · kolumny: miesiące">Pojazd·mies.</button><button type="button" data-lay="k" title="Koszty pojazdu w przedziałach przebiegu (np. do 50 tys. km, 50–100 tys. km…)">Wg przebiegu</button><button type="button" data-lay="p" title="Rozliczenie po sprzedaży: lista transakcji pojazdu — data, grupa, dane kosztowe, wartość netto, przebieg (opcjonalnie od/do daty)">Po sprzedaży</button></div></div>
     <div class="rcg"><span class="cs-lb">Podział</span><div class="cs-seg" id="csPerSeg"><button type="button" data-per="y" title="Zestawienie roczne">Rok</button><button type="button" data-per="m" title="Roczne z podziałem na miesiące">Rok + miesiące</button></div></div>
     <div class="cs-sep"></div>
     <div class="rcg" style="gap:10px">
@@ -918,6 +919,16 @@ body{height:100dvh}
       <div class="cs-sec" id="csDtSec" hidden><div class="cs-sh">Zakres dat <button type="button" id="csDtClear" class="cs-lnk">wyczyść</button></div>
         <div class="cs-dtb"><label>Od<input type="date" id="csFrom" class="rc-input cs-dt"></label><label>Do<input type="date" id="csTo" class="rc-input cs-dt"></label></div>
         <div class="cs-hint"><i class="fas fa-info-circle"></i> Zakres dat zastępuje wybór lat — np. od daty sprzedaży pojazdu.</div></div>
+    </div>
+  </div>
+  <div id="csPopKm" class="cs-pop">
+    <div class="cs-ph"><b><i class="fas fa-gauge-high"></i> Przedziały przebiegu</b></div>
+    <div class="cs-pb">
+      <div class="cs-sec"><div class="cs-sh">Tryb</div><div class="cs-seg" id="csKmMode"><button type="button" data-kmode="b" title="Osobne przedziały: 0–50 tys., 50 001–100 tys. …">Przedziały</button><button type="button" data-kmode="c" title="Narastająco: do 50 tys., do 100 tys., do 150 tys. …">Narastająco</button></div></div>
+      <div class="cs-sec"><div class="cs-sh">Presety</div><div class="cs-yrs" id="csKmPre"><button type="button" class="rc-yr" data-kp="50">50 tys. → 250 tys.</button><button type="button" class="rc-yr" data-kp="100">100 tys. → 300 tys.</button><button type="button" class="rc-yr" data-kp="auto">Auto</button></div>
+        <div class="cs-hint"><i class="fas fa-info-circle"></i> Auto dobiera krok do największego przebiegu wybranych pojazdów, tak aby pokryć cały przebieg. Pozostałe presety kończą się przedziałem „powyżej”. Układ obejmuje całą historię pojazdu — filtr okresu nie obowiązuje, bo przedziały przebiegu liczone są od początku życia pojazdu.</div></div>
+      <div class="cs-sec" id="csKmFromSec"><div class="cs-sh">Od przebiegu</div><div class="cs-yrs" id="csKmFrom"><button type="button" class="rc-yr" data-kf="0">Od zera</button><button type="button" class="rc-yr" data-kf="50">od 50 tys.</button><button type="button" class="rc-yr" data-kf="100">od 100 tys.</button><button type="button" class="rc-yr" data-kf="150">od 150 tys.</button><button type="button" class="rc-yr" data-kf="200">od 200 tys.</button></div><div class="cs-hint"><i class="fas fa-info-circle"></i> Pokazuje tylko koszty poniesione powyżej wybranego przebiegu (np. powyżej 100 tys. km) — przedziały zaczynają się wtedy od tego progu.</div></div>
+      <div class="cs-sec"><div class="cs-sh">Własny</div><div class="cs-dtb"><label>Krok (tys. km)<input type="number" min="1" step="1" id="csKmStep" class="rc-input cs-dt" style="width:90px"></label><label>Do (tys. km, 0 = bez limitu)<input type="number" min="0" step="1" id="csKmCap" class="rc-input cs-dt" style="width:90px"></label><label>Od (tys. km)<input type="number" min="0" step="1" id="csKmFromIn" class="rc-input cs-dt" style="width:90px"></label></div></div>
     </div>
   </div>
   <div id="csResult" class="table-container cs-res"></div>
@@ -3615,14 +3626,14 @@ window.expLpgXLSXPivot=function(kind,keys){
 </script>
 <script>
 (function(){
-var LS='flm_cs',st={regs:new Set(),grps:new Set(),years:new Set(),split:false,layout:'g',months:false,kon:false,fleet:false,from:'',to:'',fold:false,cf:{veh:false,grp:false,yr:false},loaded:false};
+var LS='flm_cs',st={regs:new Set(),grps:new Set(),years:new Set(),split:false,layout:'g',months:false,kon:false,fleet:false,from:'',to:'',fold:false,cf:{veh:false,grp:false,yr:false},km:{mode:'b',p:'50',step:50,cap:250,from:0},loaded:false};
 var tx=[],recs=[],regs=[],groups=[],years=[],mil={},regQ='',NO='(brak grupy)',NK='(brak kontrahenta)';
 var MN=['Sty','Lut','Mar','Kwi','Maj','Cze','Lip','Sie','Wrz','Paź','Lis','Gru'];
 function $(i){return document.getElementById(i)}
 function esc2(t){return String(t==null?'':t).replace(/[&<>"']/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]})}
 function norm(s){return String(s).toUpperCase().replace(/[\s\-_.]+/g,'')}
-function load(){if(st.loaded)return;st.loaded=true;try{var o=JSON.parse(localStorage.getItem(LS)||'null');if(o){st.regs=new Set(o.regs||[]);st.grps=new Set(o.grps||[]);st.years=new Set((o.years||[]).map(Number));st.split=!!o.split;st.layout=['g','v','i','m','p'].indexOf(o.layout)>=0?o.layout:'g';st.months=!!o.months;st.seeded=!!o.seeded;st.from=o.from||'';st.to=o.to||'';st.kon=!!o.kon;st.fleet=!!o.fleet;st.fold=!!o.fold;st.cf=Object.assign({veh:false,grp:false,yr:false},o.cf||{})}}catch(e){}}
-function save(){try{localStorage.setItem(LS,JSON.stringify({regs:Array.from(st.regs),grps:Array.from(st.grps),years:Array.from(st.years),split:st.split,layout:st.layout,fleet:st.fleet,months:st.months,seeded:st.seeded,from:st.from,to:st.to,kon:st.kon,fold:st.fold,cf:st.cf}))}catch(e){}}
+function load(){if(st.loaded)return;st.loaded=true;try{var o=JSON.parse(localStorage.getItem(LS)||'null');if(o){st.regs=new Set(o.regs||[]);st.grps=new Set(o.grps||[]);st.years=new Set((o.years||[]).map(Number));st.split=!!o.split;st.layout=['g','v','i','m','p','k'].indexOf(o.layout)>=0?o.layout:'g';st.months=!!o.months;st.seeded=!!o.seeded;st.from=o.from||'';st.to=o.to||'';st.kon=!!o.kon;st.fleet=!!o.fleet;st.fold=!!o.fold;if(o.km&&o.km.step>0)st.km={from:Math.max(0,+o.km.from||0),mode:o.km.mode==='c'?'c':'b',p:String(o.km.p||'own')==='25'?'50':String(o.km.p||'own'),step:String(o.km.p)==='25'?50:+o.km.step,cap:(String(o.km.p)==='25'||String(o.km.p)==='50')?250:Math.max(0,+o.km.cap||0)};st.cf=Object.assign({veh:false,grp:false,yr:false},o.cf||{})}}catch(e){}}
+function save(){try{localStorage.setItem(LS,JSON.stringify({regs:Array.from(st.regs),grps:Array.from(st.grps),years:Array.from(st.years),split:st.split,layout:st.layout,fleet:st.fleet,months:st.months,seeded:st.seeded,from:st.from,to:st.to,kon:st.kon,fold:st.fold,cf:st.cf,km:st.km}))}catch(e){}}
 var fPln=new Intl.NumberFormat('pl-PL',{minimumFractionDigits:2,maximumFractionDigits:2}),fInt=new Intl.NumberFormat('pl-PL',{maximumFractionDigits:0}),fCpk=new Intl.NumberFormat('pl-PL',{minimumFractionDigits:3,maximumFractionDigits:3}),fL=new Intl.NumberFormat('pl-PL',{minimumFractionDigits:1,maximumFractionDigits:1});
 var FM={p:fPln,i:fInt,c:fCpk,l:fL};
 /* rekordy: pojazd × rok × miesiąc × grupa × kontrahent */
@@ -3663,7 +3674,8 @@ function syncUI(){
   document.querySelectorAll('#csLaySeg button').forEach(function(b){b.classList.toggle('on',b.dataset.lay===L)});
   document.querySelectorAll('#csPerSeg button').forEach(function(b){b.classList.toggle('on',(b.dataset.per==='m')===st.months)});
   $('csPerSeg').classList.toggle('dis',L!=='g'&&L!=='v');$('csDtSec').hidden=L!=='p';if($('csFrom').value!==st.from)$('csFrom').value=st.from;if($('csTo').value!==st.to)$('csTo').value=st.to;$('csSplitLb').classList.toggle('dis',L!=='g');
-  $('csKonLb').classList.toggle('dis',!kOk);$('csKonLb').title=kOk?'Dodaj kontrahenta jako poziom podsumowania':'Brak kolumny kontrahenta w wczytanych danych';
+  $('csChipKm').style.display=L==='k'?'':'none';$('csChipPer').style.display=L==='k'?'none':'';$('csKmTxt').textContent=kmTxt();document.querySelectorAll('#csKmMode button').forEach(function(b){b.classList.toggle('on',b.dataset.kmode===st.km.mode)});document.querySelectorAll('#csKmFrom button').forEach(function(b){b.classList.toggle('active',+b.dataset.kf===st.km.from)});if($('csKmFromIn')&&document.activeElement!==$('csKmFromIn'))$('csKmFromIn').value=st.km.from;document.querySelectorAll('#csKmPre button').forEach(function(b){b.classList.toggle('active',b.dataset.kp===st.km.p)});if($('csKmStep')&&document.activeElement!==$('csKmStep'))$('csKmStep').value=st.km.step;if($('csKmCap')&&document.activeElement!==$('csKmCap'))$('csKmCap').value=st.km.cap;
+  $('csKonLb').classList.toggle('dis',!kOk||L==='k');$('csKonLb').title=kOk?'Dodaj kontrahenta jako poziom podsumowania':'Brak kolumny kontrahenta w wczytanych danych';
   $('csKon').checked=st.kon&&kOk;$('csFleet').checked=st.fleet;chipSync();
 }
 function renderLists(){
@@ -3730,8 +3742,58 @@ function computeP(){
   if(st.fleet&&all.length)blk('RAZEM',all,false);
   return{head:head,fm:fm,nd:nd,tc:-1,hf:'p',rows:out,G:G,Y:Y,rng:rng,f:st.from,t:st.to}
 }
+
+var KP={'50':[50,250],'100':[100,300]};
+function kmTxt(){var k=st.km,f=k.from>0?'od '+k.from+' · ':'';if(k.p==='auto')return f+'Auto';return f+k.step+' / '+(k.cap?k.cap:'∞')+' tys.'}
+function computeK(){
+  var Y=years.slice(),G=groups.filter(function(g){return st.grps.has(g)}),cum=st.km.mode==='c';
+  var by=new Map(),all=[];
+  tx.forEach(function(r){if(!st.regs.has(r.reg)||!st.grps.has(r.g))return;all.push(r);var a=by.get(r.reg);if(!a){a=[];by.set(r.reg,a)}a.push(r)});
+  /* odczyt licznika dla każdej transakcji: brakujące uzupełniane ostatnim znanym (a na początku — pierwszym znanym) */
+  var vi=new Map(),gmax=0;
+  by.forEach(function(l,reg){l.sort(function(a,b){return a.d-b.d||a.mt-b.mt});
+    var last=0,first=0,i;for(i=0;i<l.length;i++)if(l[i].mt>0){first=l[i].mt;break}
+    var lo=null,hi=null;
+    l.forEach(function(r){if(r.mt>0){last=r.mt;if(lo==null||r.mt<lo)lo=r.mt;if(hi==null||r.mt>hi)hi=r.mt}r._km=r.mt>0?r.mt:(last||first||0)});
+    vi.set(reg,{lo:lo,hi:hi});if(hi>gmax)gmax=hi||0});
+  var step,cap,k=st.km;
+  if(k.p==='auto'||!(k.step>0)){var cand=[50000,100000,250000,500000,1000000];step=cand[cand.length-1];for(var i=0;i<cand.length;i++)if(Math.ceil(gmax/cand[i])<=8){step=cand[i];break}cap=Math.max(1,Math.ceil(gmax/step))*step}
+  else{step=k.step*1000;cap=k.cap>0?Math.max(step,Math.round(k.cap/k.step)*step):Math.max(1,Math.ceil(gmax/step))*step}
+  var F0=(k.from||0)*1000,n=Math.max(Math.round(cap/step),0),fp=function(v){return fInt.format(v)},off=0;
+  while(off<n&&(off+1)*step<=F0)off++;
+  var hasOpen=!cum&&all.some(function(r){return r._km>Math.max(cap,F0)}),hasNo=F0===0&&all.some(function(r){return !(r._km>0)});
+  var lab=[],bnd=[];
+  for(var j=off;j<n;j++){var lo=Math.max(j*step,F0),hi=(j+1)*step;bnd.push([lo,hi]);lab.push(cum?'do '+fp(hi)+' km':(lo===0?'0 – '+fp(hi):fp(lo+1)+' – '+fp(hi))+' km')}
+  if(hasOpen){var oc=Math.max(cap,F0);bnd.push([oc,Infinity]);lab.push('powyżej '+fp(oc)+' km')}
+  if(hasNo){bnd.push([-1,-1]);lab.push('brak odczytu')}
+  var nb=bnd.length,idxOf=function(m){if(!(m>0))return hasNo?nb-1:-1;if(m<=F0)return -1;var j=Math.ceil(m/step)-1;return j>=n?(hasOpen?n-off:-1):j-off};
+  var dh=['Pojazd','Grupa'],nd=2,head=dh.concat(lab,[F0>0?'Razem od '+fp(F0)+' km (zł)':'Razem (zł)']),fm=['t','t'].concat(lab.map(function(){return'p'}),['p']),out=[];
+  var distOf=function(v){var d=[];for(var j=0;j<nb;j++){var b=bnd[j];if(b[0]<0||v.lo==null||v.hi==null){d.push(0);continue}
+    var from=cum?Math.max(v.lo,F0):Math.max(b[0],v.lo),to=Math.min(b[1],v.hi);d.push(Math.max(0,to-from))}return d};
+  function blk(name,list,dist,sep){
+    if(sep)out.push({cls:'cs-vh',cells:[name]});
+    var gm=new Map(),tot=new Array(nb).fill(0),sum=0;
+    list.forEach(function(r){var o=gm.get(r.g);if(!o){o={g:r.g,c:new Array(nb).fill(0),h:new Array(nb).fill(false),s:0};gm.set(r.g,o)}
+      var j=idxOf(r._km);if(j<0)return;
+      if(cum&&bnd[j][0]>=0){for(var q=j;q<nb;q++){if(bnd[q][0]<0)break;o.c[q]+=r.v;o.h[q]=true;tot[q]+=r.v}}else{o.c[j]+=r.v;o.h[j]=true;tot[j]+=r.v}
+      o.s+=r.v;sum+=r.v});
+    var pre=function(l){return[name,l]};
+    Array.from(gm.values()).sort(function(a,b){return b.s-a.s}).forEach(function(o){out.push({cls:'',cells:pre(o.g).concat(o.c.map(function(v,q){return o.h[q]?v:null}),[o.s])})});
+    var row=function(cls,l,arr,t,f){out.push({cls:cls,rf:f,cells:pre(l).concat(arr,[t])})};
+    row('cs-sub','Razem (zł)',tot.map(function(v,q){return v||null}),sum,'p');
+    var dtot=0;for(var q=0;q<nb;q++)if(bnd[q][0]>=0&&!(cum&&q>0&&false))dtot=cum?Math.max(dtot,dist[q]):dtot+dist[q];
+    var any=dist.some(function(v){return v>0});
+    if(any){row('cs-m',cum?'Przebieg narastająco (km)':'Przebieg w przedziale (km)',dist.map(function(v){return v>0?v:null}),dtot>0?dtot:null,'i');
+      var cs=0;row('cs-m','CPK (zł/km)',dist.map(function(v,q){return v>0&&tot[q]?tot[q]/v:null}),dtot>0?sum/dtot:null,'c')}
+  }
+  var names=Array.from(by.keys()).sort(function(a,b){return String(a).localeCompare(String(b))}),fd=new Array(nb).fill(0);
+  names.forEach(function(r){var d=distOf(vi.get(r));d.forEach(function(v,q){fd[q]+=v});blk(r,by.get(r),d,true)});
+  if(st.fleet&&all.length)blk('RAZEM — wszystkie pojazdy',all,fd,false);
+  return{head:head,fm:fm,nd:nd,tc:nd+nb,hf:'i',rows:out,G:G,Y:Y,km:{step:step,cap:cap,cum:cum,auto:k.p==='auto'}}
+}
 function compute(){
   if(st.layout==='p')return computeP();
+  if(st.layout==='k')return computeK();
   if(st.layout==='i')return computeI();
   var RS=st.regs,Gs=st.grps,Ys=st.years,L=st.layout,fam=L==='g'||L==='v',mo=fam&&st.months,kn=st.kon&&!!S.hasKontrahent;
   var G=groups.filter(function(g){return Gs.has(g)}),Y=years.filter(function(y){return Ys.has(y)});
@@ -3779,7 +3841,7 @@ function renderResult(){
   var el=$('csResult'),lb=$('csSumLbl');
   if(!recs.length){el.innerHTML='<div class="cs-empty">Brak danych — wczytaj pliki.</div>';lb.textContent='Brak danych';return}
   lb.textContent='';
-  if(!st.regs.size||!st.grps.size||(!st.years.size&&!(st.layout==='p'&&(st.from||st.to)))){el.innerHTML='<div class="cs-empty"><i class="fas fa-hand-pointer" style="opacity:.4;font-size:1.4rem;display:block;margin-bottom:6px"></i>Zaznacz co najmniej jeden pojazd, jedną grupę kosztów i jeden rok.</div>';return}
+  if(!st.regs.size||!st.grps.size||(!st.years.size&&st.layout!=='k'&&!(st.layout==='p'&&(st.from||st.to)))){el.innerHTML='<div class="cs-empty"><i class="fas fa-hand-pointer" style="opacity:.4;font-size:1.4rem;display:block;margin-bottom:6px"></i>Zaznacz co najmniej jeden pojazd, jedną grupę kosztów i jeden rok.</div>';return}
   var d=compute();
   if(!d.rows.length){el.innerHTML='<div class="cs-empty">Brak danych dla wybranych kryteriów.</div>';return}
   var h='<table class="cs-t"><thead><tr>'+d.head.map(function(t,i){return '<th'+(i<d.nd?' class="l"':'')+(t==='Przebieg (km)'&&st.kon&&S.hasKontrahent?' title="Przy kontrahencie przebieg jest wykazany tylko w wierszach „Razem [rok]”"':'')+'>'+esc2(t)+'</th>'}).join('')+'</tr></thead><tbody>';
@@ -3817,6 +3879,8 @@ function init(){
   root.addEventListener('change',function(e){var t=e.target;
     if(t.id==='csSplit'){st.split=t.checked;save();renderResult();return}
     if(t.id==='csFrom'||t.id==='csTo'){st[t.id==='csFrom'?'from':'to']=t.value;save();syncUI();renderResult();return}
+    if(t.id==='csKmStep'||t.id==='csKmCap'){var v=Math.max(0,Math.round(+t.value||0));if(t.id==='csKmStep')st.km.step=Math.max(1,v);else st.km.cap=v;st.km.p='own';save();syncUI();renderResult();return}
+    if(t.id==='csKmFromIn'){st.km.from=Math.max(0,Math.round(+t.value||0));save();syncUI();renderResult();return}
     if(t.id==='csFleet'){st.fleet=t.checked;save();renderResult();return}
     if(t.id==='csKon'){st.kon=t.checked;save();renderResult();return}
     if(t.dataset&&t.dataset.reg!=null){t.checked?st.regs.add(t.dataset.reg):st.regs.delete(t.dataset.reg);save();$('csVehCnt').textContent=st.regs.size+' / '+regs.length;renderGroups();renderResult()}
@@ -3824,6 +3888,9 @@ function init(){
   root.addEventListener('click',function(e){var fh=e.target.closest('[data-fold]');if(fh){st.cf[fh.dataset.fold]=!st.cf[fh.dataset.fold];save();syncUI();return}var b=e.target.closest('button');if(!b)return;
     if(b.classList.contains('cs-chip')){togglePop(b.dataset.pop,b);return}
     if(b.dataset.lay){st.layout=b.dataset.lay;save();syncUI();renderResult();return}
+    if(b.dataset.kmode){st.km.mode=b.dataset.kmode;save();syncUI();renderResult();return}
+    if(b.dataset.kf!=null){st.km.from=+b.dataset.kf;save();syncUI();renderResult();return}
+    if(b.dataset.kp){var q=b.dataset.kp;st.km.p=q;if(KP[q]){st.km.step=KP[q][0];st.km.cap=KP[q][1]}save();syncUI();renderResult();return}
     if(b.dataset.per){st.months=b.dataset.per==='m';save();syncUI();renderResult();return}
     if(b.id==='csDtClear'){st.from='';st.to='';$('csFrom').value='';$('csTo').value='';save();syncUI();renderResult();return}
     if(b.id==='csRegApply'){applyList();return}
@@ -3841,7 +3908,7 @@ function init(){
 function srcRows(d){
   var kn=!!(st.kon&&S.hasKontrahent),f=0,t=0,rng=false;
   if(st.layout==='p'&&(st.from||st.to)){rng=true;f=st.from?+new Date(st.from+'T00:00:00'):0;t=st.to?+new Date(st.to+'T23:59:59'):0}
-  var a=tx.filter(function(r){if(!st.regs.has(r.reg)||!st.grps.has(r.g))return false;if(rng)return r.d&&(!f||r.d>=f)&&(!t||r.d<=t);return st.years.has(r.y)});
+  var a=tx.filter(function(r){if(!st.regs.has(r.reg)||!st.grps.has(r.g))return false;if(rng)return r.d&&(!f||r.d>=f)&&(!t||r.d<=t);return st.layout==='k'||st.years.has(r.y)});
   a.sort(function(x,y){return x.reg===y.reg?(x.d-y.d||x.mt-y.mt):String(x.reg).localeCompare(String(y.reg))});return a}
 function loadExcelJS(){return new Promise(function(res){if(window.ExcelJS)return res(true);var sc=document.createElement('script');sc.src='https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js';sc.onload=function(){res(!!window.ExcelJS)};sc.onerror=function(){res(false)};document.head.appendChild(sc)})}
 var XF={p:'0.00',i:'0',c:'0.000',l:'0.0'};
@@ -3932,10 +3999,10 @@ window.csExport=function(kind){
   var out=d.rows.filter(function(r){return r.cls!=='cs-vh'}).map(function(r){return d.head.map(function(h,i){var v=r.cells[i],f=(r.rf&&i>=d.nd)?r.rf:d.fm[i];return f==='t'?v:(v==null?null:(f==='i'?Math.round(v):+v.toFixed(f==='c'?4:2)))})});out.unshift(d.head.slice());
   var date=new Date().toISOString().slice(0,10);
   if(kind==='csv'){saveCSV(out,'Zestawienie_'+date);return}
-  var LN={g:'Rok · grupy'+(st.months?' (z podziałem na miesiące)':''),v:'Pojazdy (blok na pojazd)',i:'Pojazdy ⇄ (grupy w wierszach, lata w kolumnach)',r:'Grupa · lata',m:'Pojazd · miesiące',p:'Rozliczenie po sprzedaży (lista transakcji)'};
+  var LN={g:'Rok · grupy'+(st.months?' (z podziałem na miesiące)':''),v:'Pojazdy (blok na pojazd)',i:'Pojazdy ⇄ (grupy w wierszach, lata w kolumnach)',r:'Grupa · lata',m:'Pojazd · miesiące',p:'Rozliczenie po sprzedaży (lista transakcji)',k:'Koszty wg przebiegu ('+(st.km.from>0?'powyżej '+st.km.from+' tys. km, ':'')+(st.km.mode==='c'?'narastająco':'przedziały')+', '+(st.km.p==='auto'?'auto':st.km.step+' tys. km')+')'};
   var notes=['Kryteria zestawienia:','Układ: '+LN[st.layout]+(st.kon&&S.hasKontrahent?' · z kontrahentem':''),'Pojazdy ('+st.regs.size+'): '+Array.from(st.regs).sort().join(', '),'Grupy kosztów ('+d.G.length+'): '+d.G.join(', '),(d.rng?'Zakres dat: '+(d.f||'…')+' — '+(d.t||'…'):'Lata: '+d.Y.join(', ')),'Przebieg/CPK w układach „Rok · grupy” (bez miesięcy) (przy kontrahencie tylko w wierszach „Razem [rok]”) i „Pojazdy” (przy kontrahencie przebieg pojazdu powtarza się w wierszach każdego kontrahenta, sumy bez dublowania; różnica odczytów licznika w roku, jak w zakładce Przebiegi).','Wygenerowano: '+date];
   var rx=d.rows.filter(function(r){return r.cls!=='cs-vh'}).map(function(r){return{cls:r.cls,v:d.head.map(function(h,i){var v=r.cells[i],f=(r.rf&&i>=d.nd)?r.rf:d.fm[i];return f==='t'?v:(v==null?null:(f==='i'?Math.round(v):+v.toFixed(f==='c'?4:2)))}),f:d.head.map(function(h,i){return(r.rf&&i>=d.nd)?r.rf:d.fm[i]})}});
-  var meta={date:date,layout:LN2(),kon:!!(st.kon&&S.hasKontrahent),nveh:st.regs.size,vehs:Array.from(st.regs).sort(),grps:d.G,src:srcRows(d),per:d.rng?'Zakres dat: '+(d.f||'…')+' — '+(d.t||'…'):'Lata: '+d.Y.join(', '),note:notes[5]};
+  var meta={date:date,layout:LN2(),kon:!!(st.kon&&S.hasKontrahent),nveh:st.regs.size,vehs:Array.from(st.regs).sort(),grps:d.G,src:srcRows(d),per:st.layout==='k'?'Cała historia pojazdu (bez filtra okresu)':d.rng?'Zakres dat: '+(d.f||'…')+' — '+(d.t||'…'):'Lata: '+d.Y.join(', '),note:notes[5]};
   function LN2(){return LN[st.layout]}
   xlsxPro(d,rx,meta).then(function(ok){if(ok)return;
     if(typeof XLSX==='undefined'){showToast('Biblioteka XLSX nie jest załadowana.');return}
