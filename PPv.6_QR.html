@@ -1602,11 +1602,19 @@ function vDataTable(useValues){
       filled = !!x;
       cell = x ? {text:x, bold:true, color:'#111'} : {text:'.'.repeat(48), color:'#c2c9ba'};
     }
-    body.push([
-      {text:String(r.n), alignment:'center', bold:true, fillColor:filled ? '#A6CE39' : '#EDF1E6', color:filled ? '#17200a' : '#8a9182'},
-      {text:r.l},
-      cell
-    ]);
+    const numCell = {text:String(r.n), alignment:'center', bold:true, fillColor:filled ? '#A6CE39' : '#EDF1E6', color:filled ? '#17200a' : '#8a9182'};
+    if(useValues && r.dmg && dmgCols()[0].length){
+      body.push([
+        numCell,
+        {colSpan:2, stack:[
+          {text:r.l},
+          {columns:dmgCols().map(c => ({width:'*', text:c.join('\n'), bold:true, color:'#111'})), columnGap:12, margin:[0,3,0,0]}
+        ]},
+        {}
+      ]);
+      return;
+    }
+    body.push([numCell, {text:r.l}, cell]);
   });
   return {table:{headerRows:1, widths:[20, 190, '*'], body}, layout:vTableLayout, fontSize:8.5};
 }
@@ -1747,17 +1755,15 @@ function ddWniosek(dmg, qr){
   const content = [
     band('#141614', {columns:[
       {width:'*', stack:[
-        {text:'ZAŁĄCZNIK DO ZGŁOSZENIA · DZIAŁ FLOTY', color:'#A6CE39', fontSize:7.5, characterSpacing:2.4},
-        {text:[{text:'WNIOSEK O PRZEKAZANIE\n', color:'#fff'}, {text:'POJAZDU / OBIEKTU UDT', color:'#A6CE39'}], bold:true, fontSize:23, lineHeight:1.05, margin:[0,8,0,0]}
+        {text:'ZAŁĄCZNIK DO ZGŁOSZENIA · DZIAŁ FLOTY', color:'#A6CE39', fontSize:6.5, characterSpacing:1.8},
+        {text:[{text:'WNIOSEK O PRZEKAZANIE ', color:'#fff'}, {text:'POJAZDU / OBIEKTU UDT', color:'#A6CE39'}], bold:true, fontSize:13.5, margin:[0,2,0,0]}
       ]},
-      {width:112, alignment:'right', stack:[
-        {text:'DATA I GODZINA ZGŁOSZENIA', fontSize:6.5, characterSpacing:1.2, color:'#8d938a'},
-        {text:today, bold:true, fontSize:17, color:'#fff', margin:[0,2,0,0]},
-        {text:'godz. ' + ts.time, bold:true, fontSize:10, color:'#A6CE39'},
-        {text:reg || '—', fontSize:8, characterSpacing:1.2, color:'#8d938a', margin:[0,6,0,0]}
+      {width:125, alignment:'right', stack:[
+        {text:[{text:today, color:'#fff', bold:true, fontSize:10.5}, {text:'  godz. ' + ts.time, color:'#A6CE39', bold:true, fontSize:8}]},
+        {text:reg || '—', fontSize:7, characterSpacing:1, color:'#8d938a', margin:[0,1,0,0]}
       ]}
-    ]}, 20, true),
-    band('#A6CE39', {text:'WYPEŁNIJ TABELĘ I WYŚLIJ NA FLOTA@CHEMIROL.COM · ZDJĘCIA ZAŁĄCZ DO WIADOMOŚCI', bold:true, fontSize:9, characterSpacing:0.4, color:'#17200a'}, 8),
+    ], columnGap:8}, 7, true),
+    band('#A6CE39', {text:'WYPEŁNIJ TABELĘ I WYŚLIJ NA FLOTA@CHEMIROL.COM · ZDJĘCIA ZAŁĄCZ DO WIADOMOŚCI', bold:true, fontSize:8, characterSpacing:0.3, color:'#17200a'}, 4),
     {text:'', margin:[0,0,0,12]},
     vDataTable(true),
     sigBlock,                // podpis — 1. strona, bezpośrednio pod tabelą danych
@@ -1799,9 +1805,17 @@ function ddWniosek(dmg, qr){
 }
 
 /* ── MAPA USZKODZEŃ w dokumentach ── */
-/* poz. 13 we wniosku PDF: skrót (max 6 szkód), by podpis zmieścił się na 1. stronie */
+/* poz. 13 we wniosku PDF: PEŁNA lista zaznaczonych uszkodzeń (każde w osobnej linii);
+   przy dłuższej liście tabela przechodzi na kolejną stronę, a blok podpisu nie jest dzielony */
+/* poz. 13 — lista uszkodzeń na całą szerokość wiersza, w 2 kolumnach (od 4 pozycji) */
+function dmgCols(){
+  const l = (window.DMG && window.DMG.list().length) ? window.DMG.tableLines() : [];
+  if(l.length < 4) return [l];
+  const h = Math.ceil(l.length / 2);
+  return [l.slice(0, h), l.slice(h)];
+}
 function pdfVal(n){
-  if(n === 13 && window.DMG && window.DMG.list().length) return window.DMG.tableText(6);
+  if(n === 13 && window.DMG && window.DMG.list().length) return window.DMG.tableLines().join('\n');
   return valOf(n);
 }
 function dmgLines(){
@@ -2014,8 +2028,16 @@ function pdfTableRows(useValues){
       cell = '<span style="color:#8a9182;font-size:11px">' + ESC(r.o.join('  /  ')) + '</span>';
     } else {
       const x = useValues ? pdfVal(r.n) : '';
-      if(x){ cell = '<span style="color:#111;font-weight:600">' + ESC(x) + '</span>'; numBg = '#A6CE39'; numCol = '#17200a'; }
+      if(x){ cell = '<span style="color:#111;font-weight:600;white-space:pre-line">' + ESC(x) + '</span>'; numBg = '#A6CE39'; numCol = '#17200a'; }
       else { cell = '<span style="color:#c2c9ba;letter-spacing:1px">...................................................</span>'; }
+    }
+    if(useValues && r.dmg && dmgCols()[0].length){
+      return '<tr style="background:' + (i % 2 ? '#F7F9F4' : '#ffffff') + '">' +
+        '<td style="border:1px solid #dde2d5;background:#A6CE39;color:#17200a;text-align:center;font-weight:800;padding:6px 4px;width:34px;vertical-align:top">' + r.n + '</td>' +
+        '<td colspan="2" style="border:1px solid #dde2d5;padding:6px 10px">' + ESC(r.l) +
+          '<table style="width:100%;border-collapse:collapse;margin-top:3px"><tr>' +
+          dmgCols().map(c => '<td style="vertical-align:top;width:50%;padding:0 8px 0 0;color:#111;font-weight:600;white-space:pre-line">' + ESC(c.join('\n')) + '</td>').join('') +
+          '</tr></table></td></tr>';
     }
     return '<tr style="background:' + (i % 2 ? '#F7F9F4' : '#ffffff') + '">' +
       '<td style="border:1px solid #dde2d5;background:' + numBg + ';color:' + numCol + ';text-align:center;font-weight:800;padding:6px 4px;width:34px">' + r.n + '</td>' +
@@ -2210,22 +2232,20 @@ function pdfWniosekHTML(dmg, qr){
 
   return `
 <div style="width:794px;background:#fff;font-family:'Barlow',Arial,sans-serif;font-size:12.5px;line-height:1.65;color:#2b2f2b">
-  <div style="background:#141614;padding:24px 44px;border-left:8px solid #A6CE39">
+  <div style="background:#141614;padding:10px 44px;border-left:5px solid #A6CE39">
     <table style="width:100%;border-collapse:collapse"><tr>
-      <td style="vertical-align:top">
-        <div style="font-family:'Barlow Condensed',Arial,sans-serif;text-transform:uppercase;letter-spacing:.32em;font-size:9.5px;color:#A6CE39">Załącznik do zgłoszenia · Dział Floty</div>
-        <div style="font-family:'Barlow Condensed',Arial,sans-serif;font-weight:800;text-transform:uppercase;color:#fff;font-size:34px;line-height:1.02;margin-top:8px">Wniosek o przekazanie<br><span style="color:#A6CE39">pojazdu / obiektu UDT</span></div>
+      <td style="vertical-align:middle">
+        <div style="font-family:'Barlow Condensed',Arial,sans-serif;text-transform:uppercase;letter-spacing:.24em;font-size:8.5px;color:#A6CE39;line-height:1.2">Załącznik do zgłoszenia · Dział Floty</div>
+        <div style="font-family:'Barlow Condensed',Arial,sans-serif;font-weight:800;text-transform:uppercase;color:#fff;font-size:20px;line-height:1.1;margin-top:2px">Wniosek o przekazanie <span style="color:#A6CE39">pojazdu / obiektu UDT</span></div>
       </td>
-      <td style="vertical-align:top;text-align:right;padding-left:18px;width:160px">
-        <div style="font-family:'Barlow Condensed',Arial,sans-serif;text-transform:uppercase;letter-spacing:.16em;font-size:9px;color:#8d938a">Data i godzina zgłoszenia</div>
-        <div style="font-family:'Barlow Condensed',Arial,sans-serif;font-weight:800;color:#fff;font-size:24px;line-height:1.1">${today}</div>
-        <div style="font-family:'Barlow Condensed',Arial,sans-serif;font-weight:700;color:#A6CE39;font-size:15px;line-height:1.1">godz. ${ts.time}</div>
-        <div style="font-family:'Barlow Condensed',Arial,sans-serif;letter-spacing:.14em;font-size:9px;color:#8d938a;margin-top:6px">${ESC(reg.toUpperCase()) || '—'}</div>
+      <td style="vertical-align:middle;text-align:right;padding-left:18px;width:170px;white-space:nowrap">
+        <div style="font-family:'Barlow Condensed',Arial,sans-serif;font-weight:800;color:#fff;font-size:16px;line-height:1.1">${today} <span style="font-weight:700;color:#A6CE39;font-size:12px">godz. ${ts.time}</span></div>
+        <div style="font-family:'Barlow Condensed',Arial,sans-serif;letter-spacing:.12em;font-size:9px;color:#8d938a;margin-top:2px">${ESC(reg.toUpperCase()) || '—'}</div>
       </td>
     </tr></table>
   </div>
 
-  <div style="background:#A6CE39;padding:10px 44px;font-family:'Barlow Condensed',Arial,sans-serif;text-transform:uppercase;font-weight:700;letter-spacing:.04em;color:#17200a;font-size:13px">
+  <div style="background:#A6CE39;padding:5px 44px;font-family:'Barlow Condensed',Arial,sans-serif;text-transform:uppercase;font-weight:700;letter-spacing:.04em;color:#17200a;font-size:11.5px">
     Wypełnij tabelę i wyślij na flota@chemirol.com · zdjęcia załącz do wiadomości
   </div>
 
@@ -2632,6 +2652,11 @@ $('#btnWipe').addEventListener('click', () => {
         '; … (+' + (l.length - limit) + ' — pełny wykaz na mapie uszkodzeń)';
     }
     return l.map(fmt).join('; ');
+  }
+  /* pełna lista do protokołu PDF — każde uszkodzenie w osobnej linii, bez limitu */
+  function tableLines(){
+    return state.damages.map((d, i) => (i + 1) + ') ' + d.part + (d.side ? ' (strona ' + d.side + ')' : '') +
+      ' – ' + d.type.toLowerCase() + (d.desc ? ' (' + d.desc + ')' : ''));
   }
   function syncTable(){
     const el = cellOf(13);
@@ -3128,6 +3153,7 @@ $('#btnWipe').addEventListener('click', () => {
       (d.desc ? ' – ' + d.desc : '') + (d.view && viewDef(d.view) ? ' [' + viewDef(d.view).title + ']' : ''),
     images: renderImages,
     tableText,
+    tableLines,
     /* wczytanie szkód z kodu QR: [element, rodzaj, strona, rzut, x, y, opis] */
     importList: arr => {
       record();
