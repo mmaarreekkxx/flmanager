@@ -376,7 +376,11 @@ table.tco-t tr.tco-hl td{background:rgba(124,58,237,.07)!important;font-weight:7
 #tab-custom-sum .cs-dtb{display:flex;flex-direction:column;gap:6px}
 #tab-custom-sum .cs-dtb label{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.65rem;font-weight:600;color:var(--tx-s)}
 #tab-custom-sum .cs-dt{width:150px;height:24px;font-size:.68rem}
-#tab-custom-sum .cs-t td.cs-w{max-width:340px;white-space:normal;word-break:break-word;font-family:var(--font-text)}
+#tab-custom-sum .cs-t td.cs-w{min-width:280px;max-width:520px;white-space:normal;word-break:break-word;font-family:var(--font-text)}
+#tab-custom-sum .cs-t th.cs-w{min-width:280px}
+#tab-custom-sum .cs-t td.cs-k{width:120px;max-width:130px;white-space:normal;word-break:break-word;line-height:1.25}
+#tab-custom-sum .cs-t th.cs-k{width:120px;max-width:130px}
+#tab-custom-sum .cs-hl{background:rgba(245,158,11,.18);color:#b45309;font-weight:700;border-radius:2px;padding:0 2px}
 #tab-custom-sum .report-controls{flex-wrap:wrap;height:auto;padding:4px 6px;row-gap:4px;min-height:30px}
 #tab-custom-sum .rc-spacer{flex:1 1 8px}
 @media(max-height:520px){#tab-custom-sum .cs-grid{grid-template-columns:1fr 1fr 1fr}#tab-custom-sum .cs-list{max-height:120px}#tab-custom-sum .cs-res{max-height:none}}
@@ -3692,6 +3696,9 @@ function computeI(){
   if(st.fleet&&all.length)blk('RAZEM — wszystkie pojazdy',all,false);
   return{head:head,fm:fm,nd:nd,tc:nd+Y.length,hf:'i',rows:out,G:G,Y:Y}
 }
+var HLR=/(wymian[\wąćęłńóśźż]*|olej[\wąćęłńóśźż]*|rozrz[ąa]d[\wąćęłńóśźż]*|pas(?:ek|ka|ki|kiem|ków|ku)(?![A-Za-z0-9ąćęłńóśźż])|klock[\wąćęłńóśźż]*|tarcz[\wąćęłńóśźż]*|(?<![0-9A-Za-z])(?:0|5|10|15)W-?(?:20|30|40)(?![0-9A-Za-z]))/gi;
+function hlSplit(t){var o=[],i=0,m;t=String(t==null?'':t);HLR.lastIndex=0;while((m=HLR.exec(t))){if(m.index>i)o.push([t.slice(i,m.index),0]);o.push([m[0],1]);i=m.index+m[0].length}if(i<t.length)o.push([t.slice(i),0]);return o}
+function hlHtml(t){return hlSplit(t).map(function(x){return x[1]?'<mark class="cs-hl">'+esc2(x[0])+'</mark>':esc2(x[0])}).join('')}
 function pad2(n){return n<10?'0'+n:''+n}
 function fD(t){if(!t)return'';var d=new Date(t);return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())}
 function computeP(){
@@ -3819,10 +3826,10 @@ function renderResult(){
   if(st.layout==='p'&&st.regs.size!==1){el.innerHTML='<div class="cs-empty"><i class="fas fa-car" style="opacity:.4;font-size:1.4rem;display:block;margin-bottom:6px"></i>Rozliczenie po sprzedaży generuje się dla jednego pojazdu — wybierz dokładnie jeden numer rejestracyjny w filtrze „Pojazdy” lub „Wklej rej.” (obecnie: '+st.regs.size+').</div>';return}
   var d=compute();
   if(!d.rows.length){el.innerHTML='<div class="cs-empty">Brak danych dla wybranych kryteriów.</div>';return}
-  var h='<table class="cs-t"><thead><tr>'+d.head.map(function(t,i){return '<th'+(i<d.nd?' class="l"':'')+(t==='Przebieg (km)'&&st.kon&&S.hasKontrahent?' title="Przy kontrahencie przebieg jest wykazany tylko w wierszach „Razem [rok]”"':'')+'>'+esc2(t)+'</th>'}).join('')+'</tr></thead><tbody>';
+  var h='<table class="cs-t"><thead><tr>'+d.head.map(function(t,i){return '<th'+(i<d.nd?' class="l'+(d.hf==='p'&&t==='Kontrahent'?' cs-k':d.hf==='p'&&i===d.nd-1?' cs-w':'')+'"':'')+(t==='Przebieg (km)'&&st.kon&&S.hasKontrahent?' title="Przy kontrahencie przebieg jest wykazany tylko w wierszach „Razem [rok]”"':'')+'>'+esc2(t)+'</th>'}).join('')+'</tr></thead><tbody>';
   d.rows.forEach(function(r){if(r.cls==='cs-vh'){h+='<tr class="cs-vh"><td class="l" colspan="'+d.head.length+'"><i class="fas fa-'+(d.hf==='g'?'calendar':'car')+'"></i> '+esc2(r.cells[0])+'</td></tr>';return}
   h+='<tr class="'+r.cls+'">'+r.cells.map(function(v,i){
-    var f=(r.rf&&i>=d.nd)?r.rf:d.fm[i];if(f==='t')return '<td class="l'+(d.hf==='p'&&i===d.nd-1?' cs-w':'')+'">'+esc2(d.hf&&d.hf!=='p'&&i===0&&(d.hf==='i'||r.cls===''||r.cls==='cs-sub2')?'':v)+'</td>';
+    var f=(r.rf&&i>=d.nd)?r.rf:d.fm[i];if(f==='t'){var pw=d.hf==='p'&&i===d.nd-1,pk=d.hf==='p'&&d.head[i]==='Kontrahent';return '<td class="l'+(pw?' cs-w':pk?' cs-k':'')+'">'+(pw&&!r.cls.match(/cs-sub|cs-tot/)?hlHtml(v):esc2(d.hf&&d.hf!=='p'&&i===0&&(d.hf==='i'||r.cls===''||r.cls==='cs-sub2')?'':v))+'</td>'}
     return '<td'+(i===d.tc?' class="cs-tc"':'')+'>'+(v==null?'—':FM[f].format(v))+'</td>'}).join('')+'</tr>'});
   el.innerHTML=h+'</tbody></table>';
 }
@@ -3896,16 +3903,22 @@ async function xlsxPro(d,rx,m){
   var hl={style:'thin',color:{argb:'FF'+LINE}};                       // delikatna linia pozioma
   var topM=function(c){return{style:'medium',color:{argb:'FF'+c}}};
   var banner=function(ws,nc,title,sub,meta){
-    ws.mergeCells(1,1,1,nc);var t=ws.getCell(1,1);t.value=title;t.font={name:FONT,size:18,bold:true,color:{argb:'FFFFFFFF'}};t.fill=fill(NAVY);t.alignment={vertical:'middle',horizontal:'left',indent:1};ws.getRow(1).height=34;
-    ws.mergeCells(2,1,2,nc);var u=ws.getCell(2,1);u.value=sub;u.font={name:FONT,size:10,color:{argb:'FFC3CCDC'}};u.fill=fill(NAVY);u.alignment={vertical:'middle',horizontal:'left',indent:1};u.border={bottom:{style:'medium',color:{argb:'FF'+ACC}}};ws.getRow(2).height=20;
-    ws.mergeCells(3,1,3,nc);var g=ws.getCell(3,1);g.value=meta;g.font={name:FONT,size:10,color:{argb:'FF'+META}};g.fill=fill('E8EDF5');g.alignment={vertical:'middle',horizontal:'left',indent:1,wrapText:true};ws.getRow(3).height=nc<9?36:22;
+    ws.mergeCells(1,1,1,nc);var t=ws.getCell(1,1);t.value=title;t.font={name:FONT,size:13,bold:true,color:{argb:'FFFFFFFF'}};t.fill=fill(NAVY);t.alignment={vertical:'middle',horizontal:'left',indent:1};ws.getRow(1).height=26;
+    ws.mergeCells(2,1,2,nc);var u=ws.getCell(2,1);u.value=sub;u.font={name:FONT,size:8.5,color:{argb:'FFC3CCDC'}};u.fill=fill(NAVY);u.alignment={vertical:'middle',horizontal:'left',indent:1};u.border={bottom:{style:'medium',color:{argb:'FF'+ACC}}};ws.getRow(2).height=16;
+    ws.mergeCells(3,1,3,nc);var g=ws.getCell(3,1);g.value=meta;g.font={name:FONT,size:9,color:{argb:'FF'+META}};g.fill=fill('E8EDF5');g.alignment={vertical:'middle',horizontal:'left',indent:1,wrapText:true};ws.getRow(3).height=nc<9?36:22;
     ws.getRow(4).height=8};
   var hdr=function(ws,row,heads,nl){var r=ws.getRow(row);r.height=32;heads.forEach(function(h,i){var c=r.getCell(i+1);c.value=h;c.font={name:FONT,size:10,bold:true,color:{argb:'FFFFFFFF'}};c.fill=fill(NAVY);c.alignment={vertical:'middle',horizontal:i<nl?'left':'center',wrapText:true,indent:i<nl?1:0}})};
   var NC0=Math.max(d.head.length,6);
   var meta=m.layout+(m.kon?' · z kontrahentem':'')+'   |   Pojazdy: '+m.nveh+'   |   Grup kosztów: '+m.grps.length+'   |   '+m.per+'   |   Wygenerowano: '+m.date;
   var ws=wb.addWorksheet('Zestawienie',{views:[{state:'frozen',xSplit:Math.min(d.nd,2),ySplit:5,showGridLines:false}],properties:{tabColor:{argb:'FF'+NAVY}}});
   var nc=d.head.length;
-  banner(ws,NC0,'Zestawienie kosztów i przebiegów','POJAZDY / KOSZTY / PRZEBIEGI / CPK',meta);
+  var bt='Zestawienie kosztów i przebiegów',bs='POJAZDY / KOSZTY / PRZEBIEGI / CPK',bm=meta;
+  if(d.hf==='p'&&m.vehs.length===1){
+    var tr=rx.filter(function(r){return r.cls==='cs-sub'})[0],np=rx.filter(function(r){return r.cls===''||r.cls==='cs-svc'}).length,ns=rx.filter(function(r){return r.cls==='cs-svc'}).length;
+    var fx=function(v,dg){return v==null?'—':new Intl.NumberFormat('pl-PL',{minimumFractionDigits:dg,maximumFractionDigits:dg,useGrouping:false}).format(v)};
+    bt='Rozliczenie kosztów pojazdu po sprzedaży';bs='POJAZD '+m.vehs[0]+'  ·  ZESTAWIENIE TRANSAKCJI';
+    bm=m.per+'   |   Pozycji: '+np+(ns?' (w tym serwisowych: '+ns+')':'')+(tr?'   |   Koszt netto razem: '+fx(tr.v[tr.v.length-2],2)+' zł   |   Dystans w okresie: '+(tr.v[tr.v.length-1]!=null?fx(tr.v[tr.v.length-1],0)+' km':'—'):'')+'   |   Wygenerowano: '+m.date}
+  banner(ws,NC0,bt,bs,bm);
   hdr(ws,5,d.head,d.nd);
   var isDate=/^\d{4}-\d{2}-\d{2}$/,z=0;
   var widths=d.head.map(function(h){return Math.max(9,Math.min(16,h.length*0.95+3))});
@@ -3918,16 +3931,19 @@ async function xlsxPro(d,rx,m){
       else{c.value=(v===''||v==null)?null:v;if(!isT)c.numFmt=XF[f]||'General'}
       var keyCol=/razem|netto/i.test(d.head[i]);
       c.font={name:FONT,size:10,bold:!!(tot||sub||(keyCol&&!isT&&!mm)),italic:mm||r.cls==='cs-sub2',color:{argb:'FF'+((tot||sub)?STX:(mm?META:(isT?TXT:NUM)))}};
-      c.alignment={vertical:'middle',horizontal:isT?(c.value instanceof Date?'center':'left'):'right',wrapText:isT&&i===d.nd-1&&d.hf==='p',indent:(isT&&i===0)?1:0};
+      c.alignment={vertical:'middle',horizontal:isT?(c.value instanceof Date?'center':'left'):'right',wrapText:isT&&d.hf==='p'&&(i===d.nd-1||d.head[i]==='Kontrahent'),indent:(isT&&i===0)?1:0};
+      if(d.hf==='p'&&i===d.nd-1&&typeof v==='string'&&v&&!tot&&!sub){var sg=hlSplit(v);if(sg.some(function(x){return x[1]}))c.value={richText:sg.map(function(x){return x[1]?{text:x[0],font:{name:FONT,size:10,bold:true,color:{argb:'FFB45309'}}}:{text:x[0],font:{name:FONT,size:10,color:{argb:'FF'+TXT}}}})}}
       c.fill=fill(tot?TOT:svc?AMB:sub?SUB:zebra?ZEB:'FFFFFF');
       c.border={bottom:hl,top:tot?topM(STX):(sub?topM('8A9BB5'):undefined)};
       var L=(v==null?0:(v instanceof Date?10:String(typeof v==='number'?(f==='p'?v.toFixed(2):v):v).length))+(isT?3:3);if(i===d.nd-1&&d.hf==='p')L=Math.min(L,44);widths[i]=Math.max(widths[i],Math.min(isT?44:20,L))});
     row.height=tot?22:(sub?19:17)});
+  if(d.hf==='p'){var PW={'Data':11,'Pojazd':11,'Kontrahent':17,'Nr FV':15,'Grupa prod.':14,'Dane kosztowe':38,'Wartość netto (zł)':13,'Przebieg (km)':11};d.head.forEach(function(h,i){if(PW[h])widths[i]=PW[h]})}
   d.head.forEach(function(h,i){ws.getColumn(i+1).width=Math.round(widths[i]*10)/10});
+  if(d.hf==='p')rx.forEach(function(r,ri){var ln=1;d.head.forEach(function(h,i){if((h==='Kontrahent'||i===d.nd-1)&&typeof r.v[i]==='string'&&!/cs-(sub|tot)/.test(r.cls)){var w=widths[i]*1.05,L=0,cur=0;String(r.v[i]).split(/\s+/).forEach(function(wd){if(cur&&cur+wd.length+1>w){L++;cur=wd.length}else cur+=(cur?1:0)+wd.length});ln=Math.max(ln,L+(cur?1:0))}});if(ln>1)ws.getRow(6+ri).height=Math.max(17,ln*13.5+4)});
   for(var ci=nc+1;ci<=NC0;ci++)ws.getColumn(ci).width=10;
   ws.autoFilter={from:{row:5,column:1},to:{row:5+rx.length,column:nc}};
-  ws.pageSetup={orientation:nc>8?'landscape':'portrait',paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0,horizontalCentered:true,margins:{left:.4,right:.4,top:.6,bottom:.6,header:.3,footer:.3},printTitlesRow:'5:5'};
-  ws.headerFooter={oddFooter:'&L&8FLManager — Zestawienie&C&8Strona &P z &N&R&8&D'};
+  ws.pageSetup={orientation:(d.hf==='p'?(nc>7):nc>8)?'landscape':'portrait',paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0,horizontalCentered:true,margins:{left:.4,right:.4,top:.6,bottom:.6,header:.3,footer:.3},printTitlesRow:'5:5'};
+  ws.headerFooter={oddFooter:'&L&8FLManager — '+(d.hf==='p'&&m.vehs.length===1?'Rozliczenie po sprzedaży · '+m.vehs[0]:'Zestawienie')+'&C&8Strona &P z &N&R&8&D'};
   // dane źródłowe — oryginalne wiersze + kolumny MCE
   if(m.src&&m.src.length){
     var keys=[],seen={},SK={_opt:1,_proc:1};
@@ -4007,9 +4023,9 @@ window.flmXlsx=async function(spec){
   spec.sheets.forEach(function(S0){
     var h1=S0.head1,h2=S0.head2||null,nc=h1.length,NC=Math.max(nc,6),hr=h2?6:5,top=hr+1,nl=S0.nl||1;
     var ws=wb.addWorksheet(S0.name,{views:[{state:'frozen',xSplit:Math.min(nl,2),ySplit:h2?6:5,showGridLines:false}],properties:{tabColor:{argb:'FF'+(S0.tab||NAVY)}}});
-    ws.mergeCells(1,1,1,NC);var t=ws.getCell(1,1);t.value=S0.title;t.font={name:FONT,size:18,bold:true,color:{argb:'FFFFFFFF'}};t.fill=fill(NAVY);t.alignment={vertical:'middle',indent:1};ws.getRow(1).height=34;
-    ws.mergeCells(2,1,2,NC);var u=ws.getCell(2,1);u.value=S0.sub;u.font={name:FONT,size:10,color:{argb:'FFC3CCDC'}};u.fill=fill(NAVY);u.alignment={vertical:'middle',indent:1};u.border={bottom:{style:'medium',color:{argb:'FF'+ACC}}};ws.getRow(2).height=20;
-    ws.mergeCells(3,1,3,NC);var g=ws.getCell(3,1);g.value=S0.meta;g.font={name:FONT,size:10,color:{argb:'FF'+META}};g.fill=fill('E8EDF5');g.alignment={vertical:'middle',indent:1,wrapText:true};ws.getRow(3).height=nc<9?34:22;ws.getRow(4).height=8;
+    ws.mergeCells(1,1,1,NC);var t=ws.getCell(1,1);t.value=S0.title;t.font={name:FONT,size:13,bold:true,color:{argb:'FFFFFFFF'}};t.fill=fill(NAVY);t.alignment={vertical:'middle',indent:1};ws.getRow(1).height=26;
+    ws.mergeCells(2,1,2,NC);var u=ws.getCell(2,1);u.value=S0.sub;u.font={name:FONT,size:8.5,color:{argb:'FFC3CCDC'}};u.fill=fill(NAVY);u.alignment={vertical:'middle',indent:1};u.border={bottom:{style:'medium',color:{argb:'FF'+ACC}}};ws.getRow(2).height=16;
+    ws.mergeCells(3,1,3,NC);var g=ws.getCell(3,1);g.value=S0.meta;g.font={name:FONT,size:9,color:{argb:'FF'+META}};g.fill=fill('E8EDF5');g.alignment={vertical:'middle',indent:1,wrapText:true};ws.getRow(3).height=nc<9?34:22;ws.getRow(4).height=8;
     // nagłówki
     var gi=[];if(h2){var gcur=-1,gcol=0;h1.forEach(function(h,i){if(i<nl||h!==''){gcur=i;gcol=(gcol+1)}gi[i]=i<nl?-1:gcol})}
     var hc=function(cell,v,i,row){cell.value=v;cell.font={name:FONT,size:10,bold:true,color:{argb:'FFFFFFFF'}};cell.fill=fill(h2&&i>=nl&&gi[i]%2===0?NAVY2:NAVY);cell.alignment={vertical:'middle',horizontal:i<nl?'left':'center',wrapText:true,indent:i<nl?1:0};cell.border={bottom:row===hr?{style:'thin',color:{argb:'FF'+NAVY}}:undefined,left:(h2&&i>nl&&gi[i]!==gi[i-1])?{style:'thin',color:{argb:'FF65738A'}}:undefined}};
