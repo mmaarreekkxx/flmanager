@@ -851,6 +851,7 @@ h2.h2 { position:relative; }
         <div class="gen-body">
           <div class="pills" id="pills" role="group" aria-label="Wybór kategorii"></div>
           <div class="fields" id="fields"></div>
+          <datalist id="vehicles"></datalist>
           <datalist id="team"><option value="Kamil"><option value="Paulina"><option value="Bartek"><option value="Sandra"><option value="Marek"><option value="W.A."><option value="Flota"></datalist>
         </div>
       </div>
@@ -1088,39 +1089,39 @@ h2.h2 { position:relative; }
 var CATS = [
   { id:'wydanie', name:'WYDANIE', icon:'🚗', color:'#15803d', tc:'#fff', cname:'ZIELONY',
     use:'wydanie pojazdu pracownikowi', rem:'1 dzień wcześniej',
-    ex:'WYDANIE – Dacia Duster – CMG12345 – Jan Kowalski (Kamil)', topicLabel:'Pracownik (odbiera pojazd)',
-    d:{veh:'Dacia Duster', reg:'CMG12345', topic:'Jan Kowalski', time:'', resp:'Kamil'},
+    ex:'WYDANIE – Dacia Duster – CMG12345 – Jan Kowalski (Bartek)', topicLabel:'Pracownik (odbiera pojazd)',
+    d:{veh:'Dacia Duster', reg:'CMG12345', topic:'Jan Kowalski', time:'', resp:'Bartek'},
     fields:[['POJAZD','veh'],['NR REJ.','reg'],['STAN POJAZDU',''],['PRACOWNIK','topic'],['DZIAŁ',''],['MIEJSCE WYDANIA',''],['OSOBA ODPOWIEDZIALNA','resp'],['UWAGI','']] },
   { id:'zwrot', name:'ZWROT', icon:'🔄', color:'#dc2626', tc:'#fff', cname:'CZERWONY',
     use:'zwrot pojazdu', rem:'1 dzień wcześniej',
-    ex:'ZWROT – Toyota Corolla – CMG45678 – Jan Kowalski (Paulina)', topicLabel:'Użytkownik (zwraca pojazd)',
-    d:{veh:'Toyota Corolla', reg:'CMG45678', topic:'Jan Kowalski', time:'', resp:'Paulina'},
+    ex:'ZWROT – Toyota Corolla – CMG45678 – Jan Kowalski (Bartek)', topicLabel:'Użytkownik (zwraca pojazd)',
+    d:{veh:'Toyota Corolla', reg:'CMG45678', topic:'Jan Kowalski', time:'', resp:'Bartek'},
     fields:[['POJAZD','veh'],['NR REJ.','reg'],['UŻYTKOWNIK','topic'],['MIEJSCE ZWROTU',''],['PRZEBIEG',''],['OSOBA ODPOWIEDZIALNA','resp'],['UWAGI','']] },
   { id:'opony', name:'OPONY', icon:'🛞', color:'#f97316', tc:'#1f1000', cname:'POMARAŃCZOWY',
     use:'wymiana, montaż, przechowywanie opon', rem:'1 dzień wcześniej',
-    ex:'OPONY – Toyota Proace – CMG98765 – wymiana opon (Sandra)', topicLabel:'Rodzaj operacji',
-    d:{veh:'Toyota Proace', reg:'CMG98765', topic:'wymiana opon', time:'', resp:'Sandra'},
+    ex:'OPONY – Toyota Proace – CMG98765 – wymiana opon (Marek)', topicLabel:'Rodzaj operacji',
+    d:{veh:'Toyota Proace', reg:'CMG98765', topic:'wymiana opon', time:'', resp:'Marek'},
     fields:[['POJAZD','veh'],['NR REJ.','reg'],['RODZAJ OPERACJI','topic'],['MIEJSCE',''],['OSOBA ODPOWIEDZIALNA','resp'],['UWAGI','']] },
   { id:'nowe', name:'NOWE AUTO', icon:'📦', color:'#7c3aed', tc:'#fff', cname:'FIOLETOWY',
     use:'odbiór / dostarczenie nowego pojazdu', rem:'według potrzeb',
-    ex:'NOWE AUTO – Skoda Fabia – CMG56741A – odbiór z Bydgoszczy / dostawa do Centrali (Marek)', topicLabel:'Odbiór / dostawa',
-    d:{veh:'Skoda Fabia', reg:'CMG56741A', topic:'odbiór z Bydgoszczy / dostawa do Centrali', time:'', resp:'Marek'},
+    ex:'NOWE AUTO – Skoda Fabia – CMG56741A – odbiór z Bydgoszczy / dostawa do Centrali (Sandra)', topicLabel:'Odbiór / dostawa',
+    d:{veh:'Skoda Fabia', reg:'CMG56741A', topic:'odbiór z Bydgoszczy / dostawa do Centrali', time:'', resp:'Sandra'},
     fields:[['POJAZD','veh'],['NR REJ.','reg'],['DEALER',''],['MIEJSCE ODBIORU',''],['DATA ODBIORU',''],['OSOBA ODPOWIEDZIALNA','resp'],['UWAGI','']] },
   { id:'serwis', name:'SERWIS', icon:'🔧', color:'#facc15', tc:'#2b2300', cname:'ŻÓŁTY',
     use:'serwis, naprawa, wizyta w warsztacie', rem:'1 dzień wcześniej',
-    ex:'SERWIS – Toyota Proace – CMG98765 – naprawa hamulców (Bartek)', topicLabel:'Zakres naprawy / temat',
-    d:{veh:'Toyota Proace', reg:'CMG98765', topic:'naprawa hamulców', time:'', resp:'Bartek'},
+    ex:'SERWIS – Toyota Proace – CMG98765 – naprawa hamulców (Marek)', topicLabel:'Zakres naprawy / temat',
+    d:{veh:'Toyota Proace', reg:'CMG98765', topic:'naprawa hamulców', time:'', resp:'Marek'},
     fields:[['POJAZD','veh'],['NR REJ.','reg'],['SERWIS',''],['ZAKRES NAPRAWY','topic'],['PLANOWANY ODBIÓR',''],['OSOBA ODPOWIEDZIALNA','resp'],['UWAGI','']] },
   { id:'zarzad', name:'ZARZĄD', icon:'📄', color:'#6b7280', tc:'#fff', cname:'SZARY',
     use:'sprawy dotyczące pojazdów Biura Zarządu', rem:'1 dzień wcześniej',
-    ex:'ZARZĄD – Maybach – CMG11111 – serwis Bydgoszcz 10:00 (Kamil)', topicLabel:'Temat / operacja',
-    d:{veh:'Maybach', reg:'CMG11111', topic:'serwis Bydgoszcz', time:'10:00', resp:'Kamil'},
+    ex:'ZARZĄD – Maybach – CMG11111 – serwis Bydgoszcz 10:00 (W.A.)', topicLabel:'Temat / operacja',
+    d:{veh:'Maybach', reg:'CMG11111', topic:'serwis Bydgoszcz', time:'10:00', resp:'W.A.'},
     fields:[['POJAZD','veh'],['NR REJ.','reg'],['UŻYTKOWNIK',''],['TEMAT/OPERACJA','topic'],['OSOBA ODPOWIEDZIALNA','resp'],['UWAGI','']] },
   { id:'spotkanie', name:'SPOTKANIE', icon:'👥', color:'#f472b6', tc:'#3b0a24', cname:'RÓŻOWY',
     use:'spotkania dotyczące floty', rem:'1 godzina wcześniej', noVeh:true,
-    ex:'SPOTKANIE – PSF – omówienie bieżących napraw 12:00 (W.A.)',
+    ex:'SPOTKANIE – PSF – omówienie bieżących napraw 12:00 (Kamil)',
     vehLabel:'Z kim / czego dotyczy (np. PSF)', topicLabel:'Temat spotkania',
-    d:{veh:'PSF', reg:'', topic:'omówienie bieżących napraw', time:'12:00', resp:'W.A.'},
+    d:{veh:'PSF', reg:'', topic:'omówienie bieżących napraw', time:'12:00', resp:'Kamil'},
     fields:[['TEMAT','topic'],['UCZESTNICY',''],['MIEJSCE / LINK TEAMS',''],['OSOBA ODPOWIEDZIALNA','resp'],['CEL / UWAGI','']] }
 ];
 // Kolejność kategorii w punktach 3 (przykłady), 4 (opisy) i 5 (przypomnienia) wiadomości.
@@ -1288,9 +1289,9 @@ var printSel = {}; PSEC.forEach(function (p) { printSel[p[0]] = true; });
 var TERM = [
   {p:true, t:'nowe-wydarzenie --kalendarz "Dział Obsługi Floty"'},
   {t:'kategoria: SERWIS (żółty)', c:'tl-dim'},
-  {t:'tytuł: SERWIS – Toyota Proace – CMG98765 – naprawa hamulców (Bartek)', c:'tl-dim'},
+  {t:'tytuł: SERWIS – Toyota Proace – CMG98765 – naprawa hamulców (Marek)', c:'tl-dim'},
   {t:'opis: szablon SERWIS, 7 pól', c:'tl-dim'},
-  {t:'osoba odpowiedzialna: Bartek (w tytule i w opisie)', c:'tl-dim'},
+  {t:'osoba odpowiedzialna: Marek (w tytule i w opisie)', c:'tl-dim'},
   {t:'przypomnienie: 1 dzień wcześniej', c:'tl-warn'},
   {t:'ok: wydarzenie zgodne ze standardem 4/4', c:'tl-ok'}
 ];
@@ -1414,6 +1415,21 @@ $$('input[data-save]').forEach(function (el) {
 });
 
 /* ============================ GENERATOR ============================ */
+/* Lista pojazdów do podpowiedzi (marka + model) */
+var VEHICLES = [
+  'Audi A5','Audi A6','Audi Q5','Audi Q7','BYD SEAL U DM-i BOOST','Citroen C3 Aircross','Citroen Jumper',
+  'Dacia Duster','Dacia Duster Expression','Dacia Duster Journey','Dacia Jogger','Dacia Sandero','Dacia Sandero Stepway',
+  'Hyundai i30','Isuzu D-MAX','Jaecoo Jaecoo 7','Kia Ceed','Kia NEW OPTIMA','Kia Stinger',
+  'Mercedes-Benz C160','Mercedes-Benz C200','Mercedes-Benz GLE 300 D','Mercedes-Benz GLS 600 4MATIC Maybach','Mercedes-Benz W212 E200I',
+  'Omoda Omoda 5','Rolls Royce Wraith','Skoda Fabia','Skoda Karoq','Skoda Kodiaq','Skoda Octavia','Skoda Scala','Skoda Superb',
+  'Suzuki Vitara','Toyota Camry','Toyota Corolla','Toyota Highlander','Toyota Proace Max',
+  'Volkswagen Arteon','Volkswagen Passat','Volkswagen Passat B8','Volvo S90'
+];
+(function () {
+  var dl = document.getElementById('vehicles');
+  if (dl) dl.innerHTML = VEHICLES.map(function (v) { return '<option value="' + v + '">'; }).join('');
+})();
+
 var state = { cat:'wydanie', v:{veh:'', reg:'', topic:'', time:'', resp:'', date:''}, x:{} };
 var cur = function () { return byId(state.cat); };
 
@@ -1430,8 +1446,8 @@ function renderPills() {
 }
 function renderForm(anim) {
   var c = cur(), h = '';
-  h += fld('veh', c.noVeh ? c.vehLabel : 'Pojazd (marka i model)', 'np. ' + c.d.veh, {full:c.noVeh});
-  if (!c.noVeh) h += fld('reg', 'Nr rejestracyjny (wielkie litery, bez spacji)', 'np. ' + c.d.reg);
+  h += fld('veh', c.noVeh ? c.vehLabel : 'Pojazd (marka i model)', 'np. ' + c.d.veh, c.noVeh ? {full:true} : {list:'vehicles'});
+  if (!c.noVeh) h += fld('reg', 'Nr rejestracyjny', 'np. ' + c.d.reg);
   h += fld('topic', c.topicLabel, 'np. ' + c.d.topic, {full:true});
   h += fld('time', 'Godzina w tytule (opcjonalnie)', 'np. ' + (c.d.time || '10:00'));
   h += fld('resp', 'Osoba odpowiedzialna (z Działu)', 'np. ' + c.d.resp, {list:'team'});
@@ -1607,6 +1623,14 @@ if (window.matchMedia) {
 
 $('#pills').addEventListener('click', function (e) {
   var b = e.target.closest('[data-cat]'); if (!b) return;
+  var from = cur(), to = byId(b.dataset.cat);
+  if (!!from.noVeh !== !!to.noVeh) {
+    // pole „veh” znaczy co innego (pojazd vs. „z kim / czego dotyczy”) – trzymamy osobne wartości
+    state.vk = state.vk || {car:'', who:''};
+    state.vk[from.noVeh ? 'who' : 'car'] = state.v.veh;
+    state.v.veh = state.vk[to.noVeh ? 'who' : 'car'];
+  }
+  state.v.resp = to.d.resp; // domyślna osoba odpowiedzialna dla danej kategorii
   state.cat = b.dataset.cat; renderPills(); renderForm(true);
 });
 $('#fields').addEventListener('input', function (e) {
@@ -1633,6 +1657,7 @@ $('#bDemo').addEventListener('click', function () {
 });
 $('#bClear').addEventListener('click', function () {
   state.v = {veh:'', reg:'', topic:'', time:'', resp:state.v.resp, date:''};
+  state.vk = {car:'', who:''};
   Object.keys(state.x).filter(function (k) { return k.indexOf(cur().id + '|') === 0; }).forEach(function (k) { delete state.x[k]; });
   renderForm(true);
 });
