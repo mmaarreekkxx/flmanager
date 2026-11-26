@@ -246,11 +246,17 @@
           pointer-events:auto;animation:skyCardIn .16s ease}
   @keyframes skyCardIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
   #skySel.on{display:block}
-  #skySel .sk-h{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#7891b3;margin-bottom:2px}
-  #skySel .sk-n{font-size:15px;font-weight:600;color:#fff;margin-bottom:6px;letter-spacing:.01em}
-  #skySel .sk-r{display:flex;justify-content:space-between;gap:16px;font-size:11px;line-height:1.7;color:#cfdcee;
+  #skySel .sk-top{display:flex;align-items:baseline;gap:6px;margin-bottom:3px;min-width:0}
+  #skySel .sk-h{font-size:7.5px;letter-spacing:.16em;text-transform:uppercase;color:#7891b3;white-space:nowrap}
+  #skySel .sk-n{font-size:11.5px;font-weight:600;color:#fff;letter-spacing:.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  #skySel .sk-x{margin-left:auto;padding:0 0 0 6px;border:0;background:none;color:#7d93b8;font-size:13px;line-height:1;cursor:pointer}
+  #skySel .sk-x:hover{color:#fff}
+  #skySel .sk-r{display:flex;justify-content:space-between;gap:10px;font-size:9px;line-height:1.5;color:#cfdcee;
                 font-variant-numeric:tabular-nums}
-  #skySel .sk-r span:first-child{color:#7b8fae;font-size:10.5px}
+  #skySel .sk-r span:first-child{color:#7b8fae;font-size:8px;letter-spacing:.04em;white-space:nowrap}
+  #skySel .sk-r span:last-child{text-align:right}
+  #skySel .sk-btns{gap:4px;margin-top:5px}
+  #skySel .sk-btns button{padding:3px 0;border-radius:5px;font-size:9px}
   /* dolny pasek narzędzi i arkusz — układ jak w mobilnych planetariach */
   #skyBar{position:fixed;left:50%;transform:translateX(-50%);bottom:4.5rem;z-index:31;display:flex;gap:4px;padding:5px;
           border-radius:9px;background:rgba(9,15,29,.9);border:1px solid rgba(148,175,220,.2);
@@ -389,7 +395,7 @@
   #skyTop .sky-irow{font-size:9px;gap:8px;line-height:1.48}
   #skyTop .sky-irow span{font-size:8px;letter-spacing:.08em;min-width:61px;width:61px}
   #skyTop .sky-irow b{font-size:9px}
-  #skyTop #skySel{margin-top:6px;padding:7px 9px;border-radius:7px}
+  #skyTop #skySel{margin-top:5px;padding:5px 8px 6px;border-radius:6px;width:auto;min-width:150px;max-width:min(220px,62vw);box-sizing:border-box}
   /* Przełączniki są rzeczywistą częścią paska czasu, nie osobnym panelem pośrodku widoku. */
   #tBarOuter{left:8px;right:8px;width:auto;transform:none;bottom:10px}
   #tBar{padding:5px 8px;gap:7px;border-radius:7px;min-height:38px;background:rgba(9,15,29,.86)}
@@ -435,6 +441,103 @@
     #skyBar .sky-tab{height:26px;gap:4px;font-size:9px}
     #skyBar .sky-tab svg{width:13px;height:13px}
     #skyPanel{bottom:calc(182px + env(safe-area-inset-bottom));max-height:min(58vh,400px)}
+  }
+
+  /* ===== Telefon w poziomie (niski ekran): zwarty interfejs, niebo zajmuje większość ekranu ===== */
+  @media (orientation:landscape) and (max-height:520px){
+    /* nagłówek i odczyty (lewy górny róg): mniejsze, w dwóch kolumnach */
+    #skyTop{top:5px;left:8px;max-width:min(330px,48vw)}
+    #skyTop .sky-head{gap:5px}
+    #skyTop .sky-ico{width:17px;height:17px}
+    #skyTop .sky-t1{font-size:8px;letter-spacing:.15em;line-height:1.15}
+    #skyTop .sky-t2{font-size:7.5px;margin-top:0;line-height:1.2}
+    #skyTop .sky-info{margin-top:3px;padding:2px 6px;border-radius:5px;display:grid;grid-template-columns:auto auto;column-gap:10px;width:max-content;max-width:100%}
+    #skyTop .sky-irow{font-size:8px;line-height:1.32;gap:4px;border-top:0}
+    #skyTop .sky-irow span{font-size:6.5px;letter-spacing:.08em;min-width:0;width:auto}
+    #skyTop .sky-irow b{font-size:8px}
+    #skyTop .sky-irow:nth-child(6){grid-column:1/-1}
+    #skyTop .sky-irow.sky-trow.on{grid-column:1/-1}
+    #skyTop #skySel{margin-top:3px;padding:4px 7px 5px;max-width:200px}
+    /* przyciski w prawym górnym rogu */
+    .fixed.top-4.right-4{top:6px;right:8px;gap:4px}
+    .fixed.top-4.right-4 .icon-btn{width:26px;height:26px;font-size:11px}
+    #btnSky{padding:0 8px 0 6px}
+    #btnSky .sky-lbl{font-size:9.5px}
+    /* dolny panel: węższy, tor czasu obok przycisków czasu, mniejsze zakładki */
+    #tBarOuter{left:50%;right:auto;transform:translateX(-50%);width:min(700px,calc(100vw - 110px));bottom:max(3px,env(safe-area-inset-bottom))}
+    body.skymode #skyBar{padding:1px;border-radius:6px 6px 0 0;gap:1px}
+    #skyBar .sky-tab{height:21px;font-size:9px;gap:4px;padding:0 3px}
+    #skyBar .sky-tab svg{width:12px;height:12px}
+    #tBar{padding:3px 6px;gap:3px 8px;min-height:0;display:grid;grid-template-columns:auto minmax(140px,1fr);
+          grid-template-areas:"r t" "s s";align-items:center}
+    #tBar .tb-row1{grid-area:r;gap:4px}
+    #tBar #tTrack{grid-area:t;height:24px}
+    #tBar .tb-sunrow{grid-area:s;gap:4px}
+    #tBar #tPlay{width:24px;height:24px;font-size:10px}
+    .tb-head{width:70px;min-width:70px}
+    #tBar #tClock{font-size:11px}
+    #tDate{font-size:7.5px}
+    .tb-seg button{padding:4px 0;font-size:9px;width:30px;min-width:30px}
+    #tSpd{padding:4px 0;font-size:9px;width:46px;min-width:46px}
+    #tLive{padding:4px 2px;font-size:8.5px;width:64px;min-width:64px}
+    .tb-mini{font-size:8px;padding:2px 4px}
+    #tBandLoc{height:14px}
+    #tSun{font-size:8px}
+    #tMarks i{top:3px;bottom:11px}
+    #tLabels{font-size:8px}
+    .tb-zone{--tb-edge:18px}
+    /* panele wysuwane nad paskiem: niżej i niższe */
+    #skyPanel{bottom:calc(92px + env(safe-area-inset-bottom));max-height:calc(100vh - 140px);width:min(400px,calc(100vw - 24px))}
+    #issPanel.panel{max-height:calc(100vh - 80px)}
+    #cornerBR{bottom:calc(8px + env(safe-area-inset-bottom))!important;right:8px!important}
+    #cornerBR .chip{padding:4px 8px 4px 7px;font-size:11px}
+  }
+  /* ===== Arkusz zakładek nieba: zwarty, nagłówek z ✕ zawsze widoczny (przewija się tylko treść) ===== */
+  #skyPanel{display:flex;flex-direction:column;overflow:hidden;padding:0;border-radius:10px;
+            width:min(360px,calc(100vw - 20px))!important;max-height:min(46vh,360px)}
+  #skyPanel > .sky-grip{flex:none;margin:6px auto 0;width:30px}
+  #skyPanel > .sky-phead{flex:none;margin:0;padding:3px 44px 5px 12px;min-height:24px}
+  #skyPanel > .sky-phead .menu-h{font-size:9.5px;margin:0}
+  #skyClose{position:absolute;top:5px;right:6px;z-index:3;width:28px!important;height:28px!important;font-size:12px}
+  #skyPanelIn{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;
+              -webkit-overflow-scrolling:touch;padding:0 12px 10px}
+  #skyPanel .menu-h{font-size:9.5px;letter-spacing:.14em}
+  #skyPanel .sky-phead{margin-bottom:4px;gap:8px}
+  #skyPanel hr.sep{margin:6px 0}
+  #skyPanel .btn{font-size:10.5px;padding:4px 7px;border-radius:5px}
+  #skyPanel .sky-2col{gap:5px;margin-top:5px}
+  #skyPanel .sky-4col{grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin-top:5px}
+  #skyPanel .sky-2col .btn,#skyPanel .sky-4col .btn{padding:4px 1px}
+  #skyPanel .sel{font-size:11px;padding:4px 6px;border-radius:5px}
+  #skyPanel input[type=range]{margin:2px 0}
+  #skyPanel .sky-minirow label span{font-size:9.5px;margin-bottom:2px}
+  #skyPanel .sky-minirow input{height:26px;font-size:11px;padding:0 7px;border-radius:5px}
+  #skyPanel .sky-note{font-size:9.5px;line-height:1.4;margin-top:6px}
+  #skyPanel .sky-fov{font-size:10px}
+  #skyPanel .row{padding:3px 2px;gap:8px}
+  #skyPanel .row b{font-size:11.5px}
+  #skyPanel .row small{font-size:9.5px}
+  #skyPanel .sw{width:30px;height:17px}
+  #skyPanel .sw::after{width:13px;height:13px}
+  #skyPanel .sw:checked::after{transform:translateX(13px)}
+  #skyPanel .sky-searchbox{height:32px;padding:0 9px;gap:7px}
+  #skyPanel .sky-searchbox input{font-size:12px}
+  #skyPanel .sky-chips{gap:4px;margin:6px 0 3px}
+  #skyPanel .sky-chip{padding:3px 8px;font-size:10px;border-radius:6px}
+  #skyPanel .sky-res{padding:4px 5px;gap:8px}
+  #skyPanel .sky-res .r-ico{width:22px;height:22px;font-size:11px}
+  #skyPanel .sky-res .r-n{font-size:11.5px}
+  #skyPanel .sky-ev{padding:4px 5px;gap:8px}
+  #skyPanel .sky-ev .e-ico{width:21px;height:21px;font-size:11px}
+  #skyPanel .sky-ev .e-n{font-size:11px}
+  #skyPanel .sky-ev .e-m,#skyPanel .sky-res .r-m{font-size:9px}
+  #skyPanel .sky-ev .e-d,#skyPanel .sky-res .r-a{font-size:9.5px}
+  #skyPanel .sky-mini-btn{padding:2px 8px;font-size:9.5px}
+  #skyPanel .sky-empty{font-size:10.5px;padding:8px 3px}
+  #skyPanel .sk-btns button{font-size:10px;padding:4px 0}
+  #skyPanel .sky-perf{font-size:9px;margin-top:6px;padding-top:6px}
+  @media (orientation:landscape) and (max-height:520px){
+    #skyPanel{max-height:calc(100vh - 128px)}
   }
 </style>
 </head>
@@ -666,6 +769,7 @@
       <div class="sky-irow"><span>Księżyc</span><b id="skyMoonv">—</b></div>
       <div class="sky-irow"><span>Czas</span><b id="skyTimev">—</b></div>
       <div class="sky-irow"><span>Płynność</span><b id="skyFpsv">—</b></div>
+      <div class="sky-irow sky-trow" id="skyIssRow"><span>ISS</span><b id="skyIssv" style="white-space:normal;line-height:1.35">—</b></div>
       <div class="sky-irow sky-trow" id="skyTrackRow"><span>Śledzenie</span><b><i id="skyTrackName">—</i><button id="skyTrackOff" class="sky-tx" title="Przestań śledzić (Esc)" aria-label="Przestań śledzić">✕</button></b></div>
     </div>
     <div id="skySel" class="glass"></div>
@@ -790,6 +894,12 @@
 /* OBSERWATORIUM — natywny JS. Render: WebGL2 (klipmapa kafelków wgrywana z budżetem czasu, chmury wypiekane na GPU)
    albo programowy (CPU). Dane: NASA GIBS (kafelki), CelesTrak + SGP4 (ISS). */
 const C_ = {};
+/* zapis do DOM tylko, gdy wartość się zmieniła — oszczędza przebudowy węzłów i układu strony */
+/* Skala rozdzielczości nieba względem jakości: do 80% jakości obraz zostaje w pełnej ostrości
+   (spadek jakości zmniejsza wtedy tylko koszt detali), niżej rozdzielczość maleje płynnie. */
+function skyResScale(q) { return q >= 0.8 ? 1 : Math.max(0.5, q / 0.8); }
+function setTxt(el, v) { if (el && el._tx !== v) { el._tx = v; el.textContent = v; } }
+function setHtml(el, v) { if (el && el._hx !== v) { el._hx = v; el.innerHTML = v; } }
 const $ = s => s.charAt(0) === '#' ? (C_[s] || (C_[s] = document.getElementById(s.slice(1)))) : document.querySelector(s);
 const DEG = Math.PI / 180, TAU = Math.PI * 2;
 const clamp = (v, a, b) => v < a ? a : (v > b ? b : v);
@@ -1026,16 +1136,35 @@ TILE_CACHE.then(async c => {                                                    
   if (!c) return;
   try { const k = await c.keys(), max = IS_MOBILE ? 500 : 1500; for (let i = 0; i < k.length - max; i++) c.delete(k[i]); } catch (e) { /* ignoruj */ }
 });
+function abortErr() { const e = new Error('aborted'); e.name = 'AbortError'; e.aborted = true; return e; }
 async function fetchTile(job, shard, signal) {
   const c = job.daily ? null : await TILE_CACHE;
   if (c) { try { const hit = await c.match(canonURL(job)); if (hit) { job.fresh = false; return await hit.blob(); } } catch (e) { /* ignoruj */ } }
+  if (signal && signal.aborted) throw abortErr();          // anulowano w trakcie sprawdzania cache — nie ruszamy sieci
   job.fresh = true;
-  const res = await fetch(tileURL(job, shard), { signal, mode: 'cors', credentials: 'omit' });
-  if (!res.ok) { const e = new Error('HTTP ' + res.status); e.status = res.status; throw e; }
-  return res.blob();
+  let res;
+  try { res = await fetch(tileURL(job, shard), { signal, mode: 'cors', credentials: 'omit' }); }
+  catch (e) { if (signal && signal.aborted) throw abortErr(); throw e; }
+  if (!res.ok) {
+    try { res.body && res.body.cancel && res.body.cancel().catch(() => {}); } catch (e) { /* ignoruj */ }
+    const e = new Error('HTTP ' + res.status); e.status = res.status; throw e;
+  }
+  job.gotHeaders = true;
+  try { return await res.blob(); }
+  catch (e) { if (signal && signal.aborted) throw abortErr(); throw e; }
 }
 const cacheTile = (job, blob) => { if (!job.daily) TILE_CACHE.then(c => c && c.put(canonURL(job), new Response(blob, { headers: { 'Content-Type': blob.type || 'image/jpeg' } }))).catch(() => {}); };
 const uncacheTile = job => { TILE_CACHE.then(c => c && c.delete(canonURL(job))).catch(() => {}); };
+/* Bezpieczne przerwanie żądania: przyczyna to zwykły Error z nazwą AbortError (a nie DOMException),
+   a ewentualne „osierocone” odrzucenia z powodu anulowania są wyciszane globalnie — to normalny stan, nie błąd. */
+function skySafeAbort(ctrl) {
+  if (!ctrl || ctrl.signal.aborted) return;
+  try { ctrl.abort(abortErr()); } catch (e) { try { ctrl.abort(); } catch (e2) { /* ignoruj */ } }
+}
+window.addEventListener('unhandledrejection', ev => {
+  const r = ev.reason;
+  if (r && (r.name === 'AbortError' || r.aborted)) ev.preventDefault();
+});
 const Net = {
   cache: new Map(), used: new Map(), sizes: new Map(), inflight: new Map(), queue: new Map(), failedAt: new Map(),
   stats: { base: { ok: 0, fail: 0, gone: 0, total: 0 }, nbase: { ok: 0, fail: 0, gone: 0, total: 0 }, detail: { ok: 0, fail: 0, gone: 0, total: 0 }, esri: { ok: 0, fail: 0, gone: 0, total: 0 } },
@@ -1062,7 +1191,10 @@ const Net = {
   },
   setNeeded(set) {
     for (const [k, j] of this.queue) if (j.group === 'detail' && !set.has(k)) this.queue.delete(k);
-    for (const [, e] of this.inflight) if (e.job.group === 'detail' && !set.has(e.job.key)) { e.job.cancelled = true; e.ctrl.abort(); }
+    for (const [, e] of this.inflight) if (e.job.group === 'detail' && !set.has(e.job.key) && !e.job.cancelled) {
+      e.job.cancelled = true;
+      skySafeAbort(e.ctrl);                                // przerwanie pobierania jest normalne (kafelek wyszedł z kadru) — bez wyjątków w konsoli
+    }
     this.protect = set;
   },
   pump() {
@@ -1075,7 +1207,7 @@ const Net = {
   start(job) {
     const ctrl = new AbortController();
     this.inflight.set(job.key, { job, ctrl });
-    const to = setTimeout(() => ctrl.abort(), 12000);       // zawieszone połączenie nie blokuje slotu dłużej niż 12 s — ponowna próba przez inny alias
+    const to = setTimeout(() => skySafeAbort(ctrl), 12000);       // zawieszone połączenie nie blokuje slotu dłużej niż 12 s — ponowna próba przez inny alias
     const shard = !job.esri && !this.shardBad && job.tries < 2;      // aliasy domen dotyczą tylko GIBS
     fetchTile(job, shard, ctrl.signal)
       .then(blob => decodeBlob(blob, job).then(img => { if (job.fresh) cacheTile(job, blob); return img; }))
@@ -1130,7 +1262,7 @@ const Net = {
   resetStats(g) { this.stats[g].ok = 0; this.stats[g].fail = 0; this.stats[g].gone = 0; },
   dropPending(sig) {
     for (const [k, j] of this.queue) if (j.group === 'nbase' && j.sig === sig) this.queue.delete(k);
-    for (const [, e] of this.inflight) if (e.job.group === 'nbase' && e.job.sig === sig) { e.job.cancelled = true; e.ctrl.abort(); }
+    for (const [, e] of this.inflight) if (e.job.group === 'nbase' && e.job.sig === sig) { e.job.cancelled = true; skySafeAbort(e.ctrl); }
   },
   evictSig(sig) {
     const pre = 'night:' + sig + '/';
@@ -1284,7 +1416,7 @@ async function gibsLatest(p) {
   const c = AVAIL.get(p.layer); if (c && Date.now() - c.at < 20000) return c.date;    // świeżo pytane — nie dubluj
   try {
     const u = `https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/${p.layer}/default/default/500m/2/0/0.${p.ext}`;
-    const ctrl = new AbortController(), to = setTimeout(() => ctrl.abort(), 9000);
+    const ctrl = new AbortController(), to = setTimeout(() => skySafeAbort(ctrl), 9000);
     const res = await fetch(u, { method: 'HEAD', signal: ctrl.signal, mode: 'cors', credentials: 'omit' });
     clearTimeout(to);
     if (!res.ok) return null;
@@ -3033,7 +3165,7 @@ async function loadTLE() {
   const srcs = [['CelesTrak', 'https://celestrak.org/NORAD/elements/gp.php?CATNR=25544&FORMAT=TLE'], ['wheretheiss.at', 'https://api.wheretheiss.at/v1/satellites/25544/tles?format=text']];
   for (const [n, u] of srcs) {
     try {
-      const ctrl = new AbortController(), to = setTimeout(() => ctrl.abort(), 9000);
+      const ctrl = new AbortController(), to = setTimeout(() => skySafeAbort(ctrl), 9000);
       const r = await fetch(u, { signal: ctrl.signal, mode: 'cors' }); clearTimeout(to);
       if (!r.ok) continue;
       const t = parseTLE(await r.text());
@@ -3119,7 +3251,8 @@ function selectPass(p) {
     sky.push({ ms, az: la.az, el: la.el }); pts.push(...wvec(geo.lat / DEG, geo.lon / DEG, 1.003));
   }
   ISS.selTrk = Float32Array.from(pts); ISS.selSky = sky;
-  T.sim = p.aos - 90000; setSpeed(10); T.playing = true; $('#tPlay').textContent = '❚❚';
+  T.sim = p.aos - 90000; T.playing = true; $('#tPlay').textContent = '❚❚';   // prędkość czasu bez zmian (wybór użytkownika)
+  TB.live = false; if (typeof tbSync === 'function') tbSync();
   ISS.follow = false; ISS.show = true; $('#iShow').checked = true;
   flyTo(ISS.obs.lat, ISS.obs.lon, 3.8, 1800);
   ISS.uiDirty = true; ovDirty = true; drawSky();
@@ -3315,6 +3448,7 @@ function toggleIssPanel(v) {
 }
 function followIss() {
   if (!ISS.pos) return;
+  setSpeed(1); tbSync();                                   // śledzenie ISS w czasie rzeczywistym (1×)
   ISS.show = true; $('#iShow').checked = true;
   flyTo(ISS.pos.lat, ISS.pos.lon, Math.max(view.zoom, 3.2), 1400, () => { ISS.follow = true; updateIssPanel(); });
 }
@@ -3322,18 +3456,18 @@ let lastIssUi = 0;
 function updateIssPanel(now) {
   if (now !== undefined) { if (now - lastIssUi < 250) return; lastIssUi = now; }   // DOM tylko 4× na sekundę
   const P = ISS.pos;
-  $('#cIss').textContent = P ? `${fmtLat(P.lat)} ${fmtLon(P.lon)} · ${Math.round(P.alt)} km ${P.lit ? '☀' : '☾'}` : (ISS.l1 ? '—' : 'ładowanie orbity…');
+  setTxt($('#cIss'), P ? `${fmtLat(P.lat)} ${fmtLon(P.lon)} · ${Math.round(P.alt)} km ${P.lit ? '☀' : '☾'}` : (ISS.l1 ? '—' : 'ładowanie orbity…'));
   if (!ISS.panel) return;
-  $('#btnIss').classList.toggle('on', true); $('#iGo').classList.toggle('on', ISS.follow); $('#iGo').textContent = ISS.follow ? 'Śledzę ISS ✓' : 'Pokaż i śledź';
+  $('#btnIss').classList.toggle('on', true); $('#iGo').classList.toggle('on', ISS.follow); setTxt($('#iGo'), ISS.follow ? 'Śledzę ISS ✓' : 'Pokaż i śledź');
   if (P) {
     const spd = P.speed * 3600, age = (T.sim - ISS.epoch) / 86400000;
-    $('#issLive').innerHTML =
+    setHtml($('#issLive'),
       `<div class="kv"><span>Szerokość</span><span>${fmtLat(P.lat)}</span></div><div class="kv"><span>Długość</span><span>${fmtLon(P.lon)}</span></div>` +
       `<div class="kv"><span>Wysokość</span><span>${fmtNum(P.alt, 1)} km</span></div><div class="kv"><span>Prędkość</span><span>${Math.round(spd).toLocaleString('pl-PL')} km/h (${fmtNum(P.speed, 2)} km/s)</span></div>` +
       `<div class="kv"><span>Oświetlenie</span><span>${P.lit ? 'w świetle Słońca' : 'w cieniu Ziemi'}</span></div>` +
-      `<div class="kv"><span>Czas na globie</span><span>${new Date(T.sim).toISOString().slice(11, 19)} UTC</span></div>`;
-    $('#issMeta').innerHTML = `Orbita: <b>${ISS.src}</b> · epoka ${new Date(ISS.epoch).toISOString().slice(0, 16).replace('T', ' ')} UTC (${fmtNum(Math.abs(age), 1)} dn. ${age >= 0 ? 'temu' : 'w przód'}) · propagator: ${ISS.sat ? 'SGP4' : 'Kepler + J2 (uproszczony)'}.` +
-      (Math.abs(age) > 10 ? ' <span style="color:#fbbf24">Dane są stare — położenie przybliżone.</span>' : '') + ' Dokładność przelotów maleje po ok. 3–5 dobach.';
+      `<div class="kv"><span>Czas na globie</span><span>${new Date(T.sim).toISOString().slice(11, 19)} UTC</span></div>`);
+    setHtml($('#issMeta'), `Orbita: <b>${ISS.src}</b> · epoka ${new Date(ISS.epoch).toISOString().slice(0, 16).replace('T', ' ')} UTC (${fmtNum(Math.abs(age), 1)} dn. ${age >= 0 ? 'temu' : 'w przód'}) · propagator: ${ISS.sat ? 'SGP4' : 'Kepler + J2 (uproszczony)'}.` +
+      (Math.abs(age) > 10 ? ' <span style="color:#fbbf24">Dane są stare — położenie przybliżone.</span>' : '') + ' Dokładność przelotów maleje po ok. 3–5 dobach.');
     $('#issMeta').title = 'Epoka TLE: ' + new Date(ISS.epoch).toISOString().slice(0, 16).replace('T', ' ') + ' UTC. Dokładność przelotów maleje po ok. 3–5 dobach od epoki.';
   }
   if (ISS.uiDirty) { renderPasses(); ISS.uiDirty = false; }
@@ -3637,7 +3771,7 @@ function endPointer(e) {
 }
 stage.addEventListener('pointerup', endPointer);
 stage.addEventListener('pointercancel', endPointer);
-stage.addEventListener('pointerleave', () => { hoverPt = null; $('#cHover').textContent = '—'; });
+stage.addEventListener('pointerleave', () => { hoverPt = null; setTxt($('#cHover'), '—'); });
 stage.addEventListener('wheel', e => {
   e.preventDefault(); if (cfg.auto) setAuto(false);
   const k = Math.exp(-e.deltaY * (e.deltaMode === 1 ? 0.05 : 0.0016));
@@ -3736,6 +3870,7 @@ $('#btnFull').onclick = () => {
    środka widoku albo dla lokalizacji obserwatora (przełącznik przy opisie Słońca). */
 /* prędkości w jednostkach czasu: ile czasu symulacji mija w jednej sekundzie rzeczywistej */
 const TB_SPD = [
+  { v: 1, l: '1×', t: '1 sekunda (czas rzeczywisty)' }, { v: 10, l: '10×', t: '10 sekund' },
   { v: 60, l: '1 min', t: '1 minuta' }, { v: 600, l: '10 min', t: '10 minut' },
   { v: 3600, l: '1 godz.', t: '1 godzina' }, { v: 43200, l: '12 godz.', t: '12 godzin' },
   { v: 86400, l: '24 godz.', t: '24 godziny' }, { v: 2592000, l: '30 dni', t: '30 dni' }
@@ -3997,7 +4132,7 @@ function tbNextEvt(a, loc) {
 }
 function setSpeed(v) {
   let i = TB_SPD.findIndex(x => x.v === v);
-  if (i < 0) {                                   // wartość spoza listy → najbliższa dostępna (najwolniej 1 min/s)
+  if (i < 0) {                                   // wartość spoza listy → najbliższa dostępna (najwolniej 1×, czas rzeczywisty)
     i = 0; let best = Infinity;
     TB_SPD.forEach((x, k) => { const d = Math.abs(Math.log(x.v) - Math.log(Math.max(1, v))); if (d < best) { best = d; i = k; } });
   }
@@ -4252,18 +4387,18 @@ function updateUI(now, sun) {
   if (now - lastUi < 250) return; lastUi = now;
   const mpp = currentMpp();
   const cd = coordDec();
-  $('#cCenter').textContent = fmtLat(view.lat, cd) + ' ' + fmtLon(view.lon, cd);
-  $('#cScale').textContent = '≈ ' + fmtRes(mpp);
+  setTxt($('#cCenter'), fmtLat(view.lat, cd) + ' ' + fmtLon(view.lon, cd));
+  setTxt($('#cScale'), '≈ ' + fmtRes(mpp));
   const zt = '×' + fmtNum(view.zoom, view.zoom < 10 ? 1 : 0);
-  $('#chipVal').textContent = zt; $('#mZoomVal').textContent = zt;
+  setTxt($('#chipVal'), zt); setTxt($('#mZoomVal'), zt);
   if (document.activeElement !== $('#zSlider')) $('#zSlider').value = zToS(view.zoom);
   const detVisible = !!Det.P && Det.fade > 0.05;
   $('#chipDot').classList.toggle('on', detVisible);
   tbSync();
   if (detVisible) Det.stat.loaded = countLoaded();
   const ns = nightScan(), nOpen = ns.ok + ns.gone + ns.fail < ns.tot;
-  $('#nStat').textContent = (nOpen ? 'Wczytywanie… ' : 'Gotowe · ') + ns.ok + '/' + ns.tot + ' kafelków bazowych' +
-    (ns.gone ? ` · ${ns.gone} bez danych` : '') + (ns.fail ? ` · ${ns.fail} błędów` : '') + (NP.step ? ` · cofnięto o ${NP.step} dn.` : '');
+  setTxt($('#nStat'), (nOpen ? 'Wczytywanie… ' : 'Gotowe · ') + ns.ok + '/' + ns.tot + ' kafelków bazowych' +
+    (ns.gone ? ` · ${ns.gone} bez danych` : '') + (ns.fail ? ` · ${ns.fail} błędów` : '') + (NP.step ? ` · cofnięto o ${NP.step} dn.` : ''));
 
   let txt, col, pulse = false;
   const st = Net.stats.base;
@@ -4274,24 +4409,25 @@ function updateUI(now, sun) {
   else if (cfg.detail && view.zoom < DETAIL_MIN_ZOOM) { txt = `Mapa bazowa NASA GIBS · szczegóły ${DP.cur.esri ? 'Esri ' : ''}od ×${fmtNum(DETAIL_MIN_ZOOM, 1)}`; col = '#7dd3fc'; }
   else if (!cfg.detail) { txt = 'Mapa bazowa NASA GIBS · szczegóły wyłączone'; col = '#94a3b8'; }
   else { txt = 'Mapa bazowa NASA GIBS'; col = '#7dd3fc'; }
-  $('#stTxt').textContent = txt; $('#stDot').style.background = col; $('#stDot').classList.toggle('animate-pulse', pulse);
+  setTxt($('#stTxt'), txt); { const sd = $('#stDot'); if (sd._bg !== col) { sd._bg = col; sd.style.background = col; } sd.classList.toggle('animate-pulse', pulse); }
 
-  $('#mInfo').textContent = (active.kind === 'gpu'
+  setTxt($('#mInfo'), (active.kind === 'gpu'
     ? `GPU: shader WebGL2, ${active.pw()}×${active.ph()} px (skala ${fmtNum(perf.scale, 2)}), pamięć kafelków ${fmtNum(Net.bytes / 1048576, 0)} MB.`
     : `Programowy: ${active.pw()}×${active.ph()} px, obraz skalowany. Okno szczegółów ograniczone do 4×4 kafelków.`) +
-    ` Maks. poziom szczegółów: ${MAX_L} (${fmtRes(resM(MAX_L))}).`;
+    ` Maks. poziom szczegółów: ${MAX_L} (${fmtRes(resM(MAX_L))}).`);
   fitMenu(); fitIss();     // położenie chipu zależy od długości podpisu źródła — dopasuj panele ponownie
 }
 function updateHover() {
   if (!hoverPt) return;
   const h = pick(hoverPt.x, hoverPt.y);
-  $('#cHover').textContent = h ? fmtLat(h.lat, coordDec()) + ' ' + fmtLon(h.lon, coordDec()) : 'poza globem';
+  setTxt($('#cHover'), h ? fmtLat(h.lat, coordDec()) + ' ' + fmtLon(h.lon, coordDec()) : 'poza globem');
 }
 
 /* ---------- Pętla główna ---------- */
 let lastT = performance.now(), lastSig = '', lastHover = 0, lastRender = 0;
 function rampClips(now) {
   let ramping = false;
+  if (!Det.P && !Det.S) return false;
   for (const c of [Det.P, Det.S]) {
     if (!c) continue;
     for (let s = 0; s < c.NX * c.NY; s++) {
@@ -4321,8 +4457,11 @@ let _warned = false;
 function warnOnce(e) { if (!_warned) { _warned = true; console.warn('Obserwatorium:', e); } }
 function frame(now) {
   requestAnimationFrame(frame);      // planujemy następną klatkę od razu — wyjątek w jednym module nie zatrzyma pętli
-  const dt = Math.min(0.1, Math.max(0.001, (now - lastT) / 1000)); lastT = now;
-  if (T.playing) T.sim += dt * 1000 * T.speed;
+  const rdt = Math.max(0, (now - lastT) / 1000);
+  const dt = Math.min(0.1, Math.max(0.001, rdt)); lastT = now;
+  /* 1× i 10×: zegar liczony z rzeczywistego upływu czasu (bez obcinania klatek) — nie spóźnia się przy przycięciach
+     ani po powrocie do karty; szybsze prędkości jak dotąd (płynne kroki) */
+  if (T.playing) T.sim += (T.speed <= 10 ? Math.min(rdt, 600) : dt) * 1000 * T.speed;
   try { sfxSunWatch(); } catch (e) { warnOnce(e); }      // sygnał przy wschodzie i zachodzie Słońca
   stepFlight(now);
   const dragged = applyDrag();                      // obrót przeciąganiem — raz na klatkę, zsynchronizowany z renderem
@@ -4477,6 +4616,9 @@ const MW_N = 2600, MW_EQ = new Float32Array(MW_N * 3), MW_W = new Float32Array(M
    mwGain tłumi jasność, mwScale ogranicza rozmiar plam. */
 const mwGain = fov => clamp(Math.pow(100 / clamp(fov, 60, 360), 0.95), 0.05, 1.05);
 const mwScale = fov => clamp(fov / 100, 0.25, 1.3);
+/* Siła mgiełki Drogi Mlecznej (duże miękkie plamy pod gwiazdami). 1 = jak dawniej;
+   niżej — gwiazdy w obrębie Drogi Mlecznej są wyraźniejsze, a pas słabiej „zamgla” niebo. */
+const MW_HAZE = 0.5;
 const MW_DN = 1200, MW_DUST = new Float32Array(MW_DN * 3), MW_DS = new Float32Array(MW_DN);
 (function buildMilkyWay() {
   let s = 20251113;
@@ -4640,56 +4782,124 @@ const SKY = {
 };
 
 /* --- wektory i rzut --- */
-const SKY_CAM = { f: [0, 1, 0], r: [1, 0, 0], u: [0, 0, 1], k: 1, ke: 1, ratio: 1, w: 0, cx: 0, cy: 0 };
-/* Szerokie pole (>150°) rysuje tylko tor WebGPU. Awaryjny Canvas 2D opiera się na gradientach
-   liniowych, które przy rzucie „rybie oko” rozmazują się w jasną obwódkę — tam zostajemy przy 150°. */
+/* Rzut nieba.
+   • do 100° — stereograficzny (wierny kształtom, jak w Stellarium),
+   • 100–135° — płynne przejście w rzut walcowy Millera (panorama; pion zostaje pionem),
+   • 135–195° — pochylenie kamery stopniowo zamienia się w przesunięcie kadru, więc horyzont prostuje się
+     w poziomą linię; przy 360° cały obwód horyzontu mieści się na szerokość ekranu.
+   Dawny rzut „rybie oko” zwijał horyzont w pętlę, a tło liczone w shaderze nie zgadzało się z położeniem
+   gwiazd i krajobrazu (inna skala) — stąd nienaturalny widok przy szerokich polach. */
+const SKY_CAM = { f: [0, 1, 0], r: [1, 0, 0], u: [0, 0, 1], k: 1, sc: 1, w1: 0, w2: 0, mg: 0, w: 0, ratio: 1, cx: 0, cy: 0 };
+const SKY_CAM_TMP = { f: [0, 1, 0], r: [1, 0, 0], u: [0, 0, 1], k: 1, sc: 1, w1: 0, w2: 0, mg: 0, w: 0, ratio: 1, cx: 0, cy: 0 };
+const SKY_PANO_F0 = 100, SKY_PANO_F1 = 135, SKY_PANO_F2 = 195;
+const millerY = p => 1.25 * Math.log(Math.tan(Math.PI / 4 + 0.4 * p));          // rzut Millera: zenit w skończonej odległości
+const millerInv = y => 2.5 * (Math.atan(Math.exp(0.8 * y)) - Math.PI / 4);
+const SKY_MILLER_TOP = millerY(Math.PI / 2);                                      // ≈ 2,303
+/* Szerokie pole (>150°) rysuje tylko tor WebGPU. Awaryjny Canvas 2D zostaje przy rzucie stereograficznym do 150°. */
 function skyFovMax() { return (typeof SKY_GPU !== 'undefined' && SKY_GPU && SKY_GPU.state === 'ready') ? 360 : 150; }
+function skyGpuOn() { return typeof SKY_GPU !== 'undefined' && SKY_GPU && SKY_GPU.state === 'ready'; }
+/* skala panoramy 360°: pełny obwód na szerokość ekranu (na wąskim ekranie — tyle, by zmieścić niebo do zenitu) */
+function skyPanoScale(W, H) { return Math.max(W / TAU, H / 3.35); }
+function skyCamCalc(C, alt, az, fov, W, H) {
+  const kst = f => (H / 2) / (2 * Math.tan(Math.min(f, 150) * DEG / 4));
+  let w1 = 0, w2 = 0, sc;
+  if (!skyGpuOn() || fov <= SKY_PANO_F0) sc = kst(fov);
+  else {
+    const k0 = kst(SKY_PANO_F0), s360 = Math.min(k0, skyPanoScale(W, H));
+    const t = clamp((fov - SKY_PANO_F0) / (360 - SKY_PANO_F0), 0, 1);
+    sc = k0 * Math.pow(s360 / k0, t);
+    w1 = smooth(SKY_PANO_F0, SKY_PANO_F1, fov);
+    w2 = smooth(SKY_PANO_F1, SKY_PANO_F2, fov);
+  }
+  const beta = alt * (1 - w2), gam = alt * w2;           // pochylenie: obrót (beta) + przesunięcie kadru (gam)
+  const cb = Math.cos(beta), sb = Math.sin(beta), saz = Math.sin(az), caz = Math.cos(az);
+  C.f = [cb * saz, cb * caz, sb];                          // [E, N, U]
+  C.r = [caz, -saz, 0];
+  C.u = [-saz * sb, -caz * sb, cb];                        // r × f = „góra”
+  C.k = C.sc = sc; C.w1 = w1; C.w2 = w2; C.mg = millerY(gam);
+  C.w = 0; C.ratio = 1;                                    // zgodność ze starszym kodem Canvas 2D
+  C.cx = W / 2; C.cy = H / 2;
+  return C;
+}
 function skyCam() {
   const fovMax = skyFovMax();
   if (SKY.fovT > fovMax) SKY.fovT = fovMax;
   if (SKY.fov > fovMax) SKY.fov = fovMax;
-  const ca = Math.cos(SKY.alt), sa = Math.sin(SKY.alt), saz = Math.sin(SKY.az), caz = Math.cos(SKY.az);
-  const f = [ca * saz, ca * caz, sa];                       // [E, N, U]
-  let r = [f[1], -f[0], 0];                                 // wschód odchylony o 90° od kierunku patrzenia
-  const rl = Math.hypot(r[0], r[1]) || 1e-9;
-  r = [r[0] / rl, r[1] / rl, 0];
-  const u = [r[1] * f[2] - r[2] * f[1], r[2] * f[0] - r[0] * f[2], r[0] * f[1] - r[1] * f[0]];   // r × f = „góra”
-  /* Do 150° rzut stereograficzny. Wyżej łączymy go płynnie z rzutem równoodległościowym
-     (rybie oko), który mieści całą sferę — bez tego powyżej ~173° nie dało się nic więcej pokazać. */
-  const fovR = SKY.fov * DEG;
-  const k = (SKY.h / 2) / (2 * Math.tan(Math.min(fovR, 150 * DEG) / 4));
-  const ke = (SKY.h / 2) / (fovR / 2);
-  SKY_CAM.w = clamp((SKY.fov - 150) / 50, 0, 1);            // 0 = stereografia, 1 = rybie oko
-  SKY_CAM.ratio = ke / k;
-  SKY_CAM.f = f; SKY_CAM.r = r; SKY_CAM.u = u; SKY_CAM.k = k; SKY_CAM.cx = SKY.w / 2; SKY_CAM.cy = SKY.h / 2;
+  skyCamCalc(SKY_CAM, SKY.alt, SKY.az, SKY.fov, SKY.w, SKY.h);
+  /* panorama: kamery nie da się zadrzeć wyżej, niż trzeba, by zenit sięgnął górnej krawędzi —
+     dalej byłby tylko pusty pas „za zenitem” */
+  let hi = 86 * DEG;
+  if (SKY_CAM.w2 > 0.001) {
+    const gmax = millerInv(SKY_MILLER_TOP - (SKY.h * 0.46) / SKY_CAM.sc);
+    hi = clamp(gmax / SKY_CAM.w2, 8 * DEG, 86 * DEG);
+  }
+  SKY_ALT_HI = hi;
 }
-function skyProj(e, n, u) {               // ENU → piksele (null = poza kadrem / za kamerą)
-  const C = SKY_CAM;
+function skyProjC(C, e, n, u) {
   const z = e * C.f[0] + n * C.f[1] + u * C.f[2];
   const x = e * C.r[0] + n * C.r[1] + u * C.r[2];
   const y = e * C.u[0] + n * C.u[1] + u * C.u[2];
-  const hxy = Math.hypot(x, y);
-  let Rk;                                                     // promień w jednostkach k
-  if (C.w <= 0) {
-    if (z <= 0.06) return null;                               // za kamerą
-    Rk = 2 * hxy / (1 + z);                                   // stereografia
+  let X, Y;
+  if (C.w1 <= 0) {
+    if (z <= -0.55) return null;                              // za kamerą (stereografia jest ciągła prawie do antypodu — przy 150° rogi kadru sięgają z≈−0.3)
+    X = 2 * x / (1 + z); Y = 2 * y / (1 + z);                 // stereografia
   } else {
-    const th = Math.acos(clamp(z, -1, 1));
-    if (th > Math.PI - 0.03) return null;                     // antypod — osobliwość rzutu
-    const Rs = z > -0.999 ? 2 * hxy / (1 + z) : 1e6;
-    Rk = (1 - C.w) * Math.min(Rs, 1e6) + C.w * th * C.ratio;
+    const lam = Math.atan2(x, z), phi = Math.asin(clamp(y, -1, 1));
+    const Xc = lam, Yc = millerY(phi) - C.mg;
+    if (C.w1 >= 1) { X = Xc; Y = Yc; }
+    else {
+      if (z <= -0.5) return null;                             // przy przejściu tył sfery i tak jest daleko poza kadrem
+      const w = C.w1, d = 1 + z;
+      X = (1 - w) * 2 * x / d + w * Xc; Y = (1 - w) * 2 * y / d + w * Yc;
+    }
   }
-  if (hxy < 1e-9) return [C.cx, C.cy];
-  const sc = Rk * C.k / hxy;
-  let px = C.cx + x * sc, py = C.cy - y * sc;
+  let px = C.cx + X * C.sc, py = C.cy - Y * C.sc;
   if (!Number.isFinite(px) || !Number.isFinite(py)) return null;
-  /* Przy szerokim polu widzenia i punktach blisko antypody rzut potrafi dać współrzędne
-     rzędu miliardów pikseli. Kierunek jest wtedy bez znaczenia (obiekt jest daleko za kadrem),
-     a takie wartości rozwalały rysowanie linii (długość odcinka liczona w milionach). */
   const lim = 24 * Math.max(SKY.w || 1200, SKY.h || 800);
   const dx = px - C.cx, dy = py - C.cy, m = Math.max(Math.abs(dx), Math.abs(dy));
   if (m > lim) { const f2 = lim / m; px = C.cx + dx * f2; py = C.cy + dy * f2; }
   return [px, py];
+}
+function skyProj(e, n, u) { return skyProjC(SKY_CAM, e, n, u); }   // ENU → piksele (null = poza kadrem / za kamerą)
+/* odwrotność przejścia stereografia → walec: Newton na (λ, φ) w układzie kamery */
+function skyInvBlend(X, Y, w) {
+  const R = Math.hypot(X, Y), th = 2 * Math.atan(R / 2), st = Math.sin(th);
+  const sx = R > 1e-9 ? X / R * st : 0, sy = R > 1e-9 ? Y / R * st : 0, sz = Math.cos(th);
+  let lam = Math.atan2(sx, sz), phi = Math.asin(clamp(sy, -1, 1));
+  for (let it = 0; it < 10; it++) {
+    const c = Math.cos(phi), s = Math.sin(phi), cl = Math.cos(lam), sl = Math.sin(lam);
+    const x = c * sl, y = s, z = c * cl, D = Math.max(1 + z, 0.05), D2 = D * D;
+    const xl = c * cl, xp = -s * sl, yp = c, zl = -c * sl, zp = -s * cl;
+    const Fx = (1 - w) * 2 * x / D + w * lam - X, Fy = (1 - w) * 2 * y / D + w * millerY(phi) - Y;
+    const a = (1 - w) * 2 * (xl * D - x * zl) / D2 + w, b = (1 - w) * 2 * (xp * D - x * zp) / D2;
+    const cc = (1 - w) * -2 * y * zl / D2, d = (1 - w) * 2 * (yp * D - y * zp) / D2 + w / Math.cos(0.8 * phi);
+    const det = a * d - b * cc; if (Math.abs(det) < 1e-9) break;
+    const dl = (d * Fx - b * Fy) / det, dp = (-cc * Fx + a * Fy) / det;
+    lam = clamp(lam - dl, -Math.PI, Math.PI); phi = clamp(phi - dp, -1.5707, 1.5707);
+    if (Math.abs(dl) + Math.abs(dp) < 1e-7) break;
+  }
+  return [lam, phi];
+}
+function skyUnprojC(C, px, py) {
+  const X = (px - C.cx) / C.sc, Y = (C.cy - py) / C.sc;
+  let wx, wy, wz;
+  if (C.w1 <= 0) {                                             // stereografia — wzór ścisły
+    const R = Math.hypot(X, Y), th = 2 * Math.atan(R / 2), s = Math.sin(th);
+    wx = R > 1e-9 ? X / R * s : 0; wy = R > 1e-9 ? Y / R * s : 0; wz = Math.cos(th);
+  } else {
+    let lam, phi;
+    if (C.w1 >= 1) {
+      lam = mod(X + Math.PI, TAU) - Math.PI;
+      phi = millerInv(Y + C.mg);
+      if (phi > Math.PI / 2) { phi = Math.PI - phi; lam += Math.PI; }        // ponad zenitem: niebo „z drugiej strony”
+      else if (phi < -Math.PI / 2) { phi = -Math.PI - phi; lam += Math.PI; }
+    } else [lam, phi] = skyInvBlend(X, Y, C.w1);
+    const c = Math.cos(phi);
+    wx = c * Math.sin(lam); wy = Math.sin(phi); wz = c * Math.cos(lam);
+  }
+  return [wx * C.r[0] + wy * C.u[0] + wz * C.f[0],
+          wx * C.r[1] + wy * C.u[1] + wz * C.f[1],
+          wx * C.r[2] + wy * C.u[2] + wz * C.f[2]];
 }
 function altAzToEnu(altRad, azRad) {
   const ca = Math.cos(altRad);
@@ -4738,8 +4948,156 @@ function skyIss(ms) {
     const ob = mkObs({ lat: SKY.obs.lat, lon: SKY.obs.lon, h: 0.1 });
     const la = lookAngles(ob, ec);
     if (la.el < -0.02) return null;
-    return { alt: la.el, az: la.az, rng: la.rng, trail: null };
+    return { alt: la.el, az: la.az, rng: la.rng, trail: null, lit: skyIssLitAt(ms, ec) };
   } catch (err) { return null; }
+}
+/* ISS w świetle Słońca? (ten sam test walca cienia co w wyszukiwarce przelotów) */
+function skyIssLitAt(ms, ec) { return issSunlit([ec.y / WA, ec.z / WA, ec.x / WA], sunInfo(ms).dir); }
+/* Przelot ISS nad horyzontem obserwatora, pokazywany od 20 min przed jego początkiem do 5 min po końcu.
+   Wynik: { aos, los, aosAz, max:{t,alt,az}, runs:[[{t,alt,az}…]…] (tylko odcinki w świetle Słońca),
+            shadowIn / shadowOut: {t,alt,az} — miejsce wejścia w cień Ziemi i wyjścia z niego }. */
+const SKY_ISS_PRE = 20 * 60000, SKY_ISS_POST = 5 * 60000;
+function skyIssPassIn(p, ms) { return !!p && ms >= p.aos - SKY_ISS_PRE && ms <= p.los + SKY_ISS_POST; }
+function skyIssPass(ms) {
+  if (!ISS.show || !SKY.showIss || (!ISS.sat && !ISS.kep)) return null;
+  const okey = SKY.obs.lat.toFixed(3) + '/' + SKY.obs.lon.toFixed(3) + '/' + (ISS.epoch || 0) + '/' + (ISS.sat ? 's' : 'k');
+  const C = SKY.issPass;
+  if (C && C.okey === okey) {
+    if (skyIssPassIn(C.pass, ms)) return C.pass;
+    for (const p of C.more) if (skyIssPassIn(p, ms)) { C.pass = p; return p; }
+    const dms = Math.abs(ms - C.ms);
+    if (dms < 20000 || (dms < 1800000 && performance.now() - C.at < 200)) return null;   // brak przelotu — nie liczymy w każdej klatce (skok czasu liczy od razu)
+  }
+  const res = { okey, ms, at: performance.now(), pass: null, more: [] };
+  SKY.issPass = res;
+  try {
+    const ob = mkObs({ lat: SKY.obs.lat, lon: SKY.obs.lon, h: 0.1 });
+    const look = t => { const e = issEci(t); if (!e) return null; const la = lookAngles(ob, eciToEcef(e.p, gmstRad(t))); la.t = t; return la; };
+    /* przelot trwa maks. ~12 min: szukamy w oknie, które obejmuje każdy przelot spełniający warunek 10 / 5 min */
+    const t0 = ms - SKY_ISS_POST - 13 * 60000, t1 = ms + SKY_ISS_PRE + 13 * 60000, STEP = 20000;
+    const edge = (a, b) => {                               // przejście przez horyzont między a i b (bisekcja)
+      let lo = a.t, hi = b.t; const up = a.el <= 0;
+      for (let i = 0; i < 14; i++) { const m = (lo + hi) / 2, l = look(m); if (!l) break; if ((l.el > 0) === up) hi = m; else lo = m; }
+      return (lo + hi) / 2;
+    };
+    const segs = [];
+    let prev = look(t0), cur = prev && prev.el > 0 ? { aos: t0 } : null;
+    for (let t = t0 + STEP; t <= t1 + STEP; t += STEP) {
+      const l = look(t); if (!l || !prev) { prev = l; continue; }
+      if (!cur && prev.el <= 0 && l.el > 0) cur = { aos: edge(prev, l) };
+      else if (cur && prev.el > 0 && l.el <= 0) { cur.los = edge(prev, l); segs.push(cur); cur = null; }
+      prev = l;
+    }
+    for (const sg of segs) {
+      const p = skyIssPassBuild(sg.aos, sg.los, look);
+      if (p && p.max.alt > 1 * DEG) res.more.push(p);
+    }
+    res.pass = res.more.find(p => skyIssPassIn(p, ms)) || null;
+  } catch (e) { warnOnce(e); }
+  return res.pass;
+}
+const SKY_ISS_MINEL = 10 * DEG;                            // poniżej 10° ISS ginie w mgiełce przy horyzoncie (jak w Heavens-Above)
+function skyIssPassBuild(aos, los, look) {
+  const STEP = 4000, runs = [], smp = [];
+  let run = null, prev = null, max = null, shadowIn = null, shadowOut = null, aosAz = 0;
+  const pt = l => ({ t: l.t, alt: Math.max(0, l.el), az: l.az });
+  const litOf = l => skyIssLitAt(l.t, l.ec);
+  const lookL = t => { const l = look(t); if (l) l.lit = litOf(l); return l; };
+  for (let t = aos; ; t = Math.min(los, t + STEP)) {
+    const l = lookL(t); if (!l) return null;
+    smp.push(l);
+    if (t === aos) aosAz = l.az;
+    if (!max || l.el > max.alt) max = { t, alt: l.el, az: l.az };
+    if (prev && prev.lit !== l.lit) {                      // granica cienia — dokładnie (bisekcja), linia kończy się/zaczyna w tym punkcie
+      let lo = prev.t, hi = l.t;
+      for (let i = 0; i < 14; i++) { const m = (lo + hi) / 2, lm = lookL(m); if (!lm) break; if (lm.lit === prev.lit) lo = m; else hi = m; }
+      const bl = lookL((lo + hi) / 2), b = pt(bl || l);
+      if (prev.lit) { if (run) { run.push(b); runs.push(run); run = null; } if (!shadowIn) shadowIn = b; }
+      else { run = [b]; if (!shadowOut) shadowOut = b; }
+    }
+    if (l.lit) { if (!run) run = []; run.push(pt(l)); }
+    prev = l;
+    if (t >= los) break;
+  }
+  if (run && run.length) runs.push(run);
+  /* dokładne maksimum (złoty podział wokół najwyższej próbki) */
+  { let lo = max.t - STEP, hi = max.t + STEP;
+    for (let i = 0; i < 16; i++) { const m1 = lo + (hi - lo) / 3, m2 = hi - (hi - lo) / 3, a = look(m1), b = look(m2); if (!a || !b) break; if (a.el < b.el) lo = m1; else hi = m2; }
+    const lm = look((lo + hi) / 2); if (lm && lm.el >= max.alt) max = { t: lm.t, alt: lm.el, az: lm.az }; }
+  /* faktycznie widoczna część przelotu: ISS w świetle Słońca i co najmniej 10° nad horyzontem */
+  const ok = l => l.lit && l.el >= SKY_ISS_MINEL;
+  const refine = (a, b) => {                               // moment zmiany warunku między próbkami a i b
+    let lo = a.t, hi = b.t; const va = ok(a);
+    for (let i = 0; i < 14; i++) { const m = (lo + hi) / 2, lm = lookL(m); if (!lm) break; if (ok(lm) === va) lo = m; else hi = m; }
+    const l = lookL((lo + hi) / 2) || b; return { t: l.t, alt: l.el, az: l.az, lit: l.lit };
+  };
+  let vis = null;
+  for (let i = 1; i < smp.length; i++) {
+    const a = smp[i - 1], b = smp[i];
+    if (!ok(a) && ok(b) && !vis) {
+      const st = refine(a, b);
+      vis = { start: st, startWhy: a.lit ? 'rise' : 'shadowOut', end: null, endWhy: '' };
+    } else if (vis && !vis.end && ok(a) && !ok(b)) {
+      vis.end = refine(a, b); vis.endWhy = !b.lit ? 'shadow' : 'low';
+    }
+  }
+  if (vis && !vis.end) { const l = smp[smp.length - 1]; vis.end = { t: l.t, alt: l.el, az: l.az }; vis.endWhy = 'low'; }
+  /* czy niebo u obserwatora jest wystarczająco ciemne (Słońce poniżej −4°) */
+  let sky = 'dark';
+  if (vis) {
+    const sa = sunAltAt((vis.start.t + vis.end.t) / 2, SKY.obs.lat, SKY.obs.lon);
+    sky = sa > -1 ? 'day' : sa > -4 ? 'bright' : 'dark';
+  }
+  return { aos, los, aosAz, max, runs, shadowIn, shadowOut, vis, sky };
+}
+function skyClockS(ms) { return new Date(ms).toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); }
+function skyMmSs(ms) { const s = Math.max(0, Math.round(ms / 1000)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+/* Stan przelotu dla obserwatora: co się dzieje teraz i za ile ISS pojawi się / zniknie */
+function skyIssStatus(ms) {
+  const ps = skyIssPass(ms);
+  if (!ps) return null;
+  const v = ps.vis, dirS = q => fmtNum(q.alt / DEG, 0) + '° ' + skyDir(q.az / DEG);
+  if (!v) return { ps, txt: ms < ps.los ? 'przelot niewidoczny (w cieniu Ziemi lub nisko)' : 'przelot zakończony', cls: 'off' };
+  const why = v.endWhy === 'shadow' ? 'wchodzi w cień Ziemi' : 'chowa się nisko nad horyzontem';
+  const skyNote = ps.sky === 'day' ? ' · jasne niebo — gołym okiem niewidoczna' : ps.sky === 'bright' ? ' · zmierzch — słabo widoczna' : '';
+  if (ms < v.start.t) return { ps, txt: 'pojawi się za ' + skyMmSs(v.start.t - ms) + ' · ' + skyClockS(v.start.t) + ' · ' + dirS(v.start) + skyNote, cls: 'pre' };
+  if (ms <= v.end.t) return { ps, txt: 'znika za ' + skyMmSs(v.end.t - ms) + ' · ' + skyClockS(v.end.t) + ' · ' + dirS(v.end) + ' — ' + why + skyNote, cls: 'on' };
+  return { ps, txt: 'zniknęła ' + skyClockS(v.end.t) + ' · ' + dirS(v.end) + ' — ' + (v.endWhy === 'shadow' ? 'w cieniu Ziemi' : 'nisko nad horyzontem'), cls: 'post' };
+}
+/* Geometria toru na ekranie (px CSS): odcinki przebyte / nadchodzące, nisko (<10°, kreskowane), znaczniki minut i opisy
+   momentów, w których ISS faktycznie się pojawia i znika dla obserwatora. */
+function skyIssPathGeom(ms) {
+  const ps = skyIssPass(ms);
+  if (!ps) return null;
+  const P = q => skyProj(...altAzToEnu(q.alt, q.az));
+  const lines = [], ticks = [], labels = [], marks = [];
+  for (const run of ps.runs) {
+    let cur = null, key = '';
+    for (let i = 0; i < run.length; i++) {
+      const q = run[i], p = P(q);
+      if (!p) { cur = null; key = ''; continue; }
+      const k = (q.t <= ms ? 'p' : 'f') + (q.alt < SKY_ISS_MINEL ? 'l' : 'h');
+      if (k !== key) {                                     // zmiana stylu — nowy odcinek zaczyna się w ostatnim punkcie poprzedniego
+        const nl = { past: k[0] === 'p', low: k[1] === 'l', pts: cur && cur.pts.length ? [cur.pts[cur.pts.length - 1]] : [] };
+        lines.push(nl); cur = nl; key = k;
+      }
+      cur.pts.push(p);
+      if (i > 0 && Math.floor(q.t / 60000) !== Math.floor(run[i - 1].t / 60000)) ticks.push([p[0], p[1], q.t <= ms]);
+    }
+  }
+  const v = ps.vis, dirS = q => fmtNum(q.alt / DEG, 0) + '° ' + skyDir(q.az / DEG);
+  if (v) {
+    const a = P(v.start), b = P(v.end), m = P(ps.max);
+    if (a) { labels.push(['pojawia się ' + skyClockS(v.start.t), a[0], a[1], 'start']); marks.push([a[0], a[1], 'start']); }
+    if (m && ps.max.t > v.start.t && ps.max.t < v.end.t && ps.max.alt > SKY_ISS_MINEL + 3 * DEG)
+      labels.push(['maks. ' + fmtNum(ps.max.alt / DEG, 0) + '° · ' + skyClockS(ps.max.t), m[0], m[1], 'max']);
+    if (b) {
+      labels.push(['znika ' + skyClockS(v.end.t) + (v.endWhy === 'shadow' ? ' · cień Ziemi' : ' · nisko'), b[0], b[1], 'end']);
+      marks.push([b[0], b[1], v.endWhy === 'shadow' ? 'shadow' : 'low']);
+    }
+  }
+  const dim = (ms > ps.los ? 0.55 : 1) * (ps.sky === 'day' ? 0.55 : ps.sky === 'bright' ? 0.8 : 1);
+  return { ps, lines, ticks, labels, marks, dim };
 }
 
 /* --- tło nieba zależne od wysokości Słońca --- */
@@ -4771,6 +5129,270 @@ function hzNoise(a) {                     // gładki szum 1D (0..1) jako funkcja
   const i = Math.floor(a), f = a - i, t = f * f * (3 - 2 * f);
   const h = n => { const x = Math.sin((n % 360) * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x); };
   return h(i) + (h(i + 1) - h(i)) * t;
+}
+/* ---------------- Krajobraz horyzontu (sylwety) ----------------
+   Wzorowany na widoku z okolic domu: pola z pasami lasu na horyzoncie, kępy liściastych drzew i topól,
+   żywopłoty oraz słupy z przewodami. Jedna warstwa z „Horyzont i krajobraz”. Wszystko deterministyczne
+   (te same drzewa w tych samych azymutach), wysokości w stopniach nad linią horyzontu. */
+const LAND = (() => {
+  const hash = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+  const vnoise = x => { const i = Math.floor(x), f = x - i, t = f * f * (3 - 2 * f); return hash(i) * (1 - t) + hash(i + 1) * t; };
+  const forests = [[18, 96, 0.62], [126, 152, 0.45], [204, 262, 0.72], [296, 352, 0.56]];   // [od°, do°, wysokość°]
+  const trees = [];
+  for (let i = 0; i < 22; i++) {
+    const poplar = hash(i * 9.1) < 0.28;
+    trees.push({ az: (i * 16.4 + hash(i * 3.7) * 9) % 360, h: 1.5 + 2.8 * hash(i * 5.3 + 1),
+                 rx: poplar ? 0.30 + 0.12 * hash(i) : 0.85 + 0.7 * hash(i * 2.2), poplar, seed: i });
+  }
+  const poles = [[99, 102.2], [212, 215.4], [321, 324.6]];        // pary słupów połączone przewodami
+  return { hash, vnoise, forests, trees, poles };
+})();
+function landHeightfield(az) {               // wysokość „pełnej” sylwety (żywopłoty, lasy) w stopniach
+  let h = 0.11 * Math.max(0, LAND.vnoise(az * 1.6) - 0.40) * 1.7;
+  for (const f of LAND.forests) {
+    const e = Math.min(smooth(f[0], f[0] + 5, az), 1 - smooth(f[1] - 5, f[1], az));
+    if (e <= 0) continue;
+    const x = az * 2.7 + LAND.hash(Math.floor(az * 2.7)) * 3;
+    const teeth = Math.abs((x - Math.floor(x)) - 0.5) * 2;      // piłokształtny zarys iglaków
+    const hh = f[2] * (0.72 + 0.18 * LAND.vnoise(az * 0.8)) + 0.15 * teeth * LAND.vnoise(az * 2.3 + 7);
+    h = Math.max(h, e * hh);
+  }
+  return h;
+}
+/* ---------------- Jezioro: tafla wody z falą i odbiciami ----------------
+   Pas wody tuż poniżej horyzontu w zakresie azymutów LAKE.a0…a1 (ustaw tak, by zgadzał się z prawdziwym kierunkiem
+   jeziora). Składa się z: tafli (gradient), rzędów migoczących zmarszczek z falowaniem, odbić jasnych gwiazd
+   oraz ścieżki odbicia Księżyca / Słońca. Odbicia są stylizowane (wysokość odbicia ściśnięta współczynnikiem). */
+const LAKE = { a0: 120, a1: 300, depth: 22, squash: 0.6, n: 0,
+  az: new Float32Array(48), alt: new Float32Array(48), mag: new Float32Array(48),
+  cr: new Float32Array(48), cg: new Float32Array(48), cb: new Float32Array(48) };
+function skyDrawLake(S, W, H, now, ep) {
+  if (!SKY.showGround) return;
+  const L = LAKE, night = SKY.night || 0, dayK = 1 - clamp(night * 1.25, 0, 1);
+  const proj = (alt, az) => {
+    const p = skyProj(...altAzToEnu(alt * DEG, az * DEG));
+    return (p && p[0] > -W * 0.6 && p[0] < W * 1.6 && p[1] > -H * 0.8 && p[1] < H * 1.8) ? p : null;
+  };
+  const mid = (L.a0 + L.a1) / 2, half = (L.a1 - L.a0) / 2;
+  /* kształt jeziora: owal (najgłębiej pośrodku, płycej ku brzegom) */
+  const shape = az => { const u = (az - mid) / half; return u <= -1 || u >= 1 ? 0 : Math.pow(1 - u * u, 0.5); };
+  const fadeA = az => { const u2 = Math.abs((az - mid) / half); return smooth(0, 0.38, 1 - u2); };   // miękkie brzegi
+  const barY = skyBarTop(SKY.h);
+  let dMax = L.depth;
+  {
+    const azc = clamp(mod(SKY.az / DEG, 360), L.a0 + 10, L.a1 - 10);
+    const q0 = proj(terrainAlt(azc * DEG), azc), q1 = proj(terrainAlt(azc * DEG) - 5, azc);
+    if (q0 && q1 && q1[1] > q0[1] + 1) dMax = clamp((barY - q0[1]) / ((q1[1] - q0[1]) / 5) * 0.9, 3, 40);
+    if (SKY_CAM.w1 > 0) dMax = Math.min(dMax, lerp(dMax, 9, SKY_CAM.w1));
+  }
+  const depthAt = az => dMax * (0.3 + 0.7 * shape(az));
+  const sq = clamp(dMax * 0.8 / 30, 0.12, L.squash);
+  const sunAlt = altOf(ep.sun) / DEG, moonAlt = altOf(ep.moon) / DEG, sunAz = azOf(ep.sun) / DEG;
+  const moonK = moonAlt > -2 ? clamp((ep.illum || 0) * Math.max(night, 0.35) * smooth(-2, 6, moonAlt), 0, 1) : 0;
+  /* --- kolor nieba w danym punkcie (te same barwy co tło): woda odbija dokładnie to, co jest nad nią --- */
+  const pal = skyPalette(sunAlt), glowI = Math.max(0, 1 - Math.abs(sunAlt + 1.5) / 26);
+  const warm = sunAlt > -2 ? [1, 0.97, 0.9] : [1, 0.84, 0.59];
+  const skyCol = (alt, az) => {
+    const al = Math.max(alt, 0), k2 = smooth(0, 60, al), k1 = smooth(0, 12, al) * 0.5;
+    const c = [0, 1, 2].map(j => lerp(lerp(pal.hor[j], pal.air[j], k1), pal.zen[j], k2) / 255);
+    const g = glowI * Math.pow(Math.max(0, Math.cos((az - sunAz) * DEG)), 3) * (1 - smooth(0, 28, al)) * 0.55;
+    if (g > 0.005) for (let j = 0; j < 3; j++) c[j] += (warm[j] - c[j]) * g;
+    return c;
+  };
+  /* --- kolor wody: głęboka ciemna woda + odbicie nieba o sile zależnej od kąta (Fresnel: przy horyzoncie niemal lustro) --- */
+  const deep = [0.016 + 0.05 * dayK, 0.030 + 0.07 * dayK, 0.050 + 0.09 * dayK];
+  const waterCol = (dep, az) => {
+    const R = 0.30 + 0.62 * Math.exp(-dep / 5.5), sc = skyCol(dep * 0.75, az), c = [0, 0, 0];
+    for (let j = 0; j < 3; j++) c[j] = deep[j] + (sc[j] * 0.92 - deep[j]) * R;
+    return c;
+  };
+  const quadAt = (alt, az, la, th, c, a) => {
+    const p0 = proj(alt + th / 2, az - la / 2), p1 = proj(alt + th / 2, az + la / 2), p2 = proj(alt - th / 2, az - la / 2), p3 = proj(alt - th / 2, az + la / 2);
+    if (!(p0 && p1 && p2 && p3)) return;
+    skyTriPush(S(p0[0]), S(p0[1]), c[0], c[1], c[2], a); skyTriPush(S(p1[0]), S(p1[1]), c[0], c[1], c[2], a); skyTriPush(S(p2[0]), S(p2[1]), c[0], c[1], c[2], a);
+    skyTriPush(S(p1[0]), S(p1[1]), c[0], c[1], c[2], a); skyTriPush(S(p3[0]), S(p3[1]), c[0], c[1], c[2], a); skyTriPush(S(p2[0]), S(p2[1]), c[0], c[1], c[2], a);
+  };
+  const SEG = 2;
+  /* 1) tafla: gradient odbitego nieba, alfa maleje ku dołowi do zera */
+  skyOp('tri', () => {
+    const fr = [0, 0.07, 0.24, 0.55, 1], al = [0.94, 0.90, 0.80, 0.50, 0];
+    for (let az = L.a0; az < L.a1; az += SEG) {
+      const f0 = fadeA(az), f1 = fadeA(az + SEG);
+      if (f0 <= 0 && f1 <= 0) continue;
+      const t0 = terrainAlt(az * DEG), t1 = terrainAlt((az + SEG) * DEG), d0 = depthAt(az), d1 = depthAt(az + SEG);
+      for (let k = 0; k < 4; k++) {
+        const a0 = proj(t0 - fr[k] * d0, az), a1 = proj(t1 - fr[k] * d1, az + SEG), b0 = proj(t0 - fr[k + 1] * d0, az), b1 = proj(t1 - fr[k + 1] * d1, az + SEG);
+        if (!(a0 && a1 && b0 && b1)) continue;
+        const cA0 = waterCol(fr[k] * d0, az), cA1 = waterCol(fr[k] * d1, az + SEG), cB0 = waterCol(fr[k + 1] * d0, az), cB1 = waterCol(fr[k + 1] * d1, az + SEG);
+        const P = (p, c, a) => skyTriPush(S(p[0]), S(p[1]), c[0], c[1], c[2], a);
+        P(a0, cA0, al[k] * f0); P(a1, cA1, al[k] * f1); P(b0, cB0, al[k + 1] * f0);
+        P(a1, cA1, al[k] * f1); P(b1, cB1, al[k + 1] * f1); P(b0, cB0, al[k + 1] * f0);
+      }
+    }
+  });
+  /* 2) odbicie drugiego brzegu: lasy i drzewa odwrócone pod linią brzegu, łamane falą (poziome pasy przesunięte w bok) */
+  skyOp('tri', () => {
+    const dark = [0.028, 0.038, 0.062], stepA = 0.5, B = 5;
+    for (let az = L.a0; az < L.a1; az += stepA) {
+      const fa = fadeA(az); if (fa <= 0.02) continue;
+      const hf0 = landHeightfield(az), hf1 = landHeightfield(az + stepA);
+      if (hf0 < 0.03 && hf1 < 0.03) continue;
+      const t0 = terrainAlt(az * DEG), t1 = terrainAlt((az + stepA) * DEG);
+      for (let b = 0; b < B; b++) {
+        const u0 = b / B, u1 = (b + 1) / B, jx = 0.1 * (1 + b * 0.6) * Math.sin(now * 0.0016 + b * 1.9 + az * 0.7);
+        const a = 0.8 * (1 - 0.62 * u1) * fa * (0.72 + 0.28 * Math.sin(now * 0.0021 + b * 2.3 + az * 1.7));
+        const p00 = proj(t0 - hf0 * u0, az + jx), p10 = proj(t1 - hf1 * u0, az + stepA + jx), p01 = proj(t0 - hf0 * u1, az + jx), p11 = proj(t1 - hf1 * u1, az + stepA + jx);
+        if (!(p00 && p10 && p01 && p11)) continue;
+        const P = p => skyTriPush(S(p[0]), S(p[1]), dark[0], dark[1], dark[2], a);
+        P(p00); P(p10); P(p01); P(p10); P(p11); P(p01);
+      }
+    }
+    for (const tr of LAND.trees) {                                     // odbicia pojedynczych drzew
+      const sh = fadeA(tr.az); if (sh <= 0.05) continue;
+      const ter = terrainAlt(tr.az * DEG) - 0.05;
+      const cy = tr.h * (tr.poplar ? 0.55 : 0.72), ry = tr.h * (tr.poplar ? 0.45 : 0.30), tw = tr.poplar ? 0.05 : 0.07;
+      const mir = h => ter - h;                                        // wysokość nad brzegiem → pod brzegiem
+      const wob = h => 0.09 * (1 + h * 0.8) * Math.sin(now * 0.0018 + h * 7 + tr.seed);
+      const aTop = 0.74 * sh;
+      const t0 = proj(mir(0), tr.az - tw), t1 = proj(mir(0), tr.az + tw), t2 = proj(mir(cy), tr.az - tw + wob(cy)), t3 = proj(mir(cy), tr.az + tw + wob(cy));
+      if (t0 && t1 && t2 && t3) {
+        const P = (p, a) => skyTriPush(S(p[0]), S(p[1]), dark[0], dark[1], dark[2], a);
+        P(t0, aTop); P(t1, aTop); P(t2, aTop * 0.8); P(t1, aTop); P(t3, aTop * 0.8); P(t2, aTop * 0.8);
+      }
+      const c = proj(mir(cy), tr.az + wob(cy)); if (!c) continue;
+      const N = 18; let prev = null;
+      for (let i = 0; i <= N; i++) {
+        const ph = (i % N) / N * Math.PI * 2, rr = 0.9 + 0.2 * LAND.hash(tr.seed * 7.7 + (i % N)), hh = cy + ry * rr * Math.sin(ph);
+        const q = proj(mir(hh), tr.az + tr.rx * rr * Math.cos(ph) + wob(hh)); if (!q) { prev = null; continue; }
+        if (prev) {
+          const aq = aTop * (1 - 0.5 * clamp(hh / tr.h, 0, 1));
+          skyTriPush(S(c[0]), S(c[1]), dark[0], dark[1], dark[2], aq * 0.85);
+          skyTriPush(S(prev[0]), S(prev[1]), dark[0], dark[1], dark[2], aq);
+          skyTriPush(S(q[0]), S(q[1]), dark[0], dark[1], dark[2], aq);
+        }
+        prev = q;
+      }
+    }
+  });
+  /* 3) fala: długie, poziome smugi jaśniejsze i ciemniejsze od wody pod nimi — łamią odbicie nieba jak drobne zmarszczki */
+  skyOp('tri', () => {
+    const NR = 24;
+    for (let i = 0; i < NR; i++) {
+      const q = (i + 0.5) / NR, speed = 0.6 + (i % 5) * 0.22;
+      const per = 3.4 + q * 8, len = per * (0.3 + 0.2 * Math.sin(i * 1.3 + 1));
+      const th0 = 0.03 + 0.065 * q;
+      const rowFade = 0.7 + 0.3 * Math.sin(now * 0.0011 + i * 2.1);
+      const drift = (now * 0.0014 * speed * (1 + q)) % per, k0 = Math.floor((L.a0 - drift) / per);
+      for (let k = k0; ; k++) {
+        const az = k * per + drift + (i * 1.37 % per);
+        if (az < L.a0) continue;
+        if (az > L.a1) break;
+        const sh = shape(az); if (sh <= 0.03) continue;
+        const dep = 0.1 + depthAt(az) * 0.85 * Math.pow(q, 1.6);
+        const alt = terrainAlt(az * DEG) - dep + (0.04 + 0.012 * dep) * Math.sin(az * 0.9 + now * 0.0019 * speed + i * 1.7);
+        const p = proj(alt, az); if (!p || p[1] > barY + 6) continue;
+        const wc = waterCol(dep, az), light = ((k * 7 + i * 13) % 5 + 5) % 5 < 3;
+        const c = light ? [Math.min(1, wc[0] * 1.5 + 0.03), Math.min(1, wc[1] * 1.5 + 0.035), Math.min(1, wc[2] * 1.45 + 0.045)] : [wc[0] * 0.5, wc[1] * 0.5, wc[2] * 0.55];
+        const a = (light ? 0.34 : 0.32) * rowFade * (0.7 + 0.5 * q) * fadeA(az) * (0.6 + 0.4 * Math.sin(now * 0.0035 * speed + az * 3 + i));
+        if (a < 0.03) continue;
+        quadAt(alt, az, len, th0 * (0.8 + 0.4 * Math.sin(az * 2 + i)), c, Math.min(a, 0.55));
+      }
+    }
+  });
+  /* 4) odbicia gwiazd / Księżyca / Słońca: migoczące pasma */
+  const glints = (az, alt, n, spread, len, th, c, al, seed) => {
+    for (let j = 0; j < n; j++) {
+      const u = (j - (n - 1) / 2) / ((n - 1) / 2 || 1), e = 1 - Math.abs(u);
+      const dy = u * spread * (1 + Math.abs(alt) * 0.05);
+      const jit = Math.sin(now * 0.0021 + j * 1.9 + seed) * (0.14 + 0.012 * Math.abs(alt)) + Math.sin(now * 0.0053 + j * 3.1 + seed * 2) * 0.07;
+      const sp = 0.45 + 0.55 * Math.max(0, Math.sin(now * 0.0042 + j * 2.3 + seed * 3));
+      const a = al * (0.3 + 0.7 * e) * sp;
+      if (a < 0.012) continue;
+      quadAt(Math.min(alt + dy, -0.15), az + jit, len * (0.5 + 0.8 * e), th, c, a);
+    }
+  };
+  skyOp('tri', () => {
+    if (night > 0.2) for (let i = 0; i < L.n; i++) {
+      const az = L.az[i], alt = L.alt[i], f = fadeA(az);
+      if (f <= 0 || alt > 28) continue;
+      glints(az, -alt * sq, 9, 0.5, 0.42, 0.11, [L.cr[i], L.cg[i], L.cb[i]], clamp((3.2 - L.mag[i]) / 2.6, 0, 1) * 0.95 * f * clamp(night, 0, 1), i * 7.3);
+    }
+    if (moonK > 0.02 && moonAlt < 32) {
+      const az = azOf(ep.moon) / DEG, f = fadeA(az);
+      if (f > 0) glints(az, -Math.min(Math.max(moonAlt, 0.3) * sq, dMax * 0.8), 17, 0.55, 0.62, 0.13, [0.86, 0.9, 1], 0.85 * moonK * f, 3.1);
+    }
+    if (dayK > 0.05 && sunAlt > -1 && sunAlt < 32) {
+      const az = azOf(ep.sun) / DEG, f = fadeA(az);
+      if (f > 0) glints(az, -Math.min(Math.max(sunAlt, 0.3) * sq, dMax * 0.8), 17, 0.6, 0.7, 0.14, [1, 0.88, 0.62], 0.8 * dayK * f * smooth(-1, 4, sunAlt), 9.4);
+    }
+  });
+}
+function skyDrawLandscape(S, W, H) {
+  const dayK = clamp(1 - (SKY.night || 0) * 1.25, 0, 1);
+  const hp = skyPalette(SKY.sunAlt || 0).hor, fogK = 0.34 * dayK;      // daleki las ginie w mgiełce w kolorze horyzontu
+  const cr = lerp((5 + 22 * dayK) / 255, hp[0] / 255, fogK), cg = lerp((7 + 31 * dayK) / 255, hp[1] / 255, fogK),
+        cb = lerp((13 + 23 * dayK) / 255, hp[2] / 255, fogK), A = 1;
+  const proj = (alt, az) => {
+    const p = skyProj(...altAzToEnu(alt * DEG, az * DEG));
+    return (p && p[0] > -W * 0.6 && p[0] < W * 1.6 && p[1] > -H * 0.8 && p[1] < H * 1.8) ? p : null;
+  };
+  const V = (p, k) => skyTriPush(S(p[0]), S(p[1]), cr * k, cg * k, cb * k, A);
+  const tri = (a, b, c, k) => { V(a, k); V(b, k); V(c, k); };
+  const quad = (a, b, c, d, k) => { tri(a, b, c, k); tri(b, d, c, k); };      // a-b górą, c-d dołem
+  const wide = SKY.fov > 150;
+  /* 1) lasy i żywopłoty — pełna sylwetka */
+  const step = clamp(SKY.fov / 700, 0.08, 0.5);
+  let pt = null, pb = null;
+  for (let az = 0; az <= 360.001; az += step) {
+    const ter = terrainAlt(az * DEG), hf = landHeightfield(az);
+    let t = null, b = null;
+    if (hf > 0.015) { t = proj(ter + hf, az); b = proj(ter - 0.12, az); }
+    if (t && b && pt && pb) quad(pt, t, pb, b, 1.12);
+    pt = t && b ? t : null; pb = t && b ? b : null;
+  }
+  /* 2) drzewa: pień + korona (elipsa z lekko nierównym brzegiem) */
+  for (const tr of LAND.trees) {
+    const ter = terrainAlt(tr.az * DEG) - 0.05;
+    const cy = ter + tr.h * (tr.poplar ? 0.55 : 0.72), ry = tr.h * (tr.poplar ? 0.45 : 0.30);
+    const c = proj(cy, tr.az); if (!c) continue;
+    const tw = tr.poplar ? 0.05 : 0.07;
+    const t0 = proj(ter, tr.az - tw), t1 = proj(ter, tr.az + tw), t2 = proj(cy, tr.az - tw), t3 = proj(cy, tr.az + tw);
+    if (t0 && t1 && t2 && t3) quad(t2, t3, t0, t1, 1.0);
+    const N = 18; let first = null, prev = null, ok = true;
+    for (let i = 0; i <= N; i++) {
+      const ph = (i % N) / N * Math.PI * 2, rr = 0.9 + 0.2 * LAND.hash(tr.seed * 7.7 + (i % N));
+      const q = proj(cy + ry * rr * Math.sin(ph), tr.az + tr.rx * rr * Math.cos(ph));
+      if (!q) { ok = false; break; }
+      if (prev) tri(c, prev, q, 1.0); else first = q;
+      prev = q;
+    }
+  }
+  if (wide) return;
+  /* 3) słupy z poprzeczką i przewodami */
+  const thin = (a, b, w, k) => {                       // cienka kreska jako czworokąt o szerokości w (px CSS)
+    const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1, nx = -dy / L * w / 2, ny = dx / L * w / 2;
+    quad([a[0] + nx, a[1] + ny], [b[0] + nx, b[1] + ny], [a[0] - nx, a[1] - ny], [b[0] - nx, b[1] - ny], k);
+  };
+  for (const [a0, a1] of LAND.poles) {
+    const tops = [];
+    for (const az of [a0, a1]) {
+      const ter = terrainAlt(az * DEG) - 0.05, top = ter + 3.3;
+      const p0 = proj(ter, az - 0.045), p1 = proj(ter, az + 0.045), p2 = proj(top, az - 0.045), p3 = proj(top, az + 0.045);
+      if (p0 && p1 && p2 && p3) quad(p2, p3, p0, p1, 1.0);
+      const bars = [proj(top - 0.35, az - 0.42), proj(top - 0.35, az + 0.42), proj(top - 0.42, az - 0.42), proj(top - 0.42, az + 0.42)];
+      if (bars.every(Boolean)) quad(bars[0], bars[1], bars[2], bars[3], 1.0);
+      tops.push(top - 0.38);
+    }
+    for (const dz of [-0.36, 0.36]) {                                   // dwa przewody z ugięciem
+      let prev = null;
+      for (let i = 0; i <= 10; i++) {
+        const t = i / 10, az = a0 + (a1 - a0) * t, alt = tops[0] + (tops[1] - tops[0]) * t - 0.12 * 4 * t * (1 - t);
+        const q = proj(alt, az + dz);
+        if (prev && q) thin(prev, q, 1.1, 1.0);
+        prev = q;
+      }
+    }
+  }
 }
 function terrainAlt(az) {                  // linia horyzontu: bardzo łagodne wzniesienia (mała amplituda, długie fale)
   const a = az / DEG;
@@ -5402,6 +6024,14 @@ function skyBodies(ctx, ep) {
                                     Math.sin(a2) * Math.cos(a1) - Math.cos(a2) * Math.sin(a1) * Math.cos(z2 - z1));
     const pa = Math.atan2(-Math.cos(paFromZenith), Math.sin(paFromZenith));
     const k = ep.illum, s = 2 * k - 1;
+    const dprM = SKY.dpr || 1, Mo = skyMoonCanvas(r * dprM, skyMoonGeom(ep, mp), SKY.night || 0, 1 - (SKY.night || 0));
+    if (Mo && Mo.cv && Mo.S) {                               // realistyczna tarcza (tekstura LRO + oświetlenie) — jak w WebGPU
+      const g0 = ctx.createRadialGradient(mp[0], mp[1], r * 0.9, mp[0], mp[1], r * 2.6);
+      g0.addColorStop(0, `rgba(150,160,185,${0.10 * Math.max(0.25, k)})`); g0.addColorStop(1, 'rgba(150,160,185,0)');
+      ctx.fillStyle = g0; ctx.beginPath(); ctx.arc(mp[0], mp[1], r * 2.6, 0, TAU); ctx.fill();
+      const sz = Mo.S / dprM;
+      ctx.drawImage(Mo.cv, mp[0] - sz / 2, mp[1] - sz / 2, sz, sz);
+    } else {
     ctx.save(); ctx.translate(mp[0], mp[1]); ctx.rotate(pa);
     ctx.beginPath(); ctx.arc(0, 0, r * 1.06, 0, TAU); ctx.fillStyle = 'rgba(150,160,185,0.075)'; ctx.fill();
     ctx.beginPath();
@@ -5418,6 +6048,7 @@ function skyBodies(ctx, ep) {
       ctx.beginPath(); ctx.arc(cx * r, cy * r, cr * r, 0, TAU); ctx.fill();
     }
     ctx.restore();
+    }
     SKY.hits.push({ x: mp[0], y: mp[1], r: Math.max(12, r + 3) * SKY.hitK, kind: 'moon', name: 'Księżyc', key: 'moon', pri: 0.5, obj: ep });
     if (SKY.showPlanets) {
       ctx.font = '12px ui-sans-serif,system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
@@ -5452,32 +6083,50 @@ function skyBodies(ctx, ep) {
     }
   }
 
-  /* ISS — tylko gdy warstwa włączona i stacja jest nad horyzontem */
+  /* ISS: tor przelotu (od 20 min przed do 5 min po przelocie; odcinki w cieniu Ziemi pominięte) i bieżąca pozycja */
+  const ig = SKY.showIss ? skyIssPathGeom(T.sim) : null;
+  if (ig) {
+    ctx.save(); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    for (const L of ig.lines) {
+      if (L.pts.length < 2) continue;
+      ctx.lineWidth = L.past ? 1.2 : 1.8;
+      ctx.strokeStyle = `rgba(255,212,121,${(L.past ? 0.32 : 0.88) * (L.low ? 0.6 : 1) * ig.dim})`;
+      ctx.setLineDash(L.low ? [4, 4] : []);
+      ctx.beginPath(); L.pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    for (const [x, y, done] of ig.ticks) { ctx.fillStyle = `rgba(255,222,150,${(done ? 0.35 : 0.9) * ig.dim})`; ctx.beginPath(); ctx.arc(x, y, 2.1, 0, TAU); ctx.fill(); }
+    for (const [x, y, k] of ig.marks) {
+      ctx.lineWidth = 1.4;
+      if (k === 'start') { ctx.strokeStyle = 'rgba(140,230,170,0.95)'; ctx.beginPath(); ctx.arc(x, y, 5, 0, TAU); ctx.stroke(); }
+      else {                                               // koniec widoczności: przekreślone kółko (cień) albo kółko (nisko)
+        ctx.strokeStyle = 'rgba(255,150,120,0.95)'; ctx.beginPath(); ctx.arc(x, y, 5, 0, TAU); ctx.stroke();
+        if (k === 'shadow') { ctx.beginPath(); ctx.moveTo(x - 3.6, y + 3.6); ctx.lineTo(x + 3.6, y - 3.6); ctx.stroke(); }
+      }
+    }
+    ctx.font = '10.5px ui-sans-serif,system-ui,sans-serif'; ctx.textBaseline = 'middle';
+    ctx.shadowColor = 'rgba(2,5,12,0.85)'; ctx.shadowBlur = 3;
+    for (const [t, x, y, k] of ig.labels) {
+      ctx.fillStyle = k === 'start' ? 'rgba(170,240,190,0.95)' : k === 'end' ? 'rgba(255,175,150,0.95)' : 'rgba(255,220,150,0.9)';
+      const tw = ctx.measureText(t).width, flip = x + 9 + tw > SKY.w - 4;      // przy prawej krawędzi napis po lewej stronie punktu
+      ctx.textAlign = flip ? 'right' : 'left';
+      ctx.fillText(t, flip ? x - 9 : Math.max(4, x + 9), Math.max(8, y + (k === 'max' ? -11 : k === 'start' ? -10 : 10)));
+    }
+    ctx.restore();
+  }
   if (SKY.issP && SKY.showIss && SKY.issP.alt > -2 * DEG) {
     const d = altAzToEnu(SKY.issP.alt, SKY.issP.az), ip = skyProj(...d);
     if (ip) {
-      /* krótki ślad orbity wokół bieżącej chwili: ±60 s wystarcza, by pokazać kierunek lotu.
-         Wcześniej ±200 s dawało łuk przez pół nieba, który wyglądał jak przypadkowa linia. */
-      const step2 = 12 * 1000, span = 5;
-      ctx.strokeStyle = 'rgba(255,205,120,0.42)'; ctx.lineWidth = 1.2;
-      ctx.beginPath(); let started = false;
-      for (let k = -span; k <= span; k++) {
-        const t = T.sim + k * step2;
-        const e = issEci(t); if (!e) continue;
-        const la = lookAngles(mkObs({ lat: SKY.obs.lat, lon: SKY.obs.lon, h: 0.1 }), eciToEcef(e.p, gmstRad(t)));
-        if (la.el < 0) { started = false; continue; }
-        const q = skyProj(...altAzToEnu(la.el, la.az));
-        if (!q) { started = false; continue; }
-        if (started) ctx.lineTo(q[0], q[1]); else { ctx.moveTo(q[0], q[1]); started = true; }
-      }
-      ctx.stroke();
+      const lit = SKY.issP.lit !== false, A = lit ? 1 : 0.3;       // w cieniu Ziemi ISS gaśnie
+      ctx.globalAlpha = A;
       ctx.fillStyle = '#ffd479';
       ctx.beginPath(); ctx.arc(ip[0], ip[1], 3.4, 0, TAU); ctx.fill();
       ctx.strokeStyle = 'rgba(255,215,130,0.8)'; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.arc(ip[0], ip[1], 8, 0, TAU); ctx.stroke();
+      ctx.globalAlpha = 1;
       if (SKY.showPlanets) {
         ctx.font = '11.5px ui-monospace,monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-        ctx.fillStyle = 'rgba(255,220,150,0.92)'; ctx.fillText('ISS', ip[0], ip[1] + 11);
+        ctx.fillStyle = `rgba(255,220,150,${0.92 * (lit ? 1 : 0.7)})`; ctx.fillText(lit ? 'ISS' : 'ISS · w cieniu', ip[0], ip[1] + 11);
       }
       SKY.hits.push({ x: ip[0], y: ip[1], r: 14 * SKY.hitK, kind: 'iss', name: 'ISS', key: 'iss', pri: 0.45, obj: SKY.issP });
     }
@@ -5520,25 +6169,31 @@ function skyGround(ctx) {
   }
   let minY = H;
   for (const r of runs) for (const p of r) if (p[1] < minY) minY = p[1];
-  /* Ziemia jest mocno przezroczysta: przy linii horyzontu lekko ciemniejsza (sylwetka pozostaje czytelna),
-     niżej prawie nie zasłania nieba — widać przez nią gwiazdy i poświatę. */
-  const g = ctx.createLinearGradient(0, Math.max(-10, minY), 0, H);
-  g.addColorStop(0, 'rgba(9,12,21,0.42)');
-  g.addColorStop(0.45, 'rgba(7,9,17,0.24)');
-  g.addColorStop(1, 'rgba(4,6,12,0.08)');
-  ctx.fillStyle = g;
+  /* Ziemia nieprzezroczysta (jak w rzeczywistości zasłania gwiazdy pod horyzontem); tuż przy grzbiecie
+     przechodzi w barwę nieba nad horyzontem — perspektywa powietrzna zamiast świecącej krawędzi. */
+  const sunAltD = SKY.sunAlt != null ? SKY.sunAlt : 0, ep = SKY.epoch;
+  const pal = skyPalette(sunAltD);
+  const bortle = clamp((SKY.bortle - 1) / 8, 0, 1);
+  const moonUp = ep ? smooth(-1, 6, altOf(ep.moon) / DEG) : 0;
+  const gc = skyGroundColor(sunAltD, ep ? (ep.illum || 0) : 0, moonUp, bortle).map(v => v * 255);
+  const fogK = 0.55 * smooth(-8, 10, sunAltD) + 0.25;
+  const hz = pal.hor.map((v, i) => lerp(gc[i], v, fogK));
+  const span = Math.max(8, Math.min(H * 0.12, SKY_CAM.sc * 0.06));      // ok. 3,5° pod horyzontem
+  const gp = new Path2D();
   for (const r of runs) {
-    ctx.beginPath();
-    r.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
-    ctx.lineTo(r[r.length - 1][0], H + 60);
-    ctx.lineTo(r[0][0], H + 60);
-    ctx.closePath();
-    ctx.fill();
+    r.forEach((p, i) => i ? gp.lineTo(p[0], p[1]) : gp.moveTo(p[0], p[1]));
+    gp.lineTo(r[r.length - 1][0], H + 60);
+    gp.lineTo(r[0][0], H + 60);
+    gp.closePath();
   }
-  /* świetlna krawędź horyzontu: trzy warstwy o rosnącej ostrości — daje wrażenie oddechu atmosfery nad grzbietem */
+  ctx.fillStyle = rgb(gc);
+  ctx.fill(gp);
+  /* mgiełka przy grzbiecie: kilka szerokich, półprzezroczystych pociągnięć przyciętych do ziemi */
   ctx.save();
-  for (const [lw, al] of [[10, 0.035], [2.2, 0.055], [0.9, 0.13]]) {
-    ctx.lineWidth = lw; ctx.strokeStyle = `rgba(150,192,240,${al})`;
+  ctx.clip(gp);
+  ctx.lineJoin = 'round';
+  for (let i = 0; i < 12; i++) {                           // 12 warstw o malejącej szerokości → gładki gradient bez pasów
+    ctx.lineWidth = span * 2 * Math.pow(0.72, i); ctx.strokeStyle = rgb(hz, 0.09 + 0.01 * i);
     for (const r of runs) {
       if (r.length < 2) continue;
       ctx.beginPath();
@@ -5657,6 +6312,10 @@ function skyFocusHor(f) {
   if (f.kind === 'sun') return ep.sun;
   if (f.kind === 'moon') return ep.moon;
   if (f.kind === 'iss' && SKY.issP) return altAzToEnu(SKY.issP.alt, SKY.issP.az);
+  if (f.kind === 'iss') {                                  // pod horyzontem: kamera czeka tam, gdzie ISS się pojawi
+    const ps = skyIssPass(T.sim);
+    if (ps && T.sim < ps.aos) return altAzToEnu(8 * DEG, ps.aosAz);
+  }
   return null;
 }
 function skyReticle(ctx, x, y, rad, col, a, spin) {
@@ -5714,134 +6373,189 @@ const SKY_GPU = { state: 'off', why: '', dev: null, ctx: null, cv: null, fmt: 'b
 
 const GPU_BG_WGSL = `
 struct U {
-  p0: vec4f, p1: vec4f, p2: vec4f, p3: vec4f, p4: vec4f,
+  p0: vec4f,   // szer., wys. (px urządzenia), skala px/rad, udział walca (w1)
+  p1: vec4f,   // środek x, y, udział przesunięcia (w2), Miller(gamma)
+  p2: vec4f,   // kierunek Słońca (E, N, U), Słońce nad horyzontem 0..1
+  p3: vec4f,   // mgiełka, ziemia włączona, winieta, pole widzenia
+  p4: vec4f,   // ziarno, czas, dzień 0..1, wysokość Słońca (°)
   right: vec4f, up: vec4f, fwd: vec4f, sunCol: vec4f, hazeCol: vec4f,
-  hor: vec4f, air: vec4f, zen: vec4f, base: vec4f,
-  p5: vec4f,   // night, lp (zanieczyszczenie), air, illum Księżyca
-  p6: vec4f,   // księżyc: x, y, R, alfa
-  p7: vec4f,   // airglow: y(46°), y(8°), -, -
-  p8: vec4f,   // kierunek horyzontalny Słońca (E, N) + siła łuny o wschodzie/zachodzie
+  hor: vec4f, air: vec4f, zen: vec4f, gnd: vec4f,   // gnd: oświetlony grunt (rgb), a = jasność dnia
+  p5: vec4f,   // noc, zanieczyszczenie światłem, łuna zmierzchu, faza Księżyca
+  p6: vec4f,   // kierunek Księżyca (E, N, U), siła poświaty
+  p7: vec4f,   // rezerwa
+  p8: vec4f,   // poziomy kierunek Słońca (E, N), -, -
 };
 @group(0) @binding(0) var<uniform> u: U;
+const PI: f32 = 3.14159265359;
+const HPI: f32 = 1.5707963;
 
 @vertex fn vs(@builtin(vertex_index) i: u32) -> @builtin(position) vec4f {
   var p = array<vec2f,3>(vec2f(-1.0,-1.0), vec2f(3.0,-1.0), vec2f(-1.0,3.0));
   return vec4f(p[i], 0.0, 1.0);
 }
-fn hash2(p: vec2f) -> f32 {
-  return fract(sin(dot(p, vec2f(12.9898, 78.233))) * 43758.5453);
+fn hash2(p: vec2f) -> f32 { return fract(sin(dot(p, vec2f(12.9898, 78.233))) * 43758.5453); }
+fn millerY(p: f32) -> f32 { return 1.25 * log(tan(0.78539816 + 0.4 * p)); }
+fn millerInv(y: f32) -> f32 { return 2.5 * (atan(exp(0.8 * y)) - 0.78539816); }
+fn frameDir(lam: f32, phi: f32) -> vec3f {
+  let c = cos(phi);
+  return c * sin(lam) * u.right.xyz + sin(phi) * u.up.xyz + c * cos(lam) * u.fwd.xyz;
+}
+/* piksel → kierunek na sferze; dokładna odwrotność skyProjC() z JS (ta sama skala i ten sam rzut) */
+fn pixDir(px: vec2f) -> vec3f {
+  let X = (px.x - u.p1.x) / u.p0.z;
+  let Y = (u.p1.y - px.y) / u.p0.z;
+  let w = clamp(u.p0.w, 0.0, 1.0);
+  if (w >= 0.999) {                                   // panorama (Miller)
+    var lam = X - 2.0 * PI * floor((X + PI) / (2.0 * PI));
+    var phi = millerInv(Y + u.p1.w);
+    if (phi > HPI) { phi = PI - phi; lam = lam + PI; }
+    if (phi < -HPI) { phi = -PI - phi; lam = lam + PI; }
+    return frameDir(lam, phi);
+  }
+  let R = length(vec2f(X, Y));
+  let th = 2.0 * atan(R * 0.5);
+  let st = sin(th);
+  var sx = 0.0; var sy = 0.0;
+  if (R > 1e-6) { sx = X / R * st; sy = Y / R * st; }
+  let sz = cos(th);
+  if (w <= 0.001) { return sx * u.right.xyz + sy * u.up.xyz + sz * u.fwd.xyz; }
+  var lam = atan2(sx, sz);
+  var phi = asin(clamp(sy, -1.0, 1.0));
+  for (var it = 0; it < 6; it = it + 1) {             // Newton: stereografia ↔ walec
+    let c = cos(phi); let s = sin(phi); let cl = cos(lam); let sl = sin(lam);
+    let x = c * sl; let y = s; let z = c * cl;
+    let D = max(1.0 + z, 0.05); let D2 = D * D;
+    let xl = c * cl; let xp = -s * sl; let yp = c; let zl = -c * sl; let zp = -s * cl;
+    let Fx = (1.0 - w) * 2.0 * x / D + w * lam - X;
+    let Fy = (1.0 - w) * 2.0 * y / D + w * millerY(phi) - Y;
+    let a = (1.0 - w) * 2.0 * (xl * D - x * zl) / D2 + w;
+    let b = (1.0 - w) * 2.0 * (xp * D - x * zp) / D2;
+    let cc = (1.0 - w) * -2.0 * y * zl / D2;
+    let d = (1.0 - w) * 2.0 * (yp * D - y * zp) / D2 + w / cos(0.8 * phi);
+    var det = a * d - b * cc;
+    if (abs(det) < 1e-6) { det = 1e-6; }
+    lam = clamp(lam - (d * Fx - b * Fy) / det, -PI, PI);
+    phi = clamp(phi - (-cc * Fx + a * Fy) / det, -1.5707, 1.5707);
+  }
+  return frameDir(lam, phi);
+}
+/* barwa nieba w danym kierunku — wszystko liczone kątowo (wysokość, odległość od Słońca i Księżyca),
+   więc wygląda tak samo przy każdym polu widzenia i w każdym rzucie */
+fn skyColor(dir: vec3f) -> vec3f {
+  let altDeg = asin(clamp(dir.z, -1.0, 1.0)) * 57.29577951;
+  let a = max(altDeg, 0.0);
+  let night = clamp(u.p5.x, 0.0, 1.0);
+  let lp = clamp(u.p5.y, 0.0, 1.0);
+  let hzW = clamp(u.p5.z, 0.0, 1.0);
+  let day = clamp(u.p4.z, 0.0, 1.0);
+  let sunAlt = u.p4.w;
+  let sunUp = clamp(u.p2.w, 0.0, 1.0);
+  let hv = vec2f(dir.x, dir.y);
+  let hl = length(hv);
+  var azC = 1.0;
+  if (hl > 1e-5) { azC = dot(hv / hl, u.p8.xy); }
+  let sunSide = pow(0.5 + 0.5 * azC, 2.0);                 // 1 = azymut Słońca, 0 = strona przeciwna
+
+  /* 1) gradient: zenit → wyżej → horyzont (pas przy horyzoncie zanika wykładniczo z wysokością) */
+  var col = mix(u.air.rgb, u.zen.rgb, pow(smoothstep(0.0, 88.0, a), 0.68));
+  let anti = mix(u.air.rgb, u.zen.rgb, 0.3) * 1.04;       // o zmierzchu: chłodny horyzont po stronie przeciwnej Słońcu
+  let hcol = mix(u.hor.rgb, mix(anti, u.hor.rgb, sunSide), hzW);
+  let band = exp(-a / mix(10.0, 6.5, hzW));
+  let band2 = exp(-a / 24.0) * sunSide * hzW * 0.42;      // łuna nad miejscem zachodu sięga wyżej
+  col = mix(col, hcol, clamp(band + band2, 0.0, 1.0));
+
+  /* 2) dzień: rozpraszanie Rayleigha (najgłębszy błękit ~90° od Słońca) i aureola Mie wokół tarczy */
+  let cg = clamp(dot(dir, u.p2.xyz), -1.0, 1.0);
+  let ang = acos(cg);
+  col = col * (1.0 - 0.17 * day * (1.0 - cg * cg) * smoothstep(3.0, 35.0, a));
+  let aur = (exp(-ang / 0.06) * 0.55 + exp(-ang / 0.30) * 0.26 + exp(-ang / 1.0) * 0.07) * sunUp;
+  let aurC = mix(vec3f(1.0, 0.70, 0.42), u.sunCol.rgb, day);
+  col = mix(col, aurC, clamp(aur * mix(0.85, 1.0, day), 0.0, 0.9));
+
+  /* 3) cień Ziemi i Pas Wenus nad horyzontem po stronie przeciwnej Słońcu (Słońce tuż pod horyzontem) */
+  let es = smoothstep(-9.0, -1.0, sunAlt) * (1.0 - smoothstep(0.5, 4.0, sunAlt)) * pow(clamp(-azC, 0.0, 1.0), 1.3);
+  if (es > 0.002) {
+    let hb = clamp(-sunAlt, 0.0, 8.0) * 0.9 + 1.4;
+    let lum = dot(u.air.rgb, vec3f(0.3, 0.5, 0.2));
+    let sh = 1.0 - smoothstep(hb - 1.0, hb + 1.8, a);
+    col = mix(col, vec3f(0.38, 0.44, 0.60) * (lum * 1.05 + 0.02), sh * es * 0.6);
+    let belt = smoothstep(hb, hb + 3.0, a) * (1.0 - smoothstep(hb + 5.0, hb + 17.0, a));
+    col = mix(col, vec3f(0.95, 0.68, 0.70) * (lum * 1.2 + 0.04), belt * es * 0.38);
+  }
+
+  /* 4) noc: poświata atmosfery (efekt van Rhijna), kopuła łuny miast wokół CAŁEGO horyzontu, woal tła */
+  if (night > 0.01) {
+    let ca = cos(radians(a));
+    let vr = inverseSqrt(max(1.0 - 0.965 * ca * ca, 0.03));
+    let ag = night * 0.035 * clamp((vr - 1.0) / 4.5, 0.0, 1.0) * smoothstep(-0.5, 4.0, altDeg);
+    col = mix(col, vec3f(0.12, 0.17, 0.15), ag);
+    let lpK = night * (0.025 + 0.32 * lp) * exp(-a / mix(9.0, 17.0, lp));
+    col = mix(col, vec3f(0.36, 0.29, 0.22) * (0.55 + 0.6 * lp), clamp(lpK, 0.0, 1.0));
+    let veil = night * (0.015 + 0.11 * lp) * (1.0 - 0.6 * smoothstep(0.0, 70.0, a));
+    col = mix(col, vec3f(0.10, 0.13, 0.20), veil);
+  }
+
+  /* 5) Księżyc: aureola wokół tarczy + rozjaśnienie całego nieba światłem rozproszonym */
+  let mA = u.p6.w;
+  if (mA > 0.0005) {
+    let md = acos(clamp(dot(dir, u.p6.xyz), -1.0, 1.0));
+    let mk = exp(-md / 0.05) * 0.9 + exp(-md / 0.30) * 0.35 + 0.22 * (0.65 + 0.35 * exp(-a / 25.0));
+    col = mix(col, vec3f(0.52, 0.62, 0.80), clamp(mA * mk, 0.0, 0.85));
+  }
+
+  /* 6) mgiełka tuż nad horyzontem (wg wysokości kątowej) */
+  if (u.p3.x > 0.002 && altDeg <= 12.0) {
+    let t = clamp(a / 12.0, 0.0, 1.0);
+    let ha = mix(0.32, 0.0, sqrt(t));
+    let hzMask = mix(1.0, mix(0.12, 1.0, sunSide), max(hzW, night));
+    col = mix(col, u.hazeCol.rgb, clamp(ha * u.p3.x * hzMask * (1.0 - 0.75 * night), 0.0, 1.0));
+  }
+  /* pod horyzontem (gdy krajobraz wyłączony): ciemne tło jak dawniej */
+  col = mix(col, vec3f(0.004, 0.008, 0.035), 1.0 - smoothstep(-2.2, -0.2, altDeg));
+  return max(col, vec3f(0.0));
+}
+fn terrainDeg(azDeg: f32) -> f32 {                      // ta sama linia horyzontu co terrainAlt() w JS
+  return max(0.10, 0.30 + 0.075 * sin(azDeg * 0.5 + 0.9) + 0.035 * sin(azDeg * 0.85 + 3.4));
 }
 @fragment fn fs(@builtin(position) fc: vec4f) -> @location(0) vec4f {
   let px = fc.xy;
-  let X = (px.x - u.p1.x) / u.p0.z;
-  let Y = (u.p1.y - px.y) / u.p0.z;
-  let Rk = length(vec2f(X, Y));
-  /* rzut: do 150° stereograficzny, wyżej płynnie przechodzi w równoodległościowy (rybie oko).
-     u.p0.w = udział rybiego oka, u.p1.z = ke/k. Trzy kroki Newtona odwracają rzut mieszany. */
-  let wmix = clamp(u.p0.w, 0.0, 1.0);
-  let ratio = max(u.p1.z, 1e-6);
-  var th = 2.0 * atan(Rk * 0.5);
-  if (wmix > 0.001) {
-    th = mix(th, Rk / ratio, wmix);
-    for (var it = 0; it < 3; it = it + 1) {
-      let tt = clamp(th, 0.0, 3.13);
-      let c2 = max(cos(tt * 0.5), 0.02);
-      let r = mix(2.0 * tan(tt * 0.5), tt / ratio, wmix);
-      let rp = mix(1.0 / (c2 * c2), 1.0 / ratio, wmix);
-      th = clamp(tt - (r - Rk) / max(rp, 1e-4), 0.0001, 3.14159);
-    }
-  }
-  let st = sin(th);
-  let ct = cos(th);
-  var dir = u.fwd.xyz;
-  if (Rk > 1e-6) {
-    dir = (X / Rk) * st * u.right.xyz + (Y / Rk) * st * u.up.xyz + ct * u.fwd.xyz;
-  }
-  let altDeg = asin(clamp(dir.z, -1.0, 1.0)) * 57.29577951308232;
-  let k1 = smoothstep(-1.0, 16.0, altDeg);
-  let k2 = smoothstep(16.0, 58.0, altDeg);
-  var col = mix(mix(u.hor.rgb, u.air.rgb, k1), u.zen.rgb, k2);
-  col = mix(col, u.base.rgb, 1.0 - smoothstep(-2.2, -0.2, altDeg));
-  /* o wschodzie i zachodzie Słońca horyzont nie jarzy się na całym obwodzie:
-     ciepła łuna istnieje tylko po stronie Słońca, resztę kręgu przygaszamy */
-  let hzW = clamp(u.p8.w, 0.0, 1.0);
-  let dh = normalize(vec2f(dir.x, dir.y) + vec2f(0.00001, 0.00002));
-  let azD = clamp(dot(dh, u.p8.xy), 0.0, 1.0);          // 1 = patrzysz w stronę Słońca
-  var azN = pow(azD, 5.0);                              // wąski stożek dla łuny
-  if (hzW > 0.01) {
-    let kd = (1.0 - smoothstep(-3.0, 30.0, altDeg)) * hzW * (1.0 - azN);
-    col = mix(col, mix(u.hor.rgb, u.zen.rgb, 0.78), clamp(kd, 0.0, 1.0));
-  }
-  let dayHi = select(0.0, 1.0, u.p4.z > 0.5);
-  let day = clamp(u.p4.z, 0.0, 1.0);
-  if (u.p2.w > 0.002 && u.p2.z > 1.0) {                     // poświata Słońca: gradient radialny, mieszanie jak w 2D
-    let d = distance(px, u.p2.xy) / u.p2.z;
-    if (d < 1.0) {
-      let nearC = u.sunCol.rgb;
-      let midC = vec3f(1.0, mix(150.0, 240.0, dayHi) / 255.0, mix(75.0, 205.0, dayHi) / 255.0);
-      let a0 = (0.55 + 0.35 * day) * u.p2.w;
-      let a1 = (0.24 + 0.20 * day) * u.p2.w;
-      var ga = a1; var gc = midC;
-      if (d < 0.22) { let k = d / 0.22; ga = mix(a0, a1, k); gc = mix(nearC, midC, k); }
-      else { ga = mix(a1, 0.0, (d - 0.22) / 0.78); }
-      col = mix(col, gc, clamp(ga, 0.0, 1.0));
-    }
-  }
-  let night = clamp(u.p5.x, 0.0, 1.0);
-  let lp = clamp(u.p5.y, 0.0, 1.0);
-  if (night > 0.02) {                                       // noc: poświata Księżyca, airglow, łuna miast, woal „nie ma czarnego nieba”
-    if (u.p6.z > 1.0 && u.p6.w > 0.002) {
-      let d = distance(px, u.p6.xy) / u.p6.z;
-      if (d < 1.0) { col = mix(col, vec3f(190.0, 205.0, 235.0) / 255.0, u.p6.w * (1.0 - d)); }
-    }
-    if (abs(u.p7.x - u.p7.y) > 8.0) {                        // airglow 8°–46°
-      let ya = min(u.p7.x, u.p7.y); let yb = max(u.p7.x, u.p7.y);
-      if (px.y >= ya && px.y <= yb) {
-        let t = clamp((px.y - ya) / (yb - ya), 0.0, 1.0);
-        var aa = 0.0;
-        if (t < 0.55) { aa = mix(0.0, 0.032 * night, t / 0.55); } else { aa = mix(0.032 * night, 0.0, (t - 0.55) / 0.45); }
-        col = mix(col, vec3f(34.0, 68.0, 56.0) / 255.0, aa * mix(0.45, 1.0, azN));
-      }
-    }
-    let yc0 = u.p0.y * 0.3;                                  // łuna miast przy horyzoncie
-    if (px.y > yc0) {
-      let t = clamp((px.y - yc0) / max(1.0, u.p0.y - yc0), 0.0, 1.0);
-      let aMid = 0.03 + 0.10 * lp; let aBot = (0.04 + 0.20 * lp) * night;
-      var ca = aMid; var cc = vec3f(140.0, 108.0, 70.0) / 255.0;
-      if (t < 0.5) { let k = t / 0.5; ca = mix(0.0, aMid, k); }
-      else { let k = (t - 0.5) / 0.5; ca = mix(aMid, aBot, k); cc = mix(cc, vec3f(150.0, 118.0, 80.0) / 255.0, k); }
-      col = mix(col, cc, clamp(ca, 0.0, 1.0) * mix(0.07, 1.0, azN));   // łuna tylko w stronę Słońca
-    }
-    let vt = clamp(px.y / max(1.0, u.p0.y), 0.0, 1.0);        // woal: im gorsza klasa nieba, tym jaśniejsze tło
-    let air = 0.055 + 0.16 * lp;
-    col = mix(col, mix(vec3f(28.0, 38.0, 64.0) / 255.0, vec3f(40.0, 52.0, 80.0) / 255.0, vt), mix(air * 0.45, air, vt) * night);
-  }
-  if (u.p3.z > 0.002) {                                     // mgiełka nad horyzontem (gradient pionowy, alfa 0,55 → 0)
-    let ya = min(u.p3.x, u.p3.y);                          // mgiełka tylko między horyzontem a 16° (jak fillRect w 2D)
-    let yb = max(u.p3.x, u.p3.y);
-    if (px.y >= ya && px.y <= yb) {
-      let dyh = u.p3.y - u.p3.x;
-      let dy2 = select(dyh, 1.0, abs(dyh) < 1.0);
-      let t = clamp((px.y - u.p3.x) / dy2, 0.0, 1.0);
-      var ha = 0.0;
-      if (t < 0.45) { ha = mix(0.55, 0.16, t / 0.45); } else { ha = mix(0.16, 0.0, (t - 0.45) / 0.55); }
-      let hzMask = mix(1.0, mix(0.09, 1.0, azN), max(hzW, night));    // dzień bez zmian, noc i zmierzch — tylko przy Słońcu
-      col = mix(col, u.hazeCol.rgb, clamp(ha, 0.0, 1.0) * u.p3.z * hzMask);
-    }
-  }
-  if (u.p3.w > 0.002) {                                     // winieta jak w skyVignette()
+  var col = skyColor(pixDir(px));
+  if (u.p3.z > 0.002) {                                     // delikatna winieta tylko przy wąskich polach
     let R = max(1.0, length(vec2f(u.p0.x, u.p0.y)) * 0.62);
     let d = distance(px, vec2f(u.p0.x * 0.5, u.p0.y * 0.46)) / R;
-    var va = 0.0;
-    if (d > 0.42) { va = mix(0.0, 0.06, clamp((d - 0.42) / 0.20, 0.0, 1.0)); }
-    if (d > 0.62) { va = mix(0.06, 0.22, clamp((d - 0.62) / 0.38, 0.0, 1.0)); }
-    col = mix(col, vec3f(1.0, 3.0, 8.0) / 255.0, va * u.p3.w);
+    let va = mix(0.0, 0.16, clamp((d - 0.55) / 0.45, 0.0, 1.0));
+    col = mix(col, vec3f(1.0, 3.0, 8.0) / 255.0, va * u.p3.z);
   }
   if (u.p4.x > 0.0005) {
     let n = hash2(px + vec2(u.p4.y, u.p4.y * 1.7)) - 0.5;
     col += vec3f(n * u.p4.x);
   }
   return vec4f(max(col, vec3f(0.0)), 1.0);
+}
+/* Ziemia: nieprzezroczysta, rysowana PO gwiazdach (chowa wszystko, co jest pod horyzontem).
+   Barwa wynika z oświetlenia (Słońce, niebo, Księżyc, łuna), a ku horyzontowi grunt ginie w mgiełce
+   w kolorze nieba tuż nad nim — dzięki temu linia horyzontu jest miękka i naturalna przy każdym rzucie. */
+@fragment fn fsGround(@builtin(position) fc: vec4f) -> @location(0) vec4f {
+  let dir = pixDir(fc.xy);
+  let altDeg = asin(clamp(dir.z, -1.0, 1.0)) * 57.29577951;
+  var az = atan2(dir.x, dir.y) * 57.29577951;
+  if (az < 0.0) { az = az + 360.0; }
+  let e = altDeg - terrainDeg(az);
+  let fw = clamp(fwidth(e), 1e-4, 2.0);
+  let cov = 1.0 - smoothstep(-0.6 * fw, 0.6 * fw, e);
+  if (cov <= 0.002) { discard; }
+  let dep = max(-altDeg, 0.0);
+  let hv = vec2f(dir.x, dir.y);
+  var hd = vec2f(0.0, 1.0);
+  if (length(hv) > 1e-5) { hd = normalize(hv); }
+  let hz = skyColor(vec3f(hd * 0.99996, 0.0087));           // niebo 0,5° nad horyzontem w tym samym azymucie
+  var g = u.gnd.rgb * mix(1.0, 0.78, smoothstep(3.0, 70.0, dep));
+  let q = log2(dep + 0.4) * 2.2;                            // łagodne plamy pól (bez pionowych pasów)
+  let nz = 0.5 + 0.25 * sin(az * 0.21 + q * 1.7) * sin(az * 0.067 - q * 2.3 + 1.1) + 0.25 * sin(az * 0.013 + q * 0.9);
+  g = g * (0.90 + 0.16 * nz * smoothstep(0.5, 6.0, dep));
+  let fog = exp(-dep / mix(1.6, 3.2, u.gnd.a));            // perspektywa powietrzna: daleki grunt w kolorze mgiełki
+  g = mix(g, hz * mix(0.55, 0.86, u.gnd.a), clamp(fog * 0.92, 0.0, 1.0));
+  return vec4f(g * cov, cov);
 }`;
 
 const GPU_SPR_WGSL = `
@@ -5872,12 +6586,27 @@ struct O {
   o.kind = i.a.w;
   return o;
 }
-fn moonLit(uv: vec2f, phase: f32, pa: f32) -> f32 {
+/* Faza Księżyca: phase = 2·oświetlenie − 1 (−1 nów … 0 kwadra … +1 pełnia), pa = kierunek jasnego brzegu.
+   Układ lokalny jak w wersji Canvas 2D: jasny brzeg po stronie +x, terminator to elipsa x = −phase·√(1−y²). */
+fn moonLocal(uv: vec2f, pa: f32) -> vec2f {
   let ca = cos(pa); let sa = sin(pa);
-  let q = vec2f(uv.x * ca + uv.y * sa, -uv.x * sa + uv.y * ca);
+  return vec2f(uv.x * ca + uv.y * sa, -uv.x * sa + uv.y * ca);
+}
+fn moonLit(q: vec2f, phase: f32, aa: f32) -> f32 {
   let r2 = clamp(1.0 - q.y * q.y, 0.0, 1.0);
-  let edge = phase * sqrt(r2);
-  return select(0.0, 1.0, q.x <= edge);
+  let d = q.x + phase * sqrt(r2);                 // > 0 po stronie oświetlonej
+  return smoothstep(-aa, aa, d);
+}
+fn moonMaria(p: vec2f) -> f32 {                    // ciemne „morza” (układ zbliżony do widoku z półkuli północnej)
+  var m = 0.0;
+  m += 0.30 * (1.0 - smoothstep(0.10, 0.24, length(p - vec2f(-0.30, -0.32))));   // Morze Deszczów
+  m += 0.26 * (1.0 - smoothstep(0.08, 0.20, length(p - vec2f(0.08, -0.22))));    // Morze Jasności
+  m += 0.26 * (1.0 - smoothstep(0.07, 0.19, length(p - vec2f(0.20, 0.02))));     // Morze Spokoju
+  m += 0.22 * (1.0 - smoothstep(0.06, 0.15, length(p - vec2f(0.46, -0.12))));    // Morze Przesileń
+  m += 0.20 * (1.0 - smoothstep(0.10, 0.30, length(p - vec2f(-0.48, 0.02))));    // Ocean Burz
+  m += 0.16 * (1.0 - smoothstep(0.06, 0.17, length(p - vec2f(0.30, 0.30))));     // Morze Nektaru / Żyzności
+  m += 0.12 * (1.0 - smoothstep(0.06, 0.16, length(p - vec2f(-0.18, 0.28))));    // Morze Chmur
+  return clamp(m, 0.0, 0.42);
 }
 @fragment fn fs(in: O) -> @location(0) vec4f {
   let r = length(in.uv);
@@ -5891,8 +6620,15 @@ fn moonLit(uv: vec2f, phase: f32, pa: f32) -> f32 {
     let w = max(in.par.x, 0.06);
     al = (1.0 - smoothstep(1.0 - w, 1.0, r)) * smoothstep(1.0 - w * 2.4, 1.0 - w, r);
   } else if (in.kind < 3.5) {                // Księżyc z fazą
-    let lit = moonLit(in.uv, in.par.x, in.par.y);
-    al = lit * (1.0 - smoothstep(0.94, 1.0, r));
+    let q = moonLocal(in.uv, in.par.z);
+    let disk = 1.0 - smoothstep(0.94, 1.0, r);
+    let aa = select(0.03, clamp(1.4 / in.par.w, 0.004, 0.2), in.par.w > 0.5);   // ~1,4 px wygładzenia terminatora
+    let lit = moonLit(q, in.par.y, aa);
+    let mu = sqrt(clamp(1.0 - r * r, 0.0, 1.0));
+    let shade = (0.82 + 0.18 * mu) * (1.0 - 0.38 * moonMaria(in.uv)); // pociemnienie brzegu + delikatne morza
+    let earth = 0.05 * (1.0 - smoothstep(-0.9, -0.2, in.par.y));       // światło popielate przy wąskim sierpie
+    al = disk * max(lit, earth);
+    rgb = mix(vec3f(0.55, 0.60, 0.70), in.col.rgb * shade, clamp(lit / max(max(lit, earth), 1e-4), 0.0, 1.0));
   } else if (in.kind < 4.5) {                // drobny kwadrat (gwiazdy proceduralne)
     al = 1.0 - smoothstep(0.55, 1.0, max(abs(in.uv.x), abs(in.uv.y)));
   } else if (in.kind < 5.5) {                // obłok Drogi Mlecznej / pył — profil i szczyt alfa 0,55 jak w sprite'ach 2D
@@ -5967,6 +6703,12 @@ struct O {
   let a = textureSampleLevel(atl, smp, in.uv, 0.0).a * in.col.a;
   if (a < 0.01) { discard; }
   return vec4f(in.col.rgb * a, a);
+}
+@fragment fn fsImg(in: O) -> @location(0) vec4f {   // obraz RGBA (premultiplied) — tarcza Księżyca
+  let t = textureSampleLevel(atl, smp, in.uv, 0.0);
+  let a = t.a * in.col.a;
+  if (a < 0.003) { discard; }
+  return vec4f(t.rgb * in.col.rgb * in.col.a, a);
 }`;
 
 /* --- atlas glifów: całe napisy rysowane raz na kanwie i wgrywane jako tekstura --- */
@@ -6033,6 +6775,7 @@ function skyGpuTeardown() {
   try { if (a.dev) a.dev.destroy(); } catch (e) { /* już martwe */ }
   a.dev = null; a.ctx = null; a.uni = null; a.small = []; a.buf = {}; a.cap = { spr: 0, lin: 0, txt: 0 };
   a.n = { spr: 0, lin: 0, txt: 0 }; a.pipe = {}; a.sampler = null; a.atlTex = null;
+  a.moonTex = null; a.moonBind = null; a.moonVer = -1;
   a.triBindBuf = null; a.triData = null;
   a.binds = null; a.msView = null; a.msW = 0; a.msH = 0; a.msN = 0;
   try { if (a.msTex) a.msTex.destroy(); } catch (e) { /* było */ }
@@ -6118,6 +6861,10 @@ function skyGpuPipes() {
     vertex: { module: bgMod, entryPoint: 'vs' },
     fragment: { module: bgMod, entryPoint: 'fs', targets: [{ format: fmt }] },
     primitive: { topology: 'triangle-list' } });
+  a.pipe.gnd = dev.createRenderPipeline({ layout: 'auto', multisample: ms,          // ziemia: pełnoekranowy przebieg z mieszaniem
+    vertex: { module: bgMod, entryPoint: 'vs' },
+    fragment: { module: bgMod, entryPoint: 'fsGround', targets: [{ format: fmt, blend: blendAlpha }] },
+    primitive: { topology: 'triangle-list' } });
   const sprMod = mk(GPU_SPR_WGSL);
   const sprPipe = (blend) => dev.createRenderPipeline({ layout: 'auto', multisample: ms,
     vertex: { module: sprMod, entryPoint: 'vs', buffers: [instLayout] },
@@ -6142,6 +6889,11 @@ function skyGpuPipes() {
     vertex: { module: txtMod, entryPoint: 'vs', buffers: [instLayout] },
     fragment: { module: txtMod, entryPoint: 'fs', targets: [{ format: fmt, blend: blendAlpha }] },
     primitive: { topology: 'triangle-list' } });
+  a.pipe.img = dev.createRenderPipeline({ layout: 'auto', multisample: ms,
+    vertex: { module: txtMod, entryPoint: 'vs', buffers: [instLayout] },
+    fragment: { module: txtMod, entryPoint: 'fsImg', targets: [{ format: fmt, blend: blendAlpha }] },
+    primitive: { topology: 'triangle-list' } });
+  a.moonBind = null;
   a.binds = null;                                          // układy z 'auto' są nowe
 }
 /* --- bind-groupy: identyczne w każdej klatce, więc tworzymy je raz --- */
@@ -6152,6 +6904,7 @@ function skyGpuBinds() {
   const g = (pipe, buf) => dev.createBindGroup({ layout: pipe.getBindGroupLayout(0), entries: [{ binding: 0, resource: { buffer: buf } }] });
   a.binds = {
     bg: g(a.pipe.bg, a.uni),
+    gnd: g(a.pipe.gnd, a.uni),
     sprAdd: g(a.pipe.sprAdd, a.small[0]),
     sprAlp: g(a.pipe.sprAlp, a.small[0]),
     lin: g(a.pipe.lin, a.small[0]),
@@ -6159,7 +6912,8 @@ function skyGpuBinds() {
     txt: dev.createBindGroup({ layout: a.pipe.txt.getBindGroupLayout(0), entries: [
       { binding: 0, resource: { buffer: a.small[2] } },
       { binding: 1, resource: a.atlTex.createView() },
-      { binding: 2, resource: a.sampler }] })
+      { binding: 2, resource: a.sampler }] }),
+    img: null
   };
   return a.binds;
 }
@@ -6328,7 +7082,7 @@ function skyOpRec(kind, start, count) {
 }
 function skyOp(kind, fn) {
   const a = SKY_GPU;
-  const key = kind === 'lin' ? 'lin' : kind === 'txt' ? 'txt' : kind === 'tri' ? 'tri' : 'spr';
+  const key = kind === 'lin' ? 'lin' : (kind === 'txt' || kind === 'img') ? 'txt' : kind === 'tri' ? 'tri' : 'spr';
   const start = a.n[key];
   fn();
   const count = a.n[key] - start;
@@ -6352,6 +7106,7 @@ function emPolyDash(pts, w, cr, cg, cb, ca, dash, gap) {
     const x0 = pts[i - 1][0], y0 = pts[i - 1][1], x1 = pts[i][0], y1 = pts[i][1];
     const len = Math.hypot(x1 - x0, y1 - y0);
     if (!(len >= 0.05) || !Number.isFinite(len)) continue;
+    if (SKY_CAM.w1 > 0 && Math.abs(x1 - x0) > (SKY.w || 1200) * (SKY.dpr || 1) * 0.45) continue;   // szew panoramy
     /* Odcinek biegnący daleko poza ekranem: kreskowanie i tak nie jest widoczne,
        a pętla wygenerowałaby setki tysięcy segmentów. Rysujemy jedną linię. */
     if (!D || len > 6 * ((SKY.w || 1200) + (SKY.h || 800))) { emLin(x0, y0, x1, y1, w, cr, cg, cb, ca); continue; }
@@ -6381,7 +7136,19 @@ function emRing(x, y, rad, w, cr, cg, cb, ca, segs) {
   }
 }
 const SKY_TRI_MAX = 200000;                                  // sufit trójkątów w klatce (24 B każdy)
+/* W panoramie azymut za plecami obserwatora „przeskakuje” z prawej krawędzi na lewą. Trójkąt rozpięty
+   nad tym szwem przeciąłby cały ekran — zbieramy więc wierzchołki po trzy i takie trójkąty pomijamy. */
 function skyTriPush(x, y, r, g, b, al) {
+  if (!(SKY_CAM.w1 > 0)) { skyTriPushRaw(x, y, r, g, b, al); return; }
+  const a = SKY_GPU, q = a.tq || (a.tq = new Float32Array(18)), n = a.tqn || 0, o = n * 6;
+  q[o] = x; q[o + 1] = y; q[o + 2] = r; q[o + 3] = g; q[o + 4] = b; q[o + 5] = al;
+  if (n < 2) { a.tqn = n + 1; return; }
+  a.tqn = 0;
+  const lim = (SKY.w || 1200) * (SKY.dpr || 1) * 0.4;
+  if (Math.abs(q[0] - q[6]) > lim || Math.abs(q[6] - q[12]) > lim || Math.abs(q[0] - q[12]) > lim) return;
+  for (let i = 0; i < 18; i += 6) skyTriPushRaw(q[i], q[i + 1], q[i + 2], q[i + 3], q[i + 4], q[i + 5]);
+}
+function skyTriPushRaw(x, y, r, g, b, al) {
   const a = SKY_GPU;
   if (!(a.n.tri < SKY_TRI_MAX)) return;
   if (a.n.tri + 1 >= a.cap.tri) {
@@ -6395,12 +7162,136 @@ function skyTriPush(x, y, r, g, b, al) {
 }
 
 /* ======================= rysowanie nieba w WebGPU ======================= */
+/* barwa gruntu (sRGB 0..1): pola i łąki oświetlone Słońcem i niebem; nocą prawie czarne,
+   z odrobiną światła Księżyca i łuny miast */
+/* ================= Księżyc: realistyczna tarcza =================
+   Mapa albedo półkuli widocznej (rzut ortograficzny 320 px) z globalnej mozaiki LRO —
+   NASA SVS „CGI Moon Kit” (domena publiczna). Oświetlenie liczone na piksel: prawo Lommela–Seeligera
+   (płaska jasność pełni, jasny brzeg sierpa), miękki terminator z lekką rzeźbą, światło popielate na stronie nocnej.
+   Orientacja: północ Księżyca ≈ kierunek do bieguna niebieskiego na ekranie, jasny brzeg — w stronę Słońca. */
+const SKY_MOON_JPG = 'data:image/jpeg;base64,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';
+const SKY_MOON = { N: 320, alb: null, gx: null, gy: null, loading: false, cv: null, key: '', at: 0, ver: 0, S: 0, R: 0 };
+function skyMoonLoad() {
+  const M = SKY_MOON;
+  if (M.alb || M.loading) return;
+  M.loading = true;
+  const im = new Image();
+  im.onload = () => {
+    try {
+      const N = M.N, c = document.createElement('canvas'); c.width = c.height = N;
+      const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(im, 0, 0, N, N);
+      const d = g.getImageData(0, 0, N, N).data, alb = new Float32Array(N * N), gx = new Float32Array(N * N), gy = new Float32Array(N * N);
+      for (let i = 0; i < N * N; i++) alb[i] = d[i * 4] / 255;
+      for (let y = 1; y < N - 1; y++) for (let x = 1; x < N - 1; x++) {
+        const i = y * N + x;
+        gx[i] = (alb[i + 1] - alb[i - 1]) * 0.5; gy[i] = (alb[i + N] - alb[i - N]) * 0.5;
+      }
+      M.alb = alb; M.gx = gx; M.gy = gy; M.key = ''; SKY.drawn = 0;
+    } catch (e) { warnOnce(e); }
+  };
+  im.onerror = () => { M.loading = false; };
+  im.src = SKY_MOON_JPG;
+}
+/* kierunek (kąt ekranowy, y w dół) od punktu v do punktu w na sferze — po rzucie, więc zgodny z każdym polem widzenia */
+function skyScreenDir(v, w, p0) {
+  const d = v[0] * w[0] + v[1] * w[1] + v[2] * w[2];
+  let t = [w[0] - d * v[0], w[1] - d * v[1], w[2] - d * v[2]];
+  const l = Math.hypot(t[0], t[1], t[2]); if (l < 1e-9) return null;
+  const e = 0.004 / l, q = skyProj(v[0] + t[0] * e, v[1] + t[1] * e, v[2] + t[2] * e);
+  if (!q || !p0) return null;
+  return Math.atan2(q[1] - p0[1], q[0] - p0[0]);
+}
+/* Parametry tarczy dla bieżącego kadru: promień, kąt jasnego brzegu, kąt północy, faza */
+function skyMoonGeom(ep, mp) {
+  const lat = SKY.obs.lat * DEG, ncp = [0, Math.cos(lat), Math.sin(lat)];
+  let pa = skyScreenDir(ep.moon, ep.sun, mp);
+  let na = skyScreenDir(ep.moon, ncp, mp);
+  if (pa == null) pa = 0;
+  if (na == null) na = -Math.PI / 2;
+  return { pa, na, k: ep.illum || 0 };
+}
+/* Rysuje tarczę na kanwie o boku S px (urządzenia), promień R px. Wynik buforowany (zmienia się powoli). */
+function skyMoonCanvas(R, g, night, dayK) {
+  const M = SKY_MOON;
+  skyMoonLoad();
+  const S = Math.min(640, Math.max(16, 2 * Math.ceil(R) + 4));
+  R = Math.min(R, S / 2 - 2);
+  const eK = night * 0.16 * Math.pow(1 - g.k, 2.2);                     // światło popielate (wyraźne przy sierpie)
+  const key = [S, (R * 4 | 0), Math.round(g.k * 600), Math.round(g.pa / DEG * 2), Math.round(g.na / DEG * 2),
+               Math.round(eK * 200), Math.round(dayK * 20), M.alb ? 1 : 0].join('|');
+  if (M.cv && key === M.key) return M;
+  const now = performance.now();
+  if (M.cv && M.S === S && now - M.at < 120 && M.alb) return M;          // podczas szybkiej animacji — najwyżej ~8 razy/s
+  M.at = now; M.key = key;
+  if (!M.cv) M.cv = document.createElement('canvas');
+  if (M.cv.width !== S) { M.cv.width = M.cv.height = S; M.ctx = M.cv.getContext('2d'); M.img = null; }
+  if (!M.img || M.img.width !== S) M.img = M.ctx.createImageData(S, S);
+  const D = M.img.data, N = M.N, alb = M.alb, GX = M.gx, GY = M.gy;
+  const cosA = 2 * g.k - 1, sinA = Math.sqrt(Math.max(0, 1 - cosA * cosA));
+  const bx = Math.cos(g.pa), by = -Math.sin(g.pa);                      // jasny brzeg w układzie: x w prawo, y w górę
+  const sx = sinA * bx, sy = sinA * by, sz = cosA;
+  const th = g.na + Math.PI / 2, ct = Math.cos(th), st = Math.sin(th);  // obrót mapy: góra mapy → północ na ekranie
+  const c0 = S / 2, inv = 1 / R, litA = 1 - 0.42 * dayK;
+  for (let j = 0; j < S; j++) {
+    const v = (j + 0.5 - c0) * inv;
+    for (let i = 0; i < S; i++) {
+      const o = (j * S + i) * 4, u = (i + 0.5 - c0) * inv, r2 = u * u + v * v;
+      const edge = Math.min(1, Math.max(0, (1 - Math.sqrt(r2)) * R + 0.5));
+      if (edge <= 0) { D[o + 3] = 0; continue; }
+      const z = Math.sqrt(Math.max(0, 1 - Math.min(1, r2)));
+      /* współrzędne na mapie (obrót odwrotny do orientacji na ekranie) */
+      const tu = u * ct + v * st, tv = -u * st + v * ct;
+      let a = 0.5, gxs = 0, gys = 0;
+      if (alb) {
+        const fx = (tu + 1) * 0.5 * (N - 1), fy = (tv + 1) * 0.5 * (N - 1);
+        const x0 = Math.max(0, Math.min(N - 2, fx | 0)), y0 = Math.max(0, Math.min(N - 2, fy | 0)), ax = Math.min(1, Math.max(0, fx - x0)), ay = Math.min(1, Math.max(0, fy - y0));
+        const p = y0 * N + x0;
+        a = (alb[p] * (1 - ax) + alb[p + 1] * ax) * (1 - ay) + (alb[p + N] * (1 - ax) + alb[p + N + 1] * ax) * ay;
+        const tgx = GX[p], tgy = GY[p];
+        gxs = tgx * ct - tgy * st; gys = tgx * st + tgy * ct;          // gradient mapy w układzie ekranu
+      }
+      /* oświetlenie: gładka sfera (Lommel–Seeliger) + rzeźba z gradientu albedo — tylko jako modulacja, słabnąca ku brzegowi tarczy */
+      const mu0s = u * sx - v * sy + z * sz, mu = Math.max(z, 0.12);
+      const bk = 2.2 * Math.sqrt(z);
+      let nx = u - gxs * bk, ny = -v + gys * bk, nz = z;
+      const nl = 1 / Math.hypot(nx, ny, nz); nx *= nl; ny *= nl; nz *= nl;
+      const mu0 = nx * sx + ny * sy + nz * sz;
+      const ls = mu0s > 0 ? mu0s / (mu0s + mu) : 0;                      // Lommel–Seeliger
+      const term = Math.min(1, Math.max(0, (mu0 + 0.03) / 0.08));       // miękka, „poszarpana” rzeźbą granica dnia i nocy
+      const relief = Math.min(1.35, Math.max(0.65, 1 + 2.4 * (mu0 - mu0s)));
+      const B = Math.min(1.1, 2 * ls) * relief * (term * term * (3 - 2 * term));
+      const A = Math.min(1.08, 0.5 + 0.66 * a);                         // morza ciemne, wyżyny jasne
+      const L = B * A;
+      const cov = Math.min(1, B * 3);                                    // pokrycie oświetlonej części (szczegóły są w kolorze, nie w przezroczystości)
+      const Lc = Math.min(cov, L * 0.92), lr = Lc * 0.985, lg = Lc * 0.962, lb = Lc * 0.925;             // lekko ciepła barwa regolitu
+      const er = eK * A * 0.62, eg = eK * A * 0.70, eb = eK * A * 0.86; // światło popielate — chłodne
+      const al = Math.max(cov * litA, Math.min(0.55, eK * 3.2 * A)) * edge;
+      if (al <= 0.002) { D[o + 3] = 0; continue; }
+      const iv = edge / al;                                 // kolor premultiplied → zapis bez premnożenia (ImageData)
+      D[o] = Math.min(255, (lr * litA + er) * iv * 255);
+      D[o + 1] = Math.min(255, (lg * litA + eg) * iv * 255);
+      D[o + 2] = Math.min(255, (lb * litA + eb) * iv * 255);
+      D[o + 3] = Math.min(255, al * 255);
+    }
+  }
+  M.ctx.putImageData(M.img, 0, 0);
+  M.S = S; M.R = R; M.ver++;
+  return M;
+}
+function skyGroundColor(sunAltD, illum, moonUp, bortle) {
+  const L = Math.pow(smooth(-10, 26, sunAltD), 0.95);
+  const warm = horizonGlowW(sunAltD) * smooth(-4, 3, sunAltD);
+  const dayC = [lerp(62, 70, warm) / 255, lerp(69, 58, warm) / 255, lerp(47, 48, warm) / 255];
+  const m = moonUp * Math.pow(illum, 1.5);
+  const nightC = [(5 + 9 * m + 9 * bortle) / 255, (7 + 11 * m + 7 * bortle) / 255, (11 + 15 * m + 5 * bortle) / 255];
+  return [lerp(nightC[0], dayC[0], L), lerp(nightC[1], dayC[1], L), lerp(nightC[2], dayC[2], L)];
+}
 function skyDrawGPU(now) {
   const a = SKY_GPU;
   if (a.state !== 'ready' || !a.dev) return;
   const dev = a.dev;
-  const base = Math.min(window.devicePixelRatio || 1, 2);
-  const dpr = SKY.dpr = Math.max(0.65, base * (SKY.qual >= 0.9 ? 1 : SKY.qual));
+  const base = Math.min(window.devicePixelRatio || 1, SKY.qMode === 'high' ? 3 : 2);   // tryb „wysoka”: do 3× na ekranach o bardzo dużej gęstości
+  const dpr = SKY.dpr = Math.max(0.65, base * skyResScale(SKY.qual));
   const W = SKY.w, H = SKY.h;
   const cw = Math.max(2, Math.round(W * dpr)), chh = Math.max(2, Math.round(H * dpr));
   if (a.cv.width !== cw || a.cv.height !== chh) { a.cv.width = cw; a.cv.height = chh; }
@@ -6414,7 +7305,7 @@ function skyDrawGPU(now) {
   SKY.hzW = horizonGlowW(sunAltD);
   skyCam();
   SKY.hits.length = 0; SKY_SH.n = 0; _labList.length = 0;
-  a.n.spr = a.n.lin = a.n.txt = a.n.tri = 0;
+  a.n.spr = a.n.lin = a.n.txt = a.n.tri = 0; a.tqn = 0;
   a.over = 0;
   SKY_GPU_OPS.n = 0;
 
@@ -6426,43 +7317,38 @@ function skyDrawGPU(now) {
 
   /* ---------------- tło ---------------- */
   {
-    const u = new Float32Array(72);
-    u[0] = cw; u[1] = chh; u[2] = C.k * dpr; u[3] = C.w || 0;          // 3: udział rzutu równoodległościowego
-    u[4] = S(C.cx); u[5] = S(C.cy); u[6] = C.ratio || 1; u[7] = 0;   // 6: ke/k
-    const sunP = skyProj(...ep.sun);
-    const glowI = Math.max(0, 1 - Math.abs(sunAltD + 1.5) / 26);
+    const u = SKY_GPU.bgU || (SKY_GPU.bgU = new Float32Array(72));
+    u.fill(0);
+    u[0] = cw; u[1] = chh; u[2] = C.sc * dpr; u[3] = C.w1;
+    u[4] = S(C.cx); u[5] = S(C.cy); u[6] = C.w2; u[7] = C.mg;
     const day = clamp((sunAltD + 2) / 12, 0, 1);
-    if (sunP && glowI > 0.01) {
-      u[8] = S(sunP[0]); u[9] = S(sunP[1]);
-      u[10] = S(Math.min(W, H) * (0.55 + 0.45 * (1 - glowI) + 0.3 * day));
-      u[11] = glowI;
-    }
-    const hz0 = skyProj(...altAzToEnu(0, SKY.az)), hz1 = skyProj(...altAzToEnu(16 * DEG, SKY.az));
-    if (hz0 && hz1) { u[12] = S(hz0[1]); u[13] = S(hz1[1]); u[14] = 1; }
-    u[15] = 1;                                               // winieta
-    u[16] = SKY.qual > 0.8 ? 0.026 : 0;                      // ziarno
+    u[8] = ep.sun[0]; u[9] = ep.sun[1]; u[10] = ep.sun[2];
+    u[11] = smooth(-3, 1.5, sunAltD);                        // aureola Słońca — tylko gdy tarcza jest nad horyzontem
+    u[12] = 1;                                               // mgiełka
+    u[13] = SKY.showGround ? 1 : 0;
+    u[14] = 1 - smooth(70, 120, SKY.fov);                    // winieta: efekt obiektywu, przy szerokich polach wyłączona
+    u[15] = SKY.fov;
+    u[16] = SKY.qual > 0.8 ? 0.018 : 0;                      // ziarno (zapobiega pasmom w gradientach)
     u[17] = (now * 0.001) % 1000;
-    u[18] = day; u[19] = 0;
+    u[18] = day; u[19] = sunAltD;
     u.set([C.r[0], C.r[1], C.r[2], 0], 20);
     u.set([C.u[0], C.u[1], C.u[2], 0], 24);
     u.set([C.f[0], C.f[1], C.f[2], 0], 28);
-    const daySun = day > 0.5;
-    u.set(daySun ? [1, 250 / 255, 235 / 255, 0] : [1, 214 / 255, 150 / 255, 0], 32);
-    const hzC = pal.hor.map(v => Math.min(1, (v * 1.12 + 12) / 255));
+    u.set(day > 0.5 ? [1, 250 / 255, 235 / 255, 0] : [1, 214 / 255, 150 / 255, 0], 32);
+    const hzC = pal.hor.map(v => Math.min(1, (v * 1.08 + 8) / 255));
     u.set([hzC[0], hzC[1], hzC[2], 0], 36);
     u.set([pal.hor[0] / 255, pal.hor[1] / 255, pal.hor[2] / 255, 1], 40);
     u.set([pal.air[0] / 255, pal.air[1] / 255, pal.air[2] / 255, 1], 44);
     u.set([pal.zen[0] / 255, pal.zen[1] / 255, pal.zen[2] / 255, 1], 48);
-    u.set([0.004, 0.008, 0.035, 1], 52);
     const bortle = clamp((SKY.bortle - 1) / 8, 0, 1);
-    u.set([night, bortle, 0, ep.illum || 0], 56);
-    const mp = skyProj(...ep.moon);
-    const moonA = 0.16 * night * (0.3 + 0.7 * (ep.illum || 0));
-    if (mp && night > 0.02) u.set([S(mp[0]), S(mp[1]), S(Math.min(W, H) * 0.5), moonA], 60);
-    const ag0 = skyProj(...altAzToEnu(8 * DEG, SKY.az)), ag1 = skyProj(...altAzToEnu(46 * DEG, SKY.az));
-    if (ag0 && ag1) u.set([S(ag1[1]), S(ag0[1]), 0, 0], 64);
-    const shz = Math.hypot(ep.sun[0], ep.sun[1]);          // łuna horyzontu: tylko po stronie Słońca
-    u.set([shz > 1e-4 ? ep.sun[0] / shz : 1, shz > 1e-4 ? ep.sun[1] / shz : 0, 0, horizonGlowW(sunAltD)], 68);
+    const moonAltD = altOf(ep.moon) / DEG, moonUp = smooth(-1, 6, moonAltD);
+    const gdn = skyGroundColor(sunAltD, ep.illum || 0, moonUp, bortle);
+    u.set([gdn[0], gdn[1], gdn[2], clamp(smooth(-6, 20, sunAltD), 0, 1)], 52);
+    u.set([night, bortle, horizonGlowW(sunAltD), ep.illum || 0], 56);
+    const moonA = 0.30 * night * Math.pow(ep.illum || 0, 1.4) * moonUp;   // pełnia wyraźnie rozjaśnia i niebieści niebo
+    u.set([ep.moon[0], ep.moon[1], ep.moon[2], moonA], 60);
+    const shz = Math.hypot(ep.sun[0], ep.sun[1]);
+    u.set([shz > 1e-4 ? ep.sun[0] / shz : 1, shz > 1e-4 ? ep.sun[1] / shz : 0, 0, 0], 68);
     dev.queue.writeBuffer(a.uni, 0, u);
     skyOpRec('bg', 0, 3);
   }
@@ -6479,7 +7365,7 @@ function skyDrawGPU(now) {
         const p = skyProj(d[0], d[1], d[2]);
         if (!inFrame(p, 60)) continue;
         const sz = (34 + 34 * MW_S[i]) * kz + 18;
-        emSpr(S(p[0]), S(p[1]), S(sz), 5, 0.745, 0.784, 0.882, clamp(0.055 * mwA * MW_W[i], 0, 1));
+        emSpr(S(p[0]), S(p[1]), S(sz), 5, 0.745, 0.784, 0.882, clamp(0.055 * MW_HAZE * mwA * MW_W[i], 0, 1));
       }
     });
     skyOp('sprAdd', () => {
@@ -6505,6 +7391,7 @@ function skyDrawGPU(now) {
   }
 
   /* ---------------- gwiazdy ---------------- */
+  LAKE.n = 0;
   if (SKY.showStars && night > 0.015) {
     let lim = Math.min(SKY.mlim, 7.5) - (1 - night) * 3.2;
     if (SKY.fov > 110) lim -= 0.8;
@@ -6529,6 +7416,14 @@ function skyDrawGPU(now) {
         if (al < 0.02) continue;
         const tint = tintIdx(SKY_BV[i]);
         const col = SKY_TINT_RGB[tint];
+        if (mag < 2.9 && d[2] > 0.01 && d[2] < 0.47 && LAKE.n < 48) {            // kandydat do odbicia w jeziorze
+          const azd = azOf(d) / DEG;
+          if (azd >= LAKE.a0 && azd <= LAKE.a1) {
+            const k2 = LAKE.n++;
+            LAKE.az[k2] = azd; LAKE.alt[k2] = altOf(d) / DEG; LAKE.mag[k2] = mag;
+            LAKE.cr[k2] = col[0]; LAKE.cg[k2] = col[1]; LAKE.cb[k2] = col[2];
+          }
+        }
         const r = (0.95 + 3.3 * Math.pow(clamp((6.4 - mag) / 7.9, 0, 1), 1.75)) * zoomBoost;
         if (mag < SKY_FAINT) {
           emSpr(S(p[0]), S(p[1]), S(r * 3.6), 6, col[0], col[1], col[2], al);
@@ -6707,7 +7602,7 @@ function skyDrawGPU(now) {
 
 
   /* ---------------- ciała Układu Słonecznego ---------------- */
-  const pxPerRad = (H / 2) / (SKY.fov * DEG / 2);
+  const pxPerRad = C.sc;
   const sunP2 = skyProj(...ep.sun);
   if (sunP2 && altOf(ep.sun) / DEG > -1.6) {
     const r = Math.max(5, 0.5334 * DEG / 2 * pxPerRad);
@@ -6730,8 +7625,14 @@ function skyDrawGPU(now) {
     const paZ = Math.atan2(Math.cos(a2) * Math.sin(z2 - z1), Math.sin(a2) * Math.cos(a1) - Math.cos(a2) * Math.sin(a1) * Math.cos(z2 - z1));
     const pa = Math.atan2(-Math.cos(paZ), Math.sin(paZ));
     const k = ep.illum, sPhase = 2 * k - 1;
-    skyOp('sprAdd', () => emSpr(S(mp[0]), S(mp[1]), S(r * 2.6), 0, 0.58, 0.63, 0.73, 0.10));
-    skyOp('sprAlp', () => emSpr(S(mp[0]), S(mp[1]), S(r * 2), 3, 1, 0.99, 0.965, 1, 0, sPhase, pa));
+    skyOp('sprAdd', () => emSpr(S(mp[0]), S(mp[1]), S(r * 2.6), 0, 0.58, 0.63, 0.73, 0.10 * Math.max(0.25, k)));
+    const mg = skyMoonGeom(ep, mp), Mo = skyMoonCanvas(S(r), mg, night, 1 - night);
+    if (Mo && Mo.cv && Mo.S) {                             // realistyczna tarcza (tekstura LRO + oświetlenie)
+      const sz = Mo.S, s0 = Mo.S / 640;
+      skyOp('img', () => emTxt(S(mp[0]) - sz / 2, S(mp[1]) - sz / 2, sz, sz, 0, 0, s0, s0, 1, 1, 1, 1));
+    } else {
+      skyOp('sprAlp', () => emSpr(S(mp[0]), S(mp[1]), S(r * 2), 3, 1, 0.99, 0.965, 1, 0, sPhase, pa, S(r)));   // zapas: prosta faza
+    }
     SKY.hits.push({ x: mp[0], y: mp[1], r: Math.max(12, r + 3) * SKY.hitK, kind: 'moon', name: 'Księżyc', key: 'moon', pri: 0.5, obj: ep });
     if (SKY.showPlanets) skyOp('txt', () => skyTextQuad('Księżyc · ' + Math.round(k * 100) + '%', mp[0], mp[1] + Math.max(r, 6) + 5, 12, dpr, 'center', 0.88, 0.92, 0.98, 0.9));
   }
@@ -6754,28 +7655,45 @@ function skyDrawGPU(now) {
       skyOp('txt', () => { for (const [n, x, y] of lab) skyTextQuad(n, x, y, 11.5, dpr, 'center', 0.84, 0.90, 0.98, clamp(night * 1.2 + 0.25, 0, 1)); });
     }
   }
-  /* ISS z krótkim śladem orbity */
+  /* ISS: tor przelotu (od 20 min przed do 5 min po przelocie; odcinki w cieniu Ziemi pominięte),
+     momenty pojawienia się i zniknięcia dla obserwatora oraz bieżąca pozycja */
+  const ig = SKY.showIss ? skyIssPathGeom(T.sim) : null;
+  if (ig) {
+    const SP = L => L.map(p => [S(p[0]), S(p[1])]);
+    skyOp('lin', () => {
+      for (const L of ig.lines) {
+        if (L.pts.length < 2) continue;
+        const a = (L.past ? 0.32 : 0.88) * (L.low ? 0.6 : 1) * ig.dim;
+        emPolyDash(SP(L.pts), S(L.past ? 1.2 : 1.8), 1, 0.83, 0.47, a, L.low ? S(4) : 0, L.low ? S(4) : 0);
+      }
+      for (const [x, y, k] of ig.marks) {
+        if (k === 'start') emRing(S(x), S(y), S(5), S(1.4), 0.55, 0.9, 0.67, 0.95, 24);
+        else {
+          emRing(S(x), S(y), S(5), S(1.4), 1, 0.59, 0.47, 0.95, 24);
+          if (k === 'shadow') emLin(S(x - 3.6), S(y + 3.6), S(x + 3.6), S(y - 3.6), S(1.4), 1, 0.59, 0.47, 0.95);
+        }
+      }
+    });
+    skyOp('sprAlp', () => { for (const [x, y, done] of ig.ticks) emSpr(S(x), S(y), S(4.4), 1, 1, 0.87, 0.59, (done ? 0.35 : 0.9) * ig.dim, 0.6); });
+    skyOp('txt', () => {
+      for (const [t, x, y, k] of ig.labels) {
+        const flip = x + 9 + t.length * 6.2 > W - 4, lx = flip ? x - 9 : Math.max(4, x + 9), al = flip ? 'right' : 'left';
+        const ly = Math.max(2, y + (k === 'max' ? -17 : k === 'start' ? -16 : 4));
+        if (k === 'start') skyTextQuad(t, lx, ly, 10.5, dpr, al, 0.67, 0.94, 0.75, 0.95);
+        else if (k === 'end') skyTextQuad(t, lx, ly, 10.5, dpr, al, 1, 0.69, 0.59, 0.95);
+        else skyTextQuad(t, lx, ly, 10.5, dpr, al, 1, 0.86, 0.59, 0.9);
+      }
+    });
+  }
   if (SKY.issP && SKY.showIss && SKY.issP.alt > -2 * DEG) {
     const iv = altAzToEnu(SKY.issP.alt, SKY.issP.az), ip = skyProj(...iv);
     if (ip) {
-      skyOp('lin', () => {
-        const pts = [];
-        for (let k2 = -5; k2 <= 5; k2++) {
-          const t = T.sim + k2 * 12000;
-          const e = issEci(t); if (!e) { pts.length = 0; continue; }
-          const la = lookAngles(mkObs({ lat: SKY.obs.lat, lon: SKY.obs.lon, h: 0.1 }), eciToEcef(e.p, gmstRad(t)));
-          if (la.el < 0) { pts.length = 0; continue; }
-          const q = skyProj(...altAzToEnu(la.el, la.az));
-          if (!q) { pts.length = 0; continue; }
-          pts.push([S(q[0]), S(q[1])]);
-        }
-        emPolyDash(pts, 1.2, 1, 0.80, 0.47, 0.42);
-      });
+      const lit = SKY.issP.lit !== false, A = lit ? 1 : 0.3;       // w cieniu Ziemi ISS gaśnie
       skyOp('sprAlp', () => {
-        emSpr(S(ip[0]), S(ip[1]), S(7), 1, 1, 0.83, 0.47, 1, 0.9);
-        emRing(S(ip[0]), S(ip[1]), S(8), 1, 1, 0.84, 0.51, 0.8, 28);
+        emSpr(S(ip[0]), S(ip[1]), S(7), 1, 1, 0.83, 0.47, A, 0.9);
+        emRing(S(ip[0]), S(ip[1]), S(8), 1, 1, 0.84, 0.51, 0.8 * A, 28);
       });
-      if (SKY.showPlanets) skyOp('txt', () => skyTextQuad('ISS', ip[0], ip[1] + 11, 11.5, dpr, 'center', 1, 0.86, 0.59, 0.92));
+      if (SKY.showPlanets) skyOp('txt', () => skyTextQuad(lit ? 'ISS' : 'ISS · w cieniu', ip[0], ip[1] + 11, 11.5, dpr, 'center', 1, 0.86, 0.59, 0.92 * (lit ? 1 : 0.7)));
       SKY.hits.push({ x: ip[0], y: ip[1], r: 14 * SKY.hitK, kind: 'iss', name: 'ISS', key: 'iss', pri: 0.45, obj: SKY.issP });
     }
   }
@@ -6796,80 +7714,10 @@ function skyDrawGPU(now) {
       skyOp('lin', () => {
         for (const r2 of runs) emPolyDash(r2.map(p => [S(p[0]), S(p[1])]), 1, 0.55, 0.67, 0.82, 0.28);
       });
-    } else if (runs.length) {
-      let minY = H;
-      for (const r2 of runs) for (const p of r2) if (p[1] < minY) minY = p[1];
-      const yTop = Math.max(-10, minY);
-      const gcol = (y) => {
-        const t = clamp((y - yTop) / Math.max(1, H - yTop), 0, 1);
-        const st = [[9, 12, 21, 0.42], [7, 9, 17, 0.24], [4, 6, 12, 0.08]];
-        let a0 = st[0], a1 = st[1], f = t / 0.45;
-        if (t > 0.45) { a0 = st[1]; a1 = st[2]; f = (t - 0.45) / 0.55; }
-        return [(a0[0] + (a1[0] - a0[0]) * f) / 255, (a0[1] + (a1[1] - a0[1]) * f) / 255,
-                (a0[2] + (a1[2] - a0[2]) * f) / 255, a0[3] + (a1[3] - a0[3]) * f];
-      };
-      skyOp('tri', () => {
-        if (SKY.fov > 150) {
-          /* szerokie pole: horyzont jest zamkniętą pętlą wokół środka kadru, więc ziemię
-             wypełniamy na zewnątrz pętli (między nią a rozciągniętym na zewnątrz obrysem) */
-          const cx = W / 2, cy = H / 2, lim = Math.hypot(W, H) * 1.8;
-          const out = p => {
-            const dx = p[0] - cx, dy = p[1] - cy, d = Math.hypot(dx, dy) || 1;
-            const f = Math.max(2.4, lim / d);
-            return [cx + dx * f, cy + dy * f];
-          };
-          for (const r2 of runs) {
-            for (let i = 1; i < r2.length; i++) {
-              const p0 = r2[i - 1], p1 = r2[i], q0 = out(p0), q1 = out(p1);
-              const c0 = gcol(p0[1]), c1 = gcol(p1[1]), cq = gcol(H + 60);
-              const x0 = S(p0[0]), y0 = S(p0[1]), x1 = S(p1[0]), y1 = S(p1[1]);
-              const u0 = S(q0[0]), v0 = S(q0[1]), u1 = S(q1[0]), v1 = S(q1[1]);
-              skyTriPush(x0, y0, c0[0], c0[1], c0[2], c0[3]);
-              skyTriPush(x1, y1, c1[0], c1[1], c1[2], c1[3]);
-              skyTriPush(u1, v1, cq[0], cq[1], cq[2], cq[3]);
-              skyTriPush(x0, y0, c0[0], c0[1], c0[2], c0[3]);
-              skyTriPush(u1, v1, cq[0], cq[1], cq[2], cq[3]);
-              skyTriPush(u0, v0, cq[0], cq[1], cq[2], cq[3]);
-            }
-          }
-        } else {
-        for (const r2 of runs) {
-          for (let i = 1; i < r2.length; i++) {
-            const p0 = r2[i - 1], p1 = r2[i];
-            const c0 = gcol(p0[1]), c1 = gcol(p1[1]), cb = gcol(H + 60);
-            const x0 = S(p0[0]), x1 = S(p1[0]), y0 = S(p0[1]), y1 = S(p1[1]), yb = S(H + 60);
-            skyTriPush(x0, y0, c0[0], c0[1], c0[2], c0[3]);
-            skyTriPush(x1, y1, c1[0], c1[1], c1[2], c1[3]);
-            skyTriPush(x0, yb, cb[0], cb[1], cb[2], cb[3]);
-            skyTriPush(x1, y1, c1[0], c1[1], c1[2], c1[3]);
-            skyTriPush(x1, yb, cb[0], cb[1], cb[2], cb[3]);
-            skyTriPush(x0, yb, cb[0], cb[1], cb[2], cb[3]);
-          }
-        }
-        }
-      });
-      /* Krawędź horyzontu: w dzień pełna, nocą i o zmierzchu najjaśniejsza po stronie Słońca
-         (dzielimy na odcinki, żeby alfa mogła zmieniać się z azymutem) */
-      const sunAzD = azOf(SKY.sun || ep.sun) / DEG;
-      const rimK = az => {
-        if ((SKY.night || 0) < 0.05 && (SKY.hzW || 0) < 0.05) return 1;
-        const dAz = Math.abs(((az - sunAzD + 540) % 360) - 180);
-        const near = 1 - clamp((dAz - 40) / 85, 0, 1);
-        return 0.16 + 0.84 * Math.pow(near, 1.3);
-      };
-      skyOp('lin', () => {
-        for (const [lw, al] of [[10, 0.03], [2.2, 0.046], [0.9, 0.108]]) {
-          for (const r2 of runs) {
-            if (r2.length < 2) continue;
-            for (let i0 = 0; i0 < r2.length - 1; i0 += 9) {
-              const seg = r2.slice(Math.max(0, i0 - 1), Math.min(r2.length, i0 + 10));
-              const k = rimK(seg[(seg.length >> 1)][2]);
-              if (k < 0.03) continue;
-              emPolyDash(seg.map(q => [S(q[0]), S(q[1])]), lw, 0.59, 0.75, 0.94, al * k);
-            }
-          }
-        }
-      });
+    } else {
+      skyOpRec('gnd', 0, 3);                                   // nieprzezroczysta ziemia liczona w shaderze (fsGround)
+      skyDrawLake(S, W, H, now, ep);
+      skyOp('tri', () => skyDrawLandscape(S, W, H));
     }
   }
 
@@ -6992,6 +7840,15 @@ function skyDrawGPU(now) {
       dev.queue.copyExternalImageToTexture({ source: at.cv }, { texture: A.atlTex }, [at.S, at.S]);
       at.dirty = false;
     }
+    const M = SKY_MOON;                                    // tekstura Księżyca: wgrywana tylko po zmianie obrazu
+    if (M.cv && M.S && A.moonVer !== M.ver && A.pipe.img) {
+      if (!A.moonTex) {
+        A.moonTex = dev.createTexture({ size: [640, 640], format: 'rgba8unorm',
+          usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT });
+      }
+      dev.queue.copyExternalImageToTexture({ source: M.cv }, { texture: A.moonTex, premultipliedAlpha: true }, [M.S, M.S]);
+      A.moonVer = M.ver;
+    }
   }
   if (A.n.tri) {
     const need = Math.min(A.n.tri, SKY_TRI_MAX) * 6;           // liczba floatów (6 na trójkąt)
@@ -7048,6 +7905,7 @@ function skyDrawGPU(now) {
   for (let oi = 0; oi < nOps; oi++) {
     const op = ops[oi];
     if (op.kind === 'bg') { pass.setPipeline(A.pipe.bg); pass.setBindGroup(0, B.bg); pass.draw(3); }
+    else if (op.kind === 'gnd') { if (!A.pipe.gnd || !B.gnd) continue; pass.setPipeline(A.pipe.gnd); pass.setBindGroup(0, B.gnd); pass.draw(3); }
     else if (op.kind === 'sprAdd') {
       if (!A.buf.spr) continue;
       pass.setPipeline(A.pipe.sprAdd); pass.setBindGroup(0, B.sprAdd);
@@ -7060,6 +7918,13 @@ function skyDrawGPU(now) {
       if (!A.buf.lin) continue;
       pass.setPipeline(A.pipe.lin); pass.setBindGroup(0, B.lin);
       pass.setVertexBuffer(0, A.buf.lin); pass.draw(6, op.count, 0, op.start);
+    } else if (op.kind === 'img') {
+      if (!A.buf.txt || !A.pipe.img || !A.moonTex || !A.small[2] || !A.sampler) continue;
+      /* bind-group tworzony leniwie i unieważniany razem z innymi (np. po przebudowie potoków przy zmianie MSAA/jakości) */
+      if (!B.img) B.img = dev.createBindGroup({ layout: A.pipe.img.getBindGroupLayout(0), entries: [
+        { binding: 0, resource: { buffer: A.small[2] } }, { binding: 1, resource: A.moonTex.createView() }, { binding: 2, resource: A.sampler }] });
+      pass.setPipeline(A.pipe.img); pass.setBindGroup(0, B.img);
+      pass.setVertexBuffer(0, A.buf.txt); pass.draw(6, op.count, 0, op.start);
     } else if (op.kind === 'txt') {
       if (!A.buf.txt) continue;
       pass.setPipeline(A.pipe.txt); pass.setBindGroup(0, B.txt);
@@ -7206,10 +8071,20 @@ function skySheet(name) {
   for (const k in SKY_PANES) skyPaneEl(k).classList.toggle('hidden', k !== name);
   if (name) document.getElementById('skyPaneTitle').textContent = SKY_PANES[name];
   if (name === 'plan') skyPlanRefresh();
-  if (name === 'find') { skyFindRefresh(); setTimeout(() => { const s = document.getElementById('skySearch'); if (s && !('ontouchstart' in window)) s.focus(); }, 60); }
+  /* pole wyszukiwania NIE dostaje fokusu po otwarciu zakładki — aktywuje się dopiero po dotknięciu/kliknięciu pola
+     (na telefonie nie wyskakuje klawiatura); wyjątek: skrót klawiszowy F na komputerze */
+  if (name === 'find') skyFindRefresh();
+  const sI = document.getElementById('skySearch');
+  if (sI && document.activeElement === sI && name !== 'find') sI.blur();
   SKY.drawn = 0;
 }
-function skySheetToggle(name) { const go = SKY.pane === name ? null : name; skySheet(go); if (go === 'find') { const s = document.getElementById('skySearch'); if (s) s.select(); } }
+function skySheetToggle(name, fromKey) {
+  const go = SKY.pane === name ? null : name; skySheet(go);
+  const s = document.getElementById('skySearch');
+  if (!s) return;
+  if (go === 'find' && fromKey) setTimeout(() => { s.focus(); s.select(); }, 30);   // tylko skrót klawiszowy (F)
+  else if (document.activeElement === s) s.blur();                                  // kliknięcie zakładki: bez fokusu i klawiatury
+}
 function skySheetClose() { if (SKY.pane) skySheet(null); }
 
 const skyNorm = s => String(s == null ? '' : s).toLowerCase()
@@ -7371,6 +8246,7 @@ function skyIsTracked(h) {
 }
 function skyTrackStart(it) {
   if (!it) return;
+  if (it.kind === 'iss') { setSpeed(1); tbSync(); }        // ISS porusza się szybko — śledzimy w czasie rzeczywistym
   SKY.track = { kind: it.kind, name: it.name, ra: it.ra, dec: it.dec, i: it.i };
   SKY.vaz = SKY.valt = 0;
   skyTrackUi(); skyTrackUpdate(true);
@@ -7494,12 +8370,10 @@ function skyRsRows(h) {
   const row = (k, v) => `<div class="sk-r"><span>${k}</span><span>${v}</span></div>`;
   const t = ms => skyClock(ms, true);
   let out = '';
-  if (rs.never) out += row('Dziś', 'pod horyzontem przez całą dobę');
-  else if (rs.circumpolar) out += row('Dziś', 'nad horyzontem przez całą dobę');
-  else {
-    out += row('Wschód', rs.rise ? t(rs.rise) : '—') + row('Górowanie', t(rs.maxT)) + row('Zachód', rs.set ? t(rs.set) : '—');
-  }
-  out += row('Maks. wysokość', skyAltTxt(rs.maxAlt));
+  if (rs.never) out += row('Dziś', 'cały czas pod horyzontem');
+  else if (rs.circumpolar) out += row('Dziś', 'cały czas nad horyzontem');
+  else out += row('Wschód / zachód', (rs.rise ? t(rs.rise) : '—') + ' / ' + (rs.set ? t(rs.set) : '—'));
+  out += row('Górowanie', t(rs.maxT) + ' · ' + skyAltTxt(rs.maxAlt));
   return out;
 }
 function skyHitRaDec(h) {
@@ -7676,8 +8550,8 @@ function skyPassesRender() {
   const box = document.getElementById('skyPasses');
   if (!box) return;
   const now = T.sim, list = (SKY.passes || []).filter(p => p.los > now - 60000).slice(0, 8);
-  if (ISS.scan) { box.innerHTML = '<div class="sky-empty">Skanuję orbity… (dane orbitalne ISS)</div>'; return; }
-  if (!list.length) { box.innerHTML = '<div class="sky-empty">Brak przelotów w najbliższych dniach — naciśnij „Skanuj”, aby przeliczyć ponownie.</div>'; return; }
+  if (ISS.scan) { setHtml(box, '<div class="sky-empty">Skanuję orbity… (dane orbitalne ISS)</div>'); return; }
+  if (!list.length) { setHtml(box, '<div class="sky-empty">Brak przelotów w najbliższych dniach — naciśnij „Skanuj”, aby przeliczyć ponownie.</div>'); return; }
   SKY._passList = list;
   let html = '';
   list.forEach((p, i) => {
@@ -7687,7 +8561,7 @@ function skyPassesRender() {
       `<span><span class="e-n">${skyDayStr(p.aos, true)}</span><span class="e-m">${dir} · maks. ${fmtNum(p.maxEl / DEG, 0)}° · ${vis}</span></span>` +
       `<span class="e-d">${Math.round((p.los - p.aos) / 60000)} min</span></button>`;
   });
-  box.innerHTML = html;
+  setHtml(box, html);
 }
 function skyScanPump(budget) {                     // dokarmianie generatora przelotów budżetem czasu
   if (!ISS.scan) return;
@@ -7716,9 +8590,9 @@ function skyPlanRefresh(force) {
 function skyIdxRender() {
   const sg = skyStargaze();
   const bar = document.getElementById('skyIdxBar'), val = document.getElementById('skyIdxVal'), txt = document.getElementById('skyIdxTxt');
-  if (bar) bar.style.width = sg.score + '%';
-  if (val) val.textContent = sg.score + '/100 · ' + sg.txt.replace(' warunki', '');
-  if (txt) txt.textContent = sg.txt + ' — ' + sg.note;
+  if (bar && bar._w !== sg.score) { bar._w = sg.score; bar.style.width = sg.score + '%'; }
+  setTxt(val, sg.score + '/100 · ' + sg.txt.replace(' warunki', ''));
+  setTxt(txt, sg.txt + ' — ' + sg.note);
 }
 function skyPlanRender() {
   skyIdxRender();
@@ -7873,8 +8747,8 @@ function skyBuildUI() {
   $('#skyPasses').addEventListener('click', e => {
     const b = e.target.closest('[data-pass]'); if (!b) return;
     const p = (SKY._passList || [])[+b.dataset.pass]; if (!p) return;
-    T.sim = p.aos - 45000; T.playing = true; T.speed = 1;
-    setSpeed(1);
+    T.sim = p.aos - 45000; T.playing = true; TB.live = false;     // prędkość czasu bez zmian
+    $('#tPlay').textContent = '❚❚'; tbSync();
     SKY.azT = p.aosAz; SKY.altT = 35 * DEG; SKY.fovT = 100;
     SKY.focus = { kind: 'iss', name: 'ISS', t: performance.now() };
     skySheetClose();
@@ -7929,7 +8803,9 @@ function skyBuildUI() {
     cv.setPointerCapture(e.pointerId);
     SKY.ptr.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (SKY.ptr.size === 1) {
-      SKY.drag = { x: e.clientX, y: e.clientY, moved: 0, t: performance.now(), lx: e.clientX, ly: e.clientY, lt: performance.now() };
+      SKY.azT = SKY.az; SKY.altT = SKY.alt;                  // zatrzymaj dojazd/inercję — chwytamy niebo w miejscu
+      SKY.drag = { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, moved: 0, active: false, v0: null,
+                   t: performance.now(), lt: performance.now(), laz: SKY.az, lalt: SKY.alt };
       SKY.vaz = SKY.valt = 0;
     } else if (SKY.ptr.size === 2) {
       const [a, b] = [...SKY.ptr.values()];
@@ -7946,28 +8822,47 @@ function skyBuildUI() {
       return;
     }
     if (!SKY.drag) return;
-    const now = performance.now();
-    const dx = e.clientX - SKY.drag.x, dy = e.clientY - SKY.drag.y;
-    SKY.drag.moved += Math.abs(dx) + Math.abs(dy);
-    if (SKY.track && SKY.drag.moved > 8) skyTrackStop(true);   // ręczne prowadzenie nieba przerywa śledzenie
-    SKY.drag.x = e.clientX; SKY.drag.y = e.clientY;
-    const per = SKY.fov * DEG / Math.max(120, SKY.h);
-    SKY.azT -= dx * per / Math.max(0.32, Math.cos(SKY.alt));
-    SKY.altT = clamp(SKY.altT + dy * per, -78 * DEG, 88 * DEG);
-    skyWrapAz();
-    const dtm = Math.max(1, now - SKY.drag.lt) / 1000;
-    SKY.vaz = -(e.clientX - SKY.drag.lx) * per / Math.max(0.32, Math.cos(SKY.alt)) / dtm * 0.6;
-    SKY.valt = (e.clientY - SKY.drag.ly) * per / dtm * 0.6;
-    SKY.drag.lx = e.clientX; SKY.drag.ly = e.clientY; SKY.drag.lt = now;
+    const now = performance.now(), D = SKY.drag;
+    D.moved = Math.max(D.moved, Math.abs(e.clientX - D.sx) + Math.abs(e.clientY - D.sy));
+    if (!D.active) {
+      if (D.moved < 5) return;                                // próg: zwykłe stuknięcie nie obraca nieba
+      if (SKY.track) skyTrackStop(true);                      // ręczne prowadzenie nieba przerywa śledzenie
+      D.active = true; D.v0 = skyUnproject(e.clientX, e.clientY);   // chwytamy punkt nieba pod palcem
+      D.laz = SKY.az; D.lalt = SKY.alt; D.lt = now;
+      return;
+    }
+    /* „Chwyt nieba”: obracamy kamerę tak, by uchwycony punkt został dokładnie pod palcem — zgodnie z
+       rzeczywistym rzutem (stereograficznym / rybie oko), na każdej wysokości i przy każdym polu widzenia.
+       Obrót wokół pionu przesuwa azymut o dokładnie tyle, o ile się różni; wysokość dokręcamy iteracyjnie. */
+    for (let it = 0; it < 4; it++) {
+      const u = skyUnproject(e.clientX, e.clientY);
+      const daz = wrap180((azOf(D.v0) - azOf(u)) / DEG) * DEG, dal = altOf(D.v0) - altOf(u);
+      SKY.az += daz; SKY.alt = clamp(SKY.alt + dal, -89.5 * DEG, 89.5 * DEG);
+      if (Math.abs(daz) + Math.abs(dal) < 2e-6) break;
+    }
+    SKY.az = mod(SKY.az, TAU);
+    SKY.alt = skyRubber(SKY.alt);                              // za granicą: opór zamiast twardej ściany
+    SKY.azT = SKY.az; SKY.altT = SKY.alt;                      // bez opóźnienia: kamera = palec
+    const dtm = (now - D.lt) / 1000;
+    if (dtm > 0.006) {                                          // prędkość do inercji: wygładzona średnia z ruchu kamery
+      const iaz = wrap180((SKY.az - D.laz) / DEG) * DEG / dtm, ial = (SKY.alt - D.lalt) / dtm;
+      SKY.vaz = SKY.vaz * 0.6 + iaz * 0.4; SKY.valt = SKY.valt * 0.6 + ial * 0.4;
+      D.laz = SKY.az; D.lalt = SKY.alt; D.lt = now;
+    }
   });
   const up = e => {
     if (!SKY.ptr.has(e.pointerId)) return;
     SKY.ptr.delete(e.pointerId);
     if (SKY.ptr.size < 2) SKY.pinch = null;
     if (SKY.drag && SKY.ptr.size === 0) {
-      const moved = SKY.drag.moved, t = performance.now() - SKY.drag.t;
-      if (moved < 6 && t < 420) { SKY.vaz = SKY.valt = 0; skyPick(e.clientX, e.clientY); }
-      else if (t > 90) { /* inercja pozostaje */ } else { SKY.vaz = SKY.valt = 0; }
+      const D = SKY.drag, moved = D.moved, now = performance.now(), t = now - D.t;
+      if (!D.active && moved < 6 && t < 420) { SKY.vaz = SKY.valt = 0; skyPick(e.clientX, e.clientY); }
+      else if (now - D.lt > 90) { SKY.vaz = SKY.valt = 0; }            // palec stał przed puszczeniem — bez inercji
+      else {                                                           // ogranicz prędkość, żeby nie „uciekało”
+        const cap = 3.2;
+        SKY.vaz = clamp(SKY.vaz, -cap, cap); SKY.valt = clamp(SKY.valt, -cap, cap);
+      }
+      if (D.active && (SKY.alt > SKY_ALT_HI || SKY.alt < SKY_ALT_LO)) { SKY.altT = clamp(SKY.alt, SKY_ALT_LO, SKY_ALT_HI); SKY.vaz *= 0.3; SKY.valt = 0; }
       SKY.drag = null;
     }
   };
@@ -7993,7 +8888,7 @@ function skyBuildUI() {
     }
     if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName) && e.target.type !== 'checkbox') return;
     const kp = { f: 'find', p: 'plan', l: 'layers', o: 'obs' }[String(e.key).toLowerCase()];
-    if (kp && !e.ctrlKey && !e.metaKey && !e.altKey) { skySheetToggle(kp); e.preventDefault(); return; }
+    if (kp && !e.ctrlKey && !e.metaKey && !e.altKey) { skySheetToggle(kp, true); e.preventDefault(); return; }
     let used = true;
     switch (e.key) {
       case 'ArrowLeft': SKY.azT -= 4 * DEG / Math.max(0.4, Math.cos(SKY.alt)); break;
@@ -8011,24 +8906,7 @@ function skyBuildUI() {
 function skyWrapAz() { SKY.azT = mod(SKY.azT, TAU); }
 function skyUnproject(px, py) {          // piksel → wektor ENU (odwrotny rzut)
   skyCam();
-  const C = SKY_CAM;
-  const dx = px - C.cx, dy = C.cy - py, R = Math.hypot(dx, dy) / C.k;
-  let th;
-  if (C.w <= 0) th = 2 * Math.atan(R / 2);                     // stereografia — wzór ścisły
-  else {                                                       // mieszany / rybie oko — bisekcja
-    let lo = 0, hi = Math.PI - 1e-4;
-    for (let i = 0; i < 26; i++) {
-      const mid = (lo + hi) / 2;
-      const rm = (1 - C.w) * 2 * Math.tan(mid / 2) + C.w * mid * C.ratio;
-      if (rm < R) lo = mid; else hi = mid;
-    }
-    th = (lo + hi) / 2;
-  }
-  const s = Math.sin(th), c = Math.cos(th);
-  const wx = R > 1e-9 ? (dx / (R * C.k)) * s : 0, wy = R > 1e-9 ? (dy / (R * C.k)) * s : 0, wz = c;
-  return [wx * SKY_CAM.r[0] + wy * SKY_CAM.u[0] + wz * SKY_CAM.f[0],
-          wx * SKY_CAM.r[1] + wy * SKY_CAM.u[1] + wz * SKY_CAM.f[1],
-          wx * SKY_CAM.r[2] + wy * SKY_CAM.u[2] + wz * SKY_CAM.f[2]];
+  return skyUnprojC(SKY_CAM, px, py);
 }
 function skyPick(px, py) {
   let best = null, bs = 1e9;
@@ -8079,60 +8957,102 @@ function skyStarName(i) {
   if (des) return skyDesigTxt(des);
   return 'Gwiazda ' + fmtNum(SKY_MAG[i], 1).replace('.', ',') + ' mag';
 }
-function skyCard(h) {
-  const el = $('#skySel');
-  if (!h) { SKY.cardHit = null; el.classList.remove('on'); el.classList.add('hidden'); return; }
-  el.classList.remove('hidden'); el.classList.add('on');
-  const ep = SKY.epoch;
+/* Odświeża dane obiektu z karty dla bieżącego czasu symulacji (pozycja, faza, jasność, odległość). */
+function skyCardFresh(h) {
+  if (!h) return h;
+  const ep = SKY.epoch || skyEpoch(T.sim);
+  if (h.kind === 'star' && h.obj) {
+    const i = h.obj.i;
+    h.obj = { i, mag: SKY_MAG[i], hor: skyRaDecHor(SKY_RA[i] / DEG, SKY_DEC[i] / DEG, ep) };
+  } else if (h.kind === 'planet') {
+    const p = ep.planets.find(x => x.n === h.name);
+    if (p) h.obj = p;
+  } else if (h.kind === 'const' && h.obj) {
+    h.obj = { ...h.obj, hor: skyRaDecHor(h.obj.ra, h.obj.dec, ep) };
+  }
+  return h;
+}
+function skyCardBody(h) {
+  const ep = SKY.epoch || skyEpoch(T.sim);
   const row = (k, v) => `<div class="sk-r"><span>${k}</span><span>${v}</span></div>`;
-  let title = h.name || (h.kind === 'star' && h.obj ? skyStarName(h.obj.i) : '—'), body = '';
-  const alt = h.obj && h.obj.hor ? altOf(h.obj.hor) / DEG : (h.kind === 'sun' ? altOf(ep.sun) / DEG : h.kind === 'moon' ? altOf(ep.moon) / DEG : null);
-  const azD = h.obj && h.obj.hor ? azOf(h.obj.hor) / DEG : (h.kind === 'sun' ? azOf(ep.sun) / DEG : h.kind === 'moon' ? azOf(ep.moon) / DEG : null);
+  const pos = hor => {
+    const a = altOf(hor) / DEG;
+    const at = a < -0.6 ? `<em style="font-style:normal;color:#f0a868" title="pod horyzontem">${skyAltTxt(a)}</em>` : skyAltTxt(a);
+    return row('Wys. / azymut', at + ' · ' + skyAzTxt(azOf(hor) / DEG));            // pomarańczowa wysokość = pod horyzontem
+  };
+  const rsSimple = rs => row('Wschód / zachód', (rs.rise ? skyClock(rs.rise, true) : '—') + ' / ' + (rs.set ? skyClock(rs.set, true) : '—'));
   if (h.kind === 'star') {
     const i = h.obj.i, mag = SKY_MAG[i];
     const cs = skyConstOf(SKY_RA[i] / DEG, SKY_DEC[i] / DEG);
     const vis = mag <= 6.5 ? 'gołym okiem' : mag <= 9 ? 'lornetka' : 'teleskop';
-    body = row('Wysokość', skyAltTxt(altOf(h.obj.hor) / DEG)) + row('Azymut', skyAzTxt(azOf(h.obj.hor) / DEG)) +
-      row('Jasność', fmtNum(mag, 2) + ' mag') + row('Barwa B−V', fmtNum(SKY_BV[i], 2)) +
-      row('Gwiazdozbiór', cs ? cs[1] + ' (' + cs[0] + ')' : '—') +
+    return pos(h.obj.hor) +
+      row('Jasność · B−V', fmtNum(mag, 2) + ' mag · ' + fmtNum(SKY_BV[i], 2)) +
+      row('Gwiazdozbiór', cs ? cs[1] : '—') +
       (SKY_LAB[i] && SKY_DESIG[i] ? row('Oznaczenie', skyDesigTxt(SKY_DESIG[i])) : '') +
-      row('Widać', vis + (mag > SKY.mlim ? ' — poniżej granicy nieba' : '')) + skyRsRows(h);
-  } else if (h.kind === 'planet') {
-    const p = h.obj;
-    body = row('Wysokość', skyAltTxt(altOf(p.hor) / DEG)) + row('Azymut', skyAzTxt(azOf(p.hor) / DEG)) +
-      row('Jasność', fmtNum(p.mag, 1) + ' mag') + row('Odległość', fmtNum(p.d * 149.598e6, 0) + ' km') +
-      row('Od Słońca', fmtNum(p.r, 2) + ' au') + skyRsRows(h);
-  } else if (h.kind === 'sun') {
-    const rs = skyRiseSet('sun');
-    body = row('Wysokość', skyAltTxt(altOf(ep.sun) / DEG)) + row('Azymut', skyAzTxt(azOf(ep.sun) / DEG)) +
-      row('Faza dnia', skyTwilight(altOf(ep.sun) / DEG)) + row('Odległość', fmtNum(ep.sunDist, 5) + ' au') +
-      row('Wschód', rs.rise ? skyClock(rs.rise, true) : '—') + row('Zachód', rs.set ? skyClock(rs.set, true) : '—');
-  } else if (h.kind === 'moon') {
-    const rs = skyRiseSet('moon');
-    body = row('Wysokość', skyAltTxt(altOf(ep.moon) / DEG)) + row('Azymut', skyAzTxt(azOf(ep.moon) / DEG)) +
-      row('Faza', Math.round(ep.illum * 100) + '% · ' + phaseName(ep.illum, ep.waxing)) +
-      row('Odległość', fmtNum(ep.moonDist, 0) + ' km') +
-      row('Wschód', rs.rise ? skyClock(rs.rise, true) : '—') + row('Zachód', rs.set ? skyClock(rs.set, true) : '—');
-  } else if (h.kind === 'iss') {
-    body = row('Wysokość', skyAltTxt(SKY.issP.alt / DEG)) + row('Azymut', skyAzTxt(SKY.issP.az / DEG)) +
-      row('Odległość', fmtNum(SKY.issP.rng, 0) + ' km') + row('Prędkość', fmtNum(7.66, 2) + ' km/s');
-  } else if (h.kind === 'const') {
-    const o = h.obj;
-    body = row('Skrót', o.abbr || '—') + row('RA / Dec', fmtNum(o.ra / 15, 2) + 'h ' + fmtLat(o.dec)) +
-      (o.hor ? row('Wysokość', skyAltTxt(altOf(o.hor) / DEG)) + row('Azymut', skyAzTxt(azOf(o.hor) / DEG)) : '') +
-      skyRsRows(h);
-  } else if (h.kind === 'messier') {
-    const [id, raD, decD, mag, type, alt2] = h.obj;
-    body = row('Rodzaj', type) + row('Jasność', mag < 90 ? fmtNum(mag, 1) + ' mag' : '—') +
-      row('RA / Dec', fmtNum(raD / 15, 2) + 'h ' + fmtLat(decD)) + (alt2 ? row('Nazwa', alt2) : '') + skyRsRows(h);
+      row('Widać', vis + (mag > SKY.mlim ? ' (za słaba)' : '')) + skyRsRows(h);
   }
-  const KINDS = { star: 'gwiazda', planet: 'planeta', messier: 'obiekt Messiera', const: 'gwiazdozbiór',
-                  sun: 'Słońce', moon: 'Księżyc', iss: 'stacja kosmiczna' };
+  if (h.kind === 'planet') {
+    const p = h.obj;
+    return pos(p.hor) + row('Jasność', fmtNum(p.mag, 1) + ' mag') +
+      row('Odległość', fmtNum(p.d * 149.598e6 / 1e6, 1) + ' mln km') + row('Od Słońca', fmtNum(p.r, 2) + ' au') + skyRsRows(h);
+  }
+  if (h.kind === 'sun') {
+    return pos(ep.sun) + row('Faza dnia', skyTwilight(altOf(ep.sun) / DEG)) + rsSimple(skyRiseSet('sun'));
+  }
+  if (h.kind === 'moon') {
+    return pos(ep.moon) + row('Faza', Math.round(ep.illum * 100) + '% · ' + phaseName(ep.illum, ep.waxing)) +
+      row('Odległość', fmtNum(ep.moonDist, 0) + ' km') + rsSimple(skyRiseSet('moon'));
+  }
+  if (h.kind === 'iss') {
+    const q = SKY.issP, ps = skyIssPass(T.sim);
+    const v = ps && ps.vis, dS = q => fmtNum(q.alt / DEG, 0) + '° ' + skyDir(q.az / DEG);
+    const pass = ps ? (v ? row('Pojawia się', skyClockS(v.start.t) + ' · ' + dS(v.start)) +
+                           row('Maks.', skyClockS(ps.max.t) + ' · ' + dS(ps.max)) +
+                           row('Znika', skyClockS(v.end.t) + ' · ' + dS(v.end) + (v.endWhy === 'shadow' ? ' · cień' : ''))
+                         : row('Przelot', 'niewidoczny (cień / nisko)')) : '';
+    if (!q) return row('Pozycja', 'pod horyzontem') + pass;
+    return row('Wys. / azymut', skyAltTxt(q.alt / DEG) + ' · ' + skyAzTxt(q.az / DEG)) +
+      row('Oświetlenie', q.lit === false ? 'w cieniu Ziemi' : 'w świetle Słońca') +
+      row('Odległość', fmtNum(q.rng, 0) + ' km') + pass;
+  }
+  if (h.kind === 'const') {
+    const o = h.obj;
+    return (o.hor ? pos(o.hor) : '') + row('Skrót · RA/Dec', (o.abbr || '—') + ' · ' + fmtNum(o.ra / 15, 1) + 'h ' + fmtLat(o.dec)) + skyRsRows(h);
+  }
+  if (h.kind === 'messier') {
+    const [id, raD, decD, mag, type, alt2] = h.obj;
+    return pos(skyRaDecHor(raD, decD, ep)) + (alt2 ? row('Nazwa', alt2) : '') +
+      row('Rodzaj · jasność', type + (mag < 90 ? ' · ' + fmtNum(mag, 1) + ' mag' : '')) + skyRsRows(h);
+  }
+  return '';
+}
+const SKY_CARD_KINDS = { star: 'gwiazda', planet: 'planeta', messier: 'Messier', const: 'gwiazdozbiór',
+                         sun: 'gwiazda', moon: 'Księżyc', iss: 'ISS' };
+function skyCard(h, refresh) {
+  const el = $('#skySel');
+  if (!h) { SKY.cardHit = null; SKY.cardKey = ''; el.classList.remove('on'); el.classList.add('hidden'); return; }
+  skyCardFresh(h);
+  const title = h.name || (h.kind === 'star' && h.obj ? skyStarName(h.obj.i) : '—');
+  const key = h.kind + ':' + (h.kind === 'star' && h.obj ? h.obj.i : title);
+  const body = skyCardBody(h);
+  const tracked = skyIsTracked(h);
   SKY.cardHit = h;
-  el.innerHTML = `<div class="sk-h">${KINDS[h.kind] || 'obiekt'}</div><div class="sk-n">${title}</div>${body}` +
+  /* ten sam obiekt — podmieniamy tylko wartości (przyciski i stan dotyku zostają) */
+  if (SKY.cardKey === key && el.classList.contains('on')) {
+    const b = el.querySelector('.sk-body');
+    if (b && SKY.cardBody !== body) { b.innerHTML = body; SKY.cardBody = body; }
+    const bt = el.querySelector('[data-sk-act="track"]');
+    if (bt && bt.classList.contains('on') !== tracked) { bt.classList.toggle('on', tracked); bt.textContent = tracked ? 'Śledzę' : 'Śledź'; }
+    return;
+  }
+  el.classList.remove('hidden'); el.classList.add('on');
+  SKY.cardKey = key; SKY.cardBody = body; SKY.cardAt = performance.now();
+  const kindTxt = h.kind === 'sun' ? 'Słońce' : (SKY_CARD_KINDS[h.kind] || 'obiekt');
+  el.innerHTML = `<div class="sk-top"><span class="sk-h">${kindTxt}</span><span class="sk-n">${h.kind === 'sun' || h.kind === 'moon' || h.kind === 'iss' ? '' : title}</span>` +
+    `<button class="sk-x" data-sk-act="close" title="Zamknij" aria-label="Zamknij">×</button></div>` +
+    `<div class="sk-body">${body}</div>` +
     `<div class="sk-btns"><button data-sk-act="goto">Wyśrodkuj</button>` +
-    `<button data-sk-act="track"${skyIsTracked(h) ? ' class="on"' : ''}>${skyIsTracked(h) ? 'Śledzę' : 'Śledź'}</button>` +
-    `<button data-sk-act="close">Zamknij</button></div>`;
+    `<button data-sk-act="track"${tracked ? ' class="on"' : ''}>${tracked ? 'Śledzę' : 'Śledź'}</button></div>`;
   const bg = el.querySelector('[data-sk-act="goto"]'), bc = el.querySelector('[data-sk-act="close"]');
   const bt = el.querySelector('[data-sk-act="track"]');
   if (bt) bt.onclick = () => {
@@ -8146,6 +9066,14 @@ function skyCard(h) {
   };
   if (bc) bc.onclick = () => { SKY.sel = null; SKY.focus = null; skyCard(null); SKY.drawn = 0; };
 }
+/* Karta pokazuje dane na bieżąco: odświeżanie ~3× na sekundę (także gdy czas płynie lub skacze o ±1 h). */
+function skyCardTick(now) {
+  if (!SKY.cardHit) return;
+  const simChanged = SKY.cardSim !== T.sim;
+  if (now - (SKY.cardTickAt || 0) < (simChanged ? 300 : 1000)) return;
+  SKY.cardTickAt = now; SKY.cardSim = T.sim;
+  try { skyCard(SKY.cardHit, true); } catch (e) { warnOnce(e); }
+}
 /* obiekt karty -> pozycja w katalogu (dla „Wyśrodkuj”) */
 function skyItemFromHit(h) {
   if (!h) return null;
@@ -8156,7 +9084,7 @@ function skyItemFromHit(h) {
   return { kind: h.kind, name: h.name };
 }
 function skyHudFov() {
-  $('#skyFovv').textContent = (SKY.fovT < 10 ? fmtNum(SKY.fovT, 1) : Math.round(SKY.fovT)) + '°';
+  setTxt($('#skyFovv'), (SKY.fovT < 10 ? fmtNum(SKY.fovT, 1) : Math.round(SKY.fovT)) + '°');
   const r = $('#skyFovR'), fmax = skyFovMax();
   if (r && r.max !== String(fmax)) r.max = String(fmax);            // 360° tylko na GPU
   if (r && document.activeElement !== r) r.value = Math.round(SKY.fovT);
@@ -8173,17 +9101,16 @@ const SKY_HZ_ANCHOR = 0.60;              // wąskie (<60°) i bardzo szerokie (>
 const SKY_HZ_ANCHOR_MID = 0.74;          // średnie pola 60–200°: więcej nieba nad horyzontem
 /* kąt patrzenia, przy którym horyzont wypada dokładnie na yPx, dla pola f */
 function skyAltForHzY(yPx, f) {
-  const H = SKY.h, C = SKY_CAM;
-  const fovR = clamp(f, 8, 360) * DEG;
-  const k2 = (H / 2) / (2 * Math.tan(Math.min(fovR, 150 * DEG) / 4));
-  const ke2 = (H / 2) / (fovR / 2), ratio2 = ke2 / k2, w2 = clamp((f - 150) / 50, 0, 1);
-  const tgt = (yPx - H / 2) / k2, sgn = tgt >= 0 ? 1 : -1, at = Math.abs(tgt);   // cy zawsze = H/2
-  let lo = 0, hi = 1.72;
-  for (let i = 0; i < 40; i++) {
+  const H = SKY.h, W = SKY.w, C = SKY_CAM_TMP, hz = altAzToEnu(0, SKY.az);
+  let lo = -78 * DEG, hi = 88 * DEG;
+  for (let i = 0; i < 44; i++) {                       // im wyżej patrzymy, tym niżej na ekranie leży horyzont
     const m = (lo + hi) / 2;
-    if ((1 - w2) * 2 * Math.tan(m / 2) + w2 * m * ratio2 < at) lo = m; else hi = m;
+    skyCamCalc(C, m, SKY.az, clamp(f, 8, 360), W, H);
+    const p = skyProjC(C, hz[0], hz[1], hz[2]);
+    const y = p ? p[1] : (m > 0 ? 1e9 : -1e9);
+    if (y < yPx) lo = m; else hi = m;
   }
-  return clamp(sgn * (lo + hi) / 2, -78 * DEG, 88 * DEG);
+  return clamp((lo + hi) / 2, -78 * DEG, 88 * DEG);
 }
 /* Wysokość kotwicy zależna od pola widzenia: przy średnich polach (60–200°) kadr jest
    najbardziej ,,płaski'' i 60% wysokości zostawiało za dużo ziemi — tam horyzont schodzi do 74%.
@@ -8191,7 +9118,30 @@ function skyAltForHzY(yPx, f) {
 function skyHzAnchorFor(f) {
   const ss = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
   const w = ss(58, 92, f) * (1 - ss(168, 202, f));
-  return SKY_HZ_ANCHOR + (SKY_HZ_ANCHOR_MID - SKY_HZ_ANCHOR) * w;
+  const base = SKY_HZ_ANCHOR + (SKY_HZ_ANCHOR_MID - SKY_HZ_ANCHOR) * w;
+  /* Horyzont tuż nad dolnym panelem (z miejscem na podziałkę kierunków) — niebo zajmuje prawie cały widoczny ekran.
+     Przy bardzo szerokim polu (pętla horyzontu) zostaje środek kadru. */
+  const low = clamp((skyBarTop(SKY.h) - 64) / Math.max(1, SKY.h), base, 0.9);
+  if (!skyGpuOn()) return base + (low - base) * (1 - ss(168, 202, f));
+  /* GPU: szerokie pola to panorama z prostym horyzontem — horyzont zostaje nisko, a przy 360° kadr
+     kończy się tuż nad zenitem (bez pustego pasa nad nim i bez nadmiaru ziemi) */
+  const w2 = smooth(SKY_PANO_F1, SKY_PANO_F2, f);
+  if (w2 <= 0) return low;
+  const C = skyCamCalc(SKY_CAM_TMP, 0, SKY.az, f, SKY.w, SKY.h), H = Math.max(1, SKY.h);
+  const zen = (0.05 * H + SKY_MILLER_TOP * C.sc) / H;
+  return low + (clamp(zen, 0.5, low) - low) * w2;
+}
+/* Najwyżej, jak horyzont może się wznieść przy przechylaniu widoku w dół (ułamek wysokości widocznej części nieba) */
+const SKY_HZ_FLOOR = 0.80;
+function skyAltFloor() { return -78 * DEG; }   // naturalna dolna granica (bez sztucznego limitu horyzontu — był nieczytelny przy przeciąganiu)
+/* Sprężysty opór na granicach: za limitem obraz podąża za palcem coraz wolniej (do ~10°), a po puszczeniu
+   wraca. Dzięki temu czuć, w którą stronę ruch jest ograniczony, zamiast uderzać w niewidzialną ścianę. */
+const SKY_ALT_LO = -78 * DEG;
+let SKY_ALT_HI = 86 * DEG;                                   // w panoramie niżej — patrz skyCam()      // przy zenicie opór krótszy (kamera nie może przejść przez zenit — obraz by się odwrócił)
+function skyRubber(a) {
+  if (a > SKY_ALT_HI) { const w = 3.2 * DEG; return SKY_ALT_HI + w * (1 - Math.exp(-(a - SKY_ALT_HI) / w)); }
+  if (a < SKY_ALT_LO) { const w = 10 * DEG; return SKY_ALT_LO - w * (1 - Math.exp(-(SKY_ALT_LO - a) / w)); }
+  return a;
 }
 function skyHzAnchorAlt(f) { return skyAltForHzY(SKY.h * skyHzAnchorFor(f), f); }
 function skySetFov(f) {
@@ -8209,17 +9159,20 @@ function skyHud(force) {
   const ep = SKY.epoch; if (!ep) return;
   const el = document.getElementById('skyAim');
   if (el) {
-    el.textContent = skyAzTxt(SKY.az / DEG) + ' · ' + skyAltTxt(SKY.alt / DEG);
+    setTxt(el, skyAzTxt(SKY.az / DEG) + ' · ' + skyAltTxt(SKY.alt / DEG));
     const sa = altOf(ep.sun) / DEG, ma = altOf(ep.moon) / DEG;
-    $('#skySunv').textContent = skyAltTxt(sa) + ' · ' + skyTwilight(sa);
-    $('#skyMoonv').textContent = Math.round(ep.illum * 100) + '% · ' + phaseName(ep.illum, ep.waxing);
-    $('#skyTimev').textContent = skyClock(T.sim, true) + ' · ' + skyClock(T.sim, false);
+    setTxt($('#skySunv'), skyAltTxt(sa) + ' · ' + skyTwilight(sa));
+    setTxt($('#skyMoonv'), Math.round(ep.illum * 100) + '% · ' + phaseName(ep.illum, ep.waxing));
+    setTxt($('#skyTimev'), skyClock(T.sim, true) + ' · ' + skyClock(T.sim, false));
+    { const st = SKY.showIss ? skyIssStatus(T.sim) : null, row = document.getElementById('skyIssRow');   // przelot ISS: odliczanie do pojawienia się / zniknięcia
+      if (row) { row.classList.toggle('on', !!st); if (st) { const b = $('#skyIssv'); setTxt(b, st.txt);
+        b.style.color = st.cls === 'on' ? '#b9f5c9' : st.cls === 'pre' ? '#ffe2a3' : '#9fb0c8'; } } }
     $('#skyTimev').title = 'Czas lokalny (' + tzTag(T.sim) + ') i UTC';
     $('#skyMoonv').title = 'Księżyc ' + skyAltTxt(ma) + ' nad horyzontem';
-    $('#skyFovv').textContent = Math.round(SKY.fov) + '°';
+    setTxt($('#skyFovv'), Math.round(SKY.fov) + '°');
     const r = $('#skyFovR');
     if (document.activeElement !== r) r.value = Math.round(SKY.fovT);
-    document.querySelectorAll('[data-skyfov]').forEach(b => b.classList.toggle('on', Math.abs(+b.dataset.skyfov - SKY.fovT) < 1));
+    (SKY._fovBtns || (SKY._fovBtns = document.querySelectorAll('[data-skyfov]'))).forEach(b => b.classList.toggle('on', Math.abs(+b.dataset.skyfov - SKY.fovT) < 1));
   }
 }
 function skyHitScale() {
@@ -8235,7 +9188,7 @@ function skyResize() {
      wypełnianie nieba kosztuje więcej niż zysk z ostrości (duże okna 4K, telefony z dpr 3). */
   const budget = 3.6e6 * (0.55 + 0.45 * SKY.qual);
   const cap = Math.sqrt(budget / (SKY.w * SKY.h));
-  const base = Math.min(window.devicePixelRatio || 1, 2, cap) * SKY.qual;
+  const base = Math.min(window.devicePixelRatio || 1, 2, cap) * skyResScale(SKY.qual);
   SKY.dpr = Math.max(0.6, Math.round(base * 20) / 20);
   cv.width = Math.round(SKY.w * SKY.dpr); cv.height = Math.round(SKY.h * SKY.dpr);
   cv.style.width = SKY.w + 'px'; cv.style.height = SKY.h + 'px';
@@ -8270,6 +9223,7 @@ function skyTick(now, dt) {
   if (document.hidden) return;                  // karta w tle — nie grzejemy GPU
   if (SKY.track) skyTrackUpdate();          // śledzony obiekt trzyma się środka kadru
   skyStep(dt);
+  skyCardTick(now);                         // karta wybranego obiektu — wartości na bieżąco
   const moving = SKY.drag || Math.abs(SKY.vaz) > 1e-4 || Math.abs(SKY.valt) > 1e-4 ||
     Math.abs(SKY.azT - SKY.az) > 1e-4 || Math.abs(SKY.altT - SKY.alt) > 1e-4 || Math.abs(SKY.fovT - SKY.fov) > 2e-3;
   const pulsing = SKY.focus && performance.now() - (SKY.focus.t || 0) < 6000;   // cel pulsuje płynnie kilka sekund
@@ -8300,7 +9254,7 @@ function skyTick(now, dt) {
       } else { slow = false; fast = false; }
     } else { SKY.qN = 0; slow = false; fast = false; }
     const q0 = SKY.qual;
-    const qMin = SKY.qMode === 'high' ? 0.9 : 0.4;                 // wysoka: nie schodzimy poniżej 90%
+    const qMin = SKY.qMode === 'high' ? 0.9 : (SKY.qMode === 'eco' ? 0.4 : 0.55);                 // wysoka: nie schodzimy poniżej 90%
     const qMax = SKY.qMode === 'eco' ? 0.6 : 1;                    // oszczędna: nie wychodzimy ponad 60%
     if (slow && SKY.qual > qMin) SKY.qual = Math.max(qMin, SKY.qual - 0.12);
     else if (fast && SKY.qual < qMax) SKY.qual = Math.min(qMax, SKY.qual + 0.05);
@@ -8318,13 +9272,13 @@ function skyTick(now, dt) {
       const fps = Math.round(SKY.fps || 60), q = Math.round(SKY.qual * 100);
       const rn = SKY_GPU.state === 'ready' ? 'WebGPU' : 'Canvas 2D';
       const ms = (SKY_GPU.state === 'ready' && SKY_GPU.msaa > 1) ? ' · MSAA ' + SKY_GPU.msaa + '×' : '';
-      el.innerHTML = rn + ' · <b>' + fps + ' fps</b> · jakość <b>' + q + '%</b>' + ms +
-        (fps < 55 ? ' · obniżam detale' : '');
+      setHtml(el, rn + ' · <b>' + fps + ' fps</b> · jakość <b>' + q + '%</b>' + ms +
+        (fps < 55 ? ' · obniżam detale' : ''));
       const hv = document.getElementById('skyFpsv');
-      if (hv) hv.textContent = rn + ' · ' + fps + ' fps · jakość ' + q + '%' + ms;
+      setTxt(hv, rn + ' · ' + fps + ' fps · jakość ' + q + '%' + ms);
     }
   }
-  if (now - (SKY.uiAt || 0) > 240) { SKY.uiAt = now; skyHud(); }
+  if (now - (SKY.uiAt || 0) > 240) { SKY.uiAt = now; skyHud(); }      // (odliczanie ISS w sekundach mieści się w tym rytmie)
   if (SKY.pane === 'plan' && ISS.scan) skyScanPump(7);              // skan postępuje także przy rzadkich klatkach
   if (SKY.pane === 'plan' && now - (SKY.passAt || 0) > 600) {      // lista przelotów rośnie w trakcie skanowania
     SKY.passAt = now;
@@ -8333,18 +9287,25 @@ function skyTick(now, dt) {
   }
 }
 function skyStep(dt) {
-  if (!SKY.drag) {
-    SKY.azT += SKY.vaz * dt; SKY.altT += SKY.valt * dt;
-    const damp = Math.exp(-dt * 3.4);
+  if (SKY.drag && SKY.drag.active) {                  // kamerę ustawia wyłącznie palec — bez wygładzania i clampów
+    SKY.azT = SKY.az; SKY.altT = SKY.alt;
+    SKY.fov += (SKY.fovT - SKY.fov) * (1 - Math.exp(-dt * 12));
+    return;
+  }
+  if (!SKY.drag && (SKY.vaz || SKY.valt)) {
+    const dA = SKY.vaz * dt, dL = SKY.valt * dt;
+    SKY.azT += dA; SKY.az += dA; SKY.altT += dL; SKY.alt += dL;       // inercja porusza kamerę wprost (bez gumowego dojazdu)
+    if (SKY.alt < SKY_ALT_LO || SKY.alt > SKY_ALT_HI) { SKY.alt = clamp(SKY.alt, SKY_ALT_LO, SKY_ALT_HI); SKY.altT = SKY.alt; SKY.valt = 0; }
+    const damp = Math.exp(-dt * 3.1);
     SKY.vaz *= damp; SKY.valt *= damp;
-    if (Math.abs(SKY.vaz) < 2e-4) SKY.vaz = 0;
-    if (Math.abs(SKY.valt) < 2e-4) SKY.valt = 0;
+    if (Math.abs(SKY.vaz) < 2e-3) SKY.vaz = 0;
+    if (Math.abs(SKY.valt) < 2e-3) SKY.valt = 0;
   }
   SKY.azT %= TAU; SKY.az %= TAU;
-  SKY.altT = clamp(SKY.altT, -78 * DEG, 88 * DEG);
+  SKY.altT = clamp(SKY.altT, SKY_ALT_LO, SKY_ALT_HI);
   let d = wrap180((SKY.azT - SKY.az) / DEG) * DEG;
-  const k = 1 - Math.exp(-dt * 16);
-  SKY.az += d * k; SKY.alt += (SKY.altT - SKY.alt) * k;
+  const k = 1 - Math.exp(-dt * 16), ka = (SKY.alt > SKY_ALT_HI || SKY.alt < SKY_ALT_LO) ? 1 - Math.exp(-dt * 9) : k;   // powrót ze sprężyny nieco wolniejszy
+  SKY.az += d * k; SKY.alt += (SKY.altT - SKY.alt) * ka;
   SKY.fov += (SKY.fovT - SKY.fov) * (1 - Math.exp(-dt * 12));
 }
 /* --- start modułu --- */
@@ -8366,7 +9327,7 @@ function skyStep(dt) {
 /* ---------- Start ---------- */
 (function init() {
   buildPlaces(); setCredit();
-  $('#mInfo').textContent = '';
+  setTxt($('#mInfo'), '');
   let hasGL = false;
   try { hasGL = !!document.createElement('canvas').getContext('webgl2'); } catch (e) { hasGL = false; }
   const hasWGPU = !!navigator.gpu;                       // globus: najpierw WebGPU, WebGL2 jako zapas
@@ -8395,5 +9356,5 @@ function skyStep(dt) {
   requestAnimationFrame(t => { lastT = t; requestAnimationFrame(frame); });
 })();
 </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a6073ea75e12b1ac',t:'MTc5NTY3ODgyMw=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a6073ea75e12b1ac',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
